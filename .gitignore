@@ -4,3 +4,11 @@ IgniteEngine/shaders/*.spv
 IgniteEngine/x64
 IgniteEngine/x64/*
 */.vs/*
+IgniteEngine/IgniteEngine/glfw
+IgniteEngine/IgniteEngine/glfw/*
+IgniteEngine/IgniteEngine/glm
+IgniteEngine/IgniteEngine/glm/*
+IgniteEngine/IgniteEngine/sdl2
+IgniteEngine/IgniteEngine/sdl2*
+IgniteEngine/IgniteEngine/vulkan_sdk
+IgniteEngine/IgniteEngine/vulkan_sdk/*

@@ -1,7 +1,7 @@
 IgniteEngine/IgniteEngine/x64
 IgniteEngine/IgniteEngine/x64/*
 IgniteEngine/shaders/*.spv
-IgniteEngine/x64/*
+IgniteEngine/x64/Debug/*
 !IgniteEngine/x64/Debug/SDL2.dll
 !IgniteEngine/x64/Release/SDL2.dll
 

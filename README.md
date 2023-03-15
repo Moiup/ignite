@@ -4,7 +4,9 @@ Currently, it is a prototype.
 
 # Installation
 ## Prerequisite
-This project works fine on Visual Studio 2022.
+The tested operating system where Windows 10 and Windows 11.
+
+This project works fine on Visual Studio 2022. You need a Vulkan ready GPU.
 
 ## Downloads
 - Download the repository.

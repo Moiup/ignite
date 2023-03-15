@@ -3,3 +3,4 @@ IgniteEngine/IgniteEngine/x64/*
 IgniteEngine/shaders/*.spv
 IgniteEngine/x64
 IgniteEngine/x64/*
+*/.vs/*

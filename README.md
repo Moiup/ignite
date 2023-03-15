@@ -2,8 +2,6 @@ A game engine based on the Vulkan API.
 
 Currently, it is a prototype.
 
-
-
 # Installation
 ## Prerequisite
 This project works fine on Visual Studio 2022.
@@ -18,6 +16,10 @@ This project works fine on Visual Studio 2022.
 ## Shader compilation
 To compile the required shader for the execution, go to the folder `ignite/IgniteEngine/shaders`, and run `compile.bat`.
 
+## Compile and run
+Launch the solution `ignite/IgniteEngine/IgniteEngine.sln`.
 
+The compilation should be configured in `Debug` or `Release` mode, and the plateforme set to `x64`. Then you can compile and run the programme. You should see three green squares going from the bottom to the top of the window.
 
-Now you should be able to launch the solution `ignite/IgniteEngine/IgniteEngine.sln`, compile and run the programme. You should see three green squares going from the bottom to the top of the window.
+# Code
+The entry point (main file) is `IgniteEngine.cpp`.

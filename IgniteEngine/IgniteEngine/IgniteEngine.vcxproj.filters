@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Ignite">
+      <UniqueIdentifier>{9e1914a5-1b23-45a3-86aa-83f78beb59f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\inc">
+      <UniqueIdentifier>{e7f8d37a-ff14-42d8-a9cf-15114128dbb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\src">
+      <UniqueIdentifier>{7c08a3a9-336a-4498-9b70-57a2a91c95d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NetworkProtocole">
+      <UniqueIdentifier>{086c71b9-c213-4962-a385-910727b457d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NetworkProtocole\inc">
+      <UniqueIdentifier>{6e1eb8ec-e0c7-4a6e-8f0d-b4a49341b4b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NetworkProtocole\src">
+      <UniqueIdentifier>{5c227ad0-34a9-4f36-8e41-97711efc5e90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\stb_image">
+      <UniqueIdentifier>{438244f1-0b08-4d86-8f20-173a2b155532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\ESocket">
+      <UniqueIdentifier>{59089178-c585-454d-8460-fd16122c7963}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\ESocket\src">
+      <UniqueIdentifier>{ff019279-8c0b-481a-bc9c-cd09182d0f0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\ESocket\inc">
+      <UniqueIdentifier>{a0c648e1-b088-471a-b637-684cdbe1db6b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Ressource.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Instance.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicalDevice.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="DefaultGPU.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="IgniteEngine.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineEntity.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowSurface.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="LogicalDevice.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandPool.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandBuffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Queue.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Swapchain.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthBuffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="StorageBuffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="UniformBuffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicShader.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ArrayBuffer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsPipeline.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="DefaultRenderer.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity3D.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineApp.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Object3D.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="TestModule.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ESocket\EServerSocket.cpp">
+      <Filter>Ignite\ESocket\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ESocket\ESocket.cpp">
+      <Filter>Ignite\ESocket\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ESocket\EStream.cpp">
+      <Filter>Ignite\ESocket\src</Filter>
+    </ClCompile>
+    <ClCompile Include="MediapipeModule.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InitChildPoint.cpp">
+      <Filter>NetworkProtocole\src</Filter>
+    </ClCompile>
+    <ClCompile Include="InitHeader.cpp">
+      <Filter>NetworkProtocole\src</Filter>
+    </ClCompile>
+    <ClCompile Include="InitNetworkProtocole.cpp">
+      <Filter>NetworkProtocole\src</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageProtocoleNetwork.cpp">
+      <Filter>NetworkProtocole\src</Filter>
+    </ClCompile>
+    <ClCompile Include="HeaderMessageProtocoleNetwork.cpp">
+      <Filter>NetworkProtocole\src</Filter>
+    </ClCompile>
+    <ClCompile Include="MocapMessageProtocolNetwork.cpp">
+      <Filter>NetworkProtocole\src</Filter>
+    </ClCompile>
+    <ClCompile Include="SecondaryMocapHeaderNetwork.cpp">
+      <Filter>NetworkProtocole\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Module.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="PerspectiveCamera.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBufferInfo.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBufferInfo.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ArrayBufferInfo.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Ressource.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicalDevice.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultGPU.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineEntity.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowSurface.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="LogicalDevice.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandPool.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandBuffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Swapchain.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthBuffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="StorageBuffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="UniformBuffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicShader.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayBuffer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsPipeline.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultRenderer.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity3D.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineApp.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="TestModule.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="ESocket\EServerSocket.h">
+      <Filter>Ignite\ESocket\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="ESocket\ESocket.h">
+      <Filter>Ignite\ESocket\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="ESocket\EStream.h">
+      <Filter>Ignite\ESocket\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="MediapipeModule.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="InitChildPoint.h">
+      <Filter>NetworkProtocole\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="InitHeader.h">
+      <Filter>NetworkProtocole\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="InitNetworkProtocole.h">
+      <Filter>NetworkProtocole\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageProtocoleNetwork.h">
+      <Filter>NetworkProtocole\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="HeaderMessageProtocoleNetwork.h">
+      <Filter>NetworkProtocole\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="MocapMessageProtocolNetwork.h">
+      <Filter>NetworkProtocole\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="SecondaryMocapHeaderNetwork.h">
+      <Filter>NetworkProtocole\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="PerspectiveCamera.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image\stb_image_write.h">
+      <Filter>Ignite\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image\stb_image_resize.h">
+      <Filter>Ignite\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image\stb_image.h">
+      <Filter>Ignite\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBufferInfo.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Object3D.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayBufferInfo.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBufferInfo.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="IgniteEngine.rc">
+      <Filter>Fichiers de ressources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

@@ -195,6 +195,9 @@
     <ClCompile Include="ArrayBufferInfo.cpp">
       <Filter>Ignite\src</Filter>
     </ClCompile>
+    <ClCompile Include="DefaultConf.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -355,6 +358,9 @@
     </ClInclude>
     <ClInclude Include="IndexBufferInfo.h">
       <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultConf.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

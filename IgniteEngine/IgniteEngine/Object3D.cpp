@@ -265,7 +265,7 @@ void Object3D::buildUV(Renderer* renderer, GraphicShader* shader) {
 
 void Object3D::buildTransformIndices(Renderer* renderer, GraphicShader* shader) {
 	// if not empty
-	if (Object3D::transform_indices.size()) {
+	if (Object3D::transform_indices[renderer][shader].size()) {
 		return;
 	}
 
@@ -299,7 +299,7 @@ void Object3D::buildTransformIndices(Renderer* renderer, GraphicShader* shader) 
 
 void Object3D::buildTransformMatrices(Renderer* renderer, GraphicShader* shader) {
 	// if not empty
-	if (Object3D::transform_matrices.size()) {
+	if (Object3D::transform_matrices[renderer][shader].size()) {
 		return;
 	}
 

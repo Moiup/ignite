@@ -75,10 +75,11 @@ void DefaultRenderer::render() {
 
 	_command_buffers[_current_frame].reset();
 	_command_buffers[_current_frame].begin();
+	
 	dynamicRenderingPipelineBarrier();
+	beginRendering(_graphics_pipelines[0]);
 
 	for (GraphicsPipeline& gp : _graphics_pipelines) {
-		beginRendering(gp);
 		_command_buffers[_current_frame].bindPipeline(
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			(VkPipeline&)gp.getPipeline()
@@ -147,9 +148,9 @@ void DefaultRenderer::render() {
 				first_index += mesh->getIndicesNbElem();
 			}
 		}
-
-		_command_buffers[_current_frame].endRendering();
 	}
+	
+	_command_buffers[_current_frame].endRendering();
 
 	dynamicRenderingPipelineBarrierBack();
 	_command_buffers[_current_frame].end();

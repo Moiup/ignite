@@ -5,7 +5,8 @@ std::vector<Module*> Module::modules;
 Module::Module() :
 	EngineEntity::EngineEntity(),
 	_graphics_shader{},
-	_renderer{}
+	_renderer{},
+	_camera{}
 {
 	;
 }
@@ -16,6 +17,10 @@ void Module::setGraphicsShader(GraphicShader* graphics_shader) {
 
 void Module::setRenderer(Renderer* renderer) {
 	_renderer = renderer;
+}
+
+void Module::setCamera(Camera* camera) {
+	_camera = camera;
 }
 
 void Module::init() {
@@ -30,7 +35,6 @@ void Module::start() {
 
 void Module::update() {
 	EngineEntity::update();
-
 }
 
 void Module::close() {

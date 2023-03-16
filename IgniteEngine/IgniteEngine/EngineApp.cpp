@@ -33,9 +33,11 @@ void EngineApp::init() {
 	_render_window.setInstance((VkInstance*)&_instance.getInstance());
 
 	// Initialising gpu
+	DefaultConf::gpu = &_gpu;
 	_gpu.configure(_instance);
 	
 	// Initialising logical device and queues
+	DefaultConf::logical_device = &_logical_device;
 	_logical_device.configure(&_gpu.getGPU());
 	_logical_device.setQueue(
 		"graphic_queue",
@@ -59,13 +61,12 @@ void EngineApp::init() {
 
 	_modules.setGraphicsShader(&_graphic_shader);
 	_modules.setRenderer(&_renderer);
+	_modules.setCamera(&_camera);
 	_modules.init();
 }
 
 void EngineApp::start() {
 	App::start();
-
-	startEngineEntities();
 
 	_camera.setAspectRatio(
 		static_cast<float>(_render_window.getWidth()) /
@@ -76,7 +77,10 @@ void EngineApp::start() {
 	_camera.setFar(100.0f);
 	_camera.setEye(glm::vec3(0, 0, 5));
 
+	startEngineEntities();
+
 	// Shader
+	DefaultConf::graphic_shader = &_graphic_shader;
 	_graphic_shader.setNbFrame(NB_FRAME);
 	_graphic_shader.setLogicalDevice(
 		(VkDevice*)_logical_device.getDevice()

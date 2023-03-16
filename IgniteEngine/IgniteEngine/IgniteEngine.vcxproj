@@ -154,6 +154,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CommandBuffer.cpp" />
     <ClCompile Include="CommandPool.cpp" />
+    <ClCompile Include="DefaultConf.cpp" />
     <ClCompile Include="DefaultGPU.cpp" />
     <ClCompile Include="DefaultRenderer.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommandBuffer.h" />
     <ClInclude Include="CommandPool.h" />
+    <ClInclude Include="DefaultConf.h" />
     <ClInclude Include="DefaultGPU.h" />
     <ClInclude Include="DefaultRenderer.h" />
     <ClInclude Include="DepthBuffer.h" />

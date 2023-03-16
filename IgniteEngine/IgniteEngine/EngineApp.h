@@ -22,6 +22,8 @@
 #include "Modules.h"
 #include "PerspectiveCamera.h"
 
+#include "DefaultConf.h"
+
 #include <SDL.h>
 
 class EngineApp: public App

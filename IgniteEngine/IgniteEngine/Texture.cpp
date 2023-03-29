@@ -1,9 +1,17 @@
 #include "Texture.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+
+#include "stb_image/stb_image.h"
+#include "stb_image/stb_image_write.h"
+
 Texture::Texture() : 
 	_pixels{},
 	_width{ 0 },
-	_height{ 0 }
+	_height{ 0 },
+	_width_inv{ 0 },
+	_height_inv{ 0 }
 {
 	;
 }
@@ -27,6 +35,10 @@ const std::vector<glm::vec4>& Texture::pixels() const {
 const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
 	glm::vec4& p = pixel(row, col);
 	return p;
+}
+
+void Texture::create() {
+
 }
 
 /**
@@ -87,7 +99,7 @@ void Texture::setPixel(glm::vec4& pix, uint64_t row, uint64_t col){
 	pixel(row, col) = pix;
 }
 
-void Texture::setPixels(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) {
+void Texture::setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t height) {
 	_pixels = pixels;
 	_width = width;
 	_height = height;
@@ -105,13 +117,27 @@ bool Texture::readFile(std::string file_name) {
 		std::cerr << "Error: failed opening the texture '" << file_name << "'" << std::endl;
 		return false;
 	}
+	size_t nb_elem = width * height * 4;
+	size_t data_size = nb_elem * sizeof(*data);
+	pixels.resize(data_size);
+	std::memcpy(pixels.data(), (float *)data, data_size);
 
-	std::memcpy(pixels.data(), data, width * height * 4 * sizeof(*data));
 	stbi_image_free(data);
 
 	setPixels(pixels, width, height);
 	
 	return true;
+}
+
+bool Texture::writeFile(std::string file_name) {
+	return stbi_write_png(
+		file_name.c_str(),
+		_width,
+		_height,
+		4,
+		(unsigned char*)_pixels.data(),
+		4 * _width
+	);
 }
 
 const uint64_t Texture::getWidth() const {

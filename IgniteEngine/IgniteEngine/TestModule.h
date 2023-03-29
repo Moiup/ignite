@@ -13,6 +13,7 @@ private:
     Mesh _m;
     uint32_t _frame;
 
+    Texture _tex;
     GraphicShader _red_shader;
 
     VertexBuffer _mesh_offsets_buffer;

@@ -4,6 +4,7 @@
 #include <vector>
 #include "DefaultConf.h"
 #include "Camera.h"
+#include "Texture.h"
 
 class Module : public EngineEntity
 {

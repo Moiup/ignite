@@ -10,18 +10,31 @@ Texture::Texture() :
 	_pixels{},
 	_width{ 0 },
 	_height{ 0 },
+	_n{4},
 	_width_inv{ 0 },
 	_height_inv{ 0 }
 {
 	;
 }
 
-Texture::Texture(std::string file_name) {
+Texture::Texture(std::string file_name) :
+	Texture::Texture()
+{
 	readFile(file_name);
 }
 
-Texture::Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) {
+Texture::Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) :
+	Texture::Texture()
+{
 	setPixels(pixels, width, height);
+}
+
+void Texture::setLogicalDevice(LogicalDevice* logical_device) {
+	_logical_device = logical_device;
+}
+
+void Texture::setGPU(PhysicalDevice* gpu) {
+	_gpu = gpu;
 }
 
 glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
@@ -38,7 +51,22 @@ const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
 }
 
 void Texture::create() {
+	// Creating the staging buffer
+	Buffer staging_buffer{};
+	staging_buffer.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	staging_buffer.setMemoryProperties(_gpu->getMemoryProperties());
+	staging_buffer.setFlags(0);
+	staging_buffer.setPNext(nullptr);
+	staging_buffer.setQueueFamilyIndexCount(0);
+	staging_buffer.setPQueueFamilyIndices(nullptr);
+	staging_buffer.setSize(_width * _height * _n * sizeof(_pixels.data()));
+	staging_buffer.setUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+	staging_buffer.setSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+	staging_buffer.create();
 
+	staging_buffer.allocateMemory(
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 }
 
 /**
@@ -112,12 +140,12 @@ bool Texture::readFile(std::string file_name) {
 	std::vector<glm::vec4> pixels;
 	int width, height, n;
 
-	data = stbi_load(file_name.c_str(), &width, &height, &n, 4);
+	data = stbi_load(file_name.c_str(), &width, &height, &n, _n);
 	if (!data) {
 		std::cerr << "Error: failed opening the texture '" << file_name << "'" << std::endl;
 		return false;
 	}
-	size_t nb_elem = width * height * 4;
+	size_t nb_elem = width * height * _n;
 	size_t data_size = nb_elem * sizeof(*data);
 	pixels.resize(data_size);
 	std::memcpy(pixels.data(), (float *)data, data_size);

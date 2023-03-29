@@ -16,10 +16,8 @@ public:
 
 public:
 	void setMemoryProperties(VkPhysicalDeviceMemoryProperties* memory_properties);
-
 	void setLogicalDevice(VkDevice* logical_device);
-
-	void allocateMemory(VkPhysicalDeviceMemoryProperties memory_properties, uint32_t memory_type_index, VkMemoryPropertyFlags memory_property_flags);
+	void allocateMemory(VkMemoryPropertyFlags memory_property_flags);
 	virtual void bind();
 
 	void freeMemory();

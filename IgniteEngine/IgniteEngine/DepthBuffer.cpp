@@ -10,8 +10,6 @@ void DepthBuffer::create() {
 	setImageInfo();
 	createImage();
 	allocateMemory(
-		*_memory_properties,
-		-1,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 	bind();

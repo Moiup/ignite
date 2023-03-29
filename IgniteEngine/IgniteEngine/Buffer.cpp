@@ -72,8 +72,8 @@ void Buffer::setQueueFamilyIndexCount(uint32_t family_index_count) {
 	_buffer_info.queueFamilyIndexCount = family_index_count;
 }
 
-void Buffer::setPQueueFamilyIndices(const uint32_t* p_queue_family_incidices){
-	_buffer_info.pQueueFamilyIndices = p_queue_family_incidices;
+void Buffer::setPQueueFamilyIndices(const uint32_t* p_queue_family_indices){
+	_buffer_info.pQueueFamilyIndices = p_queue_family_indices;
 }
 
 VkBuffer& Buffer::getBuffer() {

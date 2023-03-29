@@ -26,6 +26,7 @@ public:
 
 	VkBuffer& getBuffer();
 
+
 protected:
 	void createBuffer();
 	void destroyBuffer();

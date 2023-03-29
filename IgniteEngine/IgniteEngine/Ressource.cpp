@@ -16,7 +16,7 @@ void Ressource::setMemoryProperties(VkPhysicalDeviceMemoryProperties* memory_pro
 	_memory_properties = memory_properties;
 }
 
-void Ressource::allocateMemory(VkPhysicalDeviceMemoryProperties memory_properties, uint32_t memory_type_index, VkMemoryPropertyFlags memory_property_flags) {
+void Ressource::allocateMemory(VkMemoryPropertyFlags memory_property_flags) {
 	getMemoryRequirements();
 
 	if (_memory_req.size == 0) {
@@ -27,16 +27,16 @@ void Ressource::allocateMemory(VkPhysicalDeviceMemoryProperties memory_propertie
 	allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocate_info.pNext = nullptr;
 	allocate_info.allocationSize = _memory_req.size;
-	allocate_info.memoryTypeIndex = memory_type_index;
+	allocate_info.memoryTypeIndex = 0;
 
 	uint32_t memory_type_i = 0;
-	for (memory_type_i = 0; memory_type_i < memory_properties.memoryTypeCount; memory_type_i++) {
-		if ((_memory_req.memoryTypeBits & (1 << memory_type_i)) && (memory_properties.memoryTypes[memory_type_i].propertyFlags & memory_property_flags) == memory_property_flags) {
+	for (memory_type_i = 0; memory_type_i < _memory_properties->memoryTypeCount; memory_type_i++) {
+		if ((_memory_req.memoryTypeBits & (1 << memory_type_i)) && (_memory_properties->memoryTypes[memory_type_i].propertyFlags & memory_property_flags) == memory_property_flags) {
 			allocate_info.memoryTypeIndex = memory_type_i;
 			break;
 		}
 	}
-	if (memory_type_i > memory_properties.memoryTypeCount) {
+	if (memory_type_i > _memory_properties->memoryTypeCount) {
 		throw std::runtime_error("Error: buffer memory type not found!");
 	}
 

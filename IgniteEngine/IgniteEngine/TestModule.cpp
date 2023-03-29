@@ -15,8 +15,10 @@ void TestModule::start() {
     Module::start();
 
     // -- Textures -- //
-    _tex = Texture("../textures/scarecrow.png");
+    _tex.readFile("../textures/scarecrow.png");
+    _tex.setLogicalDevice(DefaultConf::logical_device);
     _tex.writeFile("../textures/scarecrow_test.png");
+
 
     // Loading the mesh
     _m.setCoords(rectangle(), rectIndices());

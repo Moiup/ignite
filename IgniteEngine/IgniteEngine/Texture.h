@@ -1,5 +1,9 @@
 #pragma once
 
+#include "LogicalDevice.h"
+#include "Buffer.h"
+#include "PhysicalDevice.h"
+
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -14,13 +18,20 @@ private:
 	std::vector<glm::vec4> _pixels;
 	uint64_t _width;
 	uint64_t _height;
+	uint8_t _n;
 	float _width_inv;
 	float _height_inv;
+
+	LogicalDevice* _logical_device;
+	PhysicalDevice* _gpu;
 
 public:
 	Texture();
 	Texture(std::string file_name);
 	Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
+
+	void setLogicalDevice(LogicalDevice* _logical_device);
+	void setGPU(PhysicalDevice* gpu);
 
 	void create();
 

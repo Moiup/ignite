@@ -67,6 +67,10 @@ void Texture::create() {
 	staging_buffer.allocateMemory(
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
+	staging_buffer.bind();
+
+	// Copying the actual texture data into the staging buffer
+	staging_buffer.setValues(_pixels.data());
 }
 
 /**

@@ -71,6 +71,115 @@ void Texture::create() {
 
 	// Copying the actual texture data into the staging buffer
 	staging_buffer.setValues(_pixels.data());
+
+	std::vector<VkBufferImageCopy> image_copy_arr{};
+
+	// To do for each mip level
+	// (To start, we consider only the original level -> 0)
+	VkBufferImageCopy image_copy{};
+	image_copy.bufferOffset = 0;
+	image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.imageSubresource.mipLevel = 0;
+	image_copy.imageSubresource.baseArrayLayer = 0;
+	image_copy.imageSubresource.layerCount = 1;
+	image_copy.imageExtent.width = _width;
+	image_copy.imageExtent.height = _height;
+	image_copy.imageExtent.depth = 1;
+
+	image_copy_arr.push_back(image_copy);
+
+	// Create the image to copy the buffer to
+	_image.setImageImageType(VK_IMAGE_TYPE_2D);
+	_image.setImageFormat(VK_FORMAT_R8G8B8A8_UNORM);
+	_image.setImageMipLevels(1);
+	_image.setImageArrayLayers(1);
+	_image.setImageSamples(VK_SAMPLE_COUNT_1_BIT);
+	_image.setImageTiling(VK_IMAGE_TILING_OPTIMAL);
+	_image.setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+	_image.setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+	_image.setImageExtent(_width, _height, 1);
+	_image.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+
+	_image.createImage();
+	_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_image.bind();
+
+	// Preparing the transfer with the image memory barrier
+	VkImageSubresourceRange subresource_range{};
+	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range.baseMipLevel = 0;
+	subresource_range.levelCount = 1;
+	subresource_range.layerCount = 1;
+
+	VkImageMemoryBarrier image_memory_barrier{};
+	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	image_memory_barrier.pNext = nullptr;
+	image_memory_barrier.image = _image.getImage();
+	image_memory_barrier.subresourceRange = subresource_range;
+	image_memory_barrier.srcAccessMask = 0;
+	image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+	// Creating the command buffer
+	CommandBuffer copy_cmd{};
+	copy_cmd.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	copy_cmd.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	copy_cmd.create();
+	copy_cmd.begin();
+
+	copy_cmd.pipelineBarrier(
+		VK_PIPELINE_STAGE_HOST_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &image_memory_barrier
+	);
+
+	// Copying the data from the buffer to the image
+	copy_cmd.copyBufferToImage(
+		staging_buffer.getBuffer(),
+		_image.getImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		image_copy_arr.size(),
+		image_copy_arr.data()
+	);
+	
+	// transfering the image to the shader read layout so it can be sampled from
+	image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+
+	copy_cmd.pipelineBarrier(
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &image_memory_barrier
+	);
+
+	_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	
+	copy_cmd.end();
+	copy_cmd.flush(_logical_device->getQueue(0));
+
+	copy_cmd.free();
+	staging_buffer.freeMemory();
+	staging_buffer.destroy();
+
+	_image.setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
+	_image.setImageViewFormat(VK_FORMAT_R8G8B8A8_UNORM);
+	_image.setImageViewSurbresourceRange(
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0, // base mip level
+		1, // level count
+		0, // base array layer
+		1  // layer count
+	);
+	_image.createImageView();
 }
 
 /**

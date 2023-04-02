@@ -1,7 +1,8 @@
-#version 450
+#version 450 core
 #extension GL_ARB_separate_shader_objects : enable
 
 // IN
+layout(location = 1) in vec2 uv_frag;
 
 // OUT
 layout (location = 0) out vec4 out_color;

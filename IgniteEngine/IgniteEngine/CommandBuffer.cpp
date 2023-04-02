@@ -97,6 +97,46 @@ void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, VkPipeline& pip
 	);
 }
 
+void CommandBuffer::flush(const Queue* queue) {
+	VkFenceCreateInfo fence_info{};
+	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fence_info.pNext = nullptr;
+	fence_info.flags = 0;
+
+	VkFence fence;
+
+	VkResult result = vkCreateFence(
+		*_logical_device,
+		&fence_info,
+		nullptr,
+		&fence
+	);
+
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Error while creating the fence.");
+	}
+
+	queue->submit(
+		0, nullptr,
+		0,
+		1, &_command_buffer,
+		0, nullptr,
+		&fence
+	);
+
+	result = vkWaitForFences(
+		*_logical_device,
+		1,
+		&fence,
+		VK_TRUE,
+		UINT64_MAX
+	);
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Error while waiting for fences to finish.");
+	}
+	vkDestroyFence(*_logical_device, fence, nullptr);
+}
+
 void CommandBuffer::setViewport(std::vector<VkViewport>& viewport_arr) {
 	vkCmdSetViewport(
 		_command_buffer,
@@ -189,7 +229,6 @@ void CommandBuffer::pipelineBarrier(
 }
 
 void CommandBuffer::copyBufferToImage(
-	VkCommandBuffer commandBuffer,
 	VkBuffer srcBuffer,
 	VkImage dstImage,
 	VkImageLayout dstImageLayout,
@@ -197,7 +236,7 @@ void CommandBuffer::copyBufferToImage(
 	const VkBufferImageCopy* pRegions
 ) {
 	vkCmdCopyBufferToImage(
-		commandBuffer,
+		_command_buffer,
 		srcBuffer,
 		dstImage,
 		dstImageLayout,

@@ -18,6 +18,7 @@ private:
 
     VertexBuffer _mesh_offsets_buffer;
     VertexBuffer _coord_buffer;
+    VertexBuffer _uv_buffer;
     IndexBuffer _index_buffer;
     UniformBuffer _camera_buffer;
     StorageBuffer _obj_tr_i_buffer;
@@ -32,7 +33,7 @@ public:
     void close();
 
     std::vector<glm::vec3> rectangle();
-
+    std::vector<glm::vec2> rectUV();
     std::vector<uint32_t> rectIndices();
 };
 

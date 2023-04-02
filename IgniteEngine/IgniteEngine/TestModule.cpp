@@ -21,7 +21,7 @@ void TestModule::start() {
 
 
     // Loading the mesh
-    _m.setCoords(rectangle(), rectIndices());
+    _m.setCoords(rectangle(), rectIndices(), rectUV());
 
     // -- Objects -- //
     // Setting parent Object children
@@ -54,7 +54,7 @@ void TestModule::start() {
         _red_shader.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _red_shader.setPhysicalDevice(DefaultConf::gpu);
         _red_shader.readShaderFiles(
-            "../shaders/vert.spv",
+            "../shaders/vert_red.spv",
             "../shaders/frag_red.spv"
         );
         _red_shader.addVertexBufferInfo(
@@ -68,6 +68,12 @@ void TestModule::start() {
             Object3D::getMeshOffsetsStride(_renderer, &_red_shader),
             VK_FORMAT_R32_UINT,
             1
+        );
+        _red_shader.addVertexBufferInfo(
+            "uv",
+            Object3D::getUVStride(_renderer, &_red_shader),
+            VK_FORMAT_R32G32_SFLOAT,
+            2
         );
         // Index Buffer
         _red_shader.addIndexBufferInfo(
@@ -105,12 +111,21 @@ void TestModule::start() {
         _mesh_offsets_buffer.setValues(Object3D::getMeshOffsets(_renderer, &_red_shader).data());
         _red_shader.addVertexBuffer("mesh_offsets", &_mesh_offsets_buffer);
 
+        // Coord buffer
         _coord_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _coord_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
         _coord_buffer.setSize(Object3D::getCoordsSize(_renderer, &_red_shader));
         _coord_buffer.create();
         _coord_buffer.setValues(Object3D::getCoords(_renderer, &_red_shader).data());
         _red_shader.addVertexBuffer("coord", &_coord_buffer);
+
+        // UV buffer
+        _uv_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _uv_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+        _uv_buffer.setSize(Object3D::getUVSize(_renderer, &_red_shader));
+        _uv_buffer.create();
+        _uv_buffer.setValues(Object3D::getUV(_renderer, &_red_shader).data());
+        _red_shader.addVertexBuffer("uv", &_uv_buffer);
 
         // Index buffer
         _index_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
@@ -174,6 +189,16 @@ std::vector<glm::vec3> TestModule::rectangle() {
         glm::vec3(-1, 1, 0)
     };
     return rect;
+}
+
+std::vector<glm::vec2> TestModule::rectUV() {
+    std::vector<glm::vec2> uv{
+        glm::vec2(0, 0),
+        glm::vec2(1, 0),
+        glm::vec2(1, 1),
+        glm::vec2(0, 1)
+    };
+    return uv;
 }
 
 std::vector<uint32_t> TestModule::rectIndices() {

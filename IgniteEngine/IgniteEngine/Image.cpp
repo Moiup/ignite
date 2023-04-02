@@ -74,6 +74,12 @@ void Image::setImageExtent(VkExtent3D extent) {
 	_image_info.extent = extent;
 }
 
+void Image::setImageExtent(uint32_t width, uint32_t height, uint32_t depth) {
+	_image_info.extent.width = width;
+	_image_info.extent.height = height;
+	_image_info.extent.depth = depth;
+}
+
 void Image::setImageMipLevels(uint32_t mip_level) {
 	_image_info.mipLevels = mip_level;
 }

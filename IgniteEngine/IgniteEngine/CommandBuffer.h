@@ -29,6 +29,9 @@ public:
 
 	void beginRendering(VkRenderingInfoKHR& info);
 	void bindPipeline(VkPipelineBindPoint bind_point, VkPipeline& pipeline);
+
+	void flush(const Queue* queue);
+
 	void setViewport(std::vector<VkViewport>& viewport_arr);
 	void setScissor(std::vector<VkRect2D>& scissor_arr);
 	void bindDescriptorSets(VkPipelineBindPoint bind_point, VkPipelineLayout pipeline_layout, uint32_t first_set, uint32_t descriptor_count, const VkDescriptorSet* p_descriptor_sets,
@@ -52,7 +55,6 @@ public:
 	);
 
 	void copyBufferToImage(
-		VkCommandBuffer commandBuffer,
 		VkBuffer srcBuffer,
 		VkImage dstImage,
 		VkImageLayout dstImageLayout,
@@ -61,6 +63,5 @@ public:
 	);
 
 	const VkCommandBuffer* getCommandBuffer();
-
 };
 

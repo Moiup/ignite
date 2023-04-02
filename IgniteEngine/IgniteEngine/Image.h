@@ -27,6 +27,7 @@ public:
 	void setImageImageType(VkImageType image_type);
 	void setImageFormat(VkFormat format);
 	void setImageExtent(VkExtent3D extent);
+	void setImageExtent(uint32_t width, uint32_t height, uint32_t depth);
 	void setImageMipLevels(uint32_t mip_level);
 	void setImageArrayLayers(uint32_t array_layers);
 	void setImageSamples(VkSampleCountFlagBits samples);

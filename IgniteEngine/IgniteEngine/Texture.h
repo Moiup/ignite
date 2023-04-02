@@ -1,7 +1,9 @@
 #pragma once
 
 #include "LogicalDevice.h"
+#include "CommandBuffer.h"
 #include "Buffer.h"
+#include "Image.h"
 #include "PhysicalDevice.h"
 
 #include <cstdint>
@@ -24,6 +26,9 @@ private:
 
 	LogicalDevice* _logical_device;
 	PhysicalDevice* _gpu;
+
+	Image _image;
+	VkImageLayout _image_layout;
 
 public:
 	Texture();

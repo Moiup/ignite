@@ -198,6 +198,9 @@
     <ClCompile Include="DefaultConf.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sampler.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -361,6 +364,9 @@
     </ClInclude>
     <ClInclude Include="DefaultConf.h">
       <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>Ignite\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

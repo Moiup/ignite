@@ -188,6 +188,7 @@
     <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Ressource.cpp" />
+    <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="SecondaryMocapHeaderNetwork.cpp" />
     <ClCompile Include="StorageBuffer.cpp" />
     <ClCompile Include="Swapchain.cpp" />
@@ -241,6 +242,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Ressource.h" />
+    <ClInclude Include="Sampler.h" />
     <ClInclude Include="SecondaryMocapHeaderNetwork.h" />
     <ClInclude Include="stb_image\stb_image.h" />
     <ClInclude Include="stb_image\stb_image_resize.h" />

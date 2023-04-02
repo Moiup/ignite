@@ -21,6 +21,16 @@ void Mesh::setCoords(
 	_indices = indices;
 }
 
+void Mesh::setCoords(
+	const std::vector<glm::vec3>& coords,
+	const std::vector<uint32_t>& indices,
+	const std::vector<glm::vec2>& uv
+) {
+	_coords = coords;
+	_indices = indices;
+	_uv = uv;
+}
+
 const std::vector<glm::vec3>& Mesh::getCoords() const {
 	return _coords;
 }

@@ -32,6 +32,7 @@ void TestModule::start() {
     _obj.setMesh(&_m);
     _obj.setRenderer(_renderer);
     _obj.addShader(&_red_shader);
+    _obj.setTexture(&_tex);
     _obj.setScaleAbsolute(0.5, 0.5, 0.5);
     _obj.setPositionAbsolute(-2.3f, 0, 0);
 
@@ -45,6 +46,7 @@ void TestModule::start() {
     _obj3.setMesh(&_m);
     _obj3.setRenderer(_renderer);
     _obj3.addShader(&_red_shader);
+    _obj3.setTexture(&_tex);
     _obj3.setPositionAbsolute(2.3f, 0.0, 0.0);
 
 
@@ -102,6 +104,7 @@ void TestModule::start() {
         );
 
         // Creating the buffers
+        
 
         // Mesh offsets
         _mesh_offsets_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());

@@ -2,6 +2,8 @@
 
 #include "Entity3D.h"
 #include "Mesh.h"
+#include "Sampler.h"
+#include "Texture.h"
 #include "Renderer.h"
 
 #include <map>
@@ -18,9 +20,13 @@ private:
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> uv;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> transform_indices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> transform_matrices;
+	//static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, Sampler*>> sampler;
+	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Texture*, std::vector<Object3D*>>>> textures;
+	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> texture_indices;
 
 	Mesh* _mesh;
 	Renderer* _renderer;
+	Texture* _texture;
 	std::vector<GraphicShader*> _shaders;
 
 public:
@@ -31,6 +37,9 @@ public:
 
 	void setRenderer(Renderer* renderer);
 	const Renderer* getRenderer() const;
+
+	void setTexture(Texture* texture);
+	const Texture* getTexture() const;
 
 	void addShader(GraphicShader* shader);
 	GraphicShader* getShader(uint32_t i);
@@ -64,6 +73,12 @@ public:
 	static std::vector<glm::mat4> updateTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTransformMatricesSize(Renderer* renderer, GraphicShader* shader);
 
+	static std::unordered_map<Texture*, std::vector<Object3D*>>& getTextureObjects(Renderer* renderer, GraphicShader*);
+
+	static std::vector<uint32_t> getTextureIndices(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getTextureIndicesStride(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getTextureIndicesSize(Renderer* renderer, GraphicShader* shader);
+
 private:
 	static void buildCoords(Renderer* renderer, GraphicShader* shader);
 	static void buildMeshOffsets(Renderer* renderer, GraphicShader* shader);
@@ -71,4 +86,5 @@ private:
 	static void buildUV(Renderer* renderer, GraphicShader* shader);
 	static void buildTransformIndices(Renderer* renderer, GraphicShader* shader);
 	static void buildTransformMatrices(Renderer* renderer, GraphicShader* shader);
+	static void buildTextureIndices(Renderer* renderer, GraphicShader* shader);
 };

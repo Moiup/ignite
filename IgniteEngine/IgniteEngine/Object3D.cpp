@@ -14,10 +14,15 @@ std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uin
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> Object3D::transform_matrices;
 
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Texture*, std::vector<Object3D*>>>> Object3D::textures;
+
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::texture_indices;
+
 Object3D::Object3D() :
 	_mesh{ nullptr },
 	_renderer{ nullptr },
-	_shaders{ nullptr }
+	_shaders{ nullptr },
+	_texture{ nullptr }
 { ; }
 
 void Object3D::setMesh(Mesh* mesh) {
@@ -64,6 +69,27 @@ void Object3D::setRenderer(Renderer* renderer) {
 		Object3D::mesh_objects[renderer][shader][_mesh].push_back(this);
 	}
 	_renderer = renderer;
+}
+
+void Object3D::setTexture(Texture* texture) {
+	uint32_t i = 0;
+	for (GraphicShader* s : _shaders) {
+		for (Object3D* obj : Object3D::textures.at(_renderer).at(s).at(_texture)) {
+			if (obj != this) {
+				i++;
+				continue;
+			}
+			Object3D::textures.at(_renderer).at(s).at(_texture).erase(
+				Object3D::textures.at(_renderer).at(s).at(_texture).begin() + i
+			);
+		}
+		Object3D::textures.at(_renderer).at(s)[_texture].push_back(this);
+	}
+	_texture = texture;
+}
+
+const Texture* Object3D::getTexture() const {
+	return _texture;
 }
 
 void Object3D::addShader(GraphicShader* shader) {
@@ -193,6 +219,23 @@ uint32_t Object3D::getTransformMatricesSize(Renderer* renderer, GraphicShader* s
 	return getTransformMatrices(renderer, shader).size() * sizeof(*getTransformMatrices(renderer, shader).data());
 }
 
+std::unordered_map<Texture*, std::vector<Object3D*>>& Object3D::getTextureObjects(Renderer* renderer, GraphicShader* shader) {
+	return Object3D::textures[renderer][shader];
+}
+
+std::vector<uint32_t> Object3D::getTextureIndices(Renderer* renderer, GraphicShader* shader) {
+	buildTextureIndices(renderer, shader);
+	return Object3D::texture_indices[renderer][shader];
+}
+
+uint32_t Object3D::getTextureIndicesStride(Renderer* renderer, GraphicShader* shader) {
+	return sizeof(Object3D::transform_indices[renderer][shader].data());
+}
+
+uint32_t Object3D::getTextureIndicesSize(Renderer* renderer, GraphicShader* shader){
+	return Object3D::transform_indices[renderer][shader].size() * getTextureIndicesStride(renderer, shader);
+}
+
 void Object3D::buildCoords(Renderer* renderer, GraphicShader* shader) {
 	// if not empty
 	if (Object3D::coords[renderer][shader].size()) {
@@ -310,5 +353,24 @@ void Object3D::buildTransformMatrices(Renderer* renderer, GraphicShader* shader)
 			glm::mat4 tr = obj->getTransform();
 			Object3D::transform_matrices[renderer][shader].push_back(tr);
 		}
+	}
+}
+
+void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
+	uint32_t tex_i = 0;
+	// if not empty
+	if (Object3D::texture_indices[renderer][shader].size()) {
+		return;
+	}
+
+	// For each texture looking for all the objects
+	for (auto& t_o : Object3D::textures[renderer][shader]) {
+		std::vector<Object3D*> objs = t_o.second;
+
+		// For each object add the index corresponding to the texture
+		for (const auto& obj : objs) {
+			Object3D::texture_indices[renderer][shader].push_back(tex_i);
+		}
+		tex_i++;
 	}
 }

@@ -103,9 +103,14 @@ void TestModule::start() {
             VK_SHADER_STAGE_VERTEX_BIT
         );
 
+        _red_shader.addStorageBufferInfo(
+            "texture_i",
+            3,
+            VK_SHADER_STAGE_VERTEX_BIT
+        );
+
         // Creating the buffers
         
-
         // Mesh offsets
         _mesh_offsets_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _mesh_offsets_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
@@ -160,6 +165,13 @@ void TestModule::start() {
         _obj_tr_buffer.create();
         _obj_tr_buffer.setValues(Object3D::getTransformMatrices(_renderer, &_red_shader).data());
         _red_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
+
+        _texture_i_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _texture_i_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+        _texture_i_buffer.setSize(Object3D::getTextureIndicesSize(_renderer, &_red_shader));
+        _texture_i_buffer.create();
+        _texture_i_buffer.setValues(Object3D::getTextureIndices(_renderer, &_red_shader).data());
+        _red_shader.addStorageBuffer("texture_i", &_texture_i_buffer);
     }
 
     _frame = 0;

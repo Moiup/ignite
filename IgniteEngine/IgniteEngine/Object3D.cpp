@@ -73,17 +73,17 @@ void Object3D::setRenderer(Renderer* renderer) {
 
 void Object3D::setTexture(Texture* texture) {
 	uint32_t i = 0;
-	for (GraphicShader* s : _shaders) {
-		for (Object3D* obj : Object3D::textures.at(_renderer).at(s).at(_texture)) {
+	for (GraphicShader* shader : _shaders) {
+		for (Object3D* obj : Object3D::textures[_renderer][shader][_texture]) {
 			if (obj != this) {
 				i++;
 				continue;
 			}
-			Object3D::textures.at(_renderer).at(s).at(_texture).erase(
-				Object3D::textures.at(_renderer).at(s).at(_texture).begin() + i
+			Object3D::textures[_renderer][shader][_texture].erase(
+				Object3D::textures[_renderer][shader][_texture].begin() + i
 			);
 		}
-		Object3D::textures.at(_renderer).at(s)[_texture].push_back(this);
+		Object3D::textures[_renderer][shader][_texture].push_back(this);
 	}
 	_texture = texture;
 }
@@ -229,10 +229,12 @@ std::vector<uint32_t> Object3D::getTextureIndices(Renderer* renderer, GraphicSha
 }
 
 uint32_t Object3D::getTextureIndicesStride(Renderer* renderer, GraphicShader* shader) {
+	buildTextureIndices(renderer, shader);
 	return sizeof(Object3D::transform_indices[renderer][shader].data());
 }
 
 uint32_t Object3D::getTextureIndicesSize(Renderer* renderer, GraphicShader* shader){
+	buildTextureIndices(renderer, shader);
 	return Object3D::transform_indices[renderer][shader].size() * getTextureIndicesStride(renderer, shader);
 }
 
@@ -369,7 +371,10 @@ void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
 
 		// For each object add the index corresponding to the texture
 		for (const auto& obj : objs) {
-			Object3D::texture_indices[renderer][shader].push_back(tex_i);
+			const Mesh* mesh = obj->getMesh();
+			for (uint32_t i : mesh->getIndices()) {
+				Object3D::texture_indices[renderer][shader].push_back(tex_i);
+			}
 		}
 		tex_i++;
 	}

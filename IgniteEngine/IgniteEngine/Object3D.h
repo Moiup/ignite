@@ -16,6 +16,7 @@ private:
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>> mesh_objects;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec3>>> coords;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> mesh_offsets;
+	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> object_id;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> indices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> uv;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> transform_indices;
@@ -53,6 +54,10 @@ public:
 	static uint32_t getCoordsStride(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getCoordsSize(Renderer* renderer, GraphicShader* shader);
 
+	static std::vector<uint32_t>& getObjectId(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getObjectIdStride(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getObjectIdSize(Renderer* renderer, GraphicShader* shader);
+
 	static std::vector<uint32_t>& getMeshOffsets(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getMeshOffsetsStride(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getMeshOffsetsSize(Renderer* renderer, GraphicShader* shader);
@@ -65,22 +70,23 @@ public:
 	static uint32_t getUVSize(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getUVStride(Renderer* renderer, GraphicShader* shader);
 
-	static std::vector<uint32_t> getTransformIndices(Renderer* renderer, GraphicShader* shader);
+	static std::vector<uint32_t>& getTransformIndices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTransformIndicesSize(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTransformIndicesStride(Renderer* renderer, GraphicShader* shader);
 
-	static std::vector<glm::mat4> getTransformMatrices(Renderer* renderer, GraphicShader* shader);
-	static std::vector<glm::mat4> updateTransformMatrices(Renderer* renderer, GraphicShader* shader);
+	static std::vector<glm::mat4>& getTransformMatrices(Renderer* renderer, GraphicShader* shader);
+	static std::vector<glm::mat4>& updateTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTransformMatricesSize(Renderer* renderer, GraphicShader* shader);
 
 	static std::unordered_map<Texture*, std::vector<Object3D*>>& getTextureObjects(Renderer* renderer, GraphicShader*);
 
-	static std::vector<uint32_t> getTextureIndices(Renderer* renderer, GraphicShader* shader);
+	static std::vector<uint32_t>& getTextureIndices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTextureIndicesStride(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTextureIndicesSize(Renderer* renderer, GraphicShader* shader);
 
 private:
 	static void buildCoords(Renderer* renderer, GraphicShader* shader);
+	static void buildObjectId(Renderer* renderer, GraphicShader* shader);
 	static void buildMeshOffsets(Renderer* renderer, GraphicShader* shader);
 	static void buildIndices(Renderer* renderer, GraphicShader* shader);
 	static void buildUV(Renderer* renderer, GraphicShader* shader);

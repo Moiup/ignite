@@ -98,7 +98,7 @@ void EngineApp::start() {
 		0
 	);
 	_graphic_shader.addVertexBufferInfo(
-		"mesh_offsets",
+		"object_id",
 		Object3D::getMeshOffsetsStride(&_renderer, &_graphic_shader),
 		VK_FORMAT_R32_UINT,
 		1
@@ -133,19 +133,19 @@ void EngineApp::start() {
 	// Coord
 
 	// Mesh offsets
-	_mesh_offsets_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_mesh_offsets_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_mesh_offsets_buffer.setSize(Object3D::getMeshOffsetsSize(&_renderer, &_graphic_shader));
-	_mesh_offsets_buffer.create();
-	_mesh_offsets_buffer.setValues(Object3D::getMeshOffsets(&_renderer, &_graphic_shader).data());
-	_graphic_shader.addVertexBuffer("mesh_offsets", &_mesh_offsets_buffer);
-
 	_coord_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
 	_coord_buffer.setMemoryProperties(_gpu.getMemoryProperties());
 	_coord_buffer.setSize(Object3D::getCoordsSize(&_renderer, &_graphic_shader));
 	_coord_buffer.create();
 	_coord_buffer.setValues(Object3D::getCoords(&_renderer, &_graphic_shader).data());
 	_graphic_shader.addVertexBuffer("coord", &_coord_buffer);
+
+	_object_id_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
+	_object_id_buffer.setMemoryProperties(_gpu.getMemoryProperties());
+	_object_id_buffer.setSize(Object3D::getObjectIdSize(&_renderer, &_graphic_shader));
+	_object_id_buffer.create();
+	_object_id_buffer.setValues(Object3D::getObjectId(&_renderer, &_graphic_shader).data());
+	_graphic_shader.addVertexBuffer("object_id", &_object_id_buffer);
 
 	// Index buffer
 	_index_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
@@ -164,13 +164,6 @@ void EngineApp::start() {
 	_graphic_shader.addUniformBuffer("camera", &_camera_buffer);
 
 	// Storage Buffers
-	_obj_tr_i_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_obj_tr_i_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_obj_tr_i_buffer.setSize(Object3D::getTransformIndicesSize(&_renderer, &_graphic_shader));
-	_obj_tr_i_buffer.create();
-	_obj_tr_i_buffer.setValues(Object3D::getTransformIndices(&_renderer, &_graphic_shader).data());
-	_graphic_shader.addStorageBuffer("obj_tr_i", &_obj_tr_i_buffer);
-	
 	_obj_tr_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
 	_obj_tr_buffer.setMemoryProperties(_gpu.getMemoryProperties());
 	_obj_tr_buffer.setSize(Object3D::getTransformMatricesSize(&_renderer, &_graphic_shader));
@@ -214,10 +207,9 @@ void EngineApp::close() {
 	App::close();
 
 	_coord_buffer.destroy();
-	_mesh_offsets_buffer.destroy();
+	_object_id_buffer.destroy();
 	_index_buffer.destroy();
 	_camera_buffer.destroy();
-	_obj_tr_i_buffer.destroy();
 	_obj_tr_buffer.destroy();
 	_renderer.destroy();
 	_graphic_shader.destroy();

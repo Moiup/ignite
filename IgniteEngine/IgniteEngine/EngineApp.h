@@ -42,10 +42,9 @@ private:
 
 	// Buffers
 	VertexBuffer _coord_buffer;
-	VertexBuffer _mesh_offsets_buffer;
+	VertexBuffer _object_id_buffer;
 	IndexBuffer _index_buffer;
 	UniformBuffer _camera_buffer;
-	StorageBuffer _obj_tr_i_buffer;
 	StorageBuffer _obj_tr_buffer;
 
 	Modules _modules;

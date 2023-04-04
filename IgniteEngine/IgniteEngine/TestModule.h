@@ -16,12 +16,11 @@ private:
     Texture _tex;
     GraphicShader _red_shader;
 
-    VertexBuffer _mesh_offsets_buffer;
+    VertexBuffer _object_id_buffer;
     VertexBuffer _coord_buffer;
     VertexBuffer _uv_buffer;
     IndexBuffer _index_buffer;
     UniformBuffer _camera_buffer;
-    StorageBuffer _obj_tr_i_buffer;
     StorageBuffer _obj_tr_buffer;
     StorageBuffer _texture_i_buffer;
 

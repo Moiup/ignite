@@ -66,8 +66,8 @@ void TestModule::start() {
             0
         );
         _red_shader.addVertexBufferInfo(
-            "mesh_offsets",
-            Object3D::getMeshOffsetsStride(_renderer, &_red_shader),
+            "object_id",
+            Object3D::getObjectIdStride(_renderer, &_red_shader),
             VK_FORMAT_R32_UINT,
             1
         );
@@ -77,6 +77,7 @@ void TestModule::start() {
             VK_FORMAT_R32G32_SFLOAT,
             2
         );
+
         // Index Buffer
         _red_shader.addIndexBufferInfo(
             "index",
@@ -110,15 +111,6 @@ void TestModule::start() {
         );
 
         // Creating the buffers
-        
-        // Mesh offsets
-        _mesh_offsets_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
-        _mesh_offsets_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
-        _mesh_offsets_buffer.setSize(Object3D::getMeshOffsetsSize(_renderer, &_red_shader));
-        _mesh_offsets_buffer.create();
-        _mesh_offsets_buffer.setValues(Object3D::getMeshOffsets(_renderer, &_red_shader).data());
-        _red_shader.addVertexBuffer("mesh_offsets", &_mesh_offsets_buffer);
-
         // Coord buffer
         _coord_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _coord_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
@@ -126,6 +118,14 @@ void TestModule::start() {
         _coord_buffer.create();
         _coord_buffer.setValues(Object3D::getCoords(_renderer, &_red_shader).data());
         _red_shader.addVertexBuffer("coord", &_coord_buffer);
+        
+        // Mesh offsets
+        _object_id_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _object_id_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+        _object_id_buffer.setSize(Object3D::getObjectIdSize(_renderer, &_red_shader));
+        _object_id_buffer.create();
+        _object_id_buffer.setValues(Object3D::getObjectId(_renderer, &_red_shader).data());
+        _red_shader.addVertexBuffer("object_id", &_object_id_buffer);
 
         // UV buffer
         _uv_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
@@ -152,13 +152,6 @@ void TestModule::start() {
         _red_shader.addUniformBuffer("camera", &_camera_buffer);
 
         // Storage Buffers
-        _obj_tr_i_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
-        _obj_tr_i_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
-        _obj_tr_i_buffer.setSize(Object3D::getTransformIndicesSize(_renderer, &_red_shader));
-        _obj_tr_i_buffer.create();
-        _obj_tr_i_buffer.setValues(Object3D::getTransformIndices(_renderer, &_red_shader).data());
-        _red_shader.addStorageBuffer("obj_tr_i", &_obj_tr_i_buffer);
-
         _obj_tr_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _obj_tr_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
         _obj_tr_buffer.setSize(Object3D::getTransformMatricesSize(_renderer, &_red_shader));

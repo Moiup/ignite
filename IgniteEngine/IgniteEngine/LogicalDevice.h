@@ -31,7 +31,7 @@ public:
 
 	bool setQueue(std::string name, std::vector<VkQueueFlagBits> flags);
 	const Queue* getQueue(std::string name) const;
-	const Queue* getQueue(uint32_t i) const;
+	const Queue* getDefaultQueue() const;
 	const std::vector<uint32_t>& getQueueFamilyIndexes() const;
 
 	void create();

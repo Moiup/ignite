@@ -106,8 +106,30 @@ void GraphicsPipeline::setDescriptorSetLayoutBinding(std::vector<VkDescriptorSet
 
 std::vector<VkDescriptorSetLayoutBinding> GraphicsPipeline::setDescriptorSetLayoutBindingArray() {
 	std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_binding_arr;
-	setDescriptorSetLayoutBinding(descriptor_set_layout_binding_arr, _shader->getUniformBuffersInfo());
-	setDescriptorSetLayoutBinding(descriptor_set_layout_binding_arr, _shader->getStorageBuffersInfo());
+	
+	// Uniform buffers
+	setDescriptorSetLayoutBinding(
+		descriptor_set_layout_binding_arr, 
+		_shader->getUniformBuffersInfo()
+	);
+	
+	// Storage buffers
+	setDescriptorSetLayoutBinding(
+		descriptor_set_layout_binding_arr,
+		_shader->getStorageBuffersInfo()
+	);
+	
+	// Sampler
+	setDescriptorSetLayoutBinding(
+		descriptor_set_layout_binding_arr,
+		(std::unordered_map<std::string, ArrayBufferInfo>&)_shader->getSamplerInfo()
+	);
+
+	// Textures
+	setDescriptorSetLayoutBinding(
+		descriptor_set_layout_binding_arr,
+		(std::unordered_map<std::string, ArrayBufferInfo>&)_shader->getTextureInfo()
+	);
 
 	return descriptor_set_layout_binding_arr;
 }
@@ -207,6 +229,75 @@ void GraphicsPipeline::setWriteDescriptorSet(std::unordered_map<std::string, Arr
 	}	
 }
 
+void GraphicsPipeline::setWriteDescriptorSet(
+	std::unordered_map<std::string, std::vector<Sampler*>>& sampler_arr,
+	std::unordered_map<std::string, SamplerInfo>& sampler_info_arr,
+	std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
+) {
+	for (auto& sampler_data: sampler_arr) {
+		std::string name = sampler_data.first;
+		std::vector<Sampler*>& samplers = sampler_data.second;
+		SamplerInfo& info = sampler_info_arr[name];
+
+		VkDescriptorImageInfo* image_info = new VkDescriptorImageInfo[samplers.size()];
+		uint32_t i = 0;
+		for (auto& s : samplers) {
+			VkSampler* samp = (VkSampler*)s->getSampler();
+			image_info[i].sampler = *samp;
+			//image_info[i].imageLayout = 0;
+			image_info[i].imageView = nullptr;
+		}
+
+		VkWriteDescriptorSet writes{};
+		writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writes.pNext = nullptr;
+		writes.dstSet = _descriptor_sets[0];
+		writes.dstBinding = info.getBinding();
+		writes.dstArrayElement = 0;
+		writes.descriptorCount = samplers.size();
+		writes.descriptorType = info.getDescriptorType();
+		writes.pImageInfo = image_info;
+		writes.pBufferInfo = nullptr;
+		writes.pTexelBufferView = nullptr;
+
+		write_descriptor_set_arr.push_back(writes);
+	}
+}
+
+void GraphicsPipeline::setWriteDescriptorSet(
+	std::unordered_map<std::string, std::vector<Texture*>>& texture_arr,
+	std::unordered_map<std::string, TextureInfo>& texture_info_arr,
+	std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
+) {
+	for (auto& texture_data : texture_arr) {
+		std::string name = texture_data.first;
+		std::vector<Texture*>& textures = texture_data.second;
+		TextureInfo& info = texture_info_arr[name];
+
+		VkDescriptorImageInfo* image_info = new VkDescriptorImageInfo[textures.size()];
+		uint32_t i = 0;
+		for (auto& tex : textures) {
+			image_info[i].sampler = nullptr;
+			image_info[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			image_info[i].imageView = (VkImageView)textures[i]->getImage().getImageView();
+		}
+
+		VkWriteDescriptorSet writes{};
+		writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writes.pNext = nullptr;
+		writes.dstSet = _descriptor_sets[0];
+		writes.dstBinding = info.getBinding();
+		writes.dstArrayElement = 0;
+		writes.descriptorCount = textures.size();
+		writes.descriptorType = info.getDescriptorType();
+		writes.pImageInfo = image_info;
+		writes.pBufferInfo = nullptr;
+		writes.pTexelBufferView = nullptr;
+
+		write_descriptor_set_arr.push_back(writes);
+	}
+}
+
 void GraphicsPipeline::updateDescriptorSets() {
 	std::vector<VkWriteDescriptorSet> write_descriptor_set_arr;
 	setWriteDescriptorSet(
@@ -221,6 +312,18 @@ void GraphicsPipeline::updateDescriptorSets() {
 		write_descriptor_set_arr
 	);
 
+	setWriteDescriptorSet(
+		_shader->getSampler(),
+		_shader->getSamplerInfo(),
+		write_descriptor_set_arr
+	);
+
+	setWriteDescriptorSet(
+		_shader->getTexture(),
+		_shader->getTextureInfo(),
+		write_descriptor_set_arr
+	);
+
 	vkUpdateDescriptorSets(
 		*_logical_device,
 		write_descriptor_set_arr.size(),
@@ -230,7 +333,12 @@ void GraphicsPipeline::updateDescriptorSets() {
 	);
 
 	for (VkWriteDescriptorSet& w : write_descriptor_set_arr) {
-		delete w.pBufferInfo;
+		if (w.pBufferInfo != nullptr) {
+			delete w.pBufferInfo;
+		}
+		else if (w.pImageInfo!= nullptr) {
+			delete w.pImageInfo;
+		}
 	}
 }
 

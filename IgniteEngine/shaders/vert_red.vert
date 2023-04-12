@@ -11,11 +11,11 @@ layout (std140, binding = 0) uniform camera_buf{
     mat4 mvp;
 } camera;
 
-layout(std430, binding = 2) readonly buffer obj_tr_buff {
+layout(std430, binding = 1) readonly buffer obj_tr_buff {
     mat4 tr[];
 } obj_tr;
 
-layout(std430, binding = 3) readonly buffer texture_i_buff {
+layout(std430, binding = 2) readonly buffer texture_i_buff {
     uint tex_i[];
 } texture_i;
 

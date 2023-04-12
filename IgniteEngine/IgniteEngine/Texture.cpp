@@ -37,6 +37,10 @@ void Texture::setGPU(PhysicalDevice* gpu) {
 	_gpu = gpu;
 }
 
+void Texture::setCommandPool(CommandPool* command_pool) {
+	_command_pool = command_pool;
+}
+
 glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
 	return _pixels[row * _width + col];
 }
@@ -89,6 +93,8 @@ void Texture::create() {
 	image_copy_arr.push_back(image_copy);
 
 	// Create the image to copy the buffer to
+	_image.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	_image.setMemoryProperties(_gpu->getMemoryProperties());
 	_image.setImageImageType(VK_IMAGE_TYPE_2D);
 	_image.setImageFormat(VK_FORMAT_R8G8B8A8_UNORM);
 	_image.setImageMipLevels(1);
@@ -124,6 +130,7 @@ void Texture::create() {
 	// Creating the command buffer
 	CommandBuffer copy_cmd{};
 	copy_cmd.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	copy_cmd.setCommandPool((VkCommandPool*) & _command_pool->getPool());
 	copy_cmd.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	copy_cmd.create();
 	copy_cmd.begin();
@@ -164,10 +171,9 @@ void Texture::create() {
 	_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	
 	copy_cmd.end();
-	copy_cmd.flush(_logical_device->getQueue(0));
+	copy_cmd.flush(_logical_device->getDefaultQueue());
 
 	copy_cmd.free();
-	staging_buffer.freeMemory();
 	staging_buffer.destroy();
 
 	_image.setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
@@ -287,4 +293,8 @@ const uint64_t Texture::getWidth() const {
 
 const uint64_t Texture::getHeight() const {
 	return _height;
+}
+
+const Image& Texture::getImage() const {
+	return _image;
 }

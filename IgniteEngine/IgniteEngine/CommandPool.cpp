@@ -51,6 +51,10 @@ void CommandPool::destroy() {
 	vkDestroyCommandPool(*_logical_device, _pool, nullptr);
 }
 
+const VkCommandPool& CommandPool::getPool() const {
+	return _pool;
+}
+
 CommandBuffer CommandPool::createCommandBuffer(VkCommandBufferLevel level) {
 	CommandBuffer cmd_buffer{};
 	cmd_buffer.setLogicalDevice(_logical_device);

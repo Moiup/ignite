@@ -50,6 +50,7 @@ void EngineApp::init() {
 	_logical_device.create();
 
 	// Command Pool
+	DefaultConf::command_pool = &_command_pool;  
 	_command_pool.setLogicalDevice((VkDevice*)_logical_device.getDevice());
 	_command_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	_command_pool.setQueueFamilyIndex(

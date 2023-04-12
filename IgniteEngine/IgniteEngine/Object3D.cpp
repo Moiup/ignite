@@ -12,11 +12,14 @@ std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uin
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> Object3D::uv{};
 
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Texture*, std::vector<Object3D*>>>> Object3D::textures_obj;
+
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<Texture*>>> Object3D::_textures;
+
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::transform_indices;
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> Object3D::transform_matrices;
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Texture*, std::vector<Object3D*>>>> Object3D::textures;
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::texture_indices;
 
@@ -76,16 +79,16 @@ void Object3D::setRenderer(Renderer* renderer) {
 void Object3D::setTexture(Texture* texture) {
 	uint32_t i = 0;
 	for (GraphicShader* shader : _shaders) {
-		for (Object3D* obj : Object3D::textures[_renderer][shader][_texture]) {
+		for (Object3D* obj : Object3D::textures_obj[_renderer][shader][_texture]) {
 			if (obj != this) {
 				i++;
 				continue;
 			}
-			Object3D::textures[_renderer][shader][_texture].erase(
-				Object3D::textures[_renderer][shader][_texture].begin() + i
+			Object3D::textures_obj[_renderer][shader][_texture].erase(
+				Object3D::textures_obj[_renderer][shader][_texture].begin() + i
 			);
 		}
-		Object3D::textures[_renderer][shader][_texture].push_back(this);
+		Object3D::textures_obj[_renderer][shader][texture].push_back(this);
 	}
 	_texture = texture;
 }
@@ -198,6 +201,20 @@ uint32_t Object3D::getUVSize(Renderer* renderer, GraphicShader* shader) {
 	return getUV(renderer, shader).size() * stride;
 }
 
+std::vector<Texture*>& Object3D::getTextures(Renderer* renderer, GraphicShader* shader) {
+	buildTextures(renderer, shader);
+	return _textures[renderer][shader];
+}
+
+uint32_t Object3D::getTexturesSize(Renderer* renderer, GraphicShader* shader) {
+	return sizeof(*getTextures(renderer, shader).data());
+}
+
+uint32_t Object3D::getTexturesStride(Renderer* renderer, GraphicShader* shader) {
+	uint32_t stride = getTexturesStride(renderer, shader);
+	return getTextures(renderer, shader).size() * stride;
+}
+
 std::vector<uint32_t>& Object3D::getTransformIndices(Renderer* renderer, GraphicShader* shader) {
 	buildTransformIndices(renderer, shader);
 	return Object3D::transform_indices[renderer][shader];
@@ -236,7 +253,7 @@ uint32_t Object3D::getTransformMatricesSize(Renderer* renderer, GraphicShader* s
 }
 
 std::unordered_map<Texture*, std::vector<Object3D*>>& Object3D::getTextureObjects(Renderer* renderer, GraphicShader* shader) {
-	return Object3D::textures[renderer][shader];
+	return Object3D::textures_obj[renderer][shader];
 }
 
 std::vector<uint32_t>& Object3D::getTextureIndices(Renderer* renderer, GraphicShader* shader) {
@@ -343,6 +360,25 @@ void Object3D::buildUV(Renderer* renderer, GraphicShader* shader) {
 	}
 }
 
+
+void Object3D::buildTextures(Renderer* renderer, GraphicShader* shader) {
+	// if not empty
+	if (Object3D::_textures[renderer][shader].size()) {
+		return;
+	}
+
+	// Finding the textures
+	for (auto& t_o : textures_obj[renderer][shader]) {
+		Texture* tex = t_o.first;
+		if (!tex) {
+			continue;
+		}
+		//std::vector<Object3D*>& objs = t_o.second;
+
+		_textures[renderer][shader].push_back(tex);
+	}
+}
+
 void Object3D::buildTransformIndices(Renderer* renderer, GraphicShader* shader) {
 	// if not empty
 	if (Object3D::transform_indices[renderer][shader].size()) {
@@ -399,7 +435,7 @@ void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
 	}
 
 	// For each texture looking for all the objects
-	for (auto& t_o : Object3D::textures[renderer][shader]) {
+	for (auto& t_o : Object3D::textures_obj[renderer][shader]) {
 		std::vector<Object3D*> objs = t_o.second;
 
 		// For each object add the index corresponding to the texture

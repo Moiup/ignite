@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LogicalDevice.h"
+#include "CommandPool.h"
 #include "CommandBuffer.h"
 #include "Buffer.h"
 #include "Image.h"
@@ -26,6 +27,7 @@ private:
 
 	LogicalDevice* _logical_device;
 	PhysicalDevice* _gpu;
+	CommandPool* _command_pool;	
 
 	Image _image;
 	VkImageLayout _image_layout;
@@ -37,6 +39,7 @@ public:
 
 	void setLogicalDevice(LogicalDevice* _logical_device);
 	void setGPU(PhysicalDevice* gpu);
+	void setCommandPool(CommandPool* command_pool);
 
 	void create();
 
@@ -55,5 +58,6 @@ public:
 
 	const uint64_t getWidth() const;
 	const uint64_t getHeight() const;
+	const Image& getImage() const;
 };
 

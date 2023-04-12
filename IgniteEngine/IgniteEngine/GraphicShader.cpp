@@ -99,7 +99,7 @@ std::unordered_map<std::string, UniformBuffer*>& GraphicShader::getUniformBuffer
 
 void GraphicShader::addStorageBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
 	if (_uniform_buffers_info.count(name)) {
-		std::string error = "Error: there already is an Storage buffer info named " + name + "!";
+		std::string error = "Error: there already is a Storage buffer info named " + name + "!";
 		throw std::runtime_error(error);
 	}
 
@@ -127,7 +127,69 @@ std::unordered_map<std::string, ArrayBufferInfo>& GraphicShader::getStorageBuffe
 std::unordered_map<std::string, StorageBuffer*>& GraphicShader::getStorageBuffers() {
 	return _storage_buffers;
 }
-	
+
+void GraphicShader::addSamplerInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
+	if (_sampler_info.count(name)) {
+		std::string error = "Error: there already is a sampler info named " + name + "!";
+		throw std::runtime_error(error);
+	}
+
+	SamplerInfo info{};
+	info.setBinding(binding);
+	info.setDescriptorType(VK_DESCRIPTOR_TYPE_SAMPLER);
+	info.setStageFlags(stage_flags);
+
+	_sampler_info[name] = info;
+}
+
+void GraphicShader::addSampler(std::string name, Sampler* sampler) {
+	_sampler[name].push_back(sampler);
+}
+
+std::unordered_map<std::string, SamplerInfo>& GraphicShader::getSamplerInfo() {
+	return _sampler_info;
+}
+
+std::unordered_map<std::string, std::vector<Sampler*>>& GraphicShader::getSampler() {
+	return _sampler;
+}
+
+
+void GraphicShader::addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
+	if (_texture_info.count(name)) {
+		std::string error = "Error: there already is a texture info named " + name + "!";
+		throw std::runtime_error(error);
+	}
+
+	TextureInfo info{};
+	info.setBinding(binding);
+	info.setDescriptorType(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
+	info.setStageFlags(stage_flags);
+
+	_texture_info[name] = info;
+}
+
+void GraphicShader::addTexture(std::string name, Texture* texture) {
+	_textures[name].push_back(texture);
+}
+
+
+void GraphicShader::addTexture(std::string name, std::vector<Texture*>& textures) {
+	_textures[name].insert(
+		_textures[name].end(),
+		textures.begin(),
+		textures.end()
+	);
+}
+
+std::unordered_map<std::string, TextureInfo>& GraphicShader::getTextureInfo() {
+	return _texture_info;
+}
+
+std::unordered_map<std::string, std::vector<Texture*>>& GraphicShader::getTexture() {
+	return _textures;
+}
+
 void GraphicShader::readShaderFiles(std::string vertex_shader, std::string fragment_shader) {
 	createShaderModuleAndStage(vertex_shader, VK_SHADER_STAGE_VERTEX_BIT);
 	createShaderModuleAndStage(fragment_shader, VK_SHADER_STAGE_FRAGMENT_BIT);

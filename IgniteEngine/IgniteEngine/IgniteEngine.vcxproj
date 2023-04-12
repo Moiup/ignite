@@ -189,11 +189,13 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Ressource.cpp" />
     <ClCompile Include="Sampler.cpp" />
+    <ClCompile Include="SamplerInfo.cpp" />
     <ClCompile Include="SecondaryMocapHeaderNetwork.cpp" />
     <ClCompile Include="StorageBuffer.cpp" />
     <ClCompile Include="Swapchain.cpp" />
     <ClCompile Include="TestModule.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureInfo.cpp" />
     <ClCompile Include="UniformBuffer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertexBufferInfo.cpp" />
@@ -243,6 +245,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Ressource.h" />
     <ClInclude Include="Sampler.h" />
+    <ClInclude Include="SamplerInfo.h" />
     <ClInclude Include="SecondaryMocapHeaderNetwork.h" />
     <ClInclude Include="stb_image\stb_image.h" />
     <ClInclude Include="stb_image\stb_image_resize.h" />
@@ -251,6 +254,7 @@
     <ClInclude Include="Swapchain.h" />
     <ClInclude Include="TestModule.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureInfo.h" />
     <ClInclude Include="UniformBuffer.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexBufferInfo.h" />

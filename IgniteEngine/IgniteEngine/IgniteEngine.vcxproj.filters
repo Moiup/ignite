@@ -201,6 +201,12 @@
     <ClCompile Include="Sampler.cpp">
       <Filter>Ignite\src</Filter>
     </ClCompile>
+    <ClCompile Include="SamplerInfo.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureInfo.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -366,6 +372,12 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="Sampler.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerInfo.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureInfo.h">
       <Filter>Ignite\inc</Filter>
     </ClInclude>
   </ItemGroup>

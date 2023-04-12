@@ -23,6 +23,7 @@ private:
     UniformBuffer _camera_buffer;
     StorageBuffer _obj_tr_buffer;
     StorageBuffer _texture_i_buffer;
+    Sampler _sampler;
 
 public:
     TestModule();

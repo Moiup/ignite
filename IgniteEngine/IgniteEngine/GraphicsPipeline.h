@@ -64,6 +64,16 @@ private:
 		std::unordered_map<std::string, ArrayBufferInfo>& buffer_info_arr,
 		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
 	);
+	void setWriteDescriptorSet(
+		std::unordered_map<std::string, std::vector<Sampler*>>& sampler_arr,
+		std::unordered_map<std::string, SamplerInfo>& sampler_info_arr,
+		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
+	);
+	void setWriteDescriptorSet(
+		std::unordered_map<std::string, std::vector<Texture*>>& texture_arr,
+		std::unordered_map<std::string, TextureInfo>& texture_info_arr,
+		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
+	);
 	void updateDescriptorSets();
 
 	void createDescriptorSet();

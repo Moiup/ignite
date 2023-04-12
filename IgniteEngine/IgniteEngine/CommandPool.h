@@ -21,6 +21,8 @@ public:
 	void create();
 	void destroy();
 
+	const VkCommandPool& getPool() const;
+
 	CommandBuffer createCommandBuffer(VkCommandBufferLevel level= VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 };
 

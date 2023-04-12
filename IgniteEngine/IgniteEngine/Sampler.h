@@ -1,5 +1,7 @@
 #pragma once
-#include "DefaultConf.h"
+
+#include <vulkan/vulkan.h>
+#include <iostream>
 
 class Sampler
 {

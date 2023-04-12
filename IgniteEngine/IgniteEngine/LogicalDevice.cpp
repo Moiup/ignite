@@ -62,9 +62,8 @@ const Queue* LogicalDevice::getQueue(std::string name) const {
 	return &_queues.at(name);
 }
 
-const Queue* LogicalDevice::getQueue(uint32_t i) const {
-	auto it = _queues.begin(i);
-	return &it->second;
+const Queue* LogicalDevice::getDefaultQueue() const {
+	return &_queues.begin()->second;
 }
 
 const std::vector<uint32_t>& LogicalDevice::getQueueFamilyIndexes() const {

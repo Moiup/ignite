@@ -17,7 +17,10 @@ void TestModule::start() {
     // -- Textures -- //
     _tex.readFile("../textures/scarecrow.png");
     _tex.setLogicalDevice(DefaultConf::logical_device);
-    _tex.writeFile("../textures/scarecrow_test.png");
+    _tex.setGPU(DefaultConf::gpu);
+    _tex.setCommandPool(DefaultConf::command_pool);
+    _tex.create();
+    //_tex.writeFile("../textures/scarecrow_test.png");
 
 
     // Loading the mesh
@@ -93,20 +96,28 @@ void TestModule::start() {
 
         // Storage Buffers
         _red_shader.addStorageBufferInfo(
-            "obj_tr_i",
+            "obj_tr",
             1,
             VK_SHADER_STAGE_VERTEX_BIT
         );
 
         _red_shader.addStorageBufferInfo(
-            "obj_tr",
+            "texture_i",
             2,
             VK_SHADER_STAGE_VERTEX_BIT
         );
 
-        _red_shader.addStorageBufferInfo(
-            "texture_i",
+
+        // -- Fragment shader -- //
+        _red_shader.addSamplerInfo(
+            "samp",
             3,
+            VK_SHADER_STAGE_FRAGMENT_BIT
+        );
+        
+        _red_shader.addTextureInfo(
+            "textures",
+            4,
             VK_SHADER_STAGE_VERTEX_BIT
         );
 
@@ -165,6 +176,14 @@ void TestModule::start() {
         _texture_i_buffer.create();
         _texture_i_buffer.setValues(Object3D::getTextureIndices(_renderer, &_red_shader).data());
         _red_shader.addStorageBuffer("texture_i", &_texture_i_buffer);
+
+        // Sampler
+        _sampler.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _sampler.create();
+        _red_shader.addSampler("samp", &_sampler);
+
+        // Textures
+        _red_shader.addTexture("textures", Object3D::getTextures(_renderer, &_red_shader));
     }
 
     _frame = 0;

@@ -8,6 +8,10 @@
 #include "ArrayBufferInfo.h"
 #include "StorageBuffer.h"
 #include "UniformBuffer.h"
+#include "Sampler.h"
+#include "SamplerInfo.h"
+#include "TextureInfo.h"
+#include "Texture.h"
 
 #include <unordered_map>
 #include <fstream>
@@ -29,6 +33,12 @@ private:
 
 	std::unordered_map<std::string, UniformBuffer*> _uniform_buffers;
 	std::unordered_map<std::string, StorageBuffer*> _storage_buffers;
+	
+	std::unordered_map<std::string, SamplerInfo> _sampler_info;
+	std::unordered_map<std::string, std::vector<Sampler*>> _sampler;
+
+	std::unordered_map<std::string, TextureInfo> _texture_info;
+	std::unordered_map<std::string, std::vector<Texture*>> _textures;
 
 	PhysicalDevice* _gpu;
 	VkDevice* _logical_device;
@@ -62,6 +72,17 @@ public:
 	void addStorageBuffer(std::string name, StorageBuffer* buffer);
 	std::unordered_map<std::string, ArrayBufferInfo>& getStorageBuffersInfo();
 	std::unordered_map<std::string, StorageBuffer*>& getStorageBuffers();
+
+	void addSamplerInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
+	void addSampler(std::string name, Sampler* sampler);
+	std::unordered_map<std::string, SamplerInfo>& getSamplerInfo();
+	std::unordered_map<std::string, std::vector<Sampler*>>& getSampler();
+
+	void addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
+	void addTexture(std::string name, Texture* texture);
+	void addTexture(std::string name, std::vector<Texture*>& textures);
+	std::unordered_map<std::string, TextureInfo>& getTextureInfo();
+	std::unordered_map<std::string, std::vector<Texture*>>& getTexture();
 
 	void readShaderFiles(std::string vertex_shader, std::string fragment_shader);
 

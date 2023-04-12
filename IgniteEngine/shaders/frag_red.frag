@@ -14,7 +14,7 @@ layout (location = 0) out vec4 out_color;
 
 void main(){
     vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
-    out_color = color;
+    // out_color = color;
 
-    // out_color = texture(sampler2D(textures[0], samp), uv_frag);
+    out_color = texture(sampler2D(textures[0], samp), uv_frag);
 }

@@ -118,7 +118,7 @@ void TestModule::start() {
         _red_shader.addTextureInfo(
             "textures",
             4,
-            VK_SHADER_STAGE_VERTEX_BIT
+            VK_SHADER_STAGE_FRAGMENT_BIT
         );
 
         // Creating the buffers
@@ -220,10 +220,10 @@ std::vector<glm::vec3> TestModule::rectangle() {
 
 std::vector<glm::vec2> TestModule::rectUV() {
     std::vector<glm::vec2> uv{
-        glm::vec2(0, 0),
-        glm::vec2(1, 0),
         glm::vec2(1, 1),
-        glm::vec2(0, 1)
+        glm::vec2(0, 1),
+        glm::vec2(0, 0),
+        glm::vec2(1, 0)
     };
     return uv;
 }

@@ -20,11 +20,13 @@ void TestModule::start() {
     _tex.setGPU(DefaultConf::gpu);
     _tex.setCommandPool(DefaultConf::command_pool);
     _tex.create();
-    //_tex.writeFile("../textures/scarecrow_test.png");
 
+    // -- Meshes -- //
+    // Loading the mesh (file)
+    _cube_info.loadObj("../3d_objects/cube.obj");
 
-    // Loading the mesh
-    _m.setCoords(rectangle(), rectIndices(), rectUV());
+    // Loading the mesh (by hand)
+    _m.setVertex(rectangle(), rectIndices(), rectUV());
 
     // -- Objects -- //
     // Setting parent Object children
@@ -52,6 +54,8 @@ void TestModule::start() {
     _obj3.setTexture(&_tex);
     _obj3.setPositionAbsolute(2.3f, 0.0, 0.0);
 
+    _cube.readObj("../3d_objects/cube.obj");
+    
 
     {
         // Red shader

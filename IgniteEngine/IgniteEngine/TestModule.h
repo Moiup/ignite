@@ -2,6 +2,7 @@
 #include "Module.h"
 #include "Mesh.h"
 #include "Object3D.h"
+#include "LoadedObjectInfo.h"
 
 class TestModule : public Module
 {
@@ -9,6 +10,9 @@ private:
     Object3D _obj;
     Object3D _obj2;
     Object3D _obj3;
+    Object3D _cube;
+
+    LoadedObjectInfo _cube_info;
 
     Mesh _m;
     uint32_t _frame;

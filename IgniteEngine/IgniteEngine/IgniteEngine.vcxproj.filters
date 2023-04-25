@@ -43,6 +43,9 @@
     <Filter Include="Ignite\ESocket\inc">
       <UniqueIdentifier>{a0c648e1-b088-471a-b637-684cdbe1db6b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ignite\fast_obj">
+      <UniqueIdentifier>{b648ba69-ff98-40bf-ba78-90552553cc4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Ressource.cpp">
@@ -205,6 +208,15 @@
       <Filter>Ignite\src</Filter>
     </ClCompile>
     <ClCompile Include="TextureInfo.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="fast_obj\fast_obj.c">
+      <Filter>Ignite\fast_obj</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadedObjectInfo.cpp">
       <Filter>Ignite\src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -378,6 +390,15 @@
       <Filter>Ignite\inc</Filter>
     </ClInclude>
     <ClInclude Include="TextureInfo.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="fast_obj\fast_obj.h">
+      <Filter>Ignite\fast_obj</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadedObjectInfo.h">
       <Filter>Ignite\inc</Filter>
     </ClInclude>
   </ItemGroup>

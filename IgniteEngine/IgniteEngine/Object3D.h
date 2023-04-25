@@ -9,6 +9,8 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <sstream>
+#include <fstream>
 
 class Object3D : public Entity3D
 {
@@ -25,6 +27,8 @@ private:
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> transform_matrices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> texture_indices;
 
+	static std::vector<Object3D*> allocated_objects;
+
 	Mesh* _mesh;
 	Renderer* _renderer;
 	Texture* _texture;
@@ -32,7 +36,7 @@ private:
 
 public:
 	Object3D();
-	
+
 	void setMesh(Mesh* mesh);
 	const Mesh* getMesh() const;
 
@@ -46,6 +50,7 @@ public:
 	GraphicShader* getShader(uint32_t i);
 	std::vector<GraphicShader*>& getShaders();
 
+	void readObj(const std::string& file_name);
 public:
 	static std::unordered_map<Mesh*, std::vector<Object3D*>>& getMeshObjects(Renderer* renderer, GraphicShader* shader);
 	static std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>& getMeshObjects(Renderer* renderer);
@@ -98,4 +103,6 @@ private:
 	static void buildTransformIndices(Renderer* renderer, GraphicShader* shader);
 	static void buildTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static void buildTextureIndices(Renderer* renderer, GraphicShader* shader);
+
+	static void freeAllocatedObjects();
 };

@@ -116,7 +116,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)\vulkan_sdk\Include;$(ProjectDir)\glfw\include;$(ProjectDir)\glm;$(ProjectDir)\sdl2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -164,6 +164,7 @@
     <ClCompile Include="ESocket\EServerSocket.cpp" />
     <ClCompile Include="ESocket\ESocket.cpp" />
     <ClCompile Include="ESocket\EStream.cpp" />
+    <ClCompile Include="fast_obj\fast_obj.c" />
     <ClCompile Include="GraphicShader.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="HeaderMessageProtocoleNetwork.cpp" />
@@ -175,7 +176,9 @@
     <ClCompile Include="InitHeader.cpp" />
     <ClCompile Include="InitNetworkProtocole.cpp" />
     <ClCompile Include="Instance.cpp" />
+    <ClCompile Include="LoadedObjectInfo.cpp" />
     <ClCompile Include="LogicalDevice.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="MediapipeModule.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MessageProtocoleNetwork.cpp" />
@@ -220,6 +223,7 @@
     <ClInclude Include="ESocket\EServerSocket.h" />
     <ClInclude Include="ESocket\ESocket.h" />
     <ClInclude Include="ESocket\EStream.h" />
+    <ClInclude Include="fast_obj\fast_obj.h" />
     <ClInclude Include="GraphicShader.h" />
     <ClInclude Include="GraphicsPipeline.h" />
     <ClInclude Include="HeaderMessageProtocoleNetwork.h" />
@@ -230,7 +234,9 @@
     <ClInclude Include="InitHeader.h" />
     <ClInclude Include="InitNetworkProtocole.h" />
     <ClInclude Include="Instance.h" />
+    <ClInclude Include="LoadedObjectInfo.h" />
     <ClInclude Include="LogicalDevice.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="MediapipeModule.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MessageProtocoleNetwork.h" />

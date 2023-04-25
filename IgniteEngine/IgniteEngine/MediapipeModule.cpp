@@ -25,7 +25,7 @@ void MediapipeModule::start() {
 	InitNetworkProtocole hand_info{};
 	hand_info.read(_mediapipe_stream);
 	
-	_cube.setCoords(cube(), cubeIndex());
+	_cube.setVertex(cube(), cubeIndex());
 	
 	_hands.resize(hand_info.getHeader().nb_repetitions);
 	_wrist_pos.resize(hand_info.getHeader().nb_repetitions);

@@ -20,8 +20,9 @@ std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uin
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> Object3D::transform_matrices;
 
-
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::texture_indices;
+
+std::vector<Object3D*> Object3D::allocated_objects;
 
 Object3D::Object3D() :
 	_mesh{ nullptr },
@@ -29,6 +30,31 @@ Object3D::Object3D() :
 	_shaders{ nullptr },
 	_texture{ nullptr }
 { ; }
+
+void Object3D::readObj(const std::string& file_name) {
+	std::ifstream file = std::ifstream(file_name);
+
+	if (!file.is_open()) {
+		std::cerr << "Error opening file: " << file_name << std::endl;
+		throw std::runtime_error("Error opening file.");
+	}
+
+	std::string line{};
+	while (std::getline(file, line)) {
+		std::istringstream iss = std::istringstream(line);
+		char  info_type{};
+
+		Mesh m;
+		Object3D obj;
+
+		iss >> info_type;
+		// New object
+		if (info_type == 'o') {
+			obj = Object3D();
+			m = Mesh();
+		}
+	}
+}
 
 void Object3D::setMesh(Mesh* mesh) {
 	uint32_t i = 0;
@@ -443,5 +469,11 @@ void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
 			Object3D::texture_indices[renderer][shader].push_back(tex_i);	
 		}
 		tex_i++;
+	}
+}
+
+void Object3D::freeAllocatedObjects() {
+	for (Object3D* obj : Object3D::allocated_objects) {
+		delete obj;
 	}
 }

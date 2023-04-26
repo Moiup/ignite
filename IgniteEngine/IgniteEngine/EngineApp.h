@@ -21,6 +21,7 @@
 #include "Object3D.h"
 #include "Modules.h"
 #include "PerspectiveCamera.h"
+#include "CameraScene.h"
 
 #include "DefaultConf.h"
 
@@ -36,8 +37,8 @@ private:
 	DefaultGPU _gpu;
 	WindowSurface _render_window;
 	LogicalDevice _logical_device;
-	CommandPool _command_pool{};
-	GraphicShader _graphic_shader{};
+	CommandPool _command_pool;
+	GraphicShader _graphic_shader;
 	DefaultRenderer _renderer;
 
 	// Buffers
@@ -49,7 +50,7 @@ private:
 
 	Modules _modules;
 
-	PerspectiveCamera _camera;
+	CameraScene _camera;
 	glm::mat4 cam;
 
 public:

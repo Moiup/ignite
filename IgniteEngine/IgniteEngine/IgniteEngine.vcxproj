@@ -152,6 +152,7 @@
     <ClCompile Include="ArrayBufferInfo.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraScene.cpp" />
     <ClCompile Include="CommandBuffer.cpp" />
     <ClCompile Include="CommandPool.cpp" />
     <ClCompile Include="DefaultConf.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="ArrayBufferInfo.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraScene.h" />
     <ClInclude Include="CommandBuffer.h" />
     <ClInclude Include="CommandPool.h" />
     <ClInclude Include="DefaultConf.h" />

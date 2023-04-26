@@ -39,7 +39,7 @@ void MediapipeModule::start() {
 	for (auto& hand : _hands) {
 		for (const InitChildPoint& point : hand_info.getPoints()) {
 			hand[point.child_id].setMesh(&_cube);
-			hand[point.child_id].setRenderer(_renderer);
+			hand[point.child_id].setRenderer(DefaultConf::renderer);
 			hand[point.child_id].setScaleAbsolute(0.1, 0.1, 0.1);
 
 			if (point.child_id == point.parent_id) {

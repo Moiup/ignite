@@ -8,7 +8,9 @@ EngineApp::EngineApp() :
 	_logical_device{},
 	_command_pool{},
 	_graphic_shader{},
-	_renderer{}
+	_renderer{},
+	_camera{},
+	_modules{}
 {
 	;
 }
@@ -32,12 +34,10 @@ void EngineApp::init() {
 	// Setting window
 	_render_window.setInstance((VkInstance*)&_instance.getInstance());
 
-	// Initialising gpu
-	DefaultConf::gpu = &_gpu;
+	// Initialising
 	_gpu.configure(_instance);
 	
 	// Initialising logical device and queues
-	DefaultConf::logical_device = &_logical_device;
 	_logical_device.configure(&_gpu.getGPU());
 	_logical_device.setQueue(
 		"graphic_queue",
@@ -50,7 +50,6 @@ void EngineApp::init() {
 	_logical_device.create();
 
 	// Command Pool
-	DefaultConf::command_pool = &_command_pool;  
 	_command_pool.setLogicalDevice((VkDevice*)_logical_device.getDevice());
 	_command_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	_command_pool.setQueueFamilyIndex(
@@ -60,28 +59,23 @@ void EngineApp::init() {
 
 	initEngineEntities();
 
-	_modules.setGraphicsShader(&_graphic_shader);
-	_modules.setRenderer(&_renderer);
-	_modules.setCamera(&_camera);
+	DefaultConf::gpu = &_gpu;
+	DefaultConf::logical_device = &_logical_device;
+	DefaultConf::render_window = &_render_window;
+	DefaultConf::graphic_shader = &_graphic_shader;
+	DefaultConf::command_pool = &_command_pool;
+	DefaultConf::renderer = &_renderer;
+	DefaultConf::camera = &_camera;
+
 	_modules.init();
 }
 
 void EngineApp::start() {
 	App::start();
 
-	_camera.setAspectRatio(
-		static_cast<float>(_render_window.getWidth()) /
-		static_cast<float>(_render_window.getHeight())
-	);
-	_camera.setFOVY(glm::radians(45.0f));
-	_camera.setNear(0.1f);
-	_camera.setFar(100.0f);
-	_camera.setEye(glm::vec3(0, 0, 5));
-
 	startEngineEntities();
 
 	// Shader
-	DefaultConf::graphic_shader = &_graphic_shader;
 	_graphic_shader.setNbFrame(NB_FRAME);
 	_graphic_shader.setLogicalDevice(
 		(VkDevice*)_logical_device.getDevice()
@@ -151,11 +145,12 @@ void EngineApp::start() {
 	_graphic_shader.addIndexBuffer("index", &_index_buffer);
 
 	// Uniform buffer
+	//_camera.getPerspectiveCamera().setPositionAbsolute(0, 0, 2.f);
 	_camera_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
 	_camera_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_camera_buffer.setSize(sizeof(_camera.getMVP()));
+	_camera_buffer.setSize(sizeof(_camera.getPerspectiveCamera().getMVP()));
 	_camera_buffer.create();
-	_camera_buffer.setValues(&_camera.getMVP()[0][0]);
+	_camera_buffer.setValues(&_camera.getPerspectiveCamera().getMVP()[0][0]);
 	_graphic_shader.addUniformBuffer("camera", &_camera_buffer);
 
 	// Storage Buffers

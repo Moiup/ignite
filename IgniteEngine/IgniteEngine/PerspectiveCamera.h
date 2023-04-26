@@ -1,4 +1,5 @@
 #pragma once
+#include "DefaultConf.h"
 #include "Camera.h"
 
 class PerspectiveCamera : public Camera

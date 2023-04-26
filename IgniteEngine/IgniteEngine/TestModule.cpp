@@ -47,16 +47,19 @@ void TestModule::start() {
     _obj2.addShader(_graphics_shader);
     _obj2.setPositionAbsolute(0.0, 0.0, 0.0);
 
-    // Configuring third object
+     //Configuring third object
     _obj3.setMesh(&_m);
     _obj3.setRenderer(_renderer);
     _obj3.addShader(&_red_shader);
     _obj3.setTexture(&_tex);
     _obj3.setPositionAbsolute(2.3f, 0.0, 0.0);
 
-    _cube.readObj("../3d_objects/cube.obj");
+    _cube_obj.createFromObjectInfo(_cube_info);
+    _cube_obj.setRenderer(_renderer);
+    _cube_obj.addShader(_graphics_shader);
+    _cube_obj.setScaleAbsolute(0.5, 0.5, 0.5);
+    _cube_obj.setPositionAbsolute(-2.3f, 0, 0);
     
-
     {
         // Red shader
         _red_shader.setNbFrame(2);
@@ -201,8 +204,9 @@ void TestModule::update() {
     //_obj2.setPositionAbsolute(0.0f, ((float)_frame - 100) / 100, 0);
     //_obj3.setPositionAbsolute(2.3f, ((float)_frame - 100) / 100, 0);
 
+
     _obj_tr_buffer.setValues(
-        Object3D::updateTransformMatrices(_renderer, &_red_shader).data()
+        &Object3D::updateTransformMatrices(_renderer, &_red_shader)[0][0]
     );
 
     _frame = (_frame + 1) % 200;

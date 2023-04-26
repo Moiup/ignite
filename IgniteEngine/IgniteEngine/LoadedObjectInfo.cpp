@@ -19,7 +19,7 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 	_mesh.setCoords(fom->positions, fom->position_count);
 	_mesh.setNormals(fom->normals, fom->normal_count);
 	_mesh.setUV(fom->texcoords, fom->texcoord_count);
-	_mesh.setIndices(indices.data(), fom->face_count);
+	_mesh.setIndices(indices.data(), fom->index_count);
 
 	fast_obj_destroy(fom);
 }

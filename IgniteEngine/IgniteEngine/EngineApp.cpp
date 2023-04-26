@@ -119,14 +119,8 @@ void EngineApp::start() {
 	
 	// Storage Buffers
 	_graphic_shader.addStorageBufferInfo(
-		"obj_tr_i",
-		1,
-		VK_SHADER_STAGE_VERTEX_BIT
-	);
-
-	_graphic_shader.addStorageBufferInfo(
 		"obj_tr",
-		2,
+		1,
 		VK_SHADER_STAGE_VERTEX_BIT
 	);
 
@@ -169,8 +163,9 @@ void EngineApp::start() {
 	_obj_tr_buffer.setMemoryProperties(_gpu.getMemoryProperties());
 	_obj_tr_buffer.setSize(Object3D::getTransformMatricesSize(&_renderer, &_graphic_shader));
 	_obj_tr_buffer.create();
-	_obj_tr_buffer.setValues(Object3D::getTransformMatrices(&_renderer, &_graphic_shader).data());
+	_obj_tr_buffer.setValues(&Object3D::getTransformMatrices(&_renderer, &_graphic_shader)[0][0]);
 	_graphic_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
+
 
 	// Renderer
 	_renderer.setNbFrame(NB_FRAME);
@@ -193,7 +188,7 @@ void EngineApp::update() {
 		updateEngineEntities();
 
 		_obj_tr_buffer.setValues(
-			Object3D::updateTransformMatrices(&_renderer, &_graphic_shader).data()
+			&Object3D::updateTransformMatrices(&_renderer, &_graphic_shader)[0][0]
 		);
 
 		_renderer.render();

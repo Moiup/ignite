@@ -31,28 +31,18 @@ Object3D::Object3D() :
 	_texture{ nullptr }
 { ; }
 
-void Object3D::readObj(const std::string& file_name) {
-	std::ifstream file = std::ifstream(file_name);
+void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi) {
+	createFromObjectInfo(loi, this);
+}
 
-	if (!file.is_open()) {
-		std::cerr << "Error opening file: " << file_name << std::endl;
-		throw std::runtime_error("Error opening file.");
-	}
-
-	std::string line{};
-	while (std::getline(file, line)) {
-		std::istringstream iss = std::istringstream(line);
-		char  info_type{};
-
-		Mesh m;
-		Object3D obj;
-
-		iss >> info_type;
-		// New object
-		if (info_type == 'o') {
-			obj = Object3D();
-			m = Mesh();
-		}
+void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj) {
+	obj->setMesh((Mesh*)&loi._mesh);
+	
+	for (const auto& l : loi._children) {
+		Object3D* o = new Object3D();
+		Object3D::allocated_objects.push_back(o);
+		createFromObjectInfo(l, o);
+		obj->addChild(o);
 	}
 }
 
@@ -260,14 +250,16 @@ std::vector<glm::mat4>& Object3D::getTransformMatrices(Renderer* renderer, Graph
 }
 
 std::vector<glm::mat4>& Object3D::updateTransformMatrices(Renderer* renderer, GraphicShader* shader) {
+	uint32_t mat_i = 0;
 	// For each mesh in the renderer
 	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
 		 std::vector<Object3D*> objects = m_o.second;
 		 uint32_t n = objects.size();
-
+		 
 		for (uint32_t i = 0; i < n; i++) {
 			Object3D* obj = objects[i];
-			Object3D::transform_matrices[renderer][shader][i] = obj->getTransform();
+			Object3D::transform_matrices[renderer][shader][mat_i] = obj->getTransform();
+			mat_i++;
 		}
 	}
 

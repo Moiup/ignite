@@ -9,7 +9,7 @@ struct LoadedObjectInfo
 {
 	Mesh _mesh;
 
-	std::vector<LoadedObjectInfo*> _children;
+	std::vector<LoadedObjectInfo> _children;
 
 	LoadedObjectInfo();
 

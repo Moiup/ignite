@@ -5,6 +5,7 @@
 #include "Sampler.h"
 #include "Texture.h"
 #include "Renderer.h"
+#include "LoadedObjectInfo.h"
 
 #include <map>
 #include <unordered_map>
@@ -50,7 +51,11 @@ public:
 	GraphicShader* getShader(uint32_t i);
 	std::vector<GraphicShader*>& getShaders();
 
-	void readObj(const std::string& file_name);
+	void createFromObjectInfo(const LoadedObjectInfo& loi);
+
+private:
+	void createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj);
+
 public:
 	static std::unordered_map<Mesh*, std::vector<Object3D*>>& getMeshObjects(Renderer* renderer, GraphicShader* shader);
 	static std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>& getMeshObjects(Renderer* renderer);

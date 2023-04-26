@@ -53,7 +53,7 @@ void Mesh::setVertex(
 
 const void Mesh::setCoords(float* coords, const uint32_t len) {
 	glm::vec3* c = (glm::vec3*)coords;
-	_coords.assign(c, c + len/3);
+	_coords.assign(c, c + len);
 }
 
 const void Mesh::setIndices(uint32_t* indices, const uint32_t len) {

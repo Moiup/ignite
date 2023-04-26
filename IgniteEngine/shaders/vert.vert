@@ -10,7 +10,7 @@ layout (std140, binding = 0) uniform camera_buf{
     mat4 mvp;
 } camera;
 
-layout(std430, binding = 2) readonly buffer obj_tr_buff {
+layout(std430, binding = 1) readonly buffer obj_tr_buff {
     mat4 tr[];
 } obj_tr;
 

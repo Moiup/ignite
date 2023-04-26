@@ -10,7 +10,7 @@ private:
     Object3D _obj;
     Object3D _obj2;
     Object3D _obj3;
-    Object3D _cube;
+    Object3D _cube_obj;
 
     LoadedObjectInfo _cube_info;
 

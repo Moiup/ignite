@@ -173,7 +173,10 @@ void EngineApp::start() {
 
 void EngineApp::update() {
 	/*while (!glfwWindowShouldClose(_render_window.getWindow())) {*/
+	
 	for (;;) {
+		std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+
 		SDL_Event event{};
 		if (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) {
@@ -189,6 +192,13 @@ void EngineApp::update() {
 		_renderer.render();
 
 		glfwPollEvents();
+		
+
+		std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+		
+		uint64_t delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
+
+		DefaultConf::delta_time = delta_time;
 	}
 
 	_logical_device.waitIdle();

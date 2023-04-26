@@ -6,6 +6,8 @@
 #include "WindowSurface.h"
 #include "Renderer.h"
 
+#include <chrono>
+
 class CameraScene;
 
 class DefaultConf
@@ -18,5 +20,6 @@ public:
 	static WindowSurface* render_window;
 	static Renderer* renderer;
 	static CameraScene* camera;
+	static uint64_t delta_time; // ms
 };
 

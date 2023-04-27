@@ -21,5 +21,7 @@ public:
 	static Renderer* renderer;
 	static CameraScene* camera;
 	static uint64_t delta_time; // ms
+	static SDL_Event* event;
+
 };
 

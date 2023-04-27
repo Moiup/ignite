@@ -199,7 +199,7 @@ void TestModule::start() {
 void TestModule::update() {
     //_obj.setPositionAbsolute(-2, 0, 0);
     
-    _obj.setPositionAbsoluteUpdateChildren(-2.3f, ((float)_frame - 100) / 100, 0);
+    //_obj.setPositionAbsoluteUpdateChildren(-2.3f, ((float)_frame - 100) / 100, 0);
     //_obj.setPositionAbsolute(-2.3f, ((float)_frame - 100) / 100, 0);
     //_obj2.setPositionAbsolute(0.0f, ((float)_frame - 100) / 100, 0);
     //_obj3.setPositionAbsolute(2.3f, ((float)_frame - 100) / 100, 0);
@@ -239,10 +239,10 @@ std::vector<glm::vec3> TestModule::rectangle() {
 
 std::vector<glm::vec2> TestModule::rectUV() {
     std::vector<glm::vec2> uv{
-        glm::vec2(1, 1),
-        glm::vec2(0, 1),
         glm::vec2(0, 0),
-        glm::vec2(1, 0)
+        glm::vec2(1, 0),
+        glm::vec2(1, 1),
+        glm::vec2(0, 1)
     };
     return uv;
 }

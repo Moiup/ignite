@@ -9,3 +9,5 @@ CommandPool* DefaultConf::command_pool;
 WindowSurface* DefaultConf::render_window;
 Renderer* DefaultConf::renderer;
 CameraScene* DefaultConf::camera;
+uint64_t DefaultConf::delta_time; // ms
+SDL_Event* DefaultConf::event;

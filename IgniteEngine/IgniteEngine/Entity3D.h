@@ -40,6 +40,10 @@ public:
 	void setPositionLocaleUpdateChildren(float x, float y, float z);
 	void setPositionLocaleUpdateChildren(glm::vec3 pos);
 
+	// Rotate Absolute
+	void setRotationAbsolute(float rx, float ry, float rz);
+	void setRotationAbsolute(glm::vec3 rot);
+
 	// Scale Absolute
 	void setScaleAbsolute(float sx, float sy, float sz);
 	void setScaleAbsolute(glm::vec3 scale);
@@ -49,10 +53,13 @@ public:
 	void setScaleLocale(float sx, float sy, float sz);
 	void setScaleLocale(glm::vec3 scale);
 	void setScaleLocaleUpdateChildren(float sx, float sy, float sz);
-	void setScaleLocaleUpdateChildren(glm::vec3 scale);
+	void setScaleLocaleUpdateChildren(glm::vec3 scale);	
 
 	glm::vec3 getPositionAbsolute();
 	glm::vec3 getPositionLocale();
+
+	glm::vec3 getRotationAbsolute();
+	glm::vec3 getRotationLocale();
 
 	glm::vec3 getScaleAbsolute();
 	glm::vec3 getScaleLocale();

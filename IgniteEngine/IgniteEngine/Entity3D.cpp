@@ -72,27 +72,13 @@ void Entity3D::setPositionLocale(glm::vec3 pos) {
 	_lp = pos;
 }
 
-glm::vec3 Entity3D::getPositionAbsolute() {
-	return _ap;
+void Entity3D::setRotationAbsolute(float rx, float ry, float rz) {
+	setRotationAbsolute(glm::vec3(rx, ry, rz));
 }
 
-glm::vec3 Entity3D::getPositionLocale() {
-	return _lp;
-}
-
-glm::vec3 Entity3D::getScaleAbsolute() {
-	return _as;
-}
-
-glm::vec3 Entity3D::getScaleLocale() {
-	return _ls;
-}
-
-glm::mat4 Entity3D::getTranslate() {
-	return glm::translate(
-		glm::mat4(1.0f),
-		_ap
-	);
+void Entity3D::setRotationAbsolute(glm::vec3 rot) {
+	_lr = _lr + rot - _ar;
+	_ar = rot;
 }
 
 void Entity3D::setScaleAbsolute(float sx, float sy, float sz) {
@@ -143,22 +129,53 @@ void Entity3D::setScaleLocaleUpdateChildren(glm::vec3 scale) {
 	setScaleLocale(scale);
 }
 
+glm::vec3 Entity3D::getPositionAbsolute() {
+	return _ap;
+}
+
+glm::vec3 Entity3D::getPositionLocale() {
+	return _lp;
+}
+
+glm::vec3 Entity3D::getRotationAbsolute() {
+	return _ar;
+}
+
+glm::vec3 Entity3D::getRotationLocale() {
+	return _lr;
+}
+
+glm::vec3 Entity3D::getScaleAbsolute() {
+	return _as;
+}
+
+glm::vec3 Entity3D::getScaleLocale() {
+	return _ls;
+}
+
+glm::mat4 Entity3D::getTranslate() {
+	return glm::translate(
+		glm::mat4(1.0f),
+		_ap
+	);
+}
+
 glm::mat4 Entity3D::getRotate() {
 	glm::mat4 r = glm::rotate(
 		glm::mat4(1.0f),
-		_ar[0],
+		_ar.x,
 		glm::vec3(1.0f, 0, 0)
 	);
 
-	glm::rotate(
+	r = glm::rotate(
 		r,
-		_ar[1],
+		_ar.y,
 		glm::vec3(0, 1.0f, 0)
 	);
 
-	glm::rotate(
+	r = glm::rotate(
 		r,
-		_ar[2],
+		_ar.z,
 		glm::vec3(0, 0, 1.0f)
 	);
 

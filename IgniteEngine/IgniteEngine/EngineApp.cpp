@@ -183,10 +183,15 @@ void EngineApp::update() {
 				break;
 			}
 		}
+		DefaultConf::event = &event;
+
 		updateEngineEntities();
 
 		_obj_tr_buffer.setValues(
 			&Object3D::updateTransformMatrices(&_renderer, &_graphic_shader)[0][0]
+		);
+		_camera_buffer.setValues(
+			&DefaultConf::camera->getPerspectiveCamera().getMVP()[0][0]
 		);
 
 		_renderer.render();

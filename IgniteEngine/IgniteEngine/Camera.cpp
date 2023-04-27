@@ -2,8 +2,8 @@
 
 Camera::Camera() :
 	Entity3D::Entity3D(),
-	_eye{ 0, 0, 1.0f },
-	_center{ 0, 0, 0 },
+	_eye{ 0, 0, 0.0 },
+	_center{ 0, 0, 1.0f },
 	_up{ 0, 1, 0 }
 {
 	_clip = glm::mat4(
@@ -18,19 +18,43 @@ void Camera::setEye(glm::vec3 eye) {
 	_eye = eye;
 }
 
+void Camera::setEye(float x, float y, float z) {
+	setEye(glm::vec3(x, y, z));
+}
+
 void Camera::setCenter(glm::vec3 center) {
 	_center = center;
+}
+
+void Camera::setCenter(float x, float y, float z) {
+	setCenter(glm::vec3(x, y, z));
 }
 
 void Camera::setUp(glm::vec3 up) {
 	_up = up;
 }
 
+void Camera::setUp(float x, float y, float z) {
+	setUp(glm::vec3(x, y, z));
+}
+
+glm::vec3 Camera::getEye(){
+	return _eye;
+}
+
+glm::vec3 Camera::getCenter() {
+	return _center;
+}
+
+glm::vec3 Camera::getUp() {
+	return _up;
+}
+
 glm::mat4 Camera::getView() {
 	glm::mat4 view = glm::lookAt(
 		_eye,
 		_center,
-		_up
+		-_up
 	);
 
 	return view;
@@ -46,6 +70,10 @@ glm::mat4 Camera::getClip() {
 }
 
 glm::mat4 Camera::getMVP() {
-	glm::mat4 mvp = getClip() * getProjection() * getView() * getTransform();
+	glm::mat4 tr = getTransform();
+	tr[3][0] = -tr[3][0];
+	tr[3][1] = -tr[3][1];
+
+	glm::mat4 mvp = getClip() * getProjection() * getView() * getTranslate() * getRotate() * getScale();
 	return mvp;
 }

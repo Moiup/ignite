@@ -14,6 +14,7 @@ void DepthBuffer::create() {
 	);
 	bind();
 	setImageViewInfo();
+	createImageView();
 }
 
 void DepthBuffer::destroy() {

@@ -516,7 +516,7 @@ void GraphicsPipeline::createPipeline() {
 	depth_stencil_state_info.front.reference = 0;
 	depth_stencil_state_info.front.depthFailOp = VK_STENCIL_OP_KEEP;
 	depth_stencil_state_info.front.writeMask = 0;
-	depth_stencil_state_info.back = depth_stencil_state_info.front;
+	depth_stencil_state_info.back.compareOp = VK_COMPARE_OP_ALWAYS;
 	depth_stencil_state_info.minDepthBounds = 0;
 	depth_stencil_state_info.maxDepthBounds = 0;
 

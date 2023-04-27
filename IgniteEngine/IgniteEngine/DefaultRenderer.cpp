@@ -278,6 +278,7 @@ void DefaultRenderer::createGraphicsPipeline() {
 		gp.setNbFrame(_nb_frame);
 		gp.setSwapchain(&_swapchain);
 		gp.setDepthBuffer(&_depth_buffer);
+		//gp.setCullMode(VK_CULL_MODE_BACK_BIT);
 		gp.setShader(shader);
 		gp.create();
 		_graphics_pipelines.push_back(gp);

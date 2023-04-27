@@ -45,7 +45,7 @@ void TestModule::start() {
     _obj2.setMesh(&_m);
     _obj2.setRenderer(DefaultConf::renderer);
     _obj2.addShader(DefaultConf::graphic_shader);
-    _obj2.setPositionAbsolute(0.0, 0.0, 0.0);
+    _obj2.setPositionAbsolute(1.0, 0.0, 1.0);
 
      //Configuring third object
     _obj3.setMesh(&_m);

@@ -147,12 +147,20 @@ void Image::setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32
 	_image_view_info.subresourceRange.layerCount = layer_count;
 }
 
+void Image::setImageViewInfo(VkImageViewCreateInfo info) {
+	_image_view_info = info;
+}
+
 VkFormat Image::getImageFormat() {
 	return _image_info.format;
 }
 
 const VkImage& Image::getImage() const {
 	return _image;
+}
+
+void Image::setImage(VkImage image) {
+	_image = image;
 }
 
 const VkImageView& Image::getImageView() const {

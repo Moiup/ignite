@@ -15,7 +15,7 @@ void TestModule::start() {
     Module::start();
 
     // -- Textures -- //
-    _tex.readFile("../textures/scarecrow.png");
+    _tex.readFile("../assets/textures/scarecrow.png");
     _tex.setLogicalDevice(DefaultConf::logical_device);
     _tex.setGPU(DefaultConf::gpu);
     _tex.setCommandPool(DefaultConf::command_pool);
@@ -23,7 +23,7 @@ void TestModule::start() {
 
     // -- Meshes -- //
     // Loading the mesh (file)
-    _cube_info.loadObj("../3d_objects/cube.obj");
+    _cube_info.loadObj("../assets/3d_objects/cube.obj");
     //_cube_info.loadObj("../3d_objects/output_rand_0_bone.obj");
 
     // Loading the mesh (by hand)

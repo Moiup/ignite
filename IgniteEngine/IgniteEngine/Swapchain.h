@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Image.h"
 #include "LogicalDevice.h"
 
 class Swapchain
@@ -12,8 +13,9 @@ private:
 	bool _created;
 
 	uint32_t _image_count;
-	std::vector<VkImage> _images;
-	std::vector<VkImageView> _image_views;
+	//std::vector<VkImage> _images;
+	//std::vector<VkImageView> _image_views;
+	std::vector<Image> _images;
 	VkImageViewCreateInfo _image_view_info;
 
 
@@ -44,8 +46,7 @@ public:
 	void setImageViewComponents(VkComponentSwizzle r, VkComponentSwizzle b, VkComponentSwizzle g, VkComponentSwizzle a);
 	void setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count);
 
-	std::vector<VkImageView>& getImageViews();
-	std::vector<VkImage>& getImages();
+	std::vector<Image>& getImages();
 
 	const VkSwapchainCreateInfoKHR& getSwapchainInfo() const;
 	const VkSwapchainKHR& getSwapchain() const;

@@ -44,9 +44,11 @@ public:
 	void setImageViewFormat(VkFormat format);
 	void setImageViewComponents(VkComponentSwizzle r, VkComponentSwizzle b, VkComponentSwizzle g, VkComponentSwizzle a);
 	void setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count);
+	void setImageViewInfo(VkImageViewCreateInfo info);
 
 	VkFormat getImageFormat();
 	const VkImage& getImage() const;
+	void setImage(VkImage image);
 	const VkImageView& getImageView() const;
 
 

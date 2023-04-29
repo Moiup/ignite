@@ -166,6 +166,7 @@ void DefaultRenderer::render() {
 		&_sem_render_ends[_current_frame],
 		&_fences[_current_frame]
 	);
+
 	_logical_device->getQueue("present_queue")->present(
 		1,
 		&_sem_render_ends[_current_frame],
@@ -317,7 +318,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier() {
 	image_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	image_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame.image = _swapchain.getImages()[_current_frame];
+	image_memory_barrier_frame.image = _swapchain.getImages()[_current_frame].getImage();
 	image_memory_barrier_frame.subresourceRange = subresource_range_frame;
 
 	VkImageMemoryBarrier depth_memory_barrier_frame{};
@@ -369,7 +370,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack() {
 	image_memory_barrier_frame_bk.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	image_memory_barrier_frame_bk.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame_bk.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.image = _swapchain.getImages()[_current_frame];
+	image_memory_barrier_frame_bk.image = _swapchain.getImages()[_current_frame].getImage();
 	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
 
 	_command_buffers[_current_frame].pipelineBarrier(
@@ -385,7 +386,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack() {
 void DefaultRenderer::beginRendering(GraphicsPipeline& graphics_pipeline) {
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	color_attachment.imageView = _swapchain.getImageViews()[_current_frame];
+	color_attachment.imageView = _swapchain.getImages()[_current_frame].getImageView();
 	color_attachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
 	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

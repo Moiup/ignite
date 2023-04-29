@@ -135,11 +135,7 @@ void Swapchain::setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, ui
 	_image_view_info.subresourceRange.layerCount = layer_count;
 }
 
-std::vector<VkImageView>& Swapchain::getImageViews() {
-	return _image_views;
-}
-
-std::vector<VkImage>& Swapchain::getImages() {
+std::vector<Image>& Swapchain::getImages() {
 	return _images;
 }
 
@@ -198,34 +194,31 @@ void Swapchain::gettingImages(){
 	}
 
 	_images.resize(_image_count);
+	std::vector<VkImage> imgs(_image_count);
 	vk_result = vkGetSwapchainImagesKHR(
 		*_logical_device,
 		_swapchain,
 		&_image_count,
-		_images.data()
+		imgs.data()
 	);
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed getting the images!");
 	}
+
+	for (uint32_t i = 0; i < _image_count; i++) {
+		_images[i].setLogicalDevice(_logical_device);
+		_images[i].setImage(imgs[i]);
+	}
 }
 
-void Swapchain::createImagesViews(){
-	_image_views.resize(_image_count);
-	
+void Swapchain::createImagesViews(){	
 	_image_view_info.format = _info.imageFormat;
 
 	for (uint32_t i = 0; i < _image_count; i++) {
-		_image_view_info.image = _images[i];
+		_image_view_info.image = _images[i].getImage();
 
-		VkResult vk_result = vkCreateImageView(
-			*_logical_device,
-			&_image_view_info,
-			nullptr,
-			&_image_views[i]
-		);
-		if (vk_result != VK_SUCCESS) {
-			throw std::runtime_error("Error: failed creating swapchain image views!");
-		}
+		_images[i].setImageViewInfo(_image_view_info);
+		_images[i].createImageView();
 	}
 }
 
@@ -235,10 +228,6 @@ void Swapchain::destroySwapchain() {
 
 void Swapchain::destroyImageViews() {
 	for (uint32_t i = 0; i < _image_count; i++) {
-		vkDestroyImageView(
-			*_logical_device,
-			_image_views[i],
-			nullptr
-		);
+		_images[i].destroyImageView();
 	}
 }

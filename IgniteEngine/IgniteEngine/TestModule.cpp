@@ -24,6 +24,7 @@ void TestModule::start() {
     // -- Meshes -- //
     // Loading the mesh (file)
     _cube_info.loadObj("../3d_objects/cube.obj");
+    //_cube_info.loadObj("../3d_objects/output_rand_0_bone.obj");
 
     // Loading the mesh (by hand)
     _m.setVertex(rectangle(), rectIndices(), rectUV());

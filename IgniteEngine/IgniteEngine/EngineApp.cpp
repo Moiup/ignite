@@ -200,9 +200,7 @@ void EngineApp::update() {
 		
 
 		std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-		
 		uint64_t delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
-
 		DefaultConf::delta_time = delta_time;
 	}
 

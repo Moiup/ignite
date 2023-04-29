@@ -77,7 +77,7 @@ void DefaultRenderer::render() {
 	_command_buffers[_current_frame].begin();
 	
 	dynamicRenderingPipelineBarrier();
-	beginRendering(_graphics_pipelines[0]);
+	beginRendering();
 
 	for (GraphicsPipeline& gp : _graphics_pipelines) {
 		_command_buffers[_current_frame].bindPipeline(
@@ -383,7 +383,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack() {
 	);
 }
 
-void DefaultRenderer::beginRendering(GraphicsPipeline& graphics_pipeline) {
+void DefaultRenderer::beginRendering() {
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
 	color_attachment.imageView = _swapchain.getImages()[_current_frame].getImageView();
@@ -409,7 +409,9 @@ void DefaultRenderer::beginRendering(GraphicsPipeline& graphics_pipeline) {
 	rendering_info_khr.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
 	rendering_info_khr.pNext = nullptr;
 	rendering_info_khr.flags = 0;
-	rendering_info_khr.renderArea = graphics_pipeline.getScissors()[0];
+	//rendering_info_khr.renderArea = graphics_pipeline.getScissors()[0];
+	rendering_info_khr.renderArea.offset = { 0, 0 };
+	rendering_info_khr.renderArea.extent = { _window->getWidth(), _window->getHeight()};
 	rendering_info_khr.layerCount = 1;
 	rendering_info_khr.viewMask = 0;
 	rendering_info_khr.colorAttachmentCount = 1;

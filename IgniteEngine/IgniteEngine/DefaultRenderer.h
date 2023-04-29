@@ -34,6 +34,6 @@ protected:
 
 	void dynamicRenderingPipelineBarrier();
 	void dynamicRenderingPipelineBarrierBack();
-	void beginRendering(GraphicsPipeline& graphics_pipeline);
+	void beginRendering();
 };
 

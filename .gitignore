@@ -15,3 +15,6 @@ IgniteEngine/IgniteEngine/sdl2
 IgniteEngine/IgniteEngine/sdl2*
 IgniteEngine/IgniteEngine/vulkan_sdk
 IgniteEngine/IgniteEngine/vulkan_sdk/*
+
+IgniteEngine/assets
+IgniteEngine/assets/*

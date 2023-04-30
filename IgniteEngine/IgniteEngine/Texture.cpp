@@ -23,10 +23,10 @@ Texture::Texture(std::string file_name) :
 	readFile(file_name);
 }
 
-Texture::Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) :
+Texture::Texture(std::vector<uint8_t>& pixels, uint64_t width, uint64_t height, uint8_t n) :
 	Texture::Texture()
 {
-	setPixels(pixels, width, height);
+	setPixels(pixels, width, height, n);
 }
 
 void Texture::setLogicalDevice(LogicalDevice* logical_device) {
@@ -41,18 +41,22 @@ void Texture::setCommandPool(CommandPool* command_pool) {
 	_command_pool = command_pool;
 }
 
-glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
-	return _pixels[row * _width + col];
+void Texture::setFormat(VkFormat format) {
+	_format = format;
 }
 
-const std::vector<glm::vec4>& Texture::pixels() const {
-	return _pixels;
-}
-
-const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
-	glm::vec4& p = pixel(row, col);
-	return p;
-}
+//glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
+//	return _pixels[row * _width + col];
+//}
+//
+//const std::vector<glm::vec4>& Texture::pixels() const {
+//	return _pixels;
+//}
+//
+//const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
+//	glm::vec4& p = pixel(row, col);
+//	return p;
+//}
 
 void Texture::create() {
 	// Creating the staging buffer
@@ -63,7 +67,7 @@ void Texture::create() {
 	staging_buffer.setPNext(nullptr);
 	staging_buffer.setQueueFamilyIndexCount(0);
 	staging_buffer.setPQueueFamilyIndices(nullptr);
-	staging_buffer.setSize(_width * _height * _n * sizeof(_pixels.data()));
+	staging_buffer.setSize(_width * _height * _n * sizeof(uint8_t));
 	staging_buffer.setUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 	staging_buffer.setSharingMode(VK_SHARING_MODE_EXCLUSIVE);
 	staging_buffer.create();
@@ -96,7 +100,7 @@ void Texture::create() {
 	_image.setLogicalDevice((VkDevice*)_logical_device->getDevice());
 	_image.setMemoryProperties(_gpu->getMemoryProperties());
 	_image.setImageImageType(VK_IMAGE_TYPE_2D);
-	_image.setImageFormat(VK_FORMAT_R8G8B8A8_UNORM);
+	_image.setImageFormat(_format);
 	_image.setImageMipLevels(1);
 	_image.setImageArrayLayers(1);
 	_image.setImageSamples(VK_SAMPLE_COUNT_1_BIT);
@@ -192,87 +196,96 @@ void Texture::create() {
 * Bilinear interpolation to get the corresponding color.
 * 
 */
-const glm::vec4& Texture::getPixel(float u, float v) const {
-	assert(u > 1.0 && v > 1.0, "Error: u and v must be inferior or equal to 1\n");
-	assert(u < 0 && v < 0, "Error: u and v must be superior or equal to 0.\n");
-	
-	float p_u = _height - u * _height;
-	float p_v = _width - v * _width;
-	
-	uint64_t p00u = static_cast<uint64_t>(p_u);
-	uint64_t p00v = static_cast<uint64_t>(p_v);
+//const glm::vec4& Texture::getPixel(float u, float v) const {
+//	assert(u > 1.0 && v > 1.0, "Error: u and v must be inferior or equal to 1\n");
+//	assert(u < 0 && v < 0, "Error: u and v must be superior or equal to 0.\n");
+//	
+//	float p_u = _height - u * _height;
+//	float p_v = _width - v * _width;
+//	
+//	uint64_t p00u = static_cast<uint64_t>(p_u);
+//	uint64_t p00v = static_cast<uint64_t>(p_v);
+//
+//	uint64_t p10u = static_cast<uint64_t>(p_u) + 1;
+//	uint64_t p10v = static_cast<uint64_t>(p_v);
+//
+//	uint64_t p01u = static_cast<uint64_t>(p_u);
+//	uint64_t p01v = static_cast<uint64_t>(p_v) + 1;
+//
+//	uint64_t p11u = static_cast<uint64_t>(p_u) + 1;
+//	uint64_t p11v = static_cast<uint64_t>(p_v) + 1;
+//	
+//	float diff{};
+//
+//	glm::vec4 t_pix{};
+//	glm::vec4 b_pix{};
+//	glm::vec4 pix{};
+//
+//	if (p00u == _height) {
+//		// we do not have the top neighbor
+//		p10u = p00u;
+//		p11u = p00u;
+//	}
+//	if(p00v == _width){
+//		// we do not have the right neighbor
+//		p11v = p00v;
+//		p01v = p00v;
+//	}
+//
+//	diff = p_v - p00v;
+//	t_pix = diff * getPixel(p11u, p11v) + (1 - diff) * getPixel(p10u, p10v);
+//	b_pix = diff * getPixel(p01u, p01v) + (1 - diff) * getPixel(p00u, p00v);
+//
+//	diff = p_u - p00u;
+//	pix = diff * t_pix + (1 - diff) * b_pix;
+//
+//	return pix;
+//}
 
-	uint64_t p10u = static_cast<uint64_t>(p_u) + 1;
-	uint64_t p10v = static_cast<uint64_t>(p_v);
+//const glm::vec4& Texture::getPixel(glm::vec2 uv) const {
+//	return getPixel(uv.r, uv.g);
+//}
+//
+//void Texture::setPixel(glm::vec4& pix, uint64_t row, uint64_t col){
+//	pixel(row, col) = pix;
+//}
 
-	uint64_t p01u = static_cast<uint64_t>(p_u);
-	uint64_t p01v = static_cast<uint64_t>(p_v) + 1;
-
-	uint64_t p11u = static_cast<uint64_t>(p_u) + 1;
-	uint64_t p11v = static_cast<uint64_t>(p_v) + 1;
-	
-	float diff{};
-
-	glm::vec4 t_pix{};
-	glm::vec4 b_pix{};
-	glm::vec4 pix{};
-
-	if (p00u == _height) {
-		// we do not have the top neighbor
-		p10u = p00u;
-		p11u = p00u;
-	}
-	if(p00v == _width){
-		// we do not have the right neighbor
-		p11v = p00v;
-		p01v = p00v;
-	}
-
-	diff = p_v - p00v;
-	t_pix = diff * getPixel(p11u, p11v) + (1 - diff) * getPixel(p10u, p10v);
-	b_pix = diff * getPixel(p01u, p01v) + (1 - diff) * getPixel(p00u, p00v);
-
-	diff = p_u - p00u;
-	pix = diff * t_pix + (1 - diff) * b_pix;
-
-	return pix;
-}
-
-const glm::vec4& Texture::getPixel(glm::vec2 uv) const {
-	return getPixel(uv.r, uv.g);
-}
-
-void Texture::setPixel(glm::vec4& pix, uint64_t row, uint64_t col){
-	pixel(row, col) = pix;
-}
-
-void Texture::setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t height) {
+void Texture::setPixels(std::vector<uint8_t> pixels, uint64_t width, uint64_t height, uint8_t n) {
 	_pixels = pixels;
 	_width = width;
 	_height = height;
 	_width_inv = 1.0f / width;
 	_height_inv = 1.0f / height;
+	_n = n;
+}
+
+void Texture::setPixels(void* pixels, uint64_t width, uint64_t height, uint8_t n) {
+	size_t nb_elem = width * height * n;
+	size_t data_size = nb_elem;
+	_pixels.resize(data_size);
+	std::memcpy(_pixels.data(), pixels, data_size);
+	_width = width;
+	_height = height;
+	_width_inv = 1.0f / width;
+	_height_inv = 1.0f / height;
+	_n = n;
 }
 
 bool Texture::readFile(std::string file_name) {
 	unsigned char* data;
-	std::vector<glm::vec4> pixels;
 	int width, height, n;
 
-	data = stbi_load(file_name.c_str(), &width, &height, &n, _n);
+	data = stbi_load(file_name.c_str(), &width, &height, &n, 4);
 	if (!data) {
 		std::cerr << "Error: failed opening the texture '" << file_name << "'" << std::endl;
 		return false;
 	}
-	size_t nb_elem = width * height * _n;
-	size_t data_size = nb_elem * sizeof(*data);
-	pixels.resize(data_size);
-	std::memcpy(pixels.data(), (float *)data, data_size);
+	setPixels(data, width, height, 4);
 
 	stbi_image_free(data);
 
-	setPixels(pixels, width, height);
-	
+	_format = VK_FORMAT_R8G8B8A8_UNORM;
+
 	return true;
 }
 
@@ -281,9 +294,9 @@ bool Texture::writeFile(std::string file_name) {
 		file_name.c_str(),
 		_width,
 		_height,
-		4,
-		(unsigned char*)_pixels.data(),
-		4 * _width
+		_n,
+		_pixels.data(),
+		_n * _width
 	);
 }
 
@@ -293,6 +306,10 @@ const uint64_t Texture::getWidth() const {
 
 const uint64_t Texture::getHeight() const {
 	return _height;
+}
+
+const uint8_t Texture::getNbComponents() const {
+	return _n;
 }
 
 const Image& Texture::getImage() const {

@@ -80,6 +80,27 @@ VkBuffer& Buffer::getBuffer() {
 	return _buffer;
 }
 
+void* Buffer::getValues() {
+	if (_buffer_info.size == 0) {
+		return nullptr;
+	}
+
+	void* copy;
+	void* values = new uint8_t[_buffer_info.size];
+	vkMapMemory(
+		*_logical_device,
+		_memory,
+		0,
+		_memory_req.size,
+		0,
+		(void**)&copy
+	);
+	memcpy(values, copy, _buffer_info.size);
+	vkUnmapMemory(*_logical_device, _memory);
+
+	return values;	
+}
+
 void Buffer::createBuffer() {
 	VkResult vk_result = vkCreateBuffer(
 		*_logical_device,

@@ -25,6 +25,7 @@ public:
 	void setPQueueFamilyIndices(const uint32_t* p_queue_family_indices);
 
 	VkBuffer& getBuffer();
+	void* getValues();
 
 
 protected:

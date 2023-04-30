@@ -41,7 +41,7 @@ void DepthBuffer::setImageInfo() {
 	setImageArrayLayers(1);
 	setImageSamples(VK_SAMPLE_COUNT_1_BIT);
 	setImageTiling(VK_IMAGE_TILING_OPTIMAL);
-	setImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+	setImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 	setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
 	setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
 }

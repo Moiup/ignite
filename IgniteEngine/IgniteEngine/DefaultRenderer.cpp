@@ -165,7 +165,7 @@ void DefaultRenderer::render() {
 		1,
 		&_sem_render_ends[_current_frame],
 		&_fences[_current_frame]
-	);
+	);	
 
 	_logical_device->getQueue("present_queue")->present(
 		1,
@@ -175,6 +175,128 @@ void DefaultRenderer::render() {
 		&available_img,
 		nullptr
 	);
+
+	// Copying depth image to a buffer
+	// Staging buffer
+	Buffer staging_buffer{};
+	staging_buffer.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	staging_buffer.setMemoryProperties(_gpu->getMemoryProperties());
+	staging_buffer.setFlags(0);
+	staging_buffer.setPNext(nullptr);
+	staging_buffer.setQueueFamilyIndexCount(0);
+	staging_buffer.setPQueueFamilyIndices(nullptr);
+	staging_buffer.setSize(_window->getHeight() * _window->getWidth() * 1 * sizeof(uint64_t));
+	staging_buffer.setUsage(VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+	staging_buffer.setSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+	staging_buffer.create();
+
+	staging_buffer.allocateMemory(
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+	staging_buffer.bind();
+
+	std::vector<VkBufferImageCopy> buffer_image_copy_arr{};
+
+	// To do for each mip level
+	// (To start, we consider only the original level -> 0)
+	VkBufferImageCopy buffer_image_copy{};
+	buffer_image_copy.bufferOffset = 0;
+	buffer_image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+	buffer_image_copy.imageSubresource.mipLevel = 0;
+	buffer_image_copy.imageSubresource.baseArrayLayer = 0;
+	buffer_image_copy.imageSubresource.layerCount = 1;
+	buffer_image_copy.imageExtent.width = _window->getWidth();
+	buffer_image_copy.imageExtent.height = _window->getHeight();
+	buffer_image_copy.imageExtent.depth = 1;
+	buffer_image_copy_arr.push_back(buffer_image_copy);
+
+	// Preparing the transfer with the image memory barrier
+	CommandBuffer copy_cmd{};
+	copy_cmd.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	copy_cmd.setCommandPool((VkCommandPool*)&_command_pool->getPool());
+	copy_cmd.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	copy_cmd.create();
+	copy_cmd.begin();
+
+	VkBufferMemoryBarrier buffer_memory_barrier{};
+	buffer_memory_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	buffer_memory_barrier.pNext = nullptr;
+	buffer_memory_barrier.srcAccessMask = 0;
+	buffer_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	buffer_memory_barrier.buffer = staging_buffer.getBuffer();
+	buffer_memory_barrier.offset = 0;
+	buffer_memory_barrier.size = _window->getHeight() * _window->getWidth() * 1 * sizeof(char);
+
+	VkImageSubresourceRange depth_subresource_range_frame{};
+	depth_subresource_range_frame.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+	depth_subresource_range_frame.baseMipLevel = 0;
+	depth_subresource_range_frame.levelCount = 1;
+	depth_subresource_range_frame.baseArrayLayer = 0;
+	depth_subresource_range_frame.layerCount = 1;
+
+	VkImageMemoryBarrier depth_memory_barrier_frame{};
+	depth_memory_barrier_frame.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	depth_memory_barrier_frame.pNext = nullptr;
+	depth_memory_barrier_frame.srcAccessMask = 0;
+	depth_memory_barrier_frame.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	depth_memory_barrier_frame.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	depth_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	depth_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	depth_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	depth_memory_barrier_frame.image = _depth_buffer.getImage();
+	depth_memory_barrier_frame.subresourceRange = depth_subresource_range_frame;
+
+	copy_cmd.pipelineBarrier(
+		VK_PIPELINE_STAGE_HOST_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		0,
+		0, nullptr,
+		1, &buffer_memory_barrier,
+		1, &depth_memory_barrier_frame
+	);
+
+	depth_memory_barrier_frame.srcAccessMask = 0;
+	depth_memory_barrier_frame.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	depth_memory_barrier_frame.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	depth_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	vkCmdCopyImageToBuffer(
+		*copy_cmd.getCommandBuffer(),
+		_depth_buffer.getImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		staging_buffer.getBuffer(),
+		buffer_image_copy_arr.size(),
+		buffer_image_copy_arr.data()
+	);
+
+	copy_cmd.pipelineBarrier(
+		VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+		VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &depth_memory_barrier_frame
+	);
+
+	copy_cmd.end();
+	copy_cmd.flush(_logical_device->getDefaultQueue());
+	copy_cmd.free();
+
+	//float* val = (float*)staging_buffer.getValues();
+
+	//std::vector<uint8_t> depth;
+	//depth.resize(_window->getWidth() * _window->getHeight());
+
+	//for (uint32_t i = 0; i < _window->getWidth() * _window->getHeight(); i++) {
+	//	float f = val[i] * 255;
+	//	depth[i] = f;
+	//}
+
+	//Texture tex;
+	//tex.setPixels(depth.data(), _window->getWidth(), _window->getHeight(), 1);
+	//tex.writeFile("../assets/test_test.png");
+
+	//delete val;
 
 	_current_frame = (_current_frame + 1) % _nb_frame;
 }

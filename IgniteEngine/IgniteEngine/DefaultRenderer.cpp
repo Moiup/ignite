@@ -282,21 +282,26 @@ void DefaultRenderer::render() {
 	copy_cmd.flush(_logical_device->getDefaultQueue());
 	copy_cmd.free();
 
-	//float* val = (float*)staging_buffer.getValues();
+	float* val = (float*)staging_buffer.getValues();
 
-	//std::vector<uint8_t> depth;
-	//depth.resize(_window->getWidth() * _window->getHeight());
+	std::vector<glm::vec4> depth;
+	depth.resize(_window->getWidth() * _window->getHeight());
 
-	//for (uint32_t i = 0; i < _window->getWidth() * _window->getHeight(); i++) {
-	//	float f = val[i] * 255;
-	//	depth[i] = f;
-	//}
+	for (uint32_t i = 0; i < _window->getWidth() * _window->getHeight(); i++) {
+		float f = val[i] * 255;
+		depth[i].r = f;
+		depth[i].g = f;
+		depth[i].b = f;
+		depth[i].a = 255;
+	}
 
-	//Texture tex;
-	//tex.setPixels(depth.data(), _window->getWidth(), _window->getHeight(), 1);
-	//tex.writeFile("../assets/test_test.png");
+	Texture tex;
+	tex.setPixels(depth, _window->getWidth(), _window->getHeight());
+	tex.writeFile("../assets/test_test.bmp");
 
-	//delete val;
+	delete val;
+
+	staging_buffer.destroy();
 
 	_current_frame = (_current_frame + 1) % _nb_frame;
 }

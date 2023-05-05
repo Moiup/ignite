@@ -112,7 +112,7 @@ void Texture::create() {
 	_image.createImage();
 	_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	_image.bind();
-
+	
 	// Preparing the transfer with the image memory barrier
 	VkImageSubresourceRange subresource_range{};
 	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -189,6 +189,12 @@ void Texture::create() {
 		1  // layer count
 	);
 	_image.createImageView();
+}
+
+void Texture::destroy() {
+	_image.freeMemory();
+	_image.destroyImage();
+	_image.destroyImageView();
 }
 
 /**

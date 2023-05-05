@@ -185,7 +185,7 @@ void EngineApp::update() {
 		}
 		DefaultConf::event = &event;
 
-		updateEngineEntities();
+		EngineEntity::updateAll();
 
 		_obj_tr_buffer.setValues(
 			&Object3D::updateTransformMatrices(&_renderer, &_graphic_shader)[0][0]
@@ -216,11 +216,15 @@ void EngineApp::close() {
 	_camera_buffer.destroy();
 	_obj_tr_buffer.destroy();
 	_renderer.destroy();
+
+	//CameraScene::closeAll();
+	Module::closeAll();
+	Window::closeAll();
+	
 	_graphic_shader.destroy();
 	_command_pool.destroy();
 	_logical_device.destroy();
 
-	closeEngineEntities();
 
 	_instance.destroy();
 }

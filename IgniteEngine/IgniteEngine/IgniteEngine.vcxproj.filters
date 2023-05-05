@@ -219,6 +219,9 @@
     <ClCompile Include="LoadedObjectInfo.cpp">
       <Filter>Ignite\src</Filter>
     </ClCompile>
+    <ClCompile Include="CameraScene.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -399,6 +402,9 @@
       <Filter>Ignite\fast_obj</Filter>
     </ClInclude>
     <ClInclude Include="LoadedObjectInfo.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraScene.h">
       <Filter>Ignite\inc</Filter>
     </ClInclude>
   </ItemGroup>

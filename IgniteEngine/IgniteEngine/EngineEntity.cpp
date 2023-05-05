@@ -25,3 +25,27 @@ void EngineEntity::close() {
 	}
 }
 
+void EngineEntity::initAll() {
+	for (EngineEntity* ee : EngineEntity::engine_entities) {
+		ee->init();
+	}
+}
+
+void EngineEntity::startAll() {
+	for (EngineEntity* ee : EngineEntity::engine_entities) {
+		ee->start();
+	}
+}
+
+void EngineEntity::updateAll() {
+	for (EngineEntity* ee : EngineEntity::engine_entities) {
+		ee->update();
+	}
+}
+
+void EngineEntity::closeAll() {
+	for (EngineEntity* ee : EngineEntity::engine_entities) {
+		ee->close();
+	}
+}
+

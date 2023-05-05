@@ -218,14 +218,16 @@ void TestModule::update() {
 void TestModule::close() {
     Module::close();
 
-    //_object_id_buffer.destroy();
-    //_coord_buffer.destroy();
-    //_uv_buffer.destroy();
-    //_index_buffer.destroy();
-    //_camera_buffer.destroy();
-    //_obj_tr_buffer.destroy();
-    //_texture_i_buffer.destroy();
-    //_sampler.destroy();
+    _object_id_buffer.destroy();
+    _coord_buffer.destroy();
+    _uv_buffer.destroy();
+    _index_buffer.destroy();
+    _camera_buffer.destroy();
+    _obj_tr_buffer.destroy();
+    _texture_i_buffer.destroy();
+    _tex.destroy();
+    _sampler.destroy();
+    _red_shader.destroy();
 }
 
 std::vector<glm::vec3> TestModule::rectangle() {

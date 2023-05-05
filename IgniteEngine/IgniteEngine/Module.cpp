@@ -36,3 +36,27 @@ void Module::close() {
 		i++;
 	}
 }
+
+void Module::initAll() {
+	for (Module* m : Module::modules) {
+		m->init();
+	}
+}
+
+void Module::startAll() {
+	for (Module* m : Module::modules) {
+		m->start();
+	}
+}
+
+void Module::updateAll() {
+	for (Module* m : Module::modules) {
+		m->update();
+	}
+}
+
+void Module::closeAll() {
+	for (Module* m : Module::modules) {
+		m->close();
+	}
+}

@@ -14,5 +14,10 @@ public:
 	virtual void start();
 	virtual void update();
 	virtual void close();
+
+	static void initAll();
+	static void startAll();
+	static void updateAll();
+	static void closeAll();
 };
 

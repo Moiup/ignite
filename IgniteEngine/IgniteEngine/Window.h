@@ -13,6 +13,9 @@
 
 class Window: public EngineEntity
 {
+public:
+	static std::vector<Window*> windows;
+
 private:
 	static uint32_t _last_w_id;
 	uint32_t _w_id;
@@ -52,6 +55,10 @@ public:
 	const uint32_t getHeightInPixel() const;
 	uint32_t getId() const;
 
+	static void initAll();
+	static void startAll();
+	static void updateAll();
+	static void closeAll();
 
 protected:
 	void create();

@@ -19,5 +19,10 @@ public:
 	void start();
 	void update();
 	void close();
+
+	static void initAll();
+	static void startAll();
+	static void updateAll();
+	static void closeAll();
 };
 

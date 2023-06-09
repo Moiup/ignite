@@ -21,11 +21,16 @@ void TestModule::start() {
     _tex.setCommandPool(DefaultConf::command_pool);
     _tex.create();
 
+    _hand_tex.readFile("../assets/textures/output_rand_0_diffuse.png");
+    _hand_tex.setLogicalDevice(DefaultConf::logical_device);
+    _hand_tex.setGPU(DefaultConf::gpu);
+    _hand_tex.setCommandPool(DefaultConf::command_pool);
+    _hand_tex.create();
+
     // -- Meshes -- //
     // Loading the mesh (file)
     _cube_info.loadObj("../assets/3d_objects/cube.obj");
-    //_cube_info.loadObj("../3d_objects/output_rand_0_bone.obj");
-
+    
     // Loading the mesh (by hand)
     _m.setVertex(rectangle(), rectIndices(), rectUV());
 
@@ -45,7 +50,8 @@ void TestModule::start() {
     // Configuring second object
     _obj2.setMesh(&_m);
     _obj2.setRenderer(DefaultConf::renderer);
-    _obj2.addShader(DefaultConf::graphic_shader);
+    _obj2.addShader(&_red_shader);
+    _obj2.setTexture(&_hand_tex);
     _obj2.setPositionAbsolute(1.0, 0.0, 1.0);
 
      //Configuring third object
@@ -60,6 +66,7 @@ void TestModule::start() {
     _cube_obj.addShader(DefaultConf::graphic_shader);
     _cube_obj.setScaleAbsolute(0.5, 0.5, 0.5);
     _cube_obj.setPositionAbsolute(-2.3f, 0, 0);
+
     
     {
         // Red shader
@@ -115,7 +122,6 @@ void TestModule::start() {
             VK_SHADER_STAGE_VERTEX_BIT
         );
 
-
         // -- Fragment shader -- //
         _red_shader.addSamplerInfo(
             "samp",
@@ -126,7 +132,8 @@ void TestModule::start() {
         _red_shader.addTextureInfo(
             "textures",
             4,
-            VK_SHADER_STAGE_FRAGMENT_BIT
+            VK_SHADER_STAGE_FRAGMENT_BIT,
+            2 // Descriptor count = nb textures in an array (true here)
         );
 
         // Creating the buffers
@@ -226,6 +233,7 @@ void TestModule::close() {
     _obj_tr_buffer.destroy();
     _texture_i_buffer.destroy();
     _tex.destroy();
+    _hand_tex.destroy();
     _sampler.destroy();
     _red_shader.destroy();
 }

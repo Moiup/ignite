@@ -55,7 +55,10 @@ public:
 	void destroy();
 
 private:
-	void setDescriptorSetLayoutBinding(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_binding_arr, std::unordered_map<std::string, ArrayBufferInfo>& buffer_arr);
+	void setDescriptorSetLayoutBinding(
+		std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_binding_arr,
+		std::unordered_map<std::string, ArrayBufferInfo>& buffer_arr
+	);
 	std::vector<VkDescriptorSetLayoutBinding> setDescriptorSetLayoutBindingArray();
 	void createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
 	void createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);

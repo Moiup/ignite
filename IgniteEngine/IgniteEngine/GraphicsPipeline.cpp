@@ -97,7 +97,7 @@ void GraphicsPipeline::setDescriptorSetLayoutBinding(std::vector<VkDescriptorSet
 		VkDescriptorSetLayoutBinding descriptor_set_binding{};
 		descriptor_set_binding.binding = buff_info.getBinding();
 		descriptor_set_binding.descriptorType = buff_info.getDescriptorType();
-		descriptor_set_binding.descriptorCount = buffer_arr.count(name_buff.first);
+		descriptor_set_binding.descriptorCount = buff_info.getDescriptorCount();
 		descriptor_set_binding.stageFlags = buff_info.getStageFlags();
 		descriptor_set_binding.pImmutableSamplers = nullptr;
 		descriptor_set_binding_arr.push_back(descriptor_set_binding);
@@ -280,6 +280,7 @@ void GraphicsPipeline::setWriteDescriptorSet(
 			image_info[i].sampler = nullptr;
 			image_info[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			image_info[i].imageView = (VkImageView)textures[i]->getImage().getImageView();
+			i++;
 		}
 
 		VkWriteDescriptorSet writes{};

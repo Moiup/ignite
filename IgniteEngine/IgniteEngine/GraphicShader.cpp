@@ -155,7 +155,7 @@ std::unordered_map<std::string, std::vector<Sampler*>>& GraphicShader::getSample
 }
 
 
-void GraphicShader::addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
+void GraphicShader::addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count) {
 	if (_texture_info.count(name)) {
 		std::string error = "Error: there already is a texture info named " + name + "!";
 		throw std::runtime_error(error);
@@ -165,8 +165,13 @@ void GraphicShader::addTextureInfo(std::string name, uint32_t binding, VkShaderS
 	info.setBinding(binding);
 	info.setDescriptorType(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
 	info.setStageFlags(stage_flags);
+	info.setDescriptorCount(descriptor_count);
 
 	_texture_info[name] = info;
+}
+
+void GraphicShader::addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
+	addTextureInfo(name, binding, stage_flags, 1);
 }
 
 void GraphicShader::addTexture(std::string name, Texture* texture) {

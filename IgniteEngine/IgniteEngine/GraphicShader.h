@@ -78,6 +78,7 @@ public:
 	std::unordered_map<std::string, SamplerInfo>& getSamplerInfo();
 	std::unordered_map<std::string, std::vector<Sampler*>>& getSampler();
 
+	void addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count);
 	void addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
 	void addTexture(std::string name, Texture* texture);
 	void addTexture(std::string name, std::vector<Texture*>& textures);

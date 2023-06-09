@@ -446,14 +446,17 @@ void Object3D::buildTransformMatrices(Renderer* renderer, GraphicShader* shader)
 }
 
 void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
-	uint32_t tex_i = 0;
 	// if not empty
 	if (Object3D::texture_indices[renderer][shader].size()) {
 		return;
 	}
 
+	uint32_t tex_i = 0;
 	// For each texture looking for all the objects
 	for (auto& t_o : Object3D::textures_obj[renderer][shader]) {
+		if (!t_o.first) {
+			continue;
+		}
 		std::vector<Object3D*> objs = t_o.second;
 
 		// For each object add the index corresponding to the texture

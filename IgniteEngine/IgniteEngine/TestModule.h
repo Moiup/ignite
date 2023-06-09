@@ -18,6 +18,8 @@ private:
     uint32_t _frame;
 
     Texture _tex;
+    Texture _hand_tex;
+
     GraphicShader _red_shader;
 
     VertexBuffer _object_id_buffer;

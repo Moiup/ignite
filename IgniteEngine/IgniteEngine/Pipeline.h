@@ -66,8 +66,6 @@ private:
 
 protected:
 	virtual void createPipeline() = 0;
-
-	virtual void destroyPipelineLayout() = 0;
 	virtual void destroyPipeline() = 0;
 };
 

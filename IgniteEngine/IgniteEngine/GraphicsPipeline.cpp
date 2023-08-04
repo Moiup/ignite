@@ -248,18 +248,18 @@ void GraphicsPipeline::createPipeline() {
 	}
 }
 
-void GraphicsPipeline::destroyPipelineLayout() {
-	vkDestroyPipelineLayout(
-		*_logical_device,
-		_pipeline_layout,
-		nullptr
-	);
-}
-
 void GraphicsPipeline::destroyPipeline() {
 	vkDestroyPipeline(
 		*_logical_device,
 		_pipeline,
+		nullptr
+	);
+}
+
+void GraphicsPipeline::destroyPipelineLayout() {
+	vkDestroyPipelineLayout(
+		*_logical_device,
+		_pipeline_layout,
 		nullptr
 	);
 }

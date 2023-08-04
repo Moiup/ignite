@@ -75,6 +75,7 @@ const void Queue::present(
 		&present_info
 	);
 	if (vk_result != VK_SUCCESS) {
+		//std::cout << vk_result << std::endl;
 		throw std::runtime_error("Error: failed presenting!");
 	}
 }

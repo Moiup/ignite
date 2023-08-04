@@ -14,8 +14,6 @@ private:
 	std::unordered_map<std::string, std::vector<VertexBuffer*>> _vertex_buffers;
 	std::unordered_map<std::string, std::vector<IndexBuffer*>> _index_buffers;
 
-	PhysicalDevice* _gpu;
-	VkDevice* _logical_device;
 	uint32_t _nb_frame;
 
 public:
@@ -36,6 +34,5 @@ public:
 	std::unordered_map<std::string, std::vector<IndexBuffer*>>& getIndexBuffers();
 
 	void read(std::string vertex_shader, std::string fragment_shader);
-
 };
 

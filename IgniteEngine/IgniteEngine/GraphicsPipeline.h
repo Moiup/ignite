@@ -35,10 +35,11 @@ public:
 	const std::vector<VkViewport>& getViewport() const;
 	const std::vector<VkRect2D>& getScissors() const;
 
-
 protected:
 	void createPipeline();
-	void destroyPipelineLayout();
 	void destroyPipeline();
+
+private:
+	void destroyPipelineLayout();
 };
 

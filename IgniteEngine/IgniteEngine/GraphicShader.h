@@ -8,8 +8,6 @@
 class GraphicShader : public Shader
 {
 private:
-	std::vector<VkPipelineShaderStageCreateInfo> _shader_stages;
-
 	std::unordered_map<std::string, VertexBufferInfo> _vertex_buffers_info;
 	std::unordered_map<std::string, IndexBufferInfo> _index_buffer_info;
 

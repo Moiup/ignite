@@ -2,9 +2,11 @@
 
 GraphicShader::GraphicShader() :
 	Shader::Shader(),
-	_nb_frame{2},
+	_nb_frame{ 2 },
 	_vertex_buffers_info{},
-	_index_buffer_info{}
+	_index_buffer_info{},
+	_vertex_buffers{},
+	_index_buffers{}
 { ; }
 
 GraphicShader::GraphicShader(

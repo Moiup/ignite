@@ -21,11 +21,11 @@ void TestModule::start() {
     _tex.setCommandPool(DefaultConf::command_pool);
     _tex.create();
 
-    _hand_tex.readFile("../assets/textures/output_rand_0_diffuse.png");
-    _hand_tex.setLogicalDevice(DefaultConf::logical_device);
-    _hand_tex.setGPU(DefaultConf::gpu);
-    _hand_tex.setCommandPool(DefaultConf::command_pool);
-    _hand_tex.create();
+    _mercedes_tex.readFile("../assets/textures/mercedes.png");
+    _mercedes_tex.setLogicalDevice(DefaultConf::logical_device);
+    _mercedes_tex.setGPU(DefaultConf::gpu);
+    _mercedes_tex.setCommandPool(DefaultConf::command_pool);
+    _mercedes_tex.create();
 
     // -- Meshes -- //
     // Loading the mesh (file)
@@ -51,7 +51,7 @@ void TestModule::start() {
     _obj2.setMesh(&_m);
     _obj2.setRenderer(DefaultConf::renderer);
     _obj2.addShader(&_red_shader);
-    _obj2.setTexture(&_hand_tex);
+    _obj2.setTexture(&_mercedes_tex);
     _obj2.setPositionAbsolute(1.0, 0.0, 1.0);
 
      //Configuring third object
@@ -73,7 +73,7 @@ void TestModule::start() {
         _red_shader.setNbFrame(2);
         _red_shader.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _red_shader.setPhysicalDevice(DefaultConf::gpu);
-        _red_shader.readShaderFiles(
+        _red_shader.read(
             "../shaders/vert_red.spv",
             "../shaders/frag_red.spv"
         );
@@ -233,7 +233,7 @@ void TestModule::close() {
     _obj_tr_buffer.destroy();
     _texture_i_buffer.destroy();
     _tex.destroy();
-    _hand_tex.destroy();
+    _mercedes_tex.destroy();
     _sampler.destroy();
     _red_shader.destroy();
 }

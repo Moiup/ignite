@@ -81,7 +81,7 @@ void EngineApp::start() {
 		(VkDevice*)_logical_device.getDevice()
 	);
 	_graphic_shader.setPhysicalDevice(&_gpu);
-	_graphic_shader.readShaderFiles(
+	_graphic_shader.read(
 		"../shaders/vert.spv",
 		"../shaders/frag.spv"
 	);

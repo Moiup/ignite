@@ -222,6 +222,12 @@
     <ClCompile Include="CameraScene.cpp">
       <Filter>Ignite\src</Filter>
     </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Pipeline.cpp">
+      <Filter>Ignite\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -405,6 +411,12 @@
       <Filter>Ignite\inc</Filter>
     </ClInclude>
     <ClInclude Include="CameraScene.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Ignite\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Pipeline.h">
       <Filter>Ignite\inc</Filter>
     </ClInclude>
   </ItemGroup>

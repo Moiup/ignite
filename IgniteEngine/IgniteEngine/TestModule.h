@@ -18,7 +18,7 @@ private:
     uint32_t _frame;
 
     Texture _tex;
-    Texture _hand_tex;
+    Texture _mercedes_tex;
 
     GraphicShader _red_shader;
 

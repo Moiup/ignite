@@ -403,16 +403,7 @@ void Object3D::buildTransformIndices(Renderer* renderer, GraphicShader* shader) 
 		return;
 	}
 
-	uint64_t max = 0;
-	std::vector<uint32_t>& indices = Object3D::getIndices(renderer, shader);
-	for (uint32_t ind : indices) {
-		if (ind > max) {
-			max = ind;
-		}
-	}
-
 	uint32_t tr_i = 0;
-	max = 0;
 	// For each mesh of the renderer
 	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
 		if (m_o.first == nullptr) {

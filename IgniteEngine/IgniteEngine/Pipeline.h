@@ -29,8 +29,8 @@ public:
 	const std::vector<VkDescriptorSet>& getDescriptorSets() const;
 	Shader* getShader();
 
-	virtual void create();
-	void destroy();
+	virtual void create() = 0;
+	virtual void destroy() = 0;
 
 private:
 	void setDescriptorSetLayoutBinding(
@@ -57,14 +57,12 @@ private:
 	);
 	void updateDescriptorSets();
 
-	void createDescriptorSet();
-
-	void destroyDescriptorSet();
 	void destroyDescriptorSetLayout();
 
-	void createPipelineLayout();
-
 protected:
+	void createDescriptorSet();
+	void destroyDescriptorSet();
+
 	virtual void createPipeline() = 0;
 	virtual void destroyPipeline() = 0;
 };

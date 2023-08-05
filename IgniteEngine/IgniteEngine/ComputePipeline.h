@@ -11,9 +11,11 @@ public:
 
 	ComputeShader* getShader();
 
+	void create();
+	void destroy();
+
 protected:
 	void CreatePipeline();
-
 	void destroyPipeline();
 };
 

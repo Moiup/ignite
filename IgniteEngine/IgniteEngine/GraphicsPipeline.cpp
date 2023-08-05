@@ -50,6 +50,18 @@ const std::vector<VkRect2D>& GraphicsPipeline::getScissors() const {
 	return _scissor_arr;
 }
 
+void GraphicsPipeline::create() {
+	createDescriptorSet();
+	createPipelineLayout();
+	createPipeline();
+}
+
+void GraphicsPipeline::destroy() {
+	destroyPipeline();
+	destroyDescriptorSet();
+	destroyPipelineLayout();
+}
+
 void GraphicsPipeline::createPipeline() {
 	//---- Vertex Input State (22.2)----//
 	std::vector<VkVertexInputBindingDescription> vertex_input_binding_desc_arr = {};
@@ -254,6 +266,27 @@ void GraphicsPipeline::destroyPipeline() {
 		_pipeline,
 		nullptr
 	);
+}
+
+void GraphicsPipeline::createPipelineLayout() {
+	VkPipelineLayoutCreateInfo pipeline_layout_info{};
+	pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipeline_layout_info.pNext = nullptr;
+	pipeline_layout_info.flags = 0;
+	pipeline_layout_info.setLayoutCount = _descriptor_set_layout.size();
+	pipeline_layout_info.pSetLayouts = _descriptor_set_layout.data();
+	pipeline_layout_info.pushConstantRangeCount = 0;
+	pipeline_layout_info.pPushConstantRanges = nullptr;
+
+	VkResult vk_result = vkCreatePipelineLayout(
+		*_logical_device,
+		&pipeline_layout_info,
+		nullptr,
+		&_pipeline_layout
+	);
+	if (vk_result != VK_SUCCESS) {
+		throw std::runtime_error("Error: failed creating the pipeline layout!");
+	}
 }
 
 void GraphicsPipeline::destroyPipelineLayout() {

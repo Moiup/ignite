@@ -280,7 +280,7 @@ std::vector<uint32_t>& Object3D::getTextureIndices(Renderer* renderer, GraphicSh
 }
 
 uint32_t Object3D::getTextureIndicesStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(getTextureIndices(renderer, shader).data());
+	return sizeof(*getTextureIndices(renderer, shader).data());
 }
 
 uint32_t Object3D::getTextureIndicesSize(Renderer* renderer, GraphicShader* shader){

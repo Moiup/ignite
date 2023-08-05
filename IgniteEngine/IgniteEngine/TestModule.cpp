@@ -45,21 +45,21 @@ void TestModule::start() {
     _obj.addShader(&_red_shader);
     _obj.setTexture(&_tex);
     _obj.setScaleAbsolute(0.5, 0.5, 0.5);
-    _obj.setPositionAbsolute(-2.3f, 0, 0);
+    _obj.setPositionAbsolute(-2.3f, 1.0f, 0);
 
     // Configuring second object
     _obj2.setMesh(&_m);
     _obj2.setRenderer(DefaultConf::renderer);
     _obj2.addShader(&_red_shader);
     _obj2.setTexture(&_mercedes_tex);
-    _obj2.setPositionAbsolute(1.0, 0.0, 1.0);
+    _obj2.setPositionAbsolute(0, 0.0, 1.0);
 
      //Configuring third object
     _obj3.setMesh(&_m);
     _obj3.setRenderer(DefaultConf::renderer);
     _obj3.addShader(&_red_shader);
     _obj3.setTexture(&_tex);
-    _obj3.setPositionAbsolute(2.3f, 0.0, 0.0);
+    _obj3.setPositionAbsolute(2.3f, -1.0f, 0.0);
 
     _cube_obj.createFromObjectInfo(_cube_info);
     _cube_obj.setRenderer(DefaultConf::renderer);
@@ -187,10 +187,14 @@ void TestModule::start() {
 
         _texture_i_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _texture_i_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
-        _texture_i_buffer.setSize(Object3D::getTextureIndicesSize(DefaultConf::renderer, &_red_shader));
+        _texture_i_buffer.setSize(Object3D::getTextureIndicesSize(DefaultConf::renderer, &_red_shader));     
         _texture_i_buffer.create();
         _texture_i_buffer.setValues(Object3D::getTextureIndices(DefaultConf::renderer, &_red_shader).data());
         _red_shader.addStorageBuffer("texture_i", &_texture_i_buffer);
+
+        for (uint32_t ind : Object3D::getTextureIndices(DefaultConf::renderer, &_red_shader)) {
+            std::cout << ind << std::endl;
+        }
 
         // Sampler
         _sampler.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());

@@ -10,6 +10,16 @@ ComputeShader* ComputePipeline::getShader() {
 	return (ComputeShader*)_shader;
 }
 
+void ComputePipeline::create() {
+	createDescriptorSet();
+	createPipeline();
+}
+
+void ComputePipeline::destroy() {
+	destroyPipeline();
+	destroyDescriptorSet();
+}
+
 void ComputePipeline::CreatePipeline() {
 	VkComputePipelineCreateInfo info{};
 	

@@ -404,7 +404,7 @@ void Object3D::buildTransformIndices(Renderer* renderer, GraphicShader* shader) 
 	}
 
 	uint32_t tr_i = 0;
-	// For each mesh of the renderer
+	// For each mesh of the pair renderer - shader
 	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
 		if (m_o.first == nullptr) {
 			continue;
@@ -443,18 +443,27 @@ void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
 	}
 
 	uint32_t tex_i = 0;
-	// For each texture looking for all the objects
-	for (auto& t_o : Object3D::textures_obj[renderer][shader]) {
-		if (!t_o.first) {
+	std::unordered_map<const Texture*, uint32_t> tex_i_arr{};
+	// For each mesh, finding the associated objects
+	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+		if (!m_o.first) {
 			continue;
 		}
-		std::vector<Object3D*> objs = t_o.second;
+		std::vector<Object3D*> objs = m_o.second;
 
-		// For each object add the index corresponding to the texture
-		for (const auto& obj : objs) {
-			Object3D::texture_indices[renderer][shader].push_back(tex_i);	
+		// For each object add find the texture index
+		for (Object3D* obj : objs) {
+			const Texture* tex = obj->getTexture();
+			if (!tex_i_arr.count(tex)) {
+				tex_i = tex_i_arr.size();
+				tex_i_arr[tex] = tex_i;
+			}
+			else {
+				tex_i = tex_i_arr[tex];
+			}
+
+			texture_indices[renderer][shader].push_back(tex_i); 
 		}
-		tex_i++;
 	}
 }
 

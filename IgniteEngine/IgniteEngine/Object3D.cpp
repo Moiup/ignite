@@ -12,8 +12,6 @@ std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uin
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> Object3D::uv{};
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Texture*, std::vector<Object3D*>>>> Object3D::textures_obj;
-
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<Texture*>>> Object3D::_textures;
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::transform_indices;
@@ -93,19 +91,6 @@ void Object3D::setRenderer(Renderer* renderer) {
 }
 
 void Object3D::setTexture(Texture* texture) {
-	uint32_t i = 0;
-	for (GraphicShader* shader : _shaders) {
-		for (Object3D* obj : Object3D::textures_obj[_renderer][shader][_texture]) {
-			if (obj != this) {
-				i++;
-				continue;
-			}
-			Object3D::textures_obj[_renderer][shader][_texture].erase(
-				Object3D::textures_obj[_renderer][shader][_texture].begin() + i
-			);
-		}
-		Object3D::textures_obj[_renderer][shader][texture].push_back(this);
-	}
 	_texture = texture;
 }
 
@@ -270,9 +255,9 @@ uint32_t Object3D::getTransformMatricesSize(Renderer* renderer, GraphicShader* s
 	return getTransformMatrices(renderer, shader).size() * sizeof(*getTransformMatrices(renderer, shader).data());
 }
 
-std::unordered_map<Texture*, std::vector<Object3D*>>& Object3D::getTextureObjects(Renderer* renderer, GraphicShader* shader) {
-	return Object3D::textures_obj[renderer][shader];
-}
+//std::unordered_map<Texture*, std::vector<Object3D*>>& Object3D::getTextureObjects(Renderer* renderer, GraphicShader* shader) {
+//	return Object3D::textures_obj[renderer][shader];
+//}
 
 std::vector<uint32_t>& Object3D::getTextureIndices(Renderer* renderer, GraphicShader* shader) {
 	buildTextureIndices(renderer, shader);
@@ -385,15 +370,22 @@ void Object3D::buildTextures(Renderer* renderer, GraphicShader* shader) {
 		return;
 	}
 
+	std::unordered_map<const Texture*, uint32_t> texes;
 	// Finding the textures
-	for (auto& t_o : textures_obj[renderer][shader]) {
-		Texture* tex = t_o.first;
-		if (!tex) {
-			continue;
+	for (auto& m_o : mesh_objects[renderer][shader]) {
+		std::vector<Object3D*> objs = m_o.second;
+
+		for (Object3D* obj : objs) {
+			if (texes.count(obj->getTexture())) {
+				continue;
+			}
+			if (!obj->getTexture()) {
+				continue;
+			}
+			_textures[renderer][shader].push_back((Texture*)obj->getTexture());
+			texes[obj->getTexture()] = 1;
 		}
 		//std::vector<Object3D*>& objs = t_o.second;
-
-		_textures[renderer][shader].push_back(tex);
 	}
 }
 

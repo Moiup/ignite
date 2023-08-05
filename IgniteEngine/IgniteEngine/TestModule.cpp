@@ -192,10 +192,6 @@ void TestModule::start() {
         _texture_i_buffer.setValues(Object3D::getTextureIndices(DefaultConf::renderer, &_red_shader).data());
         _red_shader.addStorageBuffer("texture_i", &_texture_i_buffer);
 
-        for (uint32_t ind : Object3D::getTextureIndices(DefaultConf::renderer, &_red_shader)) {
-            std::cout << ind << std::endl;
-        }
-
         // Sampler
         _sampler.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _sampler.create();

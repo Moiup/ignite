@@ -17,7 +17,6 @@ class Object3D : public Entity3D
 {
 private:
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>> mesh_objects;
-	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Texture*, std::vector<Object3D*>>>> textures_obj;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec3>>> coords;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> mesh_offsets;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> object_id;
@@ -91,8 +90,6 @@ public:
 	static std::vector<glm::mat4>& getTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static std::vector<glm::mat4>& updateTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTransformMatricesSize(Renderer* renderer, GraphicShader* shader);
-
-	static std::unordered_map<Texture*, std::vector<Object3D*>>& getTextureObjects(Renderer* renderer, GraphicShader*);
 
 	static std::vector<uint32_t>& getTextureIndices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTextureIndicesStride(Renderer* renderer, GraphicShader* shader);

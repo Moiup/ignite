@@ -20,7 +20,7 @@ void ComputePipeline::destroy() {
 	destroyDescriptorSet();
 }
 
-void ComputePipeline::CreatePipeline() {
+void ComputePipeline::createPipeline() {
 	VkComputePipelineCreateInfo info{};
 	
 	info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;

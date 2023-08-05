@@ -201,6 +201,47 @@ void TestModule::start() {
         _red_shader.addTexture("textures", Object3D::getTextures(DefaultConf::renderer, &_red_shader));
     }
 
+    // Compute shader
+    {
+        _sum_shader.addStorageBufferInfo(
+            "input_data",
+            0,
+            VK_SHADER_STAGE_COMPUTE_BIT
+        );
+
+        _sum_shader.addStorageBufferInfo(
+            "output_data",
+            1,
+            VK_SHADER_STAGE_COMPUTE_BIT
+        );
+
+        // Read buffer
+        std::vector<int32_t> read_arr = std::vector<int32_t>(2, 10);
+
+        _read_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _read_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+        _read_buffer.setSize(read_arr.size() * sizeof(*read_arr.data()));
+        _read_buffer.create();
+        _read_buffer.setValues(read_arr.data());
+        _sum_shader.addStorageBuffer("input_data", &_read_buffer);
+
+        // Write buffer
+        std::vector<int32_t> write_arr = std::vector<int32_t>(0, 10);
+
+        _write_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _write_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+        _write_buffer.setSize(write_arr.size() * sizeof(*write_arr.data()));
+        _write_buffer.create();
+        _write_buffer.setValues(write_arr.data());
+        _sum_shader.addStorageBuffer("output_data", &_write_buffer);
+
+        // Creating the pipeline
+         _sum_pipeline.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _sum_pipeline.setPhysicalDevice((PhysicalDevice*)DefaultConf::gpu->getGPU());
+        _sum_pipeline.setShader(&_sum_shader);
+        _sum_pipeline.create();
+    }
+
     _frame = 0;
 }
 

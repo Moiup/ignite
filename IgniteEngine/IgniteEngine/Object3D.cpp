@@ -385,7 +385,6 @@ void Object3D::buildTextures(Renderer* renderer, GraphicShader* shader) {
 			_textures[renderer][shader].push_back((Texture*)obj->getTexture());
 			texes[obj->getTexture()] = 1;
 		}
-		//std::vector<Object3D*>& objs = t_o.second;
 	}
 }
 

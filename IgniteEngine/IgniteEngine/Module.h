@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "CameraScene.h"
+#include "ComputePipeline.h"
 
 class Module : public EngineEntity
 {

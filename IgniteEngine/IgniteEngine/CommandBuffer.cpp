@@ -199,6 +199,20 @@ void CommandBuffer::drawIndexed(uint32_t index_count, uint32_t instance_count, u
 	);
 }
 
+void CommandBuffer::dispatch(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z) {
+	vkCmdDispatch(
+		_command_buffer,
+		group_count_x,
+		group_count_y,
+		group_count_z
+	);
+}
+
+void CommandBuffer::dispatchSyncAIO(const Queue* queue, uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z) {
+	dispatch(group_count_x, group_count_y, group_count_z);
+	flush(queue);
+}
+
 void CommandBuffer::endRendering() {
 	vkCmdEndRendering(_command_buffer);
 }

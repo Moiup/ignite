@@ -31,6 +31,13 @@ private:
     StorageBuffer _texture_i_buffer;
     Sampler _sampler;
 
+    ComputeShader _sum_shader;
+
+    ComputePipeline _sum_pipeline;
+
+    StorageBuffer _read_buffer;
+    StorageBuffer _write_buffer;
+
 public:
     TestModule();
 

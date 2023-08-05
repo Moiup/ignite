@@ -39,6 +39,9 @@ public:
 	void bindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType index_type);
 	void bindVertexBuffer(uint32_t first_binding, uint32_t binding_count, const VkBuffer* p_buffers, const VkDeviceSize* p_offsets);
 	void drawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance);
+	void dispatch(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
+
+	void dispatchSyncAIO(const Queue* queue, uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
 
 	void endRendering();
 

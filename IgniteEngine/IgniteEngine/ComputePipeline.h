@@ -15,7 +15,7 @@ public:
 	void destroy();
 
 protected:
-	void CreatePipeline();
+	void createPipeline();
 	void destroyPipeline();
 };
 

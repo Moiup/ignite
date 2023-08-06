@@ -47,6 +47,10 @@ void EngineApp::init() {
 		"present_queue",
 		{ VK_QUEUE_GRAPHICS_BIT }
 	);
+	_logical_device.setQueue(
+		"compute_queue",
+		{ VK_QUEUE_COMPUTE_BIT }
+	);
 	_logical_device.create();
 
 	// Command Pool

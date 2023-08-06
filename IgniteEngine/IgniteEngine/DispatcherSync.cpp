@@ -56,6 +56,12 @@ void DispatcherSync::dispatch(
 	uint32_t group_count_y,
 	uint32_t group_count_z
 ) {
+	vkResetFences(
+		*_logical_device->getDevice(),
+		1,
+		&_fence
+	);
+
 	_command_buffer.reset();
 	// Start recording
 	_command_buffer.begin();

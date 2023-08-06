@@ -32,6 +32,8 @@ private:
     StorageBuffer _texture_i_buffer;
     Sampler _sampler;
 
+    std::vector<int32_t> read_arr;
+    std::vector<int32_t> write_arr;
     ComputeShader _sum_shader;
     ComputePipeline _sum_pipeline;
     DispatcherSync _dispatcher;

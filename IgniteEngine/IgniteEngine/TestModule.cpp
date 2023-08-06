@@ -231,7 +231,7 @@ void TestModule::start() {
         );
 
         // Read buffer
-        std::vector<int32_t> read_arr = std::vector<int32_t>(10, 4);
+        read_arr = std::vector<int32_t>(10, 4);
 
         _read_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _read_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
@@ -241,7 +241,7 @@ void TestModule::start() {
         _sum_shader.addStorageBuffer("input_data", &_read_buffer);
 
         // Write buffer
-        std::vector<int32_t> write_arr = std::vector<int32_t>(10, 0);
+        write_arr = std::vector<int32_t>(10, 0);
 
         _write_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _write_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
@@ -256,7 +256,7 @@ void TestModule::start() {
         _sum_pipeline.setShader(&_sum_shader);
         _sum_pipeline.create();
 
-        _dispatcher = DispatcherSync();
+        _dispatcher = DispatcherSync(&_sum_pipeline);
         _dispatcher.create();
     }
 
@@ -280,7 +280,14 @@ void TestModule::update() {
     _frame = (_frame + 1) % 200;
 
     // Testing compute shader
-    //dispatcher.dispatch();
+    _dispatcher.dispatch(read_arr.size(), 1, 1);
+    std::cout << "TEST" << std::endl;
+
+    void* res_val_tmp = _write_buffer.getValues();
+    uint32_t* res_val = (uint32_t*)res_val_tmp;
+    for (uint32_t i = 0; i < 10; i++) {
+        std::cout << res_val[i] << std::endl;
+    }
 }
 
 void TestModule::close() {

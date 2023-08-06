@@ -10,16 +10,6 @@ ComputeShader* ComputePipeline::getShader() {
 	return (ComputeShader*)_shader;
 }
 
-void ComputePipeline::create() {
-	createDescriptorSet();
-	createPipeline();
-}
-
-void ComputePipeline::destroy() {
-	destroyPipeline();
-	destroyDescriptorSet();
-}
-
 void ComputePipeline::createPipeline() {
 	VkComputePipelineCreateInfo info{};
 	
@@ -28,12 +18,12 @@ void ComputePipeline::createPipeline() {
 	info.flags = 0;
 	info.stage = getShader()->getShaderStages()[0];
 	info.layout = _pipeline_layout;
-	info.basePipelineHandle = _pipeline;
+	info.basePipelineHandle = VK_NULL_HANDLE;
 	info.basePipelineIndex = 0;
 
 	VkResult vk_result = vkCreateComputePipelines(
 		*_logical_device,
-		nullptr,
+		VK_NULL_HANDLE,
 		1,
 		&info,
 		nullptr,

@@ -203,6 +203,21 @@ void TestModule::start() {
 
     // Compute shader
     {
+        //VkPhysicalDeviceProperties pdp{};
+        //const VkPhysicalDevice& pd = DefaultConf::gpu->getGPU();
+        //vkGetPhysicalDeviceProperties(
+        //    pd,
+        //    &pdp
+        //);
+
+        //std::cout << "maxMemoryAllocationCount: " << pdp.limits.maxMemoryAllocationCount << std::endl;
+
+        // Configuring and reading compute shader
+        _sum_shader.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+        _sum_shader.setPhysicalDevice(DefaultConf::gpu);
+        _sum_shader.read("../shaders/compute_sum.spv");
+
+        // Setting Storage Buffers
         _sum_shader.addStorageBufferInfo(
             "input_data",
             0,
@@ -226,7 +241,7 @@ void TestModule::start() {
         _sum_shader.addStorageBuffer("input_data", &_read_buffer);
 
         // Write buffer
-        std::vector<int32_t> write_arr = std::vector<int32_t>(0, 10);
+        std::vector<int32_t> write_arr = std::vector<int32_t>(2, 10);
 
         _write_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _write_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
@@ -277,6 +292,11 @@ void TestModule::close() {
     _mercedes_tex.destroy();
     _sampler.destroy();
     _red_shader.destroy();
+
+    _read_buffer.destroy();
+    _write_buffer.destroy();
+    _sum_shader.destroy();
+    _sum_pipeline.destroy();
 }
 
 std::vector<glm::vec3> TestModule::rectangle() {

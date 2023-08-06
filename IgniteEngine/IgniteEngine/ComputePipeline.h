@@ -11,9 +11,6 @@ public:
 
 	ComputeShader* getShader();
 
-	void create();
-	void destroy();
-
 protected:
 	void createPipeline();
 	void destroyPipeline();

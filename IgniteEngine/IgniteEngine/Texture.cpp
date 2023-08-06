@@ -129,12 +129,9 @@ void Texture::create() {
 	image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-
+	
 	// Creating the command buffer
-	CommandBuffer copy_cmd{};
-	copy_cmd.setLogicalDevice((VkDevice*)_logical_device->getDevice());
-	copy_cmd.setCommandPool((VkCommandPool*) & _command_pool->getPool());
-	copy_cmd.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	CommandBuffer copy_cmd = _command_pool->createCommandBuffer();
 	copy_cmd.create();
 	copy_cmd.begin();
 

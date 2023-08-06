@@ -171,7 +171,7 @@ void Texture::create() {
 		1, &image_memory_barrier
 	);
 
-	_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	_image_layout = image_memory_barrier.newLayout;
 	
 	copy_cmd.end();
 	copy_cmd.flush(_logical_device->getDefaultQueue());

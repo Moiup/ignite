@@ -34,7 +34,7 @@ private:
 
     ComputeShader _sum_shader;
     ComputePipeline _sum_pipeline;
-    DispatcherSync dispatcher;
+    DispatcherSync _dispatcher;
 
     StorageBuffer _read_buffer;
     StorageBuffer _write_buffer;

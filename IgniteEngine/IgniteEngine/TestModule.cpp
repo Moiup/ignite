@@ -256,8 +256,8 @@ void TestModule::start() {
         _sum_pipeline.setShader(&_sum_shader);
         _sum_pipeline.create();
 
-        dispatcher = DispatcherSync();
-        dispatcher.create();
+        _dispatcher = DispatcherSync();
+        _dispatcher.create();
     }
 
     _frame = 0;
@@ -271,7 +271,6 @@ void TestModule::update() {
     //_obj2.setPositionAbsolute(0.0f, ((float)_frame - 100) / 100, 0);
     //_obj3.setPositionAbsolute(2.3f, ((float)_frame - 100) / 100, 0);
 
-
     _obj_tr_buffer.setValues(
         &Object3D::updateTransformMatrices(DefaultConf::renderer, &_red_shader)[0][0]
     );
@@ -279,6 +278,9 @@ void TestModule::update() {
     _camera_buffer.setValues(&DefaultConf::camera->getPerspectiveCamera().getMVP()[0][0]);
 
     _frame = (_frame + 1) % 200;
+
+    // Testing compute shader
+    //dispatcher.dispatch();
 }
 
 void TestModule::close() {
@@ -300,6 +302,7 @@ void TestModule::close() {
     _write_buffer.destroy();
     _sum_shader.destroy();
     _sum_pipeline.destroy();
+    _dispatcher.destroy();
 }
 
 std::vector<glm::vec3> TestModule::rectangle() {

@@ -208,11 +208,6 @@ void CommandBuffer::dispatch(uint32_t group_count_x, uint32_t group_count_y, uin
 	);
 }
 
-void CommandBuffer::dispatchSyncAIO(const Queue* queue, uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z) {
-	dispatch(group_count_x, group_count_y, group_count_z);
-	flush(queue);
-}
-
 void CommandBuffer::endRendering() {
 	vkCmdEndRendering(_command_buffer);
 }

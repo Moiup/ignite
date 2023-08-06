@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Object3D.h"
 #include "LoadedObjectInfo.h"
+#include "DispatcherSync.h"
 
 class TestModule : public Module
 {
@@ -32,8 +33,8 @@ private:
     Sampler _sampler;
 
     ComputeShader _sum_shader;
-
     ComputePipeline _sum_pipeline;
+    DispatcherSync dispatcher;
 
     StorageBuffer _read_buffer;
     StorageBuffer _write_buffer;

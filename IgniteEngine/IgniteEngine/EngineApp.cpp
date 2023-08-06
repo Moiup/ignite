@@ -57,8 +57,6 @@ void EngineApp::init() {
 	);
 	_command_pool.create();
 
-	initEngineEntities();
-
 	DefaultConf::gpu = &_gpu;
 	DefaultConf::logical_device = &_logical_device;
 	DefaultConf::render_window = &_render_window;
@@ -66,8 +64,10 @@ void EngineApp::init() {
 	DefaultConf::command_pool = &_command_pool;
 	DefaultConf::renderer = &_renderer;
 	DefaultConf::camera = &_camera;
+	
+	initEngineEntities();
 
-	_modules.init();
+	//_modules.init();
 }
 
 void EngineApp::start() {

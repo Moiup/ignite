@@ -2,20 +2,35 @@
 
 #include "CommandBuffer.h"
 #include "DefaultConf.h"
+#include "ComputePipeline.h"
 
 class Dispatcher
 {
-private:
-	CommandBuffer* _command_buffer;
+protected:
+	CommandPool* _command_pool;
 	LogicalDevice* _logical_device;
+
+	CommandBuffer _command_buffer;
+
+	std::vector<VkPipelineStageFlags> _pipeline_stage_flags;
 
 public:
 	Dispatcher();
-	Dispatcher(CommandBuffer* command_buffer, LogicalDevice* logical_device);
+	Dispatcher(
+		LogicalDevice* logical_device,
+		CommandPool* command_pool
+	);
 
-	void setCommandBuffer(CommandBuffer* command_buffer);
 	void setLogicalDevice(LogicalDevice* logical_device);
+	void setCommandPool(CommandPool* command_pool);
 
-	virtual void dispatch() = 0;
+	void create();
+	void destroy();
+
+	virtual void dispatch(
+		uint32_t group_count_x,
+		uint32_t group_count_y,
+		uint32_t group_count_z
+	) = 0;
 };
 

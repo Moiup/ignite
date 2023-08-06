@@ -231,7 +231,7 @@ void TestModule::start() {
         );
 
         // Read buffer
-        std::vector<int32_t> read_arr = std::vector<int32_t>(2, 10);
+        std::vector<int32_t> read_arr = std::vector<int32_t>(10, 4);
 
         _read_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _read_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
@@ -241,7 +241,7 @@ void TestModule::start() {
         _sum_shader.addStorageBuffer("input_data", &_read_buffer);
 
         // Write buffer
-        std::vector<int32_t> write_arr = std::vector<int32_t>(2, 10);
+        std::vector<int32_t> write_arr = std::vector<int32_t>(10, 0);
 
         _write_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _write_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
@@ -255,6 +255,9 @@ void TestModule::start() {
         _sum_pipeline.setPhysicalDevice((PhysicalDevice*)DefaultConf::gpu->getGPU());
         _sum_pipeline.setShader(&_sum_shader);
         _sum_pipeline.create();
+
+        dispatcher = DispatcherSync();
+        dispatcher.create();
     }
 
     _frame = 0;

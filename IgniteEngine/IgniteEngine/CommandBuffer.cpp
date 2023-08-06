@@ -118,7 +118,7 @@ void CommandBuffer::flush(const Queue* queue) {
 
 	queue->submit(
 		0, nullptr,
-		0,
+		nullptr,
 		1, &_command_buffer,
 		0, nullptr,
 		&fence

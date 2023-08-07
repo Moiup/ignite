@@ -33,6 +33,7 @@ void EngineApp::init() {
 
 	// Setting window
 	_render_window.setInstance((VkInstance*)&_instance.getInstance());
+	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
 	// Initialising
 	_gpu.configure(_instance);

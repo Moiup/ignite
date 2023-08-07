@@ -85,7 +85,7 @@ void* Buffer::getValues() {
 		return nullptr;
 	}
 
-	void* copy;
+	void* copy{};
 	void* values = new uint8_t[_buffer_info.size];
 	vkMapMemory(
 		*_logical_device,

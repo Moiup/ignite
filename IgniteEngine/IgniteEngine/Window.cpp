@@ -52,6 +52,10 @@ void Window::setParam(std::string name, uint32_t width, uint32_t height) {
 	setHeight(height);
 }
 
+void Window::setFlags(uint32_t flags) {
+	_flags = flags;
+}
+
 SDL_Window* Window::getWindow() const {
 	return _window;
 }
@@ -118,7 +122,7 @@ void Window::create() {
 	/*glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	_window = glfwCreateWindow(_width, _height, _name.c_str(), nullptr, nullptr);*/
-	_window = SDL_CreateWindow(_name.c_str(), 100, 100, _width, _height, SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
+	_window = SDL_CreateWindow(_name.c_str(), 100, 100, _width, _height, _flags);
 	if (!_window) {
 		throw std::runtime_error("Error: failed creating the glfw window.");
 	}

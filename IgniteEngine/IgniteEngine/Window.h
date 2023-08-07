@@ -25,6 +25,7 @@ private:
 	const std::string DEFAULT_NAME{ "Ignite" };
 	uint32_t _width;
 	uint32_t _height;
+	uint32_t _flags;
 
 	//GLFWwindow* _window;
 	SDL_Window* _window;
@@ -40,6 +41,7 @@ public:
 	void setWidth(uint32_t width);
 	void setHeight(uint32_t height);
 	void setParam(std::string name, uint32_t width, uint32_t height);
+	void setFlags(uint32_t flags);
 
 	void init();
 	void start();

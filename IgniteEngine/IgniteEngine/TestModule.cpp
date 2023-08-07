@@ -288,6 +288,7 @@ void TestModule::update() {
     for (uint32_t i = 0; i < 10; i++) {
         std::cout << res_val[i] << std::endl;
     }
+    delete[] res_val_tmp;
 }
 
 void TestModule::close() {

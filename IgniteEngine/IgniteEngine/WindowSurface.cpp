@@ -37,18 +37,21 @@ const VkSurfaceKHR& WindowSurface::getSurface() const {
 }
 
 void WindowSurface::create() {
-	/*VkResult vk_result = glfwCreateWindowSurface(
-		*_instance,
-		(GLFWwindow *)getWindow(),
-		nullptr,
-		&_surface
-	);*/
+	//VkResult vk_result = glfwCreateWindowSurface(
+	//	*_instance,
+	//	(GLFWwindow *)getWindow(),
+	//	nullptr,
+	//	&_surface
+	//);
+	//if (vk_result != VK_SUCCESS) {
+	//	throw std::runtime_error("WindowSurface::create: failed creating surface.");
+	//}
+
 	SDL_bool  sdl_result = SDL_Vulkan_CreateSurface(
 		getWindow(),
 		*_instance,
 		&_surface
 	);
-
 	if (!sdl_result) {
 		throw std::runtime_error("Error: failed creating surface.");
 	}

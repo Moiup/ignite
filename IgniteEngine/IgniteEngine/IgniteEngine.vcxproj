@@ -118,7 +118,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vulkan_sdk\Include;$(ProjectDir)\glfw\include;$(ProjectDir)\glm;$(ProjectDir)\sdl2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\imgui\backends;$(ProjectDir)\imgui\;$(ProjectDir)\vulkan_sdk\Include;$(ProjectDir)\glfw\include;$(ProjectDir)\glm;$(ProjectDir)\sdl2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -175,6 +175,13 @@
     <ClCompile Include="HeaderMessageProtocoleNetwork.cpp" />
     <ClCompile Include="IgniteEngine.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="imgui\backends\imgui_impl_sdl2.cpp" />
+    <ClCompile Include="imgui\backends\imgui_impl_sdlrenderer2.cpp" />
+    <ClCompile Include="imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="IndexBufferInfo.cpp" />
     <ClCompile Include="InitChildPoint.cpp" />
@@ -185,6 +192,7 @@
     <ClCompile Include="LogicalDevice.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MediapipeModule.cpp" />
+    <ClCompile Include="MenuModule.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MessageProtocoleNetwork.cpp" />
     <ClCompile Include="MocapMessageProtocolNetwork.cpp" />
@@ -211,6 +219,7 @@
     <ClCompile Include="VertexBufferInfo.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowSurface.cpp" />
+    <ClCompile Include="WindowUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -240,6 +249,15 @@
     <ClInclude Include="GraphicsPipeline.h" />
     <ClInclude Include="HeaderMessageProtocoleNetwork.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="imgui\backends\imgui_impl_sdl2.h" />
+    <ClInclude Include="imgui\backends\imgui_impl_sdlrenderer2.h" />
+    <ClInclude Include="imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="IndexBufferInfo.h" />
     <ClInclude Include="InitChildPoint.h" />
@@ -250,6 +268,7 @@
     <ClInclude Include="LogicalDevice.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MediapipeModule.h" />
+    <ClInclude Include="MenuModule.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MessageProtocoleNetwork.h" />
     <ClInclude Include="MocapMessageProtocolNetwork.h" />
@@ -280,6 +299,7 @@
     <ClInclude Include="VertexBufferInfo.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WindowSurface.h" />
+    <ClInclude Include="WindowUI.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IgniteEngine.rc" />

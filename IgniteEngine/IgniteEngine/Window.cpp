@@ -56,6 +56,10 @@ void Window::setFlags(uint32_t flags) {
 	_flags = flags;
 }
 
+//GLFWwindow* Window::getWindow() const {
+//	return _window;
+//}
+
 SDL_Window* Window::getWindow() const {
 	return _window;
 }
@@ -75,12 +79,14 @@ const uint32_t Window::getHeight() const {
 const uint32_t Window::getWidthInPixel() const {
 	int32_t width;
 	SDL_GetWindowSize(_window, &width, nullptr);
+	//glfwGetWindowSize(_window, &width, nullptr);
 	return width;
 }
 
 const uint32_t Window::getHeightInPixel() const {
 	int32_t height;
 	SDL_GetWindowSize(_window, nullptr, &height);
+	//glfwGetWindowSize(_window, nullptr, &height);
 	return height;
 }
 
@@ -119,9 +125,9 @@ void Window::close() {
 }
 
 void Window::create() {	
-	/*glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	_window = glfwCreateWindow(_width, _height, _name.c_str(), nullptr, nullptr);*/
+	//glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	//_window = glfwCreateWindow(_width, _height, _name.c_str(), nullptr, nullptr);
 	_window = SDL_CreateWindow(_name.c_str(), 100, 100, _width, _height, _flags);
 	if (!_window) {
 		throw std::runtime_error("Error: failed creating the glfw window.");

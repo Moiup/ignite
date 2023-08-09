@@ -18,6 +18,7 @@ public:
 	static GraphicShader *graphic_shader;
 	static CommandPool* command_pool;
 	static WindowSurface* render_window;
+	static Instance* instance;
 	static Renderer* renderer;
 	static CameraScene* camera;
 	static uint64_t delta_time; // ms

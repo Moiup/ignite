@@ -25,6 +25,16 @@ void EngineApp::init() {
 		throw std::runtime_error("SDL could not load Vulkan library!");
 	}
 
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+	ImGui::StyleColorsDark();
+
+
 	// Instance
 	_instance.setExtensionsAndLayers({
 		"VK_LAYER_KHRONOS_validation"
@@ -66,6 +76,7 @@ void EngineApp::init() {
 	DefaultConf::logical_device = &_logical_device;
 	DefaultConf::render_window = &_render_window;
 	DefaultConf::graphic_shader = &_graphic_shader;
+	DefaultConf::instance = &_instance;
 	DefaultConf::command_pool = &_command_pool;
 	DefaultConf::renderer = &_renderer;
 	DefaultConf::camera = &_camera;
@@ -184,7 +195,10 @@ void EngineApp::update() {
 
 		SDL_Event event{};
 		if (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) {
+			ImGui_ImplSDL2_ProcessEvent(&event);
+			if (event.type == SDL_QUIT 
+				|| event.window.event == SDL_WINDOWEVENT_CLOSE
+				 && event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())) {
 				break;
 			}
 		}
@@ -221,6 +235,8 @@ void EngineApp::close() {
 	_camera_buffer.destroy();
 	_obj_tr_buffer.destroy();
 	_renderer.destroy();
+
+	ImGui::DestroyContext();
 
 	//CameraScene::closeAll();
 	Module::closeAll();

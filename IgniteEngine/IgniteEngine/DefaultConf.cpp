@@ -7,6 +7,7 @@ LogicalDevice* DefaultConf::logical_device;
 GraphicShader* DefaultConf::graphic_shader;
 CommandPool* DefaultConf::command_pool;
 WindowSurface* DefaultConf::render_window;
+Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;
 CameraScene* DefaultConf::camera;
 uint64_t DefaultConf::delta_time; // ms

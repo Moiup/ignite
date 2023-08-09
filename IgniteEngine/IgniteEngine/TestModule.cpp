@@ -279,16 +279,16 @@ void TestModule::update() {
 
     _frame = (_frame + 1) % 200;
 
-    // Testing compute shader
-    _dispatcher.dispatch(read_arr.size(), 1, 1);
-    std::cout << "TEST" << std::endl;
+    //// Testing compute shader
+    //_dispatcher.dispatch(read_arr.size(), 1, 1);
+    //std::cout << "TEST" << std::endl;
 
-    void* res_val_tmp = _write_buffer.getValues();
-    uint32_t* res_val = (uint32_t*)res_val_tmp;
-    for (uint32_t i = 0; i < 10; i++) {
-        std::cout << res_val[i] << std::endl;
-    }
-    delete[] res_val_tmp;
+    //void* res_val_tmp = _write_buffer.getValues();
+    //uint32_t* res_val = (uint32_t*)res_val_tmp;
+    //for (uint32_t i = 0; i < 10; i++) {
+    //    std::cout << res_val[i] << std::endl;
+    //}
+    //delete[] res_val_tmp;
 }
 
 void TestModule::close() {

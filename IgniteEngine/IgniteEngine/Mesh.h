@@ -13,6 +13,7 @@ private:
 	std::vector<uint32_t> _indices;
 	std::vector<glm::vec2> _uv;
 	std::vector<glm::vec3> _normals;
+	std::vector<uint32_t> _indices_mat; // Given a a vertex index (from indices), provides the index of the corresponding material
 	std::vector<Material> _materials;
 
 public:
@@ -44,6 +45,7 @@ public:
 	const void setIndices(uint32_t* indices, const uint32_t len);
 	const void setUV(float* uv, const uint32_t len);
 	const void setNormals(float* normals, const uint32_t len);
+	const void setIndicesMaterial(uint32_t* indices_mat, const uint32_t len);
 	const void setMaterials(fastObjMaterial* mat, const uint32_t len);
 
 
@@ -51,18 +53,21 @@ public:
 	const std::vector<uint32_t>& getIndices() const;
 	const std::vector<glm::vec2>& getUV() const;
 	const std::vector<glm::vec3>& getNormals() const;
+	const std::vector<uint32_t>& getIndicesMaterial() const;
 	const std::vector<Material>& getMaterials() const;
 
 	uint32_t getCoordsSize();
 	uint32_t getCoordsStride();
 	uint32_t getUVStride();
 	uint32_t getNormalsStride();
+	uint32_t getIndicesMaterialStride();
 	uint32_t getMaterialsStride();
 
 	uint32_t getIndicesSize();
 	uint32_t getIndicesNbElem();
 	uint32_t getUVNbElem();
 	uint32_t getNormalsNbElem();
+	uint32_t getIndicesMaterialNbElem();
 	uint32_t getMaterialsNbElem();
 };
 

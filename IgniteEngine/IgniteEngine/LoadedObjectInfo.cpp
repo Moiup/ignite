@@ -20,6 +20,8 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 	_mesh.setNormals(fom->normals, fom->normal_count);
 	_mesh.setUV(fom->texcoords, fom->texcoord_count);
 	_mesh.setIndices(indices.data(), fom->index_count);
+	_mesh.setMaterials(fom->materials, fom->material_count);
+
 
 	fast_obj_destroy(fom);
 }

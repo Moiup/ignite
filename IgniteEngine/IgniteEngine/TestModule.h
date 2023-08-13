@@ -12,8 +12,10 @@ private:
     Object3D _obj2;
     Object3D _obj3;
     Object3D _cube_obj;
+    Object3D _cornell_obj;
 
     LoadedObjectInfo _cube_info;
+    LoadedObjectInfo _cornell_info;
 
     Mesh _m;
     uint32_t _frame;

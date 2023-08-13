@@ -30,7 +30,8 @@ void TestModule::start() {
     // -- Meshes -- //
     // Loading the mesh (file)
     _cube_info.loadObj("../assets/3d_objects/cube.obj");
-    
+    _cornell_info.loadObj("../assets/3d_objects/cornell.obj");
+
     // Loading the mesh (by hand)
     _m.setVertex(rectangle(), rectIndices(), rectUV());
 
@@ -67,6 +68,9 @@ void TestModule::start() {
     _cube_obj.setScaleAbsolute(0.5, 0.5, 0.5);
     _cube_obj.setPositionAbsolute(-2.3f, 0, 0);
 
+    _cornell_obj.createFromObjectInfo(_cornell_info);
+    _cornell_obj.setRenderer(DefaultConf::renderer);
+    _cornell_obj.addShader(DefaultConf::graphic_shader);
     
     {
         // Red shader
@@ -203,15 +207,6 @@ void TestModule::start() {
 
     // Compute shader
     {
-        //VkPhysicalDeviceProperties pdp{};
-        //const VkPhysicalDevice& pd = DefaultConf::gpu->getGPU();
-        //vkGetPhysicalDeviceProperties(
-        //    pd,
-        //    &pdp
-        //);
-
-        //std::cout << "maxMemoryAllocationCount: " << pdp.limits.maxMemoryAllocationCount << std::endl;
-
         // Configuring and reading compute shader
         _sum_shader.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _sum_shader.setPhysicalDevice(DefaultConf::gpu);

@@ -6,12 +6,16 @@
 
 #include "Module.h"
 #include "WindowUI.h"
+#include "RayTracerCPU.h"
 
 class MenuModule : public Module
 {
 private:
 	WindowUI _menu_window;
 	SDL_Renderer* _renderer;
+
+	bool _is_ray_tracer;
+	RayTracerCPU _rt_cpu;
 
 public:
 	MenuModule();
@@ -20,6 +24,11 @@ public:
 	void start();
 	void update();
 	void close();
+
+private:
+	void menu();
+	bool rayTracer();
+
 
 };
 

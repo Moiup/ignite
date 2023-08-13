@@ -276,6 +276,9 @@
     <ClCompile Include="WindowUI.cpp">
       <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
+    <ClCompile Include="RayTracerCPU.cpp">
+      <Filter>Ignite\Engine\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -510,6 +513,9 @@
       <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
     <ClInclude Include="WindowUI.h">
+      <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerCPU.h">
       <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
   </ItemGroup>

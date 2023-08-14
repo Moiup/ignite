@@ -4,6 +4,10 @@
 // IN
 layout (location = 0) in vec3 coord;
 layout (location = 1) in uint object_id;
+layout (location = 2) in uint material_id;
+
+// OUT
+layout(location = 1) out uint material_i;
 
 // UNIFORM BUFFER
 layout (std140, binding = 0) uniform camera_buf{
@@ -13,6 +17,7 @@ layout (std140, binding = 0) uniform camera_buf{
 layout(std430, binding = 1) readonly buffer obj_tr_buff {
     mat4 tr[];
 } obj_tr;
+
 
 void main(){
     uint obj_i = object_id + gl_InstanceIndex;

@@ -70,8 +70,8 @@ const void Mesh::setNormals(float* normals, const uint32_t len) {
 	_normals.assign(n, n + len/3);
 }
 
-const void Mesh::setIndicesMaterial(uint32_t* indices_mat, const uint32_t len) {
-	_indices_mat.assign(indices_mat, indices_mat + len);
+const void Mesh::setIndicesToMaterial(uint32_t* indices_mat, const uint32_t len) {
+	_indices_to_mat.assign(indices_mat, indices_mat + len);
 }
 
 const void Mesh::setMaterials(fastObjMaterial* mat, const uint32_t len) {
@@ -96,8 +96,8 @@ const std::vector<glm::vec3>& Mesh::getNormals() const {
 	return _normals;
 }
 
-const std::vector<uint32_t>& Mesh::getIndicesMaterial() const {
-	return _indices_mat;
+const std::vector<uint32_t>& Mesh::getIndicesToMaterial() const {
+	return _indices_to_mat;
 }
 
 const std::vector<Material>& Mesh::getMaterials() const {
@@ -120,8 +120,8 @@ uint32_t Mesh::getNormalsStride() {
 	return sizeof(*_normals.data());
 }
 
-uint32_t Mesh::getIndicesMaterialStride() {
-	return sizeof(*_indices_mat.data());
+uint32_t Mesh::getIndicesToMaterialStride() {
+	return sizeof(*_indices_to_mat.data());
 }
 
 uint32_t Mesh::getMaterialsStride() {
@@ -144,8 +144,8 @@ uint32_t Mesh::getNormalsNbElem() {
 	return _normals.size();
 }
 
-uint32_t Mesh::getIndicesMaterialNbElem() {
-	return _indices_mat.size();
+uint32_t Mesh::getIndicesToMaterialNbElem() {
+	return _indices_to_mat.size();
 }
 
 uint32_t Mesh::getMaterialsNbElem() {

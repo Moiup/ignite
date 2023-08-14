@@ -114,6 +114,12 @@ void EngineApp::start() {
 		VK_FORMAT_R32_UINT,
 		1
 	);
+	_graphic_shader.addVertexBufferInfo(
+		"material_id",
+		Object3D::getIndicesToMaterialsStride(&_renderer, &_graphic_shader),
+		VK_FORMAT_R32_UINT,
+		2
+	);
 	// Index Buffer
 	_graphic_shader.addIndexBufferInfo(
 		"index",
@@ -151,6 +157,13 @@ void EngineApp::start() {
 	_object_id_buffer.create();
 	_object_id_buffer.setValues(Object3D::getObjectId(&_renderer, &_graphic_shader).data());
 	_graphic_shader.addVertexBuffer("object_id", &_object_id_buffer);
+
+	_indices_to_mat_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
+	_indices_to_mat_buffer.setMemoryProperties(_gpu.getMemoryProperties());
+	_indices_to_mat_buffer.setSize(Object3D::getIndicesToMaterialSize(&_renderer, &_graphic_shader));
+	_indices_to_mat_buffer.create();
+	_indices_to_mat_buffer.setValues(Object3D::getIndicesToMaterials(&_renderer, &_graphic_shader).data());
+	_graphic_shader.addVertexBuffer("material_id", &_indices_to_mat_buffer);
 
 	// Index buffer
 	_index_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
@@ -231,6 +244,7 @@ void EngineApp::close() {
 
 	_coord_buffer.destroy();
 	_object_id_buffer.destroy();
+	_indices_to_mat_buffer.destroy();
 	_index_buffer.destroy();
 	_camera_buffer.destroy();
 	_obj_tr_buffer.destroy();

@@ -55,7 +55,7 @@ void TestModule::start() {
     _obj2.setRenderer(DefaultConf::renderer);
     _obj2.addShader(&_red_shader);
     _obj2.setTexture(&_mercedes_tex);
-    _obj2.setPositionAbsolute(0, 0.0, 0.0);
+    _obj2.setPositionAbsolute(0, -3.0, 0.0);
 
      //Configuring third object
     _obj3.setMesh(&_m);
@@ -70,13 +70,13 @@ void TestModule::start() {
     _cube_obj.setScaleAbsolute(0.5, 0.5, 0.5);
     _cube_obj.setPositionAbsolute(-2.3f, 0, 0);
 
-    //_cornell_obj.createFromObjectInfo(_cornell_info);
-    //_cornell_obj.setRenderer(DefaultConf::renderer);
-    //_cornell_obj.addShader(DefaultConf::graphic_shader);
+    _cornell_obj.createFromObjectInfo(_cornell_info);
+    _cornell_obj.setRenderer(DefaultConf::renderer);
+    _cornell_obj.addShader(DefaultConf::graphic_shader);
 
-    _flying_battle.createFromObjectInfo(_flying_battle_info);
-    _flying_battle.setRenderer(DefaultConf::renderer);
-    _flying_battle.addShader(DefaultConf::graphic_shader);
+    //_flying_battle.createFromObjectInfo(_flying_battle_info);
+    //_flying_battle.setRenderer(DefaultConf::renderer);
+    //_flying_battle.addShader(DefaultConf::graphic_shader);
     
     {
         // Red shader

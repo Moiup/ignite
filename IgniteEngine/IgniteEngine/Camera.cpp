@@ -4,7 +4,7 @@ Camera::Camera() :
 	Entity3D::Entity3D(),
 	_eye{ 0, 0, 0.0 },
 	_center{ 0, 0, 1.0f },
-	_up{ 0, 1, 0 }
+	_up{ 0, -1, 0 }
 {
 	_clip = glm::mat4(
 		1.0f, 0.0f, 0.0f, 0.0f,
@@ -70,10 +70,6 @@ glm::mat4 Camera::getClip() {
 }
 
 glm::mat4 Camera::getMVP() {
-	glm::mat4 tr = getTransform();
-	tr[3][0] = -tr[3][0];
-	tr[3][1] = -tr[3][1];
-
 	glm::mat4 mvp = getClip() * getProjection() * getView() * getTranslate() * getRotate() * getScale();
 	return mvp;
 }

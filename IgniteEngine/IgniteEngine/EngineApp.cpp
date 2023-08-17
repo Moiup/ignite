@@ -184,9 +184,9 @@ void EngineApp::start() {
 	// Uniform buffer
 	_camera_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
 	_camera_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_camera_buffer.setSize(sizeof(_camera.getPerspectiveCamera().getMVP()));
+	_camera_buffer.setSize(sizeof(_camera.getMVP()));
 	_camera_buffer.create();
-	_camera_buffer.setValues(&_camera.getPerspectiveCamera().getMVP()[0][0]);
+	_camera_buffer.setValues(&_camera.getMVP()[0][0]);
 	_graphic_shader.addUniformBuffer("camera", &_camera_buffer);
 
 	// Storage Buffers
@@ -238,7 +238,7 @@ void EngineApp::update() {
 			&Object3D::updateTransformMatrices(&_renderer, &_graphic_shader)[0][0]
 		);
 		_camera_buffer.setValues(
-			&DefaultConf::camera->getPerspectiveCamera().getMVP()[0][0]
+			&DefaultConf::camera->getMVP()[0][0]
 		);
 
 		_renderer.render();

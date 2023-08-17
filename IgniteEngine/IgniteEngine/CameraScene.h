@@ -7,6 +7,7 @@ class CameraScene : public EngineEntity
 {
 private:
 	PerspectiveCamera _perspective_camera;
+	Camera* _camera;
 
 	bool _was_middle_clicked;
 	bool _is_middle_clicked;
@@ -21,7 +22,9 @@ public:
 
 	void start();
 	void update();
-
-	PerspectiveCamera& getPerspectiveCamera();
+	
+	glm::mat4 getProjection();
+	
+	glm::mat4 getMVP();
 };
 

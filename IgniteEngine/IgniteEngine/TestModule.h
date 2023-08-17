@@ -11,11 +11,13 @@ private:
     Object3D _obj;
     Object3D _obj2;
     Object3D _obj3;
+    Object3D _flying_battle;
     Object3D _cube_obj;
     Object3D _cornell_obj;
 
     LoadedObjectInfo _cube_info;
     LoadedObjectInfo _cornell_info;
+    LoadedObjectInfo _flying_battle_info;
 
     Mesh _m;
     uint32_t _frame;

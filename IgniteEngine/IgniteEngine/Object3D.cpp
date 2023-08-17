@@ -157,7 +157,7 @@ std::vector<uint32_t>& Object3D::getObjectId(Renderer* renderer, GraphicShader* 
 }
 
 uint32_t Object3D::getObjectIdStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(getObjectId(renderer, shader).data());
+	return sizeof(*getObjectId(renderer, shader).data());
 }
 
 uint32_t Object3D::getObjectIdSize(Renderer* renderer, GraphicShader* shader) {

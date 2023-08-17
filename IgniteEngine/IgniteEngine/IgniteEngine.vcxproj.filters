@@ -55,6 +55,15 @@
     <Filter Include="Ignite\Engine\inc">
       <UniqueIdentifier>{e7f8d37a-ff14-42d8-a9cf-15114128dbb4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ignite\RayTraycing">
+      <UniqueIdentifier>{c327f1e2-9445-4816-9c12-e5d272b40f25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\RayTraycing\src">
+      <UniqueIdentifier>{767ac084-f462-487c-920e-8d0245aae5fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ignite\RayTraycing\inc">
+      <UniqueIdentifier>{12029e30-c495-4e13-9c6f-81f159247463}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Ressource.cpp">
@@ -278,6 +287,18 @@
     </ClCompile>
     <ClCompile Include="RayTracerCPU.cpp">
       <Filter>Ignite\Engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Hittable.cpp">
+      <Filter>Ignite\RayTraycing\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Hit.cpp">
+      <Filter>Ignite\RayTraycing\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Ignite\RayTraycing\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Triangle.cpp">
+      <Filter>Ignite\RayTraycing\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -517,6 +538,18 @@
     </ClInclude>
     <ClInclude Include="RayTracerCPU.h">
       <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Hittable.h">
+      <Filter>Ignite\RayTraycing\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Hit.h">
+      <Filter>Ignite\RayTraycing\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Ignite\RayTraycing\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Ignite\RayTraycing\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -23,14 +23,15 @@ void Buffer::setValues(void* values) {
 	}
 	
 	void* copy;
-	vkMapMemory(
+	VkResult vk_result = vkMapMemory(
 		*_logical_device,
 		_memory,
 		0,
-		_memory_req.size,
+		_buffer_info.size,
 		0,
-		(void **)&copy
+		&copy
 	);
+
 	memcpy(copy, values, _buffer_info.size);
 	vkUnmapMemory(*_logical_device, _memory);
 }
@@ -91,7 +92,7 @@ void* Buffer::getValues() {
 		*_logical_device,
 		_memory,
 		0,
-		_memory_req.size,
+		_buffer_info.size,
 		0,
 		(void**)&copy
 	);

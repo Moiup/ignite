@@ -8,7 +8,7 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 		std::cout << "Error opening the file: " << file_name << std::endl;
 		throw std::runtime_error("Error opening file.");
 	}
-	std::cout << fom->index_count << std::endl;
+
 	std::vector<uint32_t> indices{};
 	std::vector<uint32_t> mat_id(fom->position_count);
 	std::vector<bool>exists(fom->position_count, false);

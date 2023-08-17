@@ -32,6 +32,7 @@ void TestModule::start() {
     _cube_info.loadObj("../assets/3d_objects/cube.obj");
     //_cornell_info.loadObj("../assets/3d_objects/cornell.obj");
     _cornell_info.loadObj("../assets/3d_objects/cornell-box4.obj");
+    _flying_battle_info.loadObj("../assets/3d_objects/flying_battle/export.obj");
 
     // Loading the mesh (by hand)
     _m.setVertex(rectangle(), rectIndices(), rectUV());
@@ -54,14 +55,14 @@ void TestModule::start() {
     _obj2.setRenderer(DefaultConf::renderer);
     _obj2.addShader(&_red_shader);
     _obj2.setTexture(&_mercedes_tex);
-    _obj2.setPositionAbsolute(0, 0.0, 1.0);
+    _obj2.setPositionAbsolute(0, 0.0, 0.0);
 
      //Configuring third object
     _obj3.setMesh(&_m);
     _obj3.setRenderer(DefaultConf::renderer);
     _obj3.addShader(&_red_shader);
     _obj3.setTexture(&_tex);
-    _obj3.setPositionAbsolute(2.3f, -1.0f, 0.0);
+    _obj3.setPositionAbsolute(2.3f, -1.0f, -3.0);
 
     _cube_obj.createFromObjectInfo(_cube_info);
     _cube_obj.setRenderer(DefaultConf::renderer);
@@ -69,9 +70,13 @@ void TestModule::start() {
     _cube_obj.setScaleAbsolute(0.5, 0.5, 0.5);
     _cube_obj.setPositionAbsolute(-2.3f, 0, 0);
 
-    _cornell_obj.createFromObjectInfo(_cornell_info);
-    _cornell_obj.setRenderer(DefaultConf::renderer);
-    _cornell_obj.addShader(DefaultConf::graphic_shader);
+    //_cornell_obj.createFromObjectInfo(_cornell_info);
+    //_cornell_obj.setRenderer(DefaultConf::renderer);
+    //_cornell_obj.addShader(DefaultConf::graphic_shader);
+
+    _flying_battle.createFromObjectInfo(_flying_battle_info);
+    _flying_battle.setRenderer(DefaultConf::renderer);
+    _flying_battle.addShader(DefaultConf::graphic_shader);
     
     {
         // Red shader
@@ -177,9 +182,9 @@ void TestModule::start() {
         // Uniform buffer
         _camera_buffer.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
         _camera_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
-        _camera_buffer.setSize(sizeof(DefaultConf::camera->getPerspectiveCamera().getMVP()));
+        _camera_buffer.setSize(sizeof(DefaultConf::camera->getMVP()));
         _camera_buffer.create();
-        _camera_buffer.setValues(&DefaultConf::camera->getPerspectiveCamera().getMVP()[0][0]);
+        _camera_buffer.setValues(&DefaultConf::camera->getMVP()[0][0]);
         _red_shader.addUniformBuffer("camera", &_camera_buffer);
 
         // Storage Buffers
@@ -271,7 +276,7 @@ void TestModule::update() {
         &Object3D::updateTransformMatrices(DefaultConf::renderer, &_red_shader)[0][0]
     );
 
-    _camera_buffer.setValues(&DefaultConf::camera->getPerspectiveCamera().getMVP()[0][0]);
+    _camera_buffer.setValues(&DefaultConf::camera->getMVP()[0][0]);
 
     _frame = (_frame + 1) % 200;
 
@@ -321,10 +326,10 @@ std::vector<glm::vec3> TestModule::rectangle() {
 
 std::vector<glm::vec2> TestModule::rectUV() {
     std::vector<glm::vec2> uv{
-        glm::vec2(0, 0),
-        glm::vec2(1, 0),
+        glm::vec2(0, 1),
         glm::vec2(1, 1),
-        glm::vec2(0, 1)
+        glm::vec2(1, 0),
+        glm::vec2(0, 0)
     };
     return uv;
 }

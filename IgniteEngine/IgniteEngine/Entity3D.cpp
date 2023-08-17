@@ -161,25 +161,25 @@ glm::mat4 Entity3D::getTranslate() {
 }
 
 glm::mat4 Entity3D::getRotate() {
-	glm::mat4 r = glm::rotate(
+	glm::mat4 r_x = glm::rotate(
 		glm::mat4(1.0f),
 		_ar.x,
 		glm::vec3(1.0f, 0, 0)
 	);
 
-	r = glm::rotate(
-		r,
+	glm::mat4 r_y = glm::rotate(
+		glm::mat4(1.0f),
 		_ar.y,
 		glm::vec3(0, 1.0f, 0)
 	);
 
-	r = glm::rotate(
-		r,
+	glm::mat4 r_z = glm::rotate(
+		glm::mat4(1.0f),
 		_ar.z,
 		glm::vec3(0, 0, 1.0f)
 	);
 
-	return r;
+	return r_x * r_y * r_z;
 }
 
 glm::mat4 Entity3D::getScale() {

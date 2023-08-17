@@ -173,6 +173,8 @@
     <ClCompile Include="GraphicShader.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="HeaderMessageProtocoleNetwork.cpp" />
+    <ClCompile Include="Hit.cpp" />
+    <ClCompile Include="Hittable.cpp" />
     <ClCompile Include="IgniteEngine.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_sdl2.cpp" />
@@ -203,6 +205,7 @@
     <ClCompile Include="PhysicalDevice.cpp" />
     <ClCompile Include="Pipeline.cpp" />
     <ClCompile Include="Queue.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RayTracerCPU.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Ressource.cpp" />
@@ -215,6 +218,7 @@
     <ClCompile Include="TestModule.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureInfo.cpp" />
+    <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="UniformBuffer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertexBufferInfo.cpp" />
@@ -249,6 +253,8 @@
     <ClInclude Include="GraphicShader.h" />
     <ClInclude Include="GraphicsPipeline.h" />
     <ClInclude Include="HeaderMessageProtocoleNetwork.h" />
+    <ClInclude Include="Hit.h" />
+    <ClInclude Include="Hittable.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="imgui\backends\imgui_impl_sdl2.h" />
     <ClInclude Include="imgui\backends\imgui_impl_sdlrenderer2.h" />
@@ -280,6 +286,7 @@
     <ClInclude Include="PhysicalDevice.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queue.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTracerCPU.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
@@ -296,6 +303,7 @@
     <ClInclude Include="TestModule.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureInfo.h" />
+    <ClInclude Include="Triangle.h" />
     <ClInclude Include="UniformBuffer.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexBufferInfo.h" />

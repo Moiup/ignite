@@ -2,6 +2,7 @@
 
 CameraScene::CameraScene() :
 	_perspective_camera{},
+	_camera{&_perspective_camera},
 	_was_middle_clicked{false},
 	_is_middle_clicked{false},
 	_middle_prev_mouse{},
@@ -20,8 +21,8 @@ void CameraScene::start() {
 	_perspective_camera.setFOVY(glm::radians(45.0f));
 	_perspective_camera.setNear(0.1f);
 	_perspective_camera.setFar(100.0f);
-	_perspective_camera.setEye(glm::vec3(0, 0, -1));
-	_perspective_camera.setCenter(glm::vec3(0, 0, 0));
+	_perspective_camera.setEye(glm::vec3(0, 0, 0));
+	_perspective_camera.setCenter(glm::vec3(0, 0, 1));
 }
 
 void CameraScene::update() {
@@ -53,8 +54,8 @@ void CameraScene::update() {
 				dir = glm::normalize(dir);
 				//dir = _perspective_camera.getRotate() * glm::vec4(dir, 1);
 
-				_perspective_camera.setPositionAbsolute(
-					cam_pos + dir * 0.1f
+				_camera->setPositionAbsolute(
+					cam_pos - dir * 0.1f
 				);
 			}
 		}
@@ -78,11 +79,11 @@ void CameraScene::update() {
 				0
 			);
 
-			glm::vec3 cam_rot = _perspective_camera.getRotationAbsolute();
+			glm::vec3 cam_rot = _camera->getRotationAbsolute();
 
 			if (dir.x != 0 && dir.y != 0) {
 				dir = glm::normalize(dir);
-				_perspective_camera.setRotationAbsolute(cam_rot.x - dir.y * 0.05, cam_rot.y + dir.x * 0.05, 0);
+				_camera->setRotationAbsolute(cam_rot.x + dir.y * 0.05, cam_rot.y - dir.x * 0.05, 0);
 			}
 		}
 	}
@@ -92,19 +93,32 @@ void CameraScene::update() {
 
 	// Translating camera forward and backward with mouse wheel
 	if (event->type == SDL_MOUSEWHEEL) {
-		glm::vec3 eye = _perspective_camera.getEye();
-		glm::vec3 center = _perspective_camera.getCenter();
+		glm::vec3 eye = _camera->getEye();
+		glm::vec3 center = _camera->getCenter();
 		glm::vec3 dir = glm::normalize(center - eye);
 
 		if (event->wheel.y > 0) {
-			_perspective_camera.setPositionAbsolute(cam_pos - dir);
+			_camera->setPositionAbsolute(cam_pos - dir);
 		}
 		else if (event->wheel.y < 0) {
-			_perspective_camera.setPositionAbsolute(cam_pos + dir);
+			_camera->setPositionAbsolute(cam_pos + dir);
 		}
 	}
 }
 
-PerspectiveCamera& CameraScene::getPerspectiveCamera() {
-	return _perspective_camera;
+glm::mat4 CameraScene::getProjection() {
+	return _camera->getProjection();
+}
+
+glm::mat4 CameraScene::getMVP() {
+	glm::mat4 clip = _camera->getClip();
+	glm::mat4 projection = _camera->getProjection();
+	glm::mat4 view = _camera->getView();
+	glm::mat4 translate = _camera->getTranslate();
+	glm::mat4 rotate = _camera->getRotate();
+	glm::mat4 scale = _camera->getScale();
+
+	glm::mat4 mvp = clip * projection * view * translate * rotate * scale;
+	
+	return mvp;
 }

@@ -8,8 +8,8 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 		std::cout << "Error opening the file: " << file_name << std::endl;
 		throw std::runtime_error("Error opening file.");
 	}
-
-	std::vector<uint32_t> indices(fom->index_count);
+	std::cout << fom->index_count << std::endl;
+	std::vector<uint32_t> indices{};
 	std::vector<uint32_t> mat_id(fom->position_count);
 	std::vector<bool>exists(fom->position_count, false);
 	{
@@ -18,20 +18,20 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 		while (f < fom->face_count) {
 
 			if (fom->face_vertices[f] == 3) {
-				indices[v_i] = fom->indices[v_i].p;
-				indices[v_i + 1] = fom->indices[v_i + 1].p;
-				indices[v_i + 2] = fom->indices[v_i + 2].p;
+				indices.push_back(fom->indices[v_i].p);
+				indices.push_back(fom->indices[v_i + 1].p);
+				indices.push_back(fom->indices[v_i + 2].p);
 			}
 			else {
 				// Here it is 4
 				// -- First triangle
-				indices[v_i] = fom->indices[v_i ].p;
-				indices[v_i + 1] = fom->indices[v_i + 1].p;
-				indices[v_i + 2] = fom->indices[v_i + 2].p;
+				indices.push_back(fom->indices[v_i ].p);
+				indices.push_back(fom->indices[v_i + 1].p);
+				indices.push_back(fom->indices[v_i + 2].p);
 				// -- Second triangle
-				indices[v_i] = fom->indices[v_i].p;
-				indices[v_i + 2] = fom->indices[v_i + 2].p;
-				indices[v_i + 3] = fom->indices[v_i + 3].p;
+				indices.push_back(fom->indices[v_i].p);
+				indices.push_back(fom->indices[v_i + 2].p);
+				indices.push_back(fom->indices[v_i + 3].p);
 			}
 
 			for (uint32_t i = v_i; i < v_i + fom->face_vertices[f]; i++) {

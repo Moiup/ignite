@@ -42,6 +42,7 @@ layout(location = 1) flat in uint material_i;
 layout (location = 0) out vec4 out_color;
 
 void main(){
-    vec4 color = vec4(0.0, 1.0, 0.0, 1.0);
+    // vec4 color = vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 color = vec4(materials[material_i].Kd, 1.0);
     out_color = color;
 }

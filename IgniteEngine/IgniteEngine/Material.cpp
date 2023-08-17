@@ -73,14 +73,14 @@ glsl::Mat::Mat() :
 	map_Ke{ -1 },
 	Kt{},
 	map_Kt{ -1 },
-	Ns{},
-	map_Ns{ -1 },
-	Ni{},
-	map_Ni{ -1 },
 	Tf{},
 	pad0{},
+	Ns{},
+	Ni{},
 	d{},
 	illum{},
+	map_Ns{ -1 },
+	map_Ni{ -1 },
 	map_d{ -1 },
 	map_bump{ -1 }
 { ; }

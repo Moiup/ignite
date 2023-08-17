@@ -18,7 +18,7 @@ std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uin
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> Object3D::transform_matrices{};
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::indices_to_material{};
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::material_indices{};
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glsl::Mat>>> Object3D::materials;
 
@@ -259,18 +259,32 @@ uint32_t Object3D::getTransformMatricesSize(Renderer* renderer, GraphicShader* s
 	return getTransformMatrices(renderer, shader).size() * sizeof(*getTransformMatrices(renderer, shader).data());
 }
 
-std::vector<uint32_t>& Object3D::getIndicesToMaterials(Renderer* renderer, GraphicShader* shader) {
-	buildIndicesToMaterials(renderer, shader);
-	return Object3D::indices_to_material[renderer][shader];
+std::vector<uint32_t>& Object3D::getMaterialIndices(Renderer* renderer, GraphicShader* shader) {
+	buildMaterialIndices(renderer, shader);
+	return Object3D::material_indices[renderer][shader];
 }
 
-uint32_t Object3D::getIndicesToMaterialsStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getIndicesToMaterials(renderer, shader).data());
+uint32_t Object3D::getMaterialIndicesStride(Renderer* renderer, GraphicShader* shader) {
+	return sizeof(*getMaterialIndices(renderer, shader).data());
 }
 
-uint32_t Object3D::getIndicesToMaterialSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getIndicesToMaterialsStride(renderer, shader);
-	return getIndicesToMaterials(renderer, shader).size() * stride;
+uint32_t Object3D::getMaterialIndicesSize(Renderer* renderer, GraphicShader* shader) {
+	uint32_t stride = getMaterialIndicesStride(renderer, shader);
+	return getMaterialIndices(renderer, shader).size() * stride;
+}
+
+std::vector<glsl::Mat>& Object3D::getMaterials(Renderer* renderer, GraphicShader* shader) {
+	buildMaterials(renderer, shader);
+	return Object3D::materials[renderer][shader];
+}
+
+uint32_t Object3D::getMaterialsStride(Renderer* renderer, GraphicShader* shader) {
+	return sizeof(*getMaterials(renderer, shader).data());
+}
+
+uint32_t Object3D::getMaterialsSize(Renderer* renderer, GraphicShader* shader) {
+	uint32_t stride = getMaterialsStride(renderer, shader);
+	return getMaterials(renderer, shader).size() * stride;
 }
 
 std::vector<uint32_t>& Object3D::getTextureIndices(Renderer* renderer, GraphicShader* shader) {
@@ -339,25 +353,22 @@ void Object3D::buildObjectId(Renderer* renderer, GraphicShader* shader) {
 }
 
 void Object3D::buildIndices(Renderer* renderer, GraphicShader* shader) {
-	uint32_t max = 0;
-	
 	// if not empty
 	if (Object3D::indices[renderer][shader].size()) {
 		return;
 	}
 
+	uint32_t max_i = 0;
 	// For each mesh
 	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
 		const Mesh* mesh = m_o.first;
 		uint32_t tmp = 0;
 		for (uint32_t i : mesh->getIndices()) {
-			if (i > tmp) {
-				tmp = i;
-			}
+			tmp = std::max(tmp, i);
 			// We adapt and add the indices
-			Object3D::indices[renderer][shader].push_back(i + max);
+			Object3D::indices[renderer][shader].push_back(i + max_i);
 		}
-		max = max + tmp + 1;
+		max_i = max_i + tmp + 1;
 	}
 }
 
@@ -441,9 +452,9 @@ void Object3D::buildTransformMatrices(Renderer* renderer, GraphicShader* shader)
 	}
 }
 
-void Object3D::buildIndicesToMaterials(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 	// if not empty, means already done
-	if (Object3D::indices_to_material[renderer][shader].size()) {
+	if (Object3D::material_indices[renderer][shader].size()) {
 		return;
 	}
 	
@@ -453,15 +464,39 @@ void Object3D::buildIndicesToMaterials(Renderer* renderer, GraphicShader* shader
 		Mesh* m = m_o.first;
 		const std::vector<uint32_t>& indices_to_mat_tmp = m->getIndicesToMaterial();
 		if(!indices_to_mat_tmp.size()){
-			indices_to_material[renderer][shader].push_back(DEFAULT_MATERIAL_INDICES);
+			for (auto& _ : m->getCoords()) {
+				material_indices[renderer][shader].push_back(DEFAULT_MATERIAL_INDICES);
+			}
 			continue;
 		}
 		uint32_t max_i = 0;
-		for (uint32_t i_to_mat : indices_to_mat_tmp) {
-			indices_to_material[renderer][shader].push_back(start_i + i_to_mat);
-			max_i = std::max(i_to_mat, max_i);
+		int count = 0;
+		for (uint32_t mat_i : indices_to_mat_tmp) {
+			max_i = std::max(mat_i, max_i);
+			material_indices[renderer][shader].push_back(start_i + mat_i);
 		}
 		start_i += max_i + 1;
+	}
+}
+
+void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
+	// if not empty, means already done
+	if (Object3D::materials[renderer][shader].size()) {
+		return;
+	}
+
+	// If it exists objects, then we must add the default material
+	if (Object3D::mesh_objects[renderer][shader].size()) {
+		Object3D::materials[renderer][shader].push_back(glsl::Mat(Material()));
+	}
+
+	// For each mesh given a renderer and a shader
+	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+		Mesh* m = m_o.first;
+		const std::vector<Material>& mats = m->getMaterials();
+		for (const Material& mat : mats) {
+			Object3D::materials[renderer][shader].push_back(glsl::Mat(mat));
+		}
 	}
 }
 

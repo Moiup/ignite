@@ -22,6 +22,8 @@ layout(std430, binding = 1) readonly buffer obj_tr_buff {
 void main(){
     uint obj_i = object_id + gl_InstanceIndex;
     mat4 tr = obj_tr.tr[obj_i];
+
+    material_i = material_id;
     
     gl_Position = camera.mvp * tr * vec4(coord, 1.0);
 }

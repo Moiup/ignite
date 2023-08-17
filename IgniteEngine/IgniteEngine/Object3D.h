@@ -28,7 +28,7 @@ private:
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> uv;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> transform_indices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> transform_matrices;
-	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> indices_to_material;
+	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> material_indices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glsl::Mat>>> materials;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> texture_indices;
 
@@ -96,9 +96,13 @@ public:
 	static std::vector<glm::mat4>& updateTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTransformMatricesSize(Renderer* renderer, GraphicShader* shader);
 
-	static std::vector<uint32_t>& getIndicesToMaterials(Renderer* renderer, GraphicShader* shader);
-	static uint32_t getIndicesToMaterialsStride(Renderer* renderer, GraphicShader* shader);
-	static uint32_t getIndicesToMaterialSize(Renderer* renderer, GraphicShader* shader);
+	static std::vector<uint32_t>& getMaterialIndices(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getMaterialIndicesStride(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getMaterialIndicesSize(Renderer* renderer, GraphicShader* shader);
+
+	static std::vector<glsl::Mat>& getMaterials(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getMaterialsStride(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getMaterialsSize(Renderer* renderer, GraphicShader* shader);
 
 	static std::vector<uint32_t>& getTextureIndices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTextureIndicesStride(Renderer* renderer, GraphicShader* shader);
@@ -113,7 +117,8 @@ private:
 	static void buildTextures(Renderer* renderer, GraphicShader* shader);
 	static void buildTransformIndices(Renderer* renderer, GraphicShader* shader);
 	static void buildTransformMatrices(Renderer* renderer, GraphicShader* shader);
-	static void buildIndicesToMaterials(Renderer* renderer, GraphicShader* shader);
+	static void buildMaterialIndices(Renderer* renderer, GraphicShader* shader);
+	static void buildMaterials(Renderer* renderer, GraphicShader* shader);
 	static void buildTextureIndices(Renderer* renderer, GraphicShader* shader);
 
 	static void freeAllocatedObjects();

@@ -30,7 +30,8 @@ void TestModule::start() {
     // -- Meshes -- //
     // Loading the mesh (file)
     _cube_info.loadObj("../assets/3d_objects/cube.obj");
-    _cornell_info.loadObj("../assets/3d_objects/cornell.obj");
+    //_cornell_info.loadObj("../assets/3d_objects/cornell.obj");
+    _cornell_info.loadObj("../assets/3d_objects/cornell-box4.obj");
 
     // Loading the mesh (by hand)
     _m.setVertex(rectangle(), rectIndices(), rectUV());

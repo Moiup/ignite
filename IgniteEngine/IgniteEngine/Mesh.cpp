@@ -6,9 +6,11 @@ Mesh::Mesh() :
 	_coords{},
 	_indices{},
 	_uv{},
-	_normals{}
+	_normals{},
+	_indices_to_mat{},
+	_materials{}
 { 
-	//Mesh::meshes.push_back(this);
+
 }
 
 Mesh::Mesh(
@@ -16,7 +18,9 @@ Mesh::Mesh(
 	const std::vector<uint32_t>& indices
 ) :
 	_uv{},
-	_normals{}
+	_normals{},
+	_indices_to_mat{},
+	_materials{}
 {
 	setVertex(coords, indices);
 }

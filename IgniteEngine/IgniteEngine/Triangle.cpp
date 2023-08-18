@@ -52,8 +52,10 @@ const uint32_t Triangle::mat_id() const {
 
 
 std::pair<std::vector<Triangle>, std::vector<Material>> Triangle::buildTriangles() {
-	std::vector<Triangle> triangles;
-	std::vector<Material> materials{Material()};
+	std::vector<Triangle> triangles{};
+	std::vector<Material> materials{};
+
+	materials.push_back(Material());
 
 	std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& mesh_objects = Object3D::getMeshObjects();
 
@@ -70,32 +72,35 @@ std::pair<std::vector<Triangle>, std::vector<Material>> Triangle::buildTriangles
 				const std::vector<uint32_t>& indices = mesh->getIndices();
 				const std::vector<uint32_t>& mat_indices = mesh->getIndicesToMaterial();
 				const std::vector<Material>& mesh_materials = mesh->getMaterials();
-
+				
 				std::vector<Object3D*>& objects = m_o.second;
+				
 				// For each objects of the same mesh
+				if (!objects.size()) {
+					continue;
+				}
 				for (Object3D* obj : objects) {
+					
 					glm::mat4 tr = obj->getTransform();
-
+					
 					for (uint32_t ind = 0; ind < indices.size(); ind += 3) {
-						glm::vec3 A = tr * glm::vec4(coords[ind], 1.0);
-						glm::vec3 B = tr * glm::vec4(coords[ind + 1], 1.0);
-						glm::vec3 C = tr * glm::vec4(coords[ind + 2], 1.0);
+						glm::vec3 A = tr * glm::vec4(coords[indices[ind]], 1.0);
+						glm::vec3 B = tr * glm::vec4(coords[indices[ind + 1]], 1.0);
+						glm::vec3 C = tr * glm::vec4(coords[indices[ind + 2]], 1.0);
 						uint32_t mat_id = 0;
+						
 						if (mesh_materials.size()) {
-							mat_id = mat_indices[ind] + materials.size();
+							mat_id = mat_indices[indices[ind]] + materials.size();
 						}
-
 						triangles.push_back(
 							Triangle(A, B, C, mat_id)
 						);
 					}
 				}
-
-				// Adding the materials to the materials array
-				materials.insert(materials.end(), mesh_materials.cbegin(), mesh_materials.cend());
+				materials.insert(materials.end(), mesh_materials.begin(), mesh_materials.end());
 			}
 		}
 	}
-	return /*std::pair<std::vector<Triangle>, std::vector<Material>>*/{triangles, materials};
+	return {triangles, materials};
 }
 

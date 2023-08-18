@@ -25,6 +25,5 @@ public:
 
 	static std::pair<std::vector<Triangle>, std::vector<Material>> buildTriangles();
 	//static std::vector<Triangle> buildTriangles(Renderer* renderer, GraphicShader* graphic_shader);
-
 };
 

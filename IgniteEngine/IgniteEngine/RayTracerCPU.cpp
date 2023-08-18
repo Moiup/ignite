@@ -22,3 +22,15 @@ bool RayTracerCPU::getIsFinished() {
 void RayTracerCPU::setIsFinished(bool is_finished) {
 	_is_finished = is_finished;
 }
+
+void RayTracerCPU::buildAssets() {
+	std::pair<std::vector<Triangle>, std::vector<Material>> assets = Triangle::buildTriangles();
+	_triangles = assets.first;
+	_materials = assets.second;
+}
+
+void RayTracerCPU::render() {
+	buildAssets();
+
+	_is_finished = true;
+}

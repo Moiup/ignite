@@ -63,6 +63,7 @@ bool MenuModule::rayTracer() {
 	if (is_finished) {
 		if (ImGui::Button("Launch")) {
 			_rt_cpu.setIsFinished(false);
+			_rt_cpu.render();
 		}
 	}
 	else {

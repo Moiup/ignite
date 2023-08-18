@@ -63,6 +63,7 @@ private:
 public:
 	static std::unordered_map<Mesh*, std::vector<Object3D*>>& getMeshObjects(Renderer* renderer, GraphicShader* shader);
 	static std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>& getMeshObjects(Renderer* renderer);
+	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& getMeshObjects();
 	
 	static std::vector<glm::vec3>& getCoords(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getCoordsStride(Renderer* renderer, GraphicShader* shader);

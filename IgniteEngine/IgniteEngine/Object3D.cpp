@@ -137,6 +137,10 @@ std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3
 	return Object3D::mesh_objects[renderer];
 }
 
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& Object3D::getMeshObjects() {
+	return Object3D::mesh_objects;
+}
+
 std::vector<glm::vec3>& Object3D::getCoords(Renderer* renderer, GraphicShader* shader) {
 	buildCoords(renderer, shader);
 	return Object3D::coords[renderer][shader];

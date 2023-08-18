@@ -8,6 +8,6 @@ class Hittable
 public:
 	Hittable();
 
-	virtual Hit intersect(const Ray& r) = 0;
+	virtual Hit intersect(const Ray& ray) = 0;
 };
 

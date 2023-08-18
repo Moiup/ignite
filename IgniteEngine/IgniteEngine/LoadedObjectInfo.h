@@ -8,6 +8,7 @@
 struct LoadedObjectInfo
 {
 	Mesh _mesh;
+	std::vector<Material> _materials;
 
 	std::vector<LoadedObjectInfo> _children;
 

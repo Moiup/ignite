@@ -16,7 +16,6 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 		uint32_t f = 0;
 		uint32_t v_i = 0;
 		while (f < fom->face_count) {
-
 			if (fom->face_vertices[f] == 3) {
 				indices.push_back(fom->indices[v_i].p);
 				indices.push_back(fom->indices[v_i + 1].p);

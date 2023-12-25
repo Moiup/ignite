@@ -7,12 +7,18 @@ IgniteEngine/x64/Release/*
 !IgniteEngine/x64/Release/SDL2.dll
 
 */.vs/*
+IgniteEngine/IgniteEngine/fast_obj
+IgniteEngine/IgniteEngine/fast_obj/*
 IgniteEngine/IgniteEngine/glfw
 IgniteEngine/IgniteEngine/glfw/*
 IgniteEngine/IgniteEngine/glm
 IgniteEngine/IgniteEngine/glm/*
+IgniteEngine/IgniteEngine/imgui
+IgniteEngine/IgniteEngine/imgui/*
 IgniteEngine/IgniteEngine/sdl2
-IgniteEngine/IgniteEngine/sdl2*
+IgniteEngine/IgniteEngine/sdl2/*
+IgniteEngine/IgniteEngine/stb_image
+IgniteEngine/IgniteEngine/stb_image/*
 IgniteEngine/IgniteEngine/vulkan_sdk
 IgniteEngine/IgniteEngine/vulkan_sdk/*
 

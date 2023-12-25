@@ -23,8 +23,8 @@ public:
 	void start();
 	void update();
 	
+	const Camera* camera() const;
 	glm::mat4 getProjection();
-	
 	glm::mat4 getMVP();
 };
 

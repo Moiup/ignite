@@ -300,6 +300,9 @@
     <ClCompile Include="Triangle.cpp">
       <Filter>Ignite\RayTraycing\src</Filter>
     </ClCompile>
+    <ClCompile Include="Bistro.cpp">
+      <Filter>Ignite\Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -550,6 +553,9 @@
     </ClInclude>
     <ClInclude Include="Triangle.h">
       <Filter>Ignite\RayTraycing\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Bistro.h">
+      <Filter>Ignite\Module</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

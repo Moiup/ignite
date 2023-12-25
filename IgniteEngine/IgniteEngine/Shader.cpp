@@ -18,7 +18,7 @@ void Shader::setPhysicalDevice(PhysicalDevice* gpu) {
 	_gpu = gpu;
 }
 
-void Shader::setLogicalDevice(VkDevice* logical_device) {
+void Shader::setLogicalDevice(LogicalDevice* logical_device) {
 	_logical_device = logical_device;
 }
 
@@ -153,7 +153,7 @@ std::unordered_map<std::string, std::vector<Texture*>>& Shader::getTexture() {
 
 void Shader::destroy() {
 	for (auto& stage : _shader_stages) {
-		vkDestroyShaderModule(*_logical_device, stage.module, nullptr);
+		vkDestroyShaderModule(*_logical_device->getDevice(), stage.module, nullptr);
 	}
 }
 
@@ -194,7 +194,7 @@ void Shader::createShaderModuleAndStage(const std::string& path, VkShaderStageFl
 	shader_module_info.pCode = reinterpret_cast<const uint32_t*>(shader_text.data());
 
 	VkResult vk_result = vkCreateShaderModule(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&shader_module_info,
 		nullptr,
 		&shader_module

@@ -357,7 +357,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 
 void DefaultRenderer::createSwapchain() {
 	_swapchain.setLogicalDevice(
-		(VkDevice*)_logical_device->getDevice()
+		_logical_device
 	);
 	_swapchain.setSurface(
 		_window->getSurface()
@@ -375,7 +375,7 @@ void DefaultRenderer::createSwapchain() {
 
 void DefaultRenderer::createDepthBuffer() {
 	_depth_buffer.setLogicalDevice(
-		(VkDevice*)_logical_device->getDevice()
+		_logical_device
 	);
 	_depth_buffer.setImageWidthHeight(
 		_window->getWidthInPixel(),

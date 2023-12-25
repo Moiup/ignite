@@ -7,12 +7,13 @@
 
 struct LoadedObjectInfo
 {
-	Mesh _mesh;
-
+	std::vector<Mesh> _meshes;
+	std::vector<std::vector<uint32_t>> _material_indices; // array of indices for each mesh
+	std::vector<std::vector<Material>> _materials;
 	std::vector<LoadedObjectInfo> _children;
 
 	LoadedObjectInfo();
 
-	void loadObj(const std::string& file_name);
+	void loadWavefont(const std::string& file_name);
 };
 

@@ -24,7 +24,7 @@ void Buffer::setValues(void* values) {
 	
 	void* copy;
 	VkResult vk_result = vkMapMemory(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_memory,
 		0,
 		_buffer_info.size,
@@ -33,12 +33,12 @@ void Buffer::setValues(void* values) {
 	);
 
 	memcpy(copy, values, _buffer_info.size);
-	vkUnmapMemory(*_logical_device, _memory);
+	vkUnmapMemory(*_logical_device->getDevice(), _memory);
 }
 
 void Buffer::bind() {
 	VkResult vk_result = vkBindBufferMemory(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_buffer,
 		_memory,
 		0
@@ -89,7 +89,7 @@ void* Buffer::getValues() {
 	void* copy{};
 	void* values = new uint8_t[_buffer_info.size];
 	vkMapMemory(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_memory,
 		0,
 		_buffer_info.size,
@@ -97,14 +97,14 @@ void* Buffer::getValues() {
 		(void**)&copy
 	);
 	memcpy(values, copy, _buffer_info.size);
-	vkUnmapMemory(*_logical_device, _memory);
+	vkUnmapMemory(*_logical_device->getDevice(), _memory);
 
 	return values;	
 }
 
 void Buffer::createBuffer() {
 	VkResult vk_result = vkCreateBuffer(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&_buffer_info,
 		nullptr,
 		&_buffer
@@ -116,7 +116,7 @@ void Buffer::createBuffer() {
 
 void Buffer::destroyBuffer() {
 	vkDestroyBuffer(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_buffer,
 		nullptr
 	);
@@ -124,7 +124,7 @@ void Buffer::destroyBuffer() {
 
 void Buffer::getMemoryRequirements() {
 	vkGetBufferMemoryRequirements(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_buffer,
 		&_memory_req
 	);

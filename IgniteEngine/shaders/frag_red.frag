@@ -7,7 +7,7 @@ layout(location = 2) flat in uint tex_i;
 
 // UNIFORM
 layout(binding = 3) uniform sampler samp;
-layout(binding = 4) uniform texture2D textures[2];
+layout(binding = 4) uniform texture2D textures[3];
 
 // OUT
 layout (location = 0) out vec4 out_color;

@@ -6,7 +6,7 @@
 class Swapchain
 {
 private:
-	VkDevice* _logical_device;
+	LogicalDevice* _logical_device;
 
 	VkSwapchainKHR _swapchain;
 	VkSwapchainCreateInfoKHR _info;
@@ -22,7 +22,7 @@ private:
 public:
 	Swapchain();
 
-	void setLogicalDevice(VkDevice* logical_device);
+	void setLogicalDevice(LogicalDevice* logical_device);
 
 	void setPNext(void *p_next);
 	void setFlags(VkSwapchainCreateFlagsKHR flags);

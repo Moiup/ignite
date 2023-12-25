@@ -11,11 +11,14 @@ private:
 	glm::vec3 _C;
 	uint32_t _mat_id;
 
+	glm::vec3 _n;
+
 public:
 	Triangle();
 	Triangle(glm::vec3 A, glm::vec3 B, glm::vec3 C);
 	Triangle(glm::vec3 A, glm::vec3 B, glm::vec3 C, uint32_t mat_id);
 
+	Hit intersectSimple(const Ray& ray);
 	Hit intersect(const Ray& ray);
 
 	const glm::vec3& A() const;
@@ -23,7 +26,7 @@ public:
 	const glm::vec3& C() const;
 	const uint32_t mat_id() const;
 
-	static std::pair<std::vector<Triangle>, std::vector<Material>> buildTriangles();
+	static std::pair<std::vector<Triangle>, std::vector<Material>> buildTriangles(glm::mat4 model);
 	//static std::vector<Triangle> buildTriangles(Renderer* renderer, GraphicShader* graphic_shader);
 };
 

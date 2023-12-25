@@ -150,6 +150,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ArrayBuffer.cpp" />
     <ClCompile Include="ArrayBufferInfo.cpp" />
+    <ClCompile Include="Bistro.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraScene.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="ArrayBuffer.h" />
     <ClInclude Include="ArrayBufferInfo.h" />
+    <ClInclude Include="Bistro.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraScene.h" />

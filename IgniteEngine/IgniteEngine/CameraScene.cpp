@@ -106,6 +106,10 @@ void CameraScene::update() {
 	}
 }
 
+const Camera* CameraScene::camera() const {
+	return _camera;
+}
+
 glm::mat4 CameraScene::getProjection() {
 	return _camera->getProjection();
 }

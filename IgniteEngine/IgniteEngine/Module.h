@@ -7,6 +7,9 @@
 #include "Texture.h"
 #include "CameraScene.h"
 #include "ComputePipeline.h"
+#include "Mesh.h"
+#include "Object3D.h"
+#include "LoadedObjectInfo.h"
 
 class Module : public EngineEntity
 {

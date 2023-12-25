@@ -11,7 +11,13 @@ Texture::Texture() :
 	_width{ 0 },
 	_height{ 0 },
 	_width_inv{ 0 },
-	_height_inv{ 0 }
+	_height_inv{ 0 },
+	_logical_device{},
+	_gpu{},
+	_command_pool{},
+	_image{},
+	_image_layout{},
+	_format{}
 {
 	;
 }
@@ -25,6 +31,13 @@ Texture::Texture(std::string file_name) :
 Texture::Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) :
 	Texture::Texture()
 {
+	setPixels(pixels, width, height);
+}
+
+Texture::Texture(uint64_t width, uint64_t height) :
+	Texture::Texture()
+{
+	std::vector<glm::vec4> pixels(width * height * _n);
 	setPixels(pixels, width, height);
 }
 
@@ -60,7 +73,7 @@ const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
 void Texture::create() {
 	// Creating the staging buffer
 	Buffer staging_buffer{};
-	staging_buffer.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	staging_buffer.setLogicalDevice(_logical_device);
 	staging_buffer.setMemoryProperties(_gpu->getMemoryProperties());
 	staging_buffer.setFlags(0);
 	staging_buffer.setPNext(nullptr);
@@ -96,7 +109,7 @@ void Texture::create() {
 	image_copy_arr.push_back(image_copy);
 
 	// Create the image to copy the buffer to
-	_image.setLogicalDevice((VkDevice*)_logical_device->getDevice());
+	_image.setLogicalDevice(_logical_device);
 	_image.setMemoryProperties(_gpu->getMemoryProperties());
 	_image.setImageImageType(VK_IMAGE_TYPE_2D);
 	_image.setImageFormat(_format);

@@ -8,6 +8,9 @@ private:
 	glm::vec3 _center;
 	glm::vec3 _up;
 
+	uint32_t _width;
+	uint32_t _height;
+
 	glm::mat4 _clip;
 
 public:
@@ -25,9 +28,11 @@ public:
 	glm::vec3 getUp();
 
 	glm::mat4 getView();
-	virtual glm::mat4 getProjection();
+	virtual glm::mat4 getProjection() = 0;
 	glm::mat4 getClip();
 
 	glm::mat4 getMVP();
+
+	static glm::mat4 getViewport(uint32_t width, uint32_t height);
 };
 

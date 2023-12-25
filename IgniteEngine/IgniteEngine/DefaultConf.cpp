@@ -1,6 +1,7 @@
 #include "DefaultConf.h"
 
-#include "PerspectiveCamera.h"
+#include "CameraScene.h"
+//#include "PerspectiveCamera.h"
 
 DefaultGPU* DefaultConf::gpu;
 LogicalDevice* DefaultConf::logical_device;
@@ -10,5 +11,6 @@ WindowSurface* DefaultConf::render_window;
 Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;
 CameraScene* DefaultConf::camera;
+Texture* DefaultConf::white_texture;
 uint64_t DefaultConf::delta_time; // ms
 SDL_Event* DefaultConf::event;

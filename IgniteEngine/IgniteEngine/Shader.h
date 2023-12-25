@@ -35,13 +35,13 @@ protected:
 	std::unordered_map<std::string, std::vector<Texture*>> _textures;
 
 	PhysicalDevice* _gpu;
-	VkDevice* _logical_device;
+	LogicalDevice* _logical_device;
 
 public:
 	Shader();
 
 	void setPhysicalDevice(PhysicalDevice* gpu);
-	void setLogicalDevice(VkDevice* logical_device);
+	void setLogicalDevice(LogicalDevice* logical_device);
 
 	void addUniformBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
 	void addUniformBuffer(std::string name, UniformBuffer* buffer);

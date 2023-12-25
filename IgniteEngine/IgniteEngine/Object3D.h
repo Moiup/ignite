@@ -2,6 +2,7 @@
 
 #include "Entity3D.h"
 #include "Mesh.h"
+#include "DefaultConf.h"
 #include "Sampler.h"
 #include "Texture.h"
 #include "Renderer.h"
@@ -36,6 +37,8 @@ private:
 
 	Mesh* _mesh;
 	Renderer* _renderer;
+	std::vector<uint32_t>* _material_indices;
+	std::vector<Material*> _materials;
 	Texture* _texture;
 	std::vector<GraphicShader*> _shaders;
 
@@ -48,6 +51,9 @@ public:
 	void setRenderer(Renderer* renderer);
 	const Renderer* getRenderer() const;
 
+	void setMaterial(Material* material);
+	const std::vector<Material*>& getMaterial() const;
+
 	void setTexture(Texture* texture);
 	const Texture* getTexture() const;
 
@@ -59,6 +65,11 @@ public:
 
 private:
 	void createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj);
+	void setMaterial(
+		const std::vector<Material>& material,
+		std::vector<uint32_t>* indices
+	);
+	std::vector<uint32_t>* getMaterialIndices();
 
 public:
 	static std::unordered_map<Mesh*, std::vector<Object3D*>>& getMeshObjects(Renderer* renderer, GraphicShader* shader);

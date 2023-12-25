@@ -8,7 +8,7 @@ Ressource::Ressource() :
 	;
 }
 
-void Ressource::setLogicalDevice(VkDevice* logical_device) {
+void Ressource::setLogicalDevice(LogicalDevice* logical_device) {
 	_logical_device = logical_device;
 }
 
@@ -41,7 +41,7 @@ void Ressource::allocateMemory(VkMemoryPropertyFlags memory_property_flags) {
 	}
 
 	VkResult vk_result = vkAllocateMemory(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&allocate_info,
 		nullptr,
 		&_memory
@@ -56,7 +56,7 @@ void Ressource::bind() {
 }
 
 void Ressource::freeMemory() {
-	vkFreeMemory(*_logical_device, _memory, nullptr);
+	vkFreeMemory(*_logical_device->getDevice(), _memory, nullptr);
 }
 
 void Ressource::getMemoryRequirements() {

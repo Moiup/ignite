@@ -6,6 +6,7 @@
 #include "TestModule.h"
 #include "MediapipeModule.h"
 #include "MenuModule.h"
+#include "Bistro.h"
 #include "Camera.h"
 
 class Modules
@@ -15,6 +16,7 @@ private:
 
 	TestModule _test_module;
 	//MediapipeModule _mediapipe_module;
+	Bistro _bistro;
 
 public:
 	Modules();

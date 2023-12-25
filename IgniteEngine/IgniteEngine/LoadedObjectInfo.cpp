@@ -2,7 +2,7 @@
 
 LoadedObjectInfo::LoadedObjectInfo() { ; }
 
-void LoadedObjectInfo::loadObj(const std::string& file_name) {
+void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	fastObjMesh* fom = fast_obj_read(file_name.c_str());
 	if (!fom) {
 		std::cout << "Error opening the file: " << file_name << std::endl;
@@ -15,6 +15,7 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 	{
 		uint32_t f = 0;
 		uint32_t v_i = 0;
+		uint32_t m_i = 0;
 		while (f < fom->face_count) {
 			if (fom->face_vertices[f] == 3) {
 				indices.push_back(fom->indices[v_i].p);
@@ -24,7 +25,7 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 			else {
 				// Here it is 4
 				// -- First triangle
-				indices.push_back(fom->indices[v_i ].p);
+				indices.push_back(fom->indices[v_i].p);
 				indices.push_back(fom->indices[v_i + 1].p);
 				indices.push_back(fom->indices[v_i + 2].p);
 				// -- Second triangle
@@ -46,12 +47,19 @@ void LoadedObjectInfo::loadObj(const std::string& file_name) {
 		}
 	}
 
-	_mesh.setCoords(fom->positions, fom->position_count);
-	_mesh.setNormals(fom->normals, fom->normal_count);
-	_mesh.setUV(fom->texcoords, fom->texcoord_count);
-	_mesh.setIndices(indices.data(), indices.size());
-	_mesh.setIndicesToMaterial(mat_id.data(), mat_id.size());
-	_mesh.setMaterials(fom->materials, fom->material_count);
+	_meshes.push_back(Mesh());
+	_meshes[0].setCoords(fom->positions, fom->position_count);
+	_meshes[0].setNormals(fom->normals, fom->normal_count);
+	_meshes[0].setUV(fom->texcoords, fom->texcoord_count);
+	_meshes[0].setIndices(indices.data(), indices.size());
+
+	_material_indices.push_back(std::vector<uint32_t>());
+	_material_indices[0].assign(mat_id.data(), mat_id.data() + mat_id.size());
+
+	_materials.push_back(std::vector<Material>());
+	for (uint32_t i = 0; i < fom->material_count; i++) {
+		_materials[0].push_back(Material(fom->materials[i]));
+	}
 
 	fast_obj_destroy(fom);
 }

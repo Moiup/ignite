@@ -44,6 +44,8 @@ private:
 	GraphicShader _graphic_shader;
 	DefaultRenderer _renderer;
 
+	Texture _white_texture;
+
 	// Buffers
 	VertexBuffer _coord_buffer;
 	VertexBuffer _object_id_buffer;

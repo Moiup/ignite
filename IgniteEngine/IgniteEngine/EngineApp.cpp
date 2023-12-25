@@ -9,6 +9,7 @@ EngineApp::EngineApp() :
 	_command_pool{},
 	_graphic_shader{},
 	_renderer{},
+	_white_texture{},
 	_camera{},
 	_modules{}
 {
@@ -42,7 +43,8 @@ void EngineApp::init() {
 	_instance.create();
 
 	// Setting window
-	_render_window.setInstance((VkInstance*)&_instance.getInstance());
+	const VkInstance insta = _instance.getInstance();
+	_render_window.setInstance(const_cast<VkInstance*>(&insta));
 	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
 	// Initialising
@@ -65,7 +67,7 @@ void EngineApp::init() {
 	_logical_device.create();
 
 	// Command Pool
-	_command_pool.setLogicalDevice((VkDevice*)_logical_device.getDevice());
+	_command_pool.setLogicalDevice(const_cast<VkDevice*>(_logical_device.getDevice()));
 	_command_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	_command_pool.setQueueFamilyIndex(
 		_logical_device.getQueue("graphic_queue")->getInfos()->queueFamilyIndex
@@ -80,6 +82,14 @@ void EngineApp::init() {
 	DefaultConf::command_pool = &_command_pool;
 	DefaultConf::renderer = &_renderer;
 	DefaultConf::camera = &_camera;
+	DefaultConf::white_texture = &_white_texture;
+
+	// White Texture
+	_white_texture.readFile("../assets/textures/white.png");
+	_white_texture.setLogicalDevice(DefaultConf::logical_device);
+	_white_texture.setGPU(DefaultConf::gpu);
+	_white_texture.setCommandPool(DefaultConf::command_pool);
+	_white_texture.create();
 	
 	initEngineEntities();
 
@@ -91,43 +101,43 @@ void EngineApp::start() {
 
 	startEngineEntities();
 
-	// Shader
-	_graphic_shader.setNbFrame(NB_FRAME);
-	_graphic_shader.setLogicalDevice(
-		(VkDevice*)_logical_device.getDevice()
-	);
-	_graphic_shader.setPhysicalDevice(&_gpu);
-	_graphic_shader.read(
+	//-----------//
+	// Shader    //
+	//-----------//
+	DefaultConf::graphic_shader->setNbFrame(NB_FRAME);
+	DefaultConf::graphic_shader->setLogicalDevice(DefaultConf::logical_device);
+	DefaultConf::graphic_shader->setPhysicalDevice(DefaultConf::gpu);
+	DefaultConf::graphic_shader->read(
 		"../shaders/vert.spv",
 		"../shaders/frag.spv"
 	);
 	// Configuring the Graphic Shader
-	_graphic_shader.addVertexBufferInfo(
+	DefaultConf::graphic_shader->addVertexBufferInfo(
 		"coord",
-		Object3D::getCoordsStride(&_renderer, &_graphic_shader),
+		Object3D::getCoordsStride(DefaultConf::renderer, DefaultConf::graphic_shader),
 		VK_FORMAT_R32G32B32_SFLOAT,
 		0
 	);
-	_graphic_shader.addVertexBufferInfo(
+	DefaultConf::graphic_shader->addVertexBufferInfo(
 		"object_id",
-		Object3D::getMeshOffsetsStride(&_renderer, &_graphic_shader),
+		Object3D::getMeshOffsetsStride(DefaultConf::renderer, DefaultConf::graphic_shader),
 		VK_FORMAT_R32_UINT,
 		1
 	);
-	_graphic_shader.addVertexBufferInfo(
+	DefaultConf::graphic_shader->addVertexBufferInfo(
 		"material_id",
-		Object3D::getMaterialIndicesStride(&_renderer, &_graphic_shader),
+		Object3D::getMaterialIndicesStride(DefaultConf::renderer, DefaultConf::graphic_shader),
 		VK_FORMAT_R32_UINT,
 		2
 	);
 	// Index Buffer
-	_graphic_shader.addIndexBufferInfo(
+	DefaultConf::graphic_shader->addIndexBufferInfo(
 		"index",
-		Object3D::getIndicesNbElem(&_renderer, &_graphic_shader)
+		Object3D::getIndicesNbElem(DefaultConf::renderer, DefaultConf::graphic_shader)
 	);
 
 	// Uniform buffer
-	_graphic_shader.addUniformBufferInfo(
+	DefaultConf::graphic_shader->addUniformBufferInfo(
 		"camera",
 		0,
 		VK_SHADER_STAGE_VERTEX_BIT
@@ -135,84 +145,85 @@ void EngineApp::start() {
 	
 	// Storage Buffers
 	// transform
-	_graphic_shader.addStorageBufferInfo(
+	DefaultConf::graphic_shader->addStorageBufferInfo(
 		"obj_tr",
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT
 	);
 
 	// materials
-	_graphic_shader.addStorageBufferInfo(
+	DefaultConf::graphic_shader->addStorageBufferInfo(
 		"MaterialsBuffer",
 		2,
 		VK_SHADER_STAGE_FRAGMENT_BIT
 	);
 
-	// Creating the buffers
+	//----------------------//
+	// Creating the buffers //
+	//----------------------//
 	// Coord
-
 	// Mesh offsets
-	_coord_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_coord_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_coord_buffer.setSize(Object3D::getCoordsSize(&_renderer, &_graphic_shader));
+	_coord_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_coord_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_coord_buffer.setSize(Object3D::getCoordsSize(DefaultConf::renderer, DefaultConf::graphic_shader));
 	_coord_buffer.create();
-	_coord_buffer.setValues(Object3D::getCoords(&_renderer, &_graphic_shader).data());
-	_graphic_shader.addVertexBuffer("coord", &_coord_buffer);
+	_coord_buffer.setValues(Object3D::getCoords(DefaultConf::renderer, DefaultConf::graphic_shader).data());
+	DefaultConf::graphic_shader->addVertexBuffer("coord", &_coord_buffer);
 
-	_object_id_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_object_id_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_object_id_buffer.setSize(Object3D::getObjectIdSize(&_renderer, &_graphic_shader));
+	_object_id_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_object_id_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_object_id_buffer.setSize(Object3D::getObjectIdSize(DefaultConf::renderer, DefaultConf::graphic_shader));
 	_object_id_buffer.create();
-	_object_id_buffer.setValues(Object3D::getObjectId(&_renderer, &_graphic_shader).data());
-	_graphic_shader.addVertexBuffer("object_id", &_object_id_buffer);
+	_object_id_buffer.setValues(Object3D::getObjectId(DefaultConf::renderer, DefaultConf::graphic_shader).data());
+	DefaultConf::graphic_shader->addVertexBuffer("object_id", &_object_id_buffer);
 
-	_material_indices_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_material_indices_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_material_indices_buffer.setSize(Object3D::getMaterialIndicesSize(&_renderer, &_graphic_shader));
+	_material_indices_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_material_indices_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_material_indices_buffer.setSize(Object3D::getMaterialIndicesSize(DefaultConf::renderer, DefaultConf::graphic_shader));
 	_material_indices_buffer.create();
-	_material_indices_buffer.setValues(Object3D::getMaterialIndices(&_renderer, &_graphic_shader).data());
-	_graphic_shader.addVertexBuffer("material_id", &_material_indices_buffer);
+	_material_indices_buffer.setValues(Object3D::getMaterialIndices(DefaultConf::renderer, DefaultConf::graphic_shader).data());
+	DefaultConf::graphic_shader->addVertexBuffer("material_id", &_material_indices_buffer);
 
 	// Index buffer
-	_index_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_index_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_index_buffer.setSize(Object3D::getIndicesSize(&_renderer, &_graphic_shader));
+	_index_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_index_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_index_buffer.setSize(Object3D::getIndicesSize(DefaultConf::renderer, DefaultConf::graphic_shader));
 	_index_buffer.create();
-	_index_buffer.setValues(Object3D::getIndices(&_renderer, &_graphic_shader).data());
-	_graphic_shader.addIndexBuffer("index", &_index_buffer);
+	_index_buffer.setValues(Object3D::getIndices(DefaultConf::renderer, DefaultConf::graphic_shader).data());
+	DefaultConf::graphic_shader->addIndexBuffer("index", &_index_buffer);
 
 	// Uniform buffer
-	_camera_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_camera_buffer.setMemoryProperties(_gpu.getMemoryProperties());
+	_camera_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_camera_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
 	_camera_buffer.setSize(sizeof(_camera.getMVP()));
 	_camera_buffer.create();
 	_camera_buffer.setValues(&_camera.getMVP()[0][0]);
-	_graphic_shader.addUniformBuffer("camera", &_camera_buffer);
+	DefaultConf::graphic_shader->addUniformBuffer("camera", &_camera_buffer);
 
 	// Storage Buffers
 	// transform
-	_obj_tr_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_obj_tr_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_obj_tr_buffer.setSize(Object3D::getTransformMatricesSize(&_renderer, &_graphic_shader));
+	_obj_tr_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_obj_tr_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_obj_tr_buffer.setSize(Object3D::getTransformMatricesSize(DefaultConf::renderer, DefaultConf::graphic_shader));
 	_obj_tr_buffer.create();
-	_obj_tr_buffer.setValues(&Object3D::getTransformMatrices(&_renderer, &_graphic_shader)[0][0]);
-	_graphic_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
+	_obj_tr_buffer.setValues(&Object3D::getTransformMatrices(DefaultConf::renderer, DefaultConf::graphic_shader)[0][0]);
+	DefaultConf::graphic_shader->addStorageBuffer("obj_tr", &_obj_tr_buffer);
 
 	// materials
-	_materials_buffer.setLogicalDevice((VkDevice*)_logical_device.getDevice());
-	_materials_buffer.setMemoryProperties(_gpu.getMemoryProperties());
-	_materials_buffer.setSize(Object3D::getMaterialsSize(&_renderer, &_graphic_shader));
+	_materials_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_materials_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_materials_buffer.setSize(Object3D::getMaterialsSize(DefaultConf::renderer, DefaultConf::graphic_shader));
 	_materials_buffer.create();
-	_materials_buffer.setValues(Object3D::getMaterials(&_renderer, &_graphic_shader).data());
-	_graphic_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
+	_materials_buffer.setValues(Object3D::getMaterials(DefaultConf::renderer, DefaultConf::graphic_shader).data());
+	DefaultConf::graphic_shader->addStorageBuffer("MaterialsBuffer", &_materials_buffer);
 
 	// Renderer
-	_renderer.setNbFrame(NB_FRAME);
-	_renderer.setLogicalDevice(&_logical_device);
-	_renderer.setCommandPool(&_command_pool);
-	_renderer.setPhysicalDevice(&_gpu);
-	_renderer.setWindow(&_render_window);
-	_renderer.create();
+	DefaultConf::renderer->setNbFrame(NB_FRAME);
+	DefaultConf::renderer->setLogicalDevice(DefaultConf::logical_device);
+	DefaultConf::renderer->setCommandPool(DefaultConf::command_pool);
+	DefaultConf::renderer->setPhysicalDevice(DefaultConf::gpu);
+	DefaultConf::renderer->setWindow(DefaultConf::render_window);
+	DefaultConf::renderer->create();
 }
 
 void EngineApp::update() {
@@ -235,13 +246,15 @@ void EngineApp::update() {
 		EngineEntity::updateAll();
 
 		_obj_tr_buffer.setValues(
-			&Object3D::updateTransformMatrices(&_renderer, &_graphic_shader)[0][0]
+			&Object3D::updateTransformMatrices(
+				DefaultConf::renderer, DefaultConf::graphic_shader
+			)[0][0]
 		);
 		_camera_buffer.setValues(
 			&DefaultConf::camera->getMVP()[0][0]
 		);
 
-		_renderer.render();
+		DefaultConf::renderer->render();
 
 		glfwPollEvents();
 		
@@ -251,7 +264,7 @@ void EngineApp::update() {
 		DefaultConf::delta_time = delta_time;
 	}
 
-	_logical_device.waitIdle();
+	DefaultConf::logical_device->waitIdle();
 }
 
 void EngineApp::close() {
@@ -264,6 +277,7 @@ void EngineApp::close() {
 	_camera_buffer.destroy();
 	_obj_tr_buffer.destroy();
 	_materials_buffer.destroy();
+
 	_renderer.destroy();
 
 	ImGui::DestroyContext();
@@ -275,7 +289,6 @@ void EngineApp::close() {
 	_graphic_shader.destroy();
 	_command_pool.destroy();
 	_logical_device.destroy();
-
 
 	_instance.destroy();
 }

@@ -1,5 +1,8 @@
 #pragma once
 #include "Triangle.h"
+#include "Texture.h"
+#include "DefaultConf.h"
+#include "CameraScene.h"
 
 class RayTracerCPU
 {
@@ -9,6 +12,8 @@ private:
 
 	std::vector<Triangle> _triangles;
 	std::vector<Material> _materials;
+
+	Texture _image;
 
 public:
 	RayTracerCPU();
@@ -23,5 +28,8 @@ public:
 
 private:
 	void buildAssets();
+	void buildImage();
+	void computePixel(uint64_t x, uint64_t y, glm::mat4 inv);
+	void computePixel(float x, float y, uint64_t p_x, uint64_t p_y);
 };
 

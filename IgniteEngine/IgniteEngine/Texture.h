@@ -39,6 +39,7 @@ public:
 	Texture();
 	Texture(std::string file_name);
 	Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
+	Texture(uint64_t width, uint64_t height);
 
 	void setLogicalDevice(LogicalDevice* _logical_device);
 	void setGPU(PhysicalDevice* gpu);

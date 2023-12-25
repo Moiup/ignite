@@ -6,10 +6,8 @@ Mesh::Mesh() :
 	_coords{},
 	_indices{},
 	_uv{},
-	_normals{},
-	_indices_to_mat{},
-	_materials{}
-{ 
+	_normals{}
+{
 
 }
 
@@ -18,9 +16,7 @@ Mesh::Mesh(
 	const std::vector<uint32_t>& indices
 ) :
 	_uv{},
-	_normals{},
-	_indices_to_mat{},
-	_materials{}
+	_normals{}
 {
 	setVertex(coords, indices);
 }
@@ -66,22 +62,12 @@ const void Mesh::setIndices(uint32_t* indices, const uint32_t len) {
 
 const void Mesh::setUV(float* uv, const uint32_t len) {
 	glm::vec2* t = (glm::vec2*)uv;
-	_uv.assign(t, t + len/2);
+	_uv.assign(t, t + len / 2);
 }
 
 const void Mesh::setNormals(float* normals, const uint32_t len) {
 	glm::vec3* n = (glm::vec3*)normals;
-	_normals.assign(n, n + len/3);
-}
-
-const void Mesh::setIndicesToMaterial(uint32_t* indices_mat, const uint32_t len) {
-	_indices_to_mat.assign(indices_mat, indices_mat + len);
-}
-
-const void Mesh::setMaterials(fastObjMaterial* mat, const uint32_t len) {
-	for (uint32_t i = 0; i < len; i++) {
-		_materials.push_back(Material(mat[i]));
-	}
+	_normals.assign(n, n + len / 3);
 }
 
 const std::vector<glm::vec3>& Mesh::getCoords() const {
@@ -100,13 +86,6 @@ const std::vector<glm::vec3>& Mesh::getNormals() const {
 	return _normals;
 }
 
-const std::vector<uint32_t>& Mesh::getIndicesToMaterial() const {
-	return _indices_to_mat;
-}
-
-const std::vector<Material>& Mesh::getMaterials() const {
-	return _materials;
-}
 
 uint32_t Mesh::getCoordsSize() {
 	return _coords.size() * sizeof(*_coords.data());
@@ -124,13 +103,6 @@ uint32_t Mesh::getNormalsStride() {
 	return sizeof(*_normals.data());
 }
 
-uint32_t Mesh::getIndicesToMaterialStride() {
-	return sizeof(*_indices_to_mat.data());
-}
-
-uint32_t Mesh::getMaterialsStride() {
-	return sizeof(*_materials.data());
-}
 
 uint32_t Mesh::getIndicesSize() {
 	return _indices.size() * sizeof(*_indices.data());
@@ -146,12 +118,4 @@ uint32_t Mesh::getUVNbElem() {
 
 uint32_t Mesh::getNormalsNbElem() {
 	return _normals.size();
-}
-
-uint32_t Mesh::getIndicesToMaterialNbElem() {
-	return _indices_to_mat.size();
-}
-
-uint32_t Mesh::getMaterialsNbElem() {
-	return _materials.size();
 }

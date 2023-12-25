@@ -1,8 +1,5 @@
 #pragma once
 #include "Module.h"
-#include "Mesh.h"
-#include "Object3D.h"
-#include "LoadedObjectInfo.h"
 #include "DispatcherSync.h"
 
 class TestModule : public Module

@@ -18,3 +18,5 @@ IgniteEngine/IgniteEngine/vulkan_sdk/*
 
 IgniteEngine/assets
 IgniteEngine/assets/*
+
+ignite-bench.json

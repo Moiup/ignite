@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "fast_obj/fast_obj.h"
+#include <iostream>
 
 struct Material
 {

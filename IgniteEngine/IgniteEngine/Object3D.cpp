@@ -113,7 +113,6 @@ void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj) 
 			(std::vector<uint32_t>*)&loi._material_indices[0]
 		);
 	}
-
 	for (uint32_t i = 0; i < loi._meshes.size(); i++) {
 		Object3D* o = new Object3D();
 		o->setMesh((Mesh*)&loi._meshes[i]);

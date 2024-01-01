@@ -100,6 +100,9 @@ const void glsl::Mat::setMaterial(Material mat) {
 	Kd.g = mat.Kd[1];
 	Kd.b = mat.Kd[2];
 
+	map_Kd = mat.map_Kd;
+	std::cout << mat.map_Kd << std::endl;
+
 	Ks.r = mat.Ks[0];
 	Ks.g = mat.Ks[1];
 	Ks.b = mat.Ks[2];

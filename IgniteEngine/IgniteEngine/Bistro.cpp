@@ -12,10 +12,7 @@ void Bistro::start() {
 	Module::start();
 
 	// -- Loading info
-	std::cout << "BISTRO" << std::endl;
 	_bistro_info.loadWavefont("../assets/bistro/bistro/exterior.obj");
-	std::cout << "LOADED" << std::endl;
-	std::cout << std::endl;
 
 	_bistro.createFromObjectInfo(_bistro_info);
 	_bistro.setRenderer(DefaultConf::renderer);

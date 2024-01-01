@@ -9,27 +9,22 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		throw std::runtime_error("Error opening file.");
 	}
 
+	std::cout << "Loading obj file: ";
 	std::cout << file_name << std::endl;
-	std::cout << fom->object_count << std::endl;
 
 	_materials.push_back(std::vector<Material>());
 	std::unordered_map<char*, uint32_t> mat_to_tex;
 	uint32_t t_id{0};
 	for (uint32_t i = 0; i < fom->material_count; i++) {
 		_materials[0].push_back(Material(fom->materials[i]));
-
 		if (!fom->materials[i].map_Kd.path) {
 			continue;
 		}
-
 		if (!mat_to_tex.count(fom->materials[i].map_Kd.path)) {
 			mat_to_tex[fom->materials[i].map_Kd.path] = t_id;
 			t_id++;
 		}
-		std::cout << mat_to_tex[fom->materials[i].map_Kd.path] << std::endl;
 		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];
-
-		std::cout << fom->materials[i].map_Kd.path << std::endl;
 	}
 
 	std::vector<uint32_t> indices{};
@@ -89,105 +84,3 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	
 	fast_obj_destroy(fom);
 }
-
-//void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
-//	fastObjMesh* fom = fast_obj_read(file_name.c_str());
-//	if (!fom) {
-//		std::cout << "Error opening the file: " << file_name << std::endl;
-//		throw std::runtime_error("Error opening file.");
-//	}
-//
-//	std::cout << file_name << std::endl;
-//	std::cout << fom->object_count << std::endl;
-//
-//	std::cout << fom->position_count << std::endl;
-//	std::cout << fom->face_count << std::endl;
-//
-//	exit(0);
-//
-//	_meshes.resize(fom->object_count);
-//
-//	std::cout << "TEST 1" << std::endl;
-//	// For each object
-//	for (uint32_t o_i = 0; o_i < fom->object_count; o_i++) {
-//		std::vector<uint32_t> indices{};
-//		std::vector<float> positions{};
-//		std::vector<float> normals{};
-//		std::vector<float> uv{};
-//		std::cout << "TEST 1.1" << std::endl;
-//		fastObjGroup fog = fom->objects[o_i];
-//		uint32_t v_i = fog.index_offset;
-//		// For each face of the object
-//		for (uint32_t f_i = fog.face_offset; f_i < fog.face_offset + fog.face_count; f_i++) {
-//			if (fom->face_vertices[f_i] == 3) {
-//				indices.push_back(fom->indices[v_i].p - fog.index_offset - 1);
-//				indices.push_back(fom->indices[v_i + 1].p - fog.index_offset - 1);
-//				indices.push_back(fom->indices[v_i + 2].p - fog.index_offset - 1);
-//			}
-//			else {
-//				// Here it is 4
-//				// -- First triangle
-//				indices.push_back(fom->indices[v_i].p - fog.index_offset - 1);
-//				indices.push_back(fom->indices[v_i + 1].p - fog.index_offset - 1);
-//				indices.push_back(fom->indices[v_i + 2].p - fog.index_offset - 1);
-//				// -- Second triangle
-//				indices.push_back(fom->indices[v_i].p - fog.index_offset - 1);
-//				indices.push_back(fom->indices[v_i + 2].p - fog.index_offset - 1);
-//				indices.push_back(fom->indices[v_i + 3].p - fog.index_offset - 1);
-//			}
-//			v_i += fom->face_vertices[f_i];
-//		}
-//		std::cout << "TEST 1.2" << std::endl;
-//		_meshes[o_i].setIndices(indices.data(), indices.size());
-//		std::cout << "TEST 1.3" << std::endl;
-//		std::cout << fom->position_count << " " << fom->face_count << std::endl;
-//		std::cout << fog.face_offset * fom->face_vertices[0] << " " << fog.face_count * fom->face_vertices[0] << std::endl;
-//		_meshes[o_i].setCoords(
-//			fom->positions + (fog.face_offset * fom->face_vertices[0]),
-//			fog.face_count * fom->face_vertices[0]
-//		);
-//		std::cout << "TEST 1.4" << std::endl;
-//	}
-//	std::cout << "TEST 2" << std::endl;
-//
-//	fast_obj_destroy(fom);
-//}
-
-//void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
-//	std::ifstream file;
-//
-//	file.open(file_name);
-//	if (!file.is_open()) {
-//		std::cout << "Error opening the file: " << file_name << std::endl;
-//		throw std::runtime_error("Error opening file.");
-//	}
-//
-//	//std::string line;
-//	while (!file.eof()) {
-//		std::string head;
-//		file >> head;
-//		
-//		//if (head == "mtllib") {
-//		//	// Do something
-//		//	continue;
-//		//}
-//		if (head == "usemtl") {
-//			std::cout << "object" << std::endl;
-//			//_meshes.resize(_meshes.size() + 1);
-//		}
-//		else if (head == "f") {
-//
-//		}
-//		else if (head == "v") {
-//
-//		}
-//		else if (head == "vn") {
-//
-//		}
-//		else if (head == "vt") {
-//
-//		}
-//	}
-//
-//	file.close();
-//}

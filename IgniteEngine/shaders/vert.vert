@@ -5,9 +5,11 @@
 layout (location = 0) in vec3 coord;
 layout (location = 1) in uint object_id;
 layout (location = 2) in uint material_id;
+layout (location = 3) in vec2 uv;
 
 // OUT
 layout(location = 1) out uint material_i;
+layout(location = 2) out vec2 uv_frag;
 
 // UNIFORM BUFFER
 layout (std140, binding = 0) uniform camera_buf{
@@ -24,6 +26,7 @@ void main(){
     mat4 tr = obj_tr.tr[obj_i];
 
     material_i = material_id;
+    uv_frag = uv;
     
     gl_Position = camera.mvp * tr * vec4(coord, 1.0);
 }

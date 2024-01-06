@@ -54,6 +54,7 @@ private:
 	UniformBuffer _camera_buffer;
 	StorageBuffer _obj_tr_buffer;
 	StorageBuffer _materials_buffer;
+	Sampler _sampler;
 
 	Modules _modules;
 

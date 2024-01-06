@@ -10,9 +10,10 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	}
 
 	std::cout << "Loading obj file: ";
-	std::cout << file_name << std::endl;
+	std::cout << file_name;
 
 	_materials.push_back(std::vector<Material>());
+	_textures.push_back(std::vector<Texture>());
 	std::unordered_map<char*, uint32_t> mat_to_tex;
 	uint32_t t_id{0};
 	for (uint32_t i = 0; i < fom->material_count; i++) {
@@ -20,8 +21,16 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		if (!fom->materials[i].map_Kd.path) {
 			continue;
 		}
+
+		std::cout << fom->materials[i].map_Kd.path << std::endl;
 		if (!mat_to_tex.count(fom->materials[i].map_Kd.path)) {
 			mat_to_tex[fom->materials[i].map_Kd.path] = t_id;
+			_textures[0].push_back(Texture());
+			_textures[0][t_id].readFile(fom->materials[i].map_Kd.path);
+			_textures[0][t_id].setLogicalDevice(DefaultConf::logical_device);
+			_textures[0][t_id].setGPU(DefaultConf::gpu);
+			_textures[0][t_id].setCommandPool(DefaultConf::command_pool);
+			_textures[0][t_id].create();
 			t_id++;
 		}
 		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];
@@ -67,12 +76,6 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		}
 	}
 
-	//_mercedes_tex.readFile("../assets/textures/mercedes.png");
-	//_mercedes_tex.setLogicalDevice(DefaultConf::logical_device);
-	//_mercedes_tex.setGPU(DefaultConf::gpu);
-	//_mercedes_tex.setCommandPool(DefaultConf::command_pool);
-	//_mercedes_tex.create();
-
 	_meshes.push_back(Mesh());
 	_meshes[0].setCoords(fom->positions, fom->position_count);
 	_meshes[0].setNormals(fom->normals, fom->normal_count);
@@ -83,4 +86,5 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	_material_indices[0].assign(mat_id.data(), mat_id.data() + mat_id.size());
 	
 	fast_obj_destroy(fom);
+	std::cout << " loaded!" << std::endl;
 }

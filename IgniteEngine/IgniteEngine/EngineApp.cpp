@@ -111,6 +111,7 @@ void EngineApp::start() {
 		"../shaders/vert.spv",
 		"../shaders/frag.spv"
 	);
+	// -- Vertex Shader -- //
 	// Configuring the Graphic Shader
 	DefaultConf::graphic_shader->addVertexBufferInfo(
 		"coord",
@@ -129,6 +130,12 @@ void EngineApp::start() {
 		Object3D::getMaterialIndicesStride(DefaultConf::renderer, DefaultConf::graphic_shader),
 		VK_FORMAT_R32_UINT,
 		2
+	);
+	DefaultConf::graphic_shader->addVertexBufferInfo(
+		"uv",
+		Object3D::getUVStride(DefaultConf::renderer, DefaultConf::graphic_shader),
+		VK_FORMAT_R32G32_SFLOAT,
+		3
 	);
 	// Index Buffer
 	DefaultConf::graphic_shader->addIndexBufferInfo(
@@ -151,11 +158,25 @@ void EngineApp::start() {
 		VK_SHADER_STAGE_VERTEX_BIT
 	);
 
+	// -- Fragment shader -- //
 	// materials
 	DefaultConf::graphic_shader->addStorageBufferInfo(
 		"MaterialsBuffer",
 		2,
 		VK_SHADER_STAGE_FRAGMENT_BIT
+	);
+
+	DefaultConf::graphic_shader->addSamplerInfo(
+		"samp",
+		3,
+		VK_SHADER_STAGE_FRAGMENT_BIT
+	);
+
+	DefaultConf::graphic_shader->addTextureInfo(
+		"textures",
+		4,
+		VK_SHADER_STAGE_FRAGMENT_BIT,
+		200
 	);
 
 	//----------------------//
@@ -216,6 +237,17 @@ void EngineApp::start() {
 	_materials_buffer.create();
 	_materials_buffer.setValues(Object3D::getMaterials(DefaultConf::renderer, DefaultConf::graphic_shader).data());
 	DefaultConf::graphic_shader->addStorageBuffer("MaterialsBuffer", &_materials_buffer);
+
+	// Sampler
+	_sampler.setLogicalDevice((VkDevice*)DefaultConf::logical_device->getDevice());
+	_sampler.create();
+	DefaultConf::graphic_shader->addSampler("samp", &_sampler);
+
+	// Textures
+	DefaultConf::graphic_shader->addTexture(
+		"textures",
+		Object3D::getTextures(DefaultConf::renderer, DefaultConf::graphic_shader)
+	);
 
 	// Renderer
 	DefaultConf::renderer->setNbFrame(NB_FRAME);

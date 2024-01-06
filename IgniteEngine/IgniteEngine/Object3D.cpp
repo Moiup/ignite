@@ -32,7 +32,7 @@ Object3D::Object3D() :
 	_material_indices{},
 	_materials{},
 	_shaders{ nullptr },
-	_texture{ nullptr }
+	_texture{}
 {
 	;
 }
@@ -92,11 +92,11 @@ const std::vector<Material*>& Object3D::getMaterial() const {
 	return _materials;
 }
 
-void Object3D::setTexture(Texture* texture) {
+void Object3D::setTexture(std::vector<Texture*>& texture) {
 	_texture = texture;
 }
 
-const Texture* Object3D::getTexture() const {
+const std::vector<Texture*>& Object3D::getTexture() const {
 	return _texture;
 }
 
@@ -112,12 +112,15 @@ void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj) 
 			mat,
 			(std::vector<uint32_t>*)&loi._material_indices[0]
 		);
+
+		std::vector<Texture>& tex = (std::vector<Texture>&)loi._textures[0];
+		obj->setTextures(tex);
 	}
-	for (uint32_t i = 0; i < loi._meshes.size(); i++) {
-		Object3D* o = new Object3D();
-		o->setMesh((Mesh*)&loi._meshes[i]);
-		o->setMaterial((Material*)&loi._materials[i]);
-	}
+	//for (uint32_t i = 0; i < loi._meshes.size(); i++) {
+	//	Object3D* o = new Object3D();
+	//	o->setMesh((Mesh*)&loi._meshes[i]);
+	//	o->setMaterial((Material*)&loi._materials[i]);
+	//}
 
 	//for (const auto& l : loi._children) {
 	//	Object3D* o = new Object3D();
@@ -139,6 +142,12 @@ void Object3D::setMaterial(
 
 std::vector<uint32_t>* Object3D::getMaterialIndices() {
 	return _material_indices;
+}
+
+void Object3D::setTextures(const std::vector<Texture>& textures) {
+	for (const Texture& tex : textures) {
+		_texture.push_back((Texture*)&tex);
+	}
 }
 
 void Object3D::addShader(GraphicShader* shader) {
@@ -330,19 +339,19 @@ uint32_t Object3D::getMaterialsSize(Renderer* renderer, GraphicShader* shader) {
 	return getMaterials(renderer, shader).size() * stride;
 }
 
-std::vector<uint32_t>& Object3D::getTextureIndices(Renderer* renderer, GraphicShader* shader) {
-	buildTextureIndices(renderer, shader);
-	return Object3D::texture_indices[renderer][shader];
-}
+//std::vector<uint32_t>& Object3D::getTextureIndices(Renderer* renderer, GraphicShader* shader) {
+//	buildTextureIndices(renderer, shader);
+//	return Object3D::texture_indices[renderer][shader];
+//}
 
-uint32_t Object3D::getTextureIndicesStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getTextureIndices(renderer, shader).data());
-}
-
-uint32_t Object3D::getTextureIndicesSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getTextureIndicesStride(renderer, shader);
-	return getTextureIndices(renderer, shader).size() * stride;
-}
+//uint32_t Object3D::getTextureIndicesStride(Renderer* renderer, GraphicShader* shader) {
+//	return sizeof(*getTextureIndices(renderer, shader).data());
+//}
+//
+//uint32_t Object3D::getTextureIndicesSize(Renderer* renderer, GraphicShader* shader) {
+//	uint32_t stride = getTextureIndicesStride(renderer, shader);
+//	return getTextureIndices(renderer, shader).size() * stride;
+//}
 
 void Object3D::buildCoords(Renderer* renderer, GraphicShader* shader) {
 	// if not empty
@@ -433,28 +442,32 @@ void Object3D::buildUV(Renderer* renderer, GraphicShader* shader) {
 
 
 void Object3D::buildTextures(Renderer* renderer, GraphicShader* shader) {
-	// if not empty
-	if (Object3D::_textures[renderer][shader].size()) {
-		return;
-	}
+	buildMaterials(renderer, shader);
+	//// if not empty
+	//if (Object3D::_textures[renderer][shader].size()) {
+	//	return;
+	//}
+	//_textures[renderer][shader].push_back(DefaultConf::white_texture);
 
-	std::unordered_map<const Texture*, uint32_t> texes;
-	_textures[renderer][shader].push_back(DefaultConf::white_texture);
-	// Finding the textures
-	for (auto& m_o : mesh_objects[renderer][shader]) {
-		std::vector<Object3D*> objs = m_o.second;
+	// For each material
 
-		for (Object3D* obj : objs) {
-			if (texes.count(obj->getTexture())) {
-				continue;
-			}
-			if (!obj->getTexture()) {
-				continue;
-			}
-			_textures[renderer][shader].push_back(const_cast<Texture*>(obj->getTexture()));
-			texes[obj->getTexture()] = 1;
-		}
-	}
+
+	//std::unordered_map<const Texture*, uint32_t> texes;
+	//// Finding the textures
+	//for (auto& m_o : mesh_objects[renderer][shader]) {
+	//	std::vector<Object3D*> objs = m_o.second;
+
+	//	for (Object3D* obj : objs) {
+	//		if (texes.count(obj->getTexture())) {
+	//			continue;
+	//		}
+	//		if (!obj->getTexture()) {
+	//			continue;
+	//		}
+	//		_textures[renderer][shader].push_back(const_cast<Texture*>(obj->getTexture()));
+	//		texes[obj->getTexture()] = 1;
+	//	}
+	//}
 }
 
 void Object3D::buildTransformIndices(Renderer* renderer, GraphicShader* shader) {
@@ -553,6 +566,8 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 }
 
 void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
+	//buildTextures(renderer, shader);
+
 	// if not empty, means already done
 	if (Object3D::materials[renderer][shader].size()) {
 		return;
@@ -560,11 +575,18 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 
 	std::unordered_map<Material*, bool> is_mat{};
 
+	std::unordered_map<Texture*, uint32_t> texes{};
+	uint32_t tex_id = 0;
+
 	// If an object exists, then we must add the default material
+	// And the default texture
 	if (Object3D::mesh_objects[renderer][shader].size()) {
 		const Material& mat = Material();
 		Object3D::materials[renderer][shader].push_back(glsl::Mat(mat));
 		is_mat[(Material*)&mat] = true;
+		_textures[renderer][shader].push_back(DefaultConf::white_texture);
+		texes[DefaultConf::white_texture] = tex_id;
+		tex_id++;
 	}
 
 	// For each mesh given a renderer and a shader
@@ -574,6 +596,7 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 
 		// For each object
 		for (auto obj : objs) {
+			const std::vector<Texture*>& textures = obj->getTexture();
 			for (Material* mat : obj->getMaterial()) {
 				// If the material was never added
 				// We add it to the array of material
@@ -581,43 +604,57 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 					Object3D::materials[renderer][shader].push_back(
 						glsl::Mat(*mat)
 					);
+
+					if (mat->map_Kd == -1) {
+						Object3D::materials[renderer][shader][Object3D::materials[renderer][shader].size() - 1].map_Kd = 0;
+						continue;
+					}
+
+					Texture* tex = textures[mat->map_Kd];
+					if (!texes.count(tex)) {
+						texes[tex] = tex_id;
+						_textures[renderer][shader].push_back(tex);
+						tex_id++;
+					}
+
+					Object3D::materials[renderer][shader][Object3D::materials[renderer][shader].size() - 1].map_Kd = texes[tex];
 				}
 			}
 		}
 	}
 }
 
-void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
-	// if not empty
-	if (Object3D::texture_indices[renderer][shader].size()) {
-		return;
-	}
-
-	uint32_t tex_i = 0;
-	std::unordered_map<const Texture*, uint32_t> tex_i_arr{};
-	// For each mesh, finding the associated objects
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
-		if (!m_o.first) {
-			continue;
-		}
-		std::vector<Object3D*> objs = m_o.second;
-
-		// For each object add find the texture index
-		for (Object3D* obj : objs) {
-			const Texture* tex = obj->getTexture();
-			if (!tex_i_arr.count(tex)) {
-				tex_i = tex_i_arr.size();
-				tex_i_arr[tex] = tex_i;
-			}
-			else {
-				tex_i = tex_i_arr[tex];
-			}
-
-			// +1 because index 0 is the default texture
-			texture_indices[renderer][shader].push_back(tex_i + 1);
-		}
-	}
-}
+//void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
+//	// if not empty
+//	if (Object3D::texture_indices[renderer][shader].size()) {
+//		return;
+//	}
+//
+//	uint32_t tex_i = 0;
+//	std::unordered_map<const Texture*, uint32_t> tex_i_arr{};
+//	// For each mesh, finding the associated objects
+//	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+//		if (!m_o.first) {
+//			continue;
+//		}
+//		std::vector<Object3D*> objs = m_o.second;
+//
+//		// For each object add find the texture index
+//		for (Object3D* obj : objs) {
+//			const Texture* tex = obj->getTexture();
+//			if (!tex_i_arr.count(tex)) {
+//				tex_i = tex_i_arr.size();
+//				tex_i_arr[tex] = tex_i;
+//			}
+//			else {
+//				tex_i = tex_i_arr[tex];
+//			}
+//
+//			// +1 because index 0 is the default texture
+//			texture_indices[renderer][shader].push_back(tex_i + 1);
+//		}
+//	}
+//}
 
 void Object3D::freeAllocatedObjects() {
 	for (Object3D* obj : Object3D::allocated_objects) {

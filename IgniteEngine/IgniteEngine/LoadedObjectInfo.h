@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "Material.h"
+#include "DefaultConf.h"
 #include "fast_obj/fast_obj.h"
 #include <iostream>
 #include <fstream>

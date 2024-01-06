@@ -39,7 +39,7 @@ private:
 	Renderer* _renderer;
 	std::vector<uint32_t>* _material_indices;
 	std::vector<Material*> _materials;
-	Texture* _texture;
+	std::vector<Texture*> _texture;
 	std::vector<GraphicShader*> _shaders;
 
 public:
@@ -54,8 +54,8 @@ public:
 	void setMaterial(Material* material);
 	const std::vector<Material*>& getMaterial() const;
 
-	void setTexture(Texture* texture);
-	const Texture* getTexture() const;
+	void setTexture(std::vector<Texture*>& texture);
+	const std::vector<Texture*>& getTexture() const;
 
 	void addShader(GraphicShader* shader);
 	GraphicShader* getShader(uint32_t i);
@@ -70,6 +70,7 @@ private:
 		std::vector<uint32_t>* indices
 	);
 	std::vector<uint32_t>* getMaterialIndices();
+	void setTextures(const std::vector<Texture>& texture);
 
 public:
 	static std::unordered_map<Mesh*, std::vector<Object3D*>>& getMeshObjects(Renderer* renderer, GraphicShader* shader);
@@ -116,9 +117,9 @@ public:
 	static uint32_t getMaterialsStride(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getMaterialsSize(Renderer* renderer, GraphicShader* shader);
 
-	static std::vector<uint32_t>& getTextureIndices(Renderer* renderer, GraphicShader* shader);
-	static uint32_t getTextureIndicesStride(Renderer* renderer, GraphicShader* shader);
-	static uint32_t getTextureIndicesSize(Renderer* renderer, GraphicShader* shader);
+	//static std::vector<uint32_t>& getTextureIndices(Renderer* renderer, GraphicShader* shader);
+	//static uint32_t getTextureIndicesStride(Renderer* renderer, GraphicShader* shader);
+	//static uint32_t getTextureIndicesSize(Renderer* renderer, GraphicShader* shader);
 
 private:
 	static void buildCoords(Renderer* renderer, GraphicShader* shader);
@@ -131,7 +132,7 @@ private:
 	static void buildTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static void buildMaterialIndices(Renderer* renderer, GraphicShader* shader);
 	static void buildMaterials(Renderer* renderer, GraphicShader* shader);
-	static void buildTextureIndices(Renderer* renderer, GraphicShader* shader);
+	//static void buildTextureIndices(Renderer* renderer, GraphicShader* shader);
 
 	static void freeAllocatedObjects();
 };

@@ -48,6 +48,7 @@ const void Queue::submit(
 	VkResult vk_result = vkQueueSubmit(_queue, 1, &submit_info, *fence);
 
 	if (vk_result != VK_SUCCESS) {
+		std::cout << "Queue submit failed: " << vk_result << std::endl;
 		throw std::runtime_error("Error: failed submitting queue!");
 	}
 }

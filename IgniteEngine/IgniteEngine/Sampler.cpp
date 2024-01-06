@@ -8,9 +8,9 @@ Sampler::Sampler() :
 	_info.magFilter = VK_FILTER_LINEAR;
 	_info.minFilter = VK_FILTER_LINEAR;
 	_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
-	_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
-	_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
+	_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	_info.mipLodBias = 0.0f;
 	_info.anisotropyEnable = VK_FALSE;
 	_info.maxAnisotropy = 1.0f;

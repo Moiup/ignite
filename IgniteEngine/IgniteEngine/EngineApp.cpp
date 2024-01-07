@@ -176,7 +176,7 @@ void EngineApp::start() {
 		"textures",
 		4,
 		VK_SHADER_STAGE_FRAGMENT_BIT,
-		200
+		2
 	);
 
 	//----------------------//
@@ -204,6 +204,13 @@ void EngineApp::start() {
 	_material_indices_buffer.create();
 	_material_indices_buffer.setValues(Object3D::getMaterialIndices(DefaultConf::renderer, DefaultConf::graphic_shader).data());
 	DefaultConf::graphic_shader->addVertexBuffer("material_id", &_material_indices_buffer);
+
+	_uv_buffer.setLogicalDevice(DefaultConf::logical_device);
+	_uv_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_uv_buffer.setSize(Object3D::getUVSize(DefaultConf::renderer, DefaultConf::graphic_shader));
+	_uv_buffer.create();
+	_uv_buffer.setValues(Object3D::getUV(DefaultConf::renderer, DefaultConf::graphic_shader).data());
+	DefaultConf::graphic_shader->addVertexBuffer("uv", &_uv_buffer);
 
 	// Index buffer
 	_index_buffer.setLogicalDevice(DefaultConf::logical_device);
@@ -261,6 +268,7 @@ void EngineApp::start() {
 void EngineApp::update() {
 	/*while (!glfwWindowShouldClose(_render_window.getWindow())) {*/
 	
+	//for (uint32_t i = 0; i < 1; i++) {
 	for (;;) {
 		std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 

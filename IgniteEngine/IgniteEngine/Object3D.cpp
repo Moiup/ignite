@@ -581,7 +581,8 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 	// If an object exists, then we must add the default material
 	// And the default texture
 	if (Object3D::mesh_objects[renderer][shader].size()) {
-		const Material& mat = Material();
+		Material mat{};
+		mat.map_Kd = 0;
 		Object3D::materials[renderer][shader].push_back(glsl::Mat(mat));
 		is_mat[(Material*)&mat] = true;
 		_textures[renderer][shader].push_back(DefaultConf::white_texture);

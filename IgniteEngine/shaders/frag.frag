@@ -36,7 +36,7 @@ layout(std430, binding = 2) readonly buffer MaterialsBuffer {
 };
 
 layout(binding = 3) uniform sampler samp;
-layout(binding = 4) uniform texture2D textures[200];
+layout(binding = 4) uniform texture2D textures[2];
 
 // IN
 layout(location = 1) flat in uint material_i;

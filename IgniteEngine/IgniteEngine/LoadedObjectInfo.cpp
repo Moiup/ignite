@@ -76,6 +76,8 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		}
 	}
 
+	std::cout << fom->face_count << " " << fom->face_count * 3 << " " << fom->position_count << " " << fom->normal_count << " " << fom->texcoord_count << std::endl;
+
 	_meshes.push_back(Mesh());
 	_meshes[0].setCoords(fom->positions, fom->position_count);
 	_meshes[0].setNormals(fom->normals, fom->normal_count);

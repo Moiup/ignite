@@ -10,7 +10,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	}
 
 	std::cout << "Loading obj file: ";
-	std::cout << file_name;
+	std::cout << file_name << std::endl;
 
 	_materials.push_back(std::vector<Material>());
 	_textures.push_back(std::vector<Texture>());
@@ -37,52 +37,296 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	}
 
 	std::vector<uint32_t> indices{};
-	std::vector<uint32_t> mat_id(fom->position_count);
-	std::vector<uint32_t> tex_id(fom->position_count);
-	std::vector<bool>exists(fom->position_count, false);
+	std::vector<uint32_t> mat_id{};
+	std::vector<glm::vec3> v_coord{};
+	std::vector<glm::vec3> n_coord{};
+	std::vector<glm::vec2> t_coord{};
+
+	std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::unordered_map<uint32_t, uint32_t>>> is_vertex;
+
 	{
 		uint32_t f = 0;
 		uint32_t v_i = 0;
-		uint32_t m_i = 0;
 		while (f < fom->face_count) {
-			if (fom->face_vertices[f] == 3) {
-				indices.push_back(fom->indices[v_i].p);
-				indices.push_back(fom->indices[v_i + 1].p);
-				indices.push_back(fom->indices[v_i + 2].p);
+			uint32_t p_i{ 0 };
+			uint32_t n_i{ 0 };
+			uint32_t t_i{ 0 };
+
+			p_i = fom->indices[v_i].p;
+			n_i = fom->indices[v_i].n;
+			t_i = fom->indices[v_i].t;
+			if (!is_vertex.count(p_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
 			}
-			else {
-				// Here it is 4
-				// -- First triangle
-				indices.push_back(fom->indices[v_i].p);
-				indices.push_back(fom->indices[v_i + 1].p);
-				indices.push_back(fom->indices[v_i + 2].p);
-				// -- Second triangle
-				indices.push_back(fom->indices[v_i].p);
-				indices.push_back(fom->indices[v_i + 2].p);
-				indices.push_back(fom->indices[v_i + 3].p);
+			else if (!is_vertex[p_i].count(n_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			else if (!is_vertex[p_i][n_i].count(t_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			indices.push_back(is_vertex[p_i][n_i][t_i]);
+
+			p_i = fom->indices[v_i + 1].p;
+			n_i = fom->indices[v_i + 1].n;
+			t_i = fom->indices[v_i + 1].t;
+			if (!is_vertex.count(p_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			else if (!is_vertex[p_i].count(n_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			else if (!is_vertex[p_i][n_i].count(t_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			indices.push_back(is_vertex[p_i][n_i][t_i]);
+
+			p_i = fom->indices[v_i + 2].p;
+			n_i = fom->indices[v_i + 2].n;
+			t_i = fom->indices[v_i + 2].t;
+			if (!is_vertex.count(p_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			else if (!is_vertex[p_i].count(n_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			else if (!is_vertex[p_i][n_i].count(t_i)) {
+				is_vertex[p_i][n_i][t_i] = v_coord.size();
+				v_coord.push_back({
+					fom->positions[3 * p_i],
+					fom->positions[3 * p_i + 1],
+					fom->positions[3 * p_i + 2]
+					});
+				n_coord.push_back({
+					fom->normals[3 * n_i],
+					fom->normals[3 * n_i + 1],
+					fom->normals[3 * n_i + 2]
+					});
+				t_coord.push_back({
+					fom->texcoords[2 * t_i],
+					fom->texcoords[2 * t_i + 1]
+					});
+				mat_id.push_back(fom->face_materials[f]);
+			}
+			indices.push_back(is_vertex[p_i][n_i][t_i]);
+
+			if (fom->face_vertices[f] == 4) {
+				p_i = fom->indices[v_i].p;
+				n_i = fom->indices[v_i].n;
+				t_i = fom->indices[v_i].t;
+				indices.push_back(is_vertex[p_i][n_i][t_i]);
+
+				p_i = fom->indices[v_i + 2].p;
+				n_i = fom->indices[v_i + 2].n;
+				t_i = fom->indices[v_i + 2].t;
+				indices.push_back(is_vertex[p_i][n_i][t_i]);
+
+				p_i = fom->indices[v_i + 3].p;
+				n_i = fom->indices[v_i + 3].n;
+				t_i = fom->indices[v_i + 3].t;
+				if (!is_vertex.count(p_i)) {
+					is_vertex[p_i][n_i][t_i] = v_coord.size();
+					v_coord.push_back({
+						fom->positions[3 * p_i],
+						fom->positions[3 * p_i + 1],
+						fom->positions[3 * p_i + 2]
+						});
+					n_coord.push_back({
+						fom->normals[3 * n_i],
+						fom->normals[3 * n_i + 1],
+						fom->normals[3 * n_i + 2]
+						});
+					t_coord.push_back({
+						fom->texcoords[2 * t_i],
+						fom->texcoords[2 * t_i + 1]
+						});
+					mat_id.push_back(fom->face_materials[f]);
+				}
+				else if (!is_vertex[p_i].count(n_i)) {
+					is_vertex[p_i][n_i][t_i] = v_coord.size();
+					v_coord.push_back({
+						fom->positions[3 * p_i],
+						fom->positions[3 * p_i + 1],
+						fom->positions[3 * p_i + 2]
+						});
+					n_coord.push_back({
+						fom->normals[3 * n_i],
+						fom->normals[3 * n_i + 1],
+						fom->normals[3 * n_i + 2]
+						});
+					t_coord.push_back({
+						fom->texcoords[2 * t_i],
+						fom->texcoords[2 * t_i + 1]
+						});
+					mat_id.push_back(fom->face_materials[f]);
+				}
+				else if (!is_vertex[p_i][n_i].count(t_i)) {
+					is_vertex[p_i][n_i][t_i] = v_coord.size();
+					v_coord.push_back({
+						fom->positions[3 * p_i],
+						fom->positions[3 * p_i + 1],
+						fom->positions[3 * p_i + 2]
+						});
+					n_coord.push_back({
+						fom->normals[3 * n_i],
+						fom->normals[3 * n_i + 1],
+						fom->normals[3 * n_i + 2]
+						});
+					t_coord.push_back({
+						fom->texcoords[2 * t_i],
+						fom->texcoords[2 * t_i + 1]
+						});
+					mat_id.push_back(fom->face_materials[f]);
+				}
+				indices.push_back(is_vertex[p_i][n_i][t_i]);
 			}
 
-			for (uint32_t i = v_i; i < v_i + fom->face_vertices[f]; i++) {
-				uint32_t ind = fom->indices[i].p;
-				if (exists[ind]) {
-					continue;
-				}
-				mat_id[ind] = fom->face_materials[f];
-				tex_id[ind] = _materials[0][fom->face_materials[f]].map_Kd;
-				exists[ind] = true;
-			}
+			//else {
+			//	// Here it is 4
+			//	// -- First triangle
+			//	indices.push_back(fom->indices[v_i].p);
+			//	indices.push_back(fom->indices[v_i + 1].p);
+			//	indices.push_back(fom->indices[v_i + 2].p);
+			//	// -- Second triangle
+			//	indices.push_back(fom->indices[v_i].p);
+			//	indices.push_back(fom->indices[v_i + 2].p);
+			//	indices.push_back(fom->indices[v_i + 3].p);
+			//}
+
 			v_i += fom->face_vertices[f];
 			f++;
 		}
+		std::cout << v_i << std::endl;
 	}
 
-	std::cout << fom->face_count << " " << fom->face_count * 3 << " " << fom->position_count << " " << fom->normal_count << " " << fom->texcoord_count << std::endl;
+	std::cout << fom->index_count << " " << fom->face_count * 4 << " " << indices.size() << " " << v_coord.size() << " " << n_coord.size() << " " << t_coord.size() << std::endl;
 
 	_meshes.push_back(Mesh());
-	_meshes[0].setCoords(fom->positions, fom->position_count);
-	_meshes[0].setNormals(fom->normals, fom->normal_count);
-	_meshes[0].setUV(fom->texcoords, fom->texcoord_count);
+	_meshes[0].setCoords(&v_coord[0][0], v_coord.size());
+	_meshes[0].setNormals(&n_coord[0][0], n_coord.size());
+	_meshes[0].setUV(&t_coord[0][0], t_coord.size());
 	_meshes[0].setIndices(indices.data(), indices.size());
+
+	std::cout << _meshes[0].getCoords().size() << " " << _meshes[0].getNormals().size() << " " << _meshes[0].getUV().size() << std::endl;
 
 	_material_indices.push_back(std::vector<uint32_t>());
 	_material_indices[0].assign(mat_id.data(), mat_id.data() + mat_id.size());

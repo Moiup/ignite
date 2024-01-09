@@ -62,12 +62,12 @@ const void Mesh::setIndices(uint32_t* indices, const uint32_t len) {
 
 const void Mesh::setUV(float* uv, const uint32_t len) {
 	glm::vec2* t = (glm::vec2*)uv;
-	_uv.assign(t, t + len / 2);
+	_uv.assign(t, t + len);
 }
 
 const void Mesh::setNormals(float* normals, const uint32_t len) {
 	glm::vec3* n = (glm::vec3*)normals;
-	_normals.assign(n, n + len / 3);
+	_normals.assign(n, n + len);
 }
 
 const std::vector<glm::vec3>& Mesh::getCoords() const {

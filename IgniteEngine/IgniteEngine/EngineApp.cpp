@@ -176,7 +176,7 @@ void EngineApp::start() {
 		"textures",
 		4,
 		VK_SHADER_STAGE_FRAGMENT_BIT,
-		2
+		133
 	);
 
 	//----------------------//

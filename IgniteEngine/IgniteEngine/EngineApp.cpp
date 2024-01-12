@@ -38,7 +38,7 @@ void EngineApp::init() {
 
 	// Instance
 	_instance.setExtensionsAndLayers({
-		"VK_LAYER_KHRONOS_validation"
+		"VK_LAYER_KHRONOS_validation",
 	});
 	_instance.create();
 
@@ -176,7 +176,7 @@ void EngineApp::start() {
 		"textures",
 		4,
 		VK_SHADER_STAGE_FRAGMENT_BIT,
-		133
+		Object3D::getTextures(DefaultConf::renderer, DefaultConf::graphic_shader).size()
 	);
 
 	//----------------------//

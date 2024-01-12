@@ -1,5 +1,6 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_nonuniform_qualifier : enable
 
 // BUFFERS
 struct Material {
@@ -36,7 +37,7 @@ layout(std430, binding = 2) readonly buffer MaterialsBuffer {
 };
 
 layout(binding = 3) uniform sampler samp;
-layout(binding = 4) uniform texture2D textures[133];
+layout(binding = 4) uniform texture2D textures[];
 
 // IN
 layout(location = 1) flat in uint material_i;

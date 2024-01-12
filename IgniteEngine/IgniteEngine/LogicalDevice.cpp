@@ -117,11 +117,21 @@ void LogicalDevice::createQueueCreateInfo(std::vector<VkDeviceQueueCreateInfo>& 
 }
 
 void LogicalDevice::createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &queues_info) {
+	VkPhysicalDeviceVulkan12Features physical_device_v12_features{};
+	physical_device_v12_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+	physical_device_v12_features.runtimeDescriptorArray = VK_TRUE;
+
+	VkPhysicalDeviceFeatures physical_device_features{};
+	VkPhysicalDeviceFeatures2 physical_device_features2{};
+	physical_device_features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+	physical_device_features2.pNext = &physical_device_v12_features;
+	physical_device_features2.features = physical_device_features;
+
 	VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_features{};
 	dynamic_rendering_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+	dynamic_rendering_features.pNext = &physical_device_features2;
 	dynamic_rendering_features.dynamicRendering = VK_TRUE;
 
-	VkPhysicalDeviceFeatures device_features{};
 	VkDeviceCreateInfo device_info{};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	device_info.pNext = &dynamic_rendering_features;
@@ -130,7 +140,7 @@ void LogicalDevice::createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &qu
 	device_info.pQueueCreateInfos = queues_info.data();
 	device_info.enabledExtensionCount = _EXTENSIONS.size();
 	device_info.ppEnabledExtensionNames = _EXTENSIONS.data();
-	device_info.pEnabledFeatures = &device_features;
+	device_info.pEnabledFeatures = nullptr;
 
 	VkResult vk_result = vkCreateDevice(
 		*_gpu,

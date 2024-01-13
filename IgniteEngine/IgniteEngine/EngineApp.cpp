@@ -43,7 +43,7 @@ void EngineApp::init() {
 	_instance.create();
 
 	// Setting window
-	const VkInstance insta = _instance.getInstance();
+	const VkInstance& insta = _instance.getInstance();
 	_render_window.setInstance(const_cast<VkInstance*>(&insta));
 	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
@@ -271,31 +271,29 @@ void EngineApp::update() {
 	//for (uint32_t i = 0; i < 1; i++) {
 	for (;;) {
 		std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
-
 		SDL_Event event{};
 		if (SDL_PollEvent(&event)) {
-			ImGui_ImplSDL2_ProcessEvent(&event);
+			//ImGui_ImplSDL2_ProcessEvent(&event);
 			if (event.type == SDL_QUIT 
 				|| event.window.event == SDL_WINDOWEVENT_CLOSE
 				 && event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())) {
 				break;
 			}
 		}
+
 		DefaultConf::event = &event;
-
 		EngineEntity::updateAll();
-
 		_obj_tr_buffer.setValues(
 			&Object3D::updateTransformMatrices(
 				DefaultConf::renderer, DefaultConf::graphic_shader
 			)[0][0]
 		);
+
 		_camera_buffer.setValues(
 			&DefaultConf::camera->getMVP()[0][0]
 		);
 
 		DefaultConf::renderer->render();
-
 		glfwPollEvents();
 		
 
@@ -313,10 +311,14 @@ void EngineApp::close() {
 	_coord_buffer.destroy();
 	_object_id_buffer.destroy();
 	_material_indices_buffer.destroy();
+	_uv_buffer.destroy();
 	_index_buffer.destroy();
 	_camera_buffer.destroy();
 	_obj_tr_buffer.destroy();
 	_materials_buffer.destroy();
+	_sampler.destroy();
+
+	DefaultConf::white_texture->destroy();
 
 	_renderer.destroy();
 

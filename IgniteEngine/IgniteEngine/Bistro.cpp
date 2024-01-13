@@ -28,4 +28,10 @@ void Bistro::update() {
 
 void Bistro::close() {
 	Module::close();
+
+	for (std::vector<Texture>& vec_tex : _bistro_info._textures) {
+		for (Texture& tex : vec_tex) {
+			tex.destroy();
+		}
+	}
 }

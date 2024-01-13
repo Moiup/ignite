@@ -200,7 +200,8 @@ void Texture::create() {
 	);
 	_image.createImageView();
 
-	_pixels = std::vector<glm::vec4>(0);
+	_pixels = std::vector<glm::vec4>(0); // Temporary solution to lower memory usage.
+	// _pixels field must be removed in the future.
 }
 
 void Texture::destroy() {

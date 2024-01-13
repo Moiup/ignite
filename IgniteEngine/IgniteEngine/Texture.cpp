@@ -199,6 +199,8 @@ void Texture::create() {
 		1  // layer count
 	);
 	_image.createImageView();
+
+	_pixels = std::vector<glm::vec4>(0);
 }
 
 void Texture::destroy() {

@@ -26,7 +26,7 @@ void main(){
     mat4 tr = obj_tr.tr[obj_i];
 
     material_i = material_id;
-    uv_frag = uv;
+    uv_frag = vec2(uv.x, 1.0 - uv.y);
     
     gl_Position = camera.mvp * tr * vec4(coord, 1.0);
 }

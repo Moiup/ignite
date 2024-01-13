@@ -19,5 +19,18 @@ struct LoadedObjectInfo
 	LoadedObjectInfo();
 
 	void loadWavefont(const std::string& file_name);
+
+private:
+	void buildFace(
+		fastObjMesh* fom,
+		std::vector<uint32_t>& indices,
+		std::vector<uint32_t>& mat_id,
+		std::vector<glm::vec3>& v_coord,
+		std::vector<glm::vec3>& n_coord,
+		std::vector<glm::vec2>& t_coord,
+		std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::unordered_map<uint32_t, uint32_t>>>& is_vertex,
+		uint32_t f,
+		uint32_t v_i
+	);
 };
 

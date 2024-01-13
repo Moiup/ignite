@@ -48,256 +48,14 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		uint32_t f = 0;
 		uint32_t v_i = 0;
 		while (f < fom->face_count) {
-			uint32_t p_i{ 0 };
-			uint32_t n_i{ 0 };
-			uint32_t t_i{ 0 };
-
-			p_i = fom->indices[v_i].p;
-			n_i = fom->indices[v_i].n;
-			t_i = fom->indices[v_i].t;
-			if (!is_vertex.count(p_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			else if (!is_vertex[p_i].count(n_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			else if (!is_vertex[p_i][n_i].count(t_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			indices.push_back(is_vertex[p_i][n_i][t_i]);
-
-			p_i = fom->indices[v_i + 1].p;
-			n_i = fom->indices[v_i + 1].n;
-			t_i = fom->indices[v_i + 1].t;
-			if (!is_vertex.count(p_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			else if (!is_vertex[p_i].count(n_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			else if (!is_vertex[p_i][n_i].count(t_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			indices.push_back(is_vertex[p_i][n_i][t_i]);
-
-			p_i = fom->indices[v_i + 2].p;
-			n_i = fom->indices[v_i + 2].n;
-			t_i = fom->indices[v_i + 2].t;
-			if (!is_vertex.count(p_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			else if (!is_vertex[p_i].count(n_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			else if (!is_vertex[p_i][n_i].count(t_i)) {
-				is_vertex[p_i][n_i][t_i] = v_coord.size();
-				v_coord.push_back({
-					fom->positions[3 * p_i],
-					fom->positions[3 * p_i + 1],
-					fom->positions[3 * p_i + 2]
-					});
-				n_coord.push_back({
-					fom->normals[3 * n_i],
-					fom->normals[3 * n_i + 1],
-					fom->normals[3 * n_i + 2]
-					});
-				t_coord.push_back({
-					fom->texcoords[2 * t_i],
-					fom->texcoords[2 * t_i + 1]
-					});
-				mat_id.push_back(fom->face_materials[f]);
-			}
-			indices.push_back(is_vertex[p_i][n_i][t_i]);
+			buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i);
+			buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 1);
+			buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 2);
 
 			if (fom->face_vertices[f] == 4) {
-				p_i = fom->indices[v_i].p;
-				n_i = fom->indices[v_i].n;
-				t_i = fom->indices[v_i].t;
-				indices.push_back(is_vertex[p_i][n_i][t_i]);
-
-				p_i = fom->indices[v_i + 2].p;
-				n_i = fom->indices[v_i + 2].n;
-				t_i = fom->indices[v_i + 2].t;
-				indices.push_back(is_vertex[p_i][n_i][t_i]);
-
-				p_i = fom->indices[v_i + 3].p;
-				n_i = fom->indices[v_i + 3].n;
-				t_i = fom->indices[v_i + 3].t;
-				if (!is_vertex.count(p_i)) {
-					is_vertex[p_i][n_i][t_i] = v_coord.size();
-					v_coord.push_back({
-						fom->positions[3 * p_i],
-						fom->positions[3 * p_i + 1],
-						fom->positions[3 * p_i + 2]
-						});
-					n_coord.push_back({
-						fom->normals[3 * n_i],
-						fom->normals[3 * n_i + 1],
-						fom->normals[3 * n_i + 2]
-						});
-					t_coord.push_back({
-						fom->texcoords[2 * t_i],
-						fom->texcoords[2 * t_i + 1]
-						});
-					mat_id.push_back(fom->face_materials[f]);
-				}
-				else if (!is_vertex[p_i].count(n_i)) {
-					is_vertex[p_i][n_i][t_i] = v_coord.size();
-					v_coord.push_back({
-						fom->positions[3 * p_i],
-						fom->positions[3 * p_i + 1],
-						fom->positions[3 * p_i + 2]
-						});
-					n_coord.push_back({
-						fom->normals[3 * n_i],
-						fom->normals[3 * n_i + 1],
-						fom->normals[3 * n_i + 2]
-						});
-					t_coord.push_back({
-						fom->texcoords[2 * t_i],
-						fom->texcoords[2 * t_i + 1]
-						});
-					mat_id.push_back(fom->face_materials[f]);
-				}
-				else if (!is_vertex[p_i][n_i].count(t_i)) {
-					is_vertex[p_i][n_i][t_i] = v_coord.size();
-					v_coord.push_back({
-						fom->positions[3 * p_i],
-						fom->positions[3 * p_i + 1],
-						fom->positions[3 * p_i + 2]
-						});
-					n_coord.push_back({
-						fom->normals[3 * n_i],
-						fom->normals[3 * n_i + 1],
-						fom->normals[3 * n_i + 2]
-						});
-					t_coord.push_back({
-						fom->texcoords[2 * t_i],
-						fom->texcoords[2 * t_i + 1]
-						});
-					mat_id.push_back(fom->face_materials[f]);
-				}
-				indices.push_back(is_vertex[p_i][n_i][t_i]);
+				buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i);
+				buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 2);
+				buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 3);
 			}
 
 			//else {
@@ -333,4 +91,76 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	
 	fast_obj_destroy(fom);
 	std::cout << " loaded!" << std::endl;
+}
+
+void LoadedObjectInfo::buildFace(
+	fastObjMesh* fom,
+	std::vector<uint32_t>& indices,
+	std::vector<uint32_t>& mat_id,
+	std::vector<glm::vec3>& v_coord,
+	std::vector<glm::vec3>& n_coord,
+	std::vector<glm::vec2>& t_coord,
+	std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::unordered_map<uint32_t, uint32_t>>>& is_vertex,
+	uint32_t f,
+	uint32_t v_i
+) {
+	uint32_t p_i = fom->indices[v_i].p;
+	uint32_t n_i = fom->indices[v_i].n;
+	uint32_t t_i = fom->indices[v_i].t;
+
+	if (!is_vertex.count(p_i)) {
+		is_vertex[p_i][n_i][t_i] = v_coord.size();
+		v_coord.push_back({
+			fom->positions[3 * p_i],
+			fom->positions[3 * p_i + 1],
+			fom->positions[3 * p_i + 2]
+			});
+		n_coord.push_back({
+			fom->normals[3 * n_i],
+			fom->normals[3 * n_i + 1],
+			fom->normals[3 * n_i + 2]
+			});
+		t_coord.push_back({
+			fom->texcoords[2 * t_i],
+			fom->texcoords[2 * t_i + 1]
+			});
+		mat_id.push_back(fom->face_materials[f]);
+	}
+	else if (!is_vertex[p_i].count(n_i)) {
+		is_vertex[p_i][n_i][t_i] = v_coord.size();
+		v_coord.push_back({
+			fom->positions[3 * p_i],
+			fom->positions[3 * p_i + 1],
+			fom->positions[3 * p_i + 2]
+			});
+		n_coord.push_back({
+			fom->normals[3 * n_i],
+			fom->normals[3 * n_i + 1],
+			fom->normals[3 * n_i + 2]
+			});
+		t_coord.push_back({
+			fom->texcoords[2 * t_i],
+			fom->texcoords[2 * t_i + 1]
+			});
+		mat_id.push_back(fom->face_materials[f]);
+	}
+	else if (!is_vertex[p_i][n_i].count(t_i)) {
+		is_vertex[p_i][n_i][t_i] = v_coord.size();
+		v_coord.push_back({
+			fom->positions[3 * p_i],
+			fom->positions[3 * p_i + 1],
+			fom->positions[3 * p_i + 2]
+			});
+		n_coord.push_back({
+			fom->normals[3 * n_i],
+			fom->normals[3 * n_i + 1],
+			fom->normals[3 * n_i + 2]
+			});
+		t_coord.push_back({
+			fom->texcoords[2 * t_i],
+			fom->texcoords[2 * t_i + 1]
+			});
+		mat_id.push_back(fom->face_materials[f]);
+	}
+	indices.push_back(is_vertex[p_i][n_i][t_i]);
 }

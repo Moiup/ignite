@@ -58,33 +58,16 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 				buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 3);
 			}
 
-			//else {
-			//	// Here it is 4
-			//	// -- First triangle
-			//	indices.push_back(fom->indices[v_i].p);
-			//	indices.push_back(fom->indices[v_i + 1].p);
-			//	indices.push_back(fom->indices[v_i + 2].p);
-			//	// -- Second triangle
-			//	indices.push_back(fom->indices[v_i].p);
-			//	indices.push_back(fom->indices[v_i + 2].p);
-			//	indices.push_back(fom->indices[v_i + 3].p);
-			//}
-
 			v_i += fom->face_vertices[f];
 			f++;
 		}
-		std::cout << v_i << std::endl;
 	}
-
-	std::cout << fom->index_count << " " << fom->face_count * 4 << " " << indices.size() << " " << v_coord.size() << " " << n_coord.size() << " " << t_coord.size() << std::endl;
 
 	_meshes.push_back(Mesh());
 	_meshes[0].setCoords(&v_coord[0][0], v_coord.size());
 	_meshes[0].setNormals(&n_coord[0][0], n_coord.size());
 	_meshes[0].setUV(&t_coord[0][0], t_coord.size());
 	_meshes[0].setIndices(indices.data(), indices.size());
-
-	std::cout << _meshes[0].getCoords().size() << " " << _meshes[0].getNormals().size() << " " << _meshes[0].getUV().size() << std::endl;
 
 	_material_indices.push_back(std::vector<uint32_t>());
 	_material_indices[0].assign(mat_id.data(), mat_id.data() + mat_id.size());

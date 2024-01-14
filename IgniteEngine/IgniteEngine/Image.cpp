@@ -155,6 +155,14 @@ VkFormat Image::getImageFormat() {
 	return _image_info.format;
 }
 
+uint32_t Image::getImageExtentWidth() const {
+	return _image_info.extent.width;
+}
+
+uint32_t Image::getImageExtentHeight() const {
+	return _image_info.extent.height;
+}
+
 const VkImage& Image::getImage() const {
 	return _image;
 }

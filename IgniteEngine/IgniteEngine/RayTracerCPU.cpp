@@ -65,7 +65,7 @@ void RayTracerCPU::buildImage() {
 		}
 	}
 
-	_image.writeFile("ray_traced_image.png");
+	//_image.writeFile("ray_traced_image.png");
 }
 
 void RayTracerCPU::computePixel(uint64_t x, uint64_t y, glm::mat4 inv) {

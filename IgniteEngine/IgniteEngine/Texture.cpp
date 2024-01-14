@@ -1,10 +1,10 @@
 #include "Texture.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-
-#include "stb_image/stb_image.h"
-#include "stb_image/stb_image_write.h"
+//#define STB_IMAGE_WRITE_IMPLEMENTATION
+//#define STB_IMAGE_IMPLEMENTATION
+//
+//#include "stb_image/stb_image.h"
+//#include "stb_image/stb_image_write.h"
 
 Texture::Texture() : 
 	_pixels{},
@@ -17,16 +17,16 @@ Texture::Texture() :
 	_command_pool{},
 	_image{},
 	_image_layout{},
-	_format{}
+	_format{ VK_FORMAT_R8G8B8A8_UNORM }
 {
 	;
 }
 
-Texture::Texture(std::string file_name) :
-	Texture::Texture()
-{
-	readFile(file_name);
-}
+//Texture::Texture(std::string file_name) :
+//	Texture::Texture()
+//{
+//	readFile(file_name);
+//}
 
 Texture::Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) :
 	Texture::Texture()
@@ -57,6 +57,11 @@ void Texture::setFormat(VkFormat format) {
 	_format = format;
 }
 
+void Texture::setDimensions(uint32_t width, uint32_t height) {
+	_width = width;
+	_height = height;
+}
+
 glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
 	return _pixels[row * _width + col];
 }
@@ -71,6 +76,40 @@ const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
 }
 
 void Texture::create() {
+	// Create the image to copy the buffer to
+	_image.setLogicalDevice(_logical_device);
+	_image.setMemoryProperties(_gpu->getMemoryProperties());
+	_image.setImageImageType(VK_IMAGE_TYPE_2D);
+	_image.setImageFormat(_format);
+	_image.setImageMipLevels(1);
+	_image.setImageArrayLayers(1);
+	_image.setImageSamples(VK_SAMPLE_COUNT_1_BIT);
+	_image.setImageTiling(VK_IMAGE_TILING_OPTIMAL);
+	_image.setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+	_image.setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+	_image.setImageExtent(_width, _height, 1);
+	_image.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+
+	_image.createImage();
+	_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_image.bind();
+
+	_image.setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
+	_image.setImageViewFormat(_format);
+	_image.setImageViewSurbresourceRange(
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0, // base mip level
+		1, // level count
+		0, // base array layer
+		1  // layer count
+	);
+	_image.createImageView();
+
+	//_pixels = std::vector<glm::vec4>(0); // Temporary solution to lower memory usage.
+	// _pixels field must be removed in the future.
+}
+
+void Texture::update(Pixels& pixels) {
 	// Creating the staging buffer
 	Buffer staging_buffer{};
 	staging_buffer.setLogicalDevice(_logical_device);
@@ -90,7 +129,7 @@ void Texture::create() {
 	staging_buffer.bind();
 
 	// Copying the actual texture data into the staging buffer
-	staging_buffer.setValues(_pixels.data());
+	staging_buffer.setValues(pixels.getPixels());
 
 	std::vector<VkBufferImageCopy> image_copy_arr{};
 
@@ -108,24 +147,6 @@ void Texture::create() {
 
 	image_copy_arr.push_back(image_copy);
 
-	// Create the image to copy the buffer to
-	_image.setLogicalDevice(_logical_device);
-	_image.setMemoryProperties(_gpu->getMemoryProperties());
-	_image.setImageImageType(VK_IMAGE_TYPE_2D);
-	_image.setImageFormat(_format);
-	_image.setImageMipLevels(1);
-	_image.setImageArrayLayers(1);
-	_image.setImageSamples(VK_SAMPLE_COUNT_1_BIT);
-	_image.setImageTiling(VK_IMAGE_TILING_OPTIMAL);
-	_image.setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
-	_image.setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
-	_image.setImageExtent(_width, _height, 1);
-	_image.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-
-	_image.createImage();
-	_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	_image.bind();
-	
 	// Preparing the transfer with the image memory barrier
 	VkImageSubresourceRange subresource_range{};
 	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -142,7 +163,7 @@ void Texture::create() {
 	image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	
+
 	// Creating the command buffer
 	CommandBuffer copy_cmd = _command_pool->createCommandBuffer();
 	copy_cmd.create();
@@ -165,7 +186,7 @@ void Texture::create() {
 		image_copy_arr.size(),
 		image_copy_arr.data()
 	);
-	
+
 	// transfering the image to the shader read layout so it can be sampled from
 	image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -182,26 +203,12 @@ void Texture::create() {
 	);
 
 	_image_layout = image_memory_barrier.newLayout;
-	
+
 	copy_cmd.end();
 	copy_cmd.flush(_logical_device->getDefaultQueue());
 
 	copy_cmd.free();
 	staging_buffer.destroy();
-
-	_image.setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
-	_image.setImageViewFormat(_format);
-	_image.setImageViewSurbresourceRange(
-		VK_IMAGE_ASPECT_COLOR_BIT,
-		0, // base mip level
-		1, // level count
-		0, // base array layer
-		1  // layer count
-	);
-	_image.createImageView();
-
-	_pixels = std::vector<glm::vec4>(0); // Temporary solution to lower memory usage.
-	// _pixels field must be removed in the future.
 }
 
 void Texture::destroy() {
@@ -287,65 +294,65 @@ void Texture::setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t 
 //	_height_inv = 1.0f / height;
 //}
 
-bool Texture::readFile(std::string file_name) {
-	uint8_t* data;
-	int width, height, n;
+//bool Texture::readFile(std::string file_name) {
+//	uint8_t* data;
+//	int width, height, n;
+//
+//	data = stbi_load(file_name.c_str(), &width, &height, &n, _n);
+//	if (!data) {
+//		std::cerr << "Error: failed opening the texture '" << file_name << "'" << std::endl;
+//		return false;
+//	}
+//
+//	_pixels.resize(width * height);
+//	_width = width;
+//	_height = height;
+//
+//	std::memcpy(_pixels.data(), data, width * height * _n) ;
+//
+//	stbi_image_free(data);
+//
+//	_format = VK_FORMAT_R8G8B8A8_UNORM;
+//
+//	return true;
+//}
 
-	data = stbi_load(file_name.c_str(), &width, &height, &n, _n);
-	if (!data) {
-		std::cerr << "Error: failed opening the texture '" << file_name << "'" << std::endl;
-		return false;
-	}
+//bool Texture::writeFile(std::string file_name) {
+//	std::vector<uint8_t> data(_width * _height * _n);
+//	uint32_t len = _width * _height;
+//
+//	for (uint32_t i = 0, j = 0; i < len; i++, j+=4) {
+//		data[j] = _pixels[i].r;
+//		data[j + 1] = _pixels[i].g;
+//		data[j + 2] = _pixels[i].b;
+//		data[j + 3] = _pixels[i].a;
+//	}
+//
+//	return stbi_write_bmp(
+//		file_name.c_str(),
+//		_width,
+//		_height,
+//		_n,
+//		data.data()
+//	);
+//}
+//
+//bool Texture::writeFileHDR(std::string file_name) {
+//	return stbi_write_hdr(
+//		file_name.c_str(),
+//		_width,
+//		_height,
+//		_n,
+//		&_pixels[0].r
+//	);
+//}
 
-	_pixels.resize(width * height);
-	_width = width;
-	_height = height;
-
-	std::memcpy(_pixels.data(), data, width * height * _n) ;
-
-	stbi_image_free(data);
-
-	_format = VK_FORMAT_R8G8B8A8_UNORM;
-
-	return true;
-}
-
-bool Texture::writeFile(std::string file_name) {
-	std::vector<uint8_t> data(_width * _height * _n);
-	uint32_t len = _width * _height;
-
-	for (uint32_t i = 0, j = 0; i < len; i++, j+=4) {
-		data[j] = _pixels[i].r;
-		data[j + 1] = _pixels[i].g;
-		data[j + 2] = _pixels[i].b;
-		data[j + 3] = _pixels[i].a;
-	}
-
-	return stbi_write_bmp(
-		file_name.c_str(),
-		_width,
-		_height,
-		_n,
-		data.data()
-	);
-}
-
-bool Texture::writeFileHDR(std::string file_name) {
-	return stbi_write_hdr(
-		file_name.c_str(),
-		_width,
-		_height,
-		_n,
-		&_pixels[0].r
-	);
-}
-
-const uint64_t Texture::getWidth() const {
-	return _width;
+const uint32_t Texture::getWidth() const {
+	return _image.getImageExtentWidth();
 }
 
 const uint64_t Texture::getHeight() const {
-	return _height;
+	return _image.getImageExtentHeight();
 }
 
 const uint8_t Texture::getNbComponents() const {

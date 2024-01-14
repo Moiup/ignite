@@ -6,6 +6,7 @@
 #include "Buffer.h"
 #include "Image.h"
 #include "PhysicalDevice.h"
+#include "Pixels.h"
 
 #include <cstdint>
 #include <iostream>
@@ -37,7 +38,7 @@ private:
 
 public:
 	Texture();
-	Texture(std::string file_name);
+	//Texture(std::string file_name);
 	Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
 	Texture(uint64_t width, uint64_t height);
 
@@ -45,8 +46,10 @@ public:
 	void setGPU(PhysicalDevice* gpu);
 	void setCommandPool(CommandPool* command_pool);
 	void setFormat(VkFormat format);
+	void setDimensions(uint32_t width, uint32_t height);
 
 	void create();
+	void update(Pixels& pixels);
 	void destroy();
 
 	glm::vec4& pixel(uint64_t row, uint64_t col);
@@ -60,11 +63,11 @@ public:
 	void setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t height);
 	//void setPixels(void* pixels, uint64_t width, uint64_t height, uint8_t n);
 
-	bool readFile(std::string file_name);
-	bool writeFile(std::string file_name);
-	bool writeFileHDR(std::string file_name);
+	//bool readFile(std::string file_name);
+	//bool writeFile(std::string file_name);
+	//bool writeFileHDR(std::string file_name);
 
-	const uint64_t getWidth() const;
+	const uint32_t getWidth() const;
 	const uint64_t getHeight() const;
 	const uint8_t getNbComponents() const;
 	const Image& getImage() const;

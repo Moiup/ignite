@@ -303,6 +303,9 @@
     <ClCompile Include="Bistro.cpp">
       <Filter>Ignite\Module</Filter>
     </ClCompile>
+    <ClCompile Include="Pixels.cpp">
+      <Filter>Ignite\Engine\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -556,6 +559,9 @@
     </ClInclude>
     <ClInclude Include="Bistro.h">
       <Filter>Ignite\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="Pixels.h">
+      <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

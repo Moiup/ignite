@@ -205,6 +205,7 @@
     <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="PhysicalDevice.cpp" />
     <ClCompile Include="Pipeline.cpp" />
+    <ClCompile Include="Pixels.cpp" />
     <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RayTracerCPU.cpp" />
@@ -287,6 +288,7 @@
     <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="PhysicalDevice.h" />
     <ClInclude Include="Pipeline.h" />
+    <ClInclude Include="Pixels.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTracerCPU.h" />

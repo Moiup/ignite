@@ -47,6 +47,9 @@ public:
 	void setImageViewInfo(VkImageViewCreateInfo info);
 
 	VkFormat getImageFormat();
+	uint32_t getImageExtentWidth() const;
+	uint32_t getImageExtentHeight() const;
+
 	const VkImage& getImage() const;
 	void setImage(VkImage image);
 	const VkImageView& getImageView() const;

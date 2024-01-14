@@ -85,11 +85,15 @@ void EngineApp::init() {
 	DefaultConf::white_texture = &_white_texture;
 
 	// White Texture
-	_white_texture.readFile("../assets/textures/white.png");
+	//_white_texture.readFile("../assets/textures/white.png");
+	Pixels pixels;
+	pixels.readFile("../assets/textures/white.png");
 	_white_texture.setLogicalDevice(DefaultConf::logical_device);
 	_white_texture.setGPU(DefaultConf::gpu);
 	_white_texture.setCommandPool(DefaultConf::command_pool);
+	_white_texture.setDimensions(pixels.getWidth(), pixels.getHeight());
 	_white_texture.create();
+	_white_texture.update(pixels);
 	
 	initEngineEntities();
 

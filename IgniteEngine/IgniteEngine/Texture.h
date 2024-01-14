@@ -19,11 +19,8 @@
 class Texture
 {
 private:
-	std::vector<glm::vec4> _pixels;
 	uint64_t _width;
 	uint64_t _height;
-	float _width_inv;
-	float _height_inv;
 
 	static const uint8_t _n{4};
 
@@ -39,8 +36,8 @@ private:
 public:
 	Texture();
 	//Texture(std::string file_name);
-	Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
-	Texture(uint64_t width, uint64_t height);
+	//Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
+	//Texture(uint64_t width, uint64_t height);
 
 	void setLogicalDevice(LogicalDevice* _logical_device);
 	void setGPU(PhysicalDevice* gpu);
@@ -52,15 +49,15 @@ public:
 	void update(Pixels& pixels);
 	void destroy();
 
-	glm::vec4& pixel(uint64_t row, uint64_t col);
-	const std::vector<glm::vec4>& pixels() const;
+	//glm::vec4& pixel(uint64_t row, uint64_t col);
+	//const std::vector<glm::vec4>& pixels() const;
 
-	const glm::vec4& getPixel(uint64_t row, uint64_t col);
-	const glm::vec4& getPixel(float u, float v) const;
-	const glm::vec4& getPixel(glm::vec2 uv) const;
+	//const glm::vec4& getPixel(uint64_t row, uint64_t col);
+	//const glm::vec4& getPixel(float u, float v) const;
+	//const glm::vec4& getPixel(glm::vec2 uv) const;
 
-	void setPixel(glm::vec4& pix, uint64_t row, uint64_t col);
-	void setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t height);
+	//void setPixel(glm::vec4& pix, uint64_t row, uint64_t col);
+	//void setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t height);
 	//void setPixels(void* pixels, uint64_t width, uint64_t height, uint8_t n);
 
 	//bool readFile(std::string file_name);

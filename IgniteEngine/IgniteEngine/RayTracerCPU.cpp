@@ -42,10 +42,10 @@ void RayTracerCPU::buildImage() {
 	uint64_t width = DefaultConf::render_window->getWidthInPixel();
 	uint64_t height = DefaultConf::render_window->getHeightInPixel();
 
-	_image = Texture(
-		width,
-		height
-	);
+	//_image = Texture(
+	//	width,
+	//	height
+	//);
 
 	glm::mat4 viewport = camera->getViewport(width, height);
 	glm::mat4 model = glm::mat4(1.0f);
@@ -93,7 +93,7 @@ void RayTracerCPU::computePixel(uint64_t x, uint64_t y, glm::mat4 inv) {
 		pix = glm::vec4(0, 0, 0, 255);
 	}
 
-	_image.setPixel(pix, y, x);
+	//_image.setPixel(pix, y, x);
 }
 
 void RayTracerCPU::computePixel(float x, float y, uint64_t p_x, uint64_t p_y) {
@@ -121,5 +121,5 @@ void RayTracerCPU::computePixel(float x, float y, uint64_t p_x, uint64_t p_y) {
 		pix = glm::vec4(0, 0, 0, 255);
 	}
 
-	_image.setPixel(pix, p_y, p_x);
+	//_image.setPixel(pix, p_y, p_x);
 }

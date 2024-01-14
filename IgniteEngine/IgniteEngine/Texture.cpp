@@ -7,11 +7,8 @@
 //#include "stb_image/stb_image_write.h"
 
 Texture::Texture() : 
-	_pixels{},
 	_width{ 0 },
 	_height{ 0 },
-	_width_inv{ 0 },
-	_height_inv{ 0 },
 	_logical_device{},
 	_gpu{},
 	_command_pool{},
@@ -28,18 +25,18 @@ Texture::Texture() :
 //	readFile(file_name);
 //}
 
-Texture::Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) :
-	Texture::Texture()
-{
-	setPixels(pixels, width, height);
-}
-
-Texture::Texture(uint64_t width, uint64_t height) :
-	Texture::Texture()
-{
-	std::vector<glm::vec4> pixels(width * height * _n);
-	setPixels(pixels, width, height);
-}
+//Texture::Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height) :
+//	Texture::Texture()
+//{
+//	setPixels(pixels, width, height);
+//}
+//
+//Texture::Texture(uint64_t width, uint64_t height) :
+//	Texture::Texture()
+//{
+//	std::vector<glm::vec4> pixels(width * height * _n);
+//	setPixels(pixels, width, height);
+//}
 
 void Texture::setLogicalDevice(LogicalDevice* logical_device) {
 	_logical_device = logical_device;
@@ -62,18 +59,18 @@ void Texture::setDimensions(uint32_t width, uint32_t height) {
 	_height = height;
 }
 
-glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
-	return _pixels[row * _width + col];
-}
+//glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
+//	return _pixels[row * _width + col];
+//}
+//
+//const std::vector<glm::vec4>& Texture::pixels() const {
+//	return _pixels;
+//}
 
-const std::vector<glm::vec4>& Texture::pixels() const {
-	return _pixels;
-}
-
-const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
-	glm::vec4& p = pixel(row, col);
-	return p;
-}
+//const glm::vec4& Texture::getPixel(uint64_t row, uint64_t col) {
+//	glm::vec4& p = pixel(row, col);
+//	return p;
+//}
 
 void Texture::create() {
 	// Create the image to copy the buffer to
@@ -104,9 +101,6 @@ void Texture::create() {
 		1  // layer count
 	);
 	_image.createImageView();
-
-	//_pixels = std::vector<glm::vec4>(0); // Temporary solution to lower memory usage.
-	// _pixels field must be removed in the future.
 }
 
 void Texture::update(Pixels& pixels) {
@@ -221,67 +215,67 @@ void Texture::destroy() {
 * Bilinear interpolation to get the corresponding color.
 * 
 */
-const glm::vec4& Texture::getPixel(float u, float v) const {
-	assert(u > 1.0 && v > 1.0, "Error: u and v must be inferior or equal to 1\n");
-	assert(u < 0 && v < 0, "Error: u and v must be superior or equal to 0.\n");
-	
-	float p_u = _height - u * _height;
-	float p_v = _width - v * _width;
-	
-	uint64_t p00u = static_cast<uint64_t>(p_u);
-	uint64_t p00v = static_cast<uint64_t>(p_v);
+//const glm::vec4& Texture::getPixel(float u, float v) const {
+//	assert(u > 1.0 && v > 1.0, "Error: u and v must be inferior or equal to 1\n");
+//	assert(u < 0 && v < 0, "Error: u and v must be superior or equal to 0.\n");
+//	
+//	float p_u = _height - u * _height;
+//	float p_v = _width - v * _width;
+//	
+//	uint64_t p00u = static_cast<uint64_t>(p_u);
+//	uint64_t p00v = static_cast<uint64_t>(p_v);
+//
+//	uint64_t p10u = static_cast<uint64_t>(p_u) + 1;
+//	uint64_t p10v = static_cast<uint64_t>(p_v);
+//
+//	uint64_t p01u = static_cast<uint64_t>(p_u);
+//	uint64_t p01v = static_cast<uint64_t>(p_v) + 1;
+//
+//	uint64_t p11u = static_cast<uint64_t>(p_u) + 1;
+//	uint64_t p11v = static_cast<uint64_t>(p_v) + 1;
+//	
+//	float diff{};
+//
+//	glm::vec4 t_pix{};
+//	glm::vec4 b_pix{};
+//	glm::vec4 pix{};
+//
+//	if (p00u == _height) {
+//		// we do not have the top neighbor
+//		p10u = p00u;
+//		p11u = p00u;
+//	}
+//	if(p00v == _width){
+//		// we do not have the right neighbor
+//		p11v = p00v;
+//		p01v = p00v;
+//	}
+//
+//	diff = p_v - p00v;
+//	t_pix = diff * getPixel(p11u, p11v) + (1 - diff) * getPixel(p10u, p10v);
+//	b_pix = diff * getPixel(p01u, p01v) + (1 - diff) * getPixel(p00u, p00v);
+//
+//	diff = p_u - p00u;
+//	pix = diff * t_pix + (1 - diff) * b_pix;
+//
+//	return pix;
+//}
+//
+//const glm::vec4& Texture::getPixel(glm::vec2 uv) const {
+//	return getPixel(uv.r, uv.g);
+//}
+//
+//void Texture::setPixel(glm::vec4& pix, uint64_t row, uint64_t col){
+//	pixel(row, col) = pix;
+//}
 
-	uint64_t p10u = static_cast<uint64_t>(p_u) + 1;
-	uint64_t p10v = static_cast<uint64_t>(p_v);
-
-	uint64_t p01u = static_cast<uint64_t>(p_u);
-	uint64_t p01v = static_cast<uint64_t>(p_v) + 1;
-
-	uint64_t p11u = static_cast<uint64_t>(p_u) + 1;
-	uint64_t p11v = static_cast<uint64_t>(p_v) + 1;
-	
-	float diff{};
-
-	glm::vec4 t_pix{};
-	glm::vec4 b_pix{};
-	glm::vec4 pix{};
-
-	if (p00u == _height) {
-		// we do not have the top neighbor
-		p10u = p00u;
-		p11u = p00u;
-	}
-	if(p00v == _width){
-		// we do not have the right neighbor
-		p11v = p00v;
-		p01v = p00v;
-	}
-
-	diff = p_v - p00v;
-	t_pix = diff * getPixel(p11u, p11v) + (1 - diff) * getPixel(p10u, p10v);
-	b_pix = diff * getPixel(p01u, p01v) + (1 - diff) * getPixel(p00u, p00v);
-
-	diff = p_u - p00u;
-	pix = diff * t_pix + (1 - diff) * b_pix;
-
-	return pix;
-}
-
-const glm::vec4& Texture::getPixel(glm::vec2 uv) const {
-	return getPixel(uv.r, uv.g);
-}
-
-void Texture::setPixel(glm::vec4& pix, uint64_t row, uint64_t col){
-	pixel(row, col) = pix;
-}
-
-void Texture::setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t height) {
-	_pixels = pixels;
-	_width = width;
-	_height = height;
-	_width_inv = 1.0f / width;
-	_height_inv = 1.0f / height;
-}
+//void Texture::setPixels(std::vector<glm::vec4> pixels, uint64_t width, uint64_t height) {
+//	_pixels = pixels;
+//	_width = width;
+//	_height = height;
+//	_width_inv = 1.0f / width;
+//	_height_inv = 1.0f / height;
+//}
 
 //void Texture::setPixels(void* pixels, uint64_t width, uint64_t height, uint8_t n) {
 //	size_t nb_elem = width * height * n;

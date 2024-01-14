@@ -28,7 +28,6 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 			Pixels pixels;
 			pixels.readFile(fom->materials[i].map_Kd.path);
 			_textures[0].push_back(Texture());
-			//_textures[0][t_id].readFile(fom->materials[i].map_Kd.path);
 			_textures[0][t_id].setLogicalDevice(DefaultConf::logical_device);
 			_textures[0][t_id].setGPU(DefaultConf::gpu);
 			_textures[0][t_id].setCommandPool(DefaultConf::command_pool);

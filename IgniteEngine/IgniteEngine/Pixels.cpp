@@ -14,6 +14,14 @@ Pixels::Pixels() :
 	;
 }
 
+Pixels::Pixels(std::string file_path) {
+	readFile(file_path);
+}
+
+Pixels::Pixels(glm::vec4* pixels, uint32_t width, uint32_t height) {
+	setPixels(pixels, width, height);
+}
+
 Pixels::~Pixels(){
 	delete[] _pixels;
 }

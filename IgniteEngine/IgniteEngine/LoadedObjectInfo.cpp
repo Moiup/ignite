@@ -25,8 +25,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		std::cout << fom->materials[i].map_Kd.path << std::endl;
 		if (!mat_to_tex.count(fom->materials[i].map_Kd.path)) {
 			mat_to_tex[fom->materials[i].map_Kd.path] = t_id;
-			Pixels pixels;
-			pixels.readFile(fom->materials[i].map_Kd.path);
+			Pixels pixels(fom->materials[i].map_Kd.path);
 			_textures[0].push_back(Texture());
 			_textures[0][t_id].setLogicalDevice(DefaultConf::logical_device);
 			_textures[0][t_id].setGPU(DefaultConf::gpu);

@@ -18,6 +18,8 @@ private:
 
 public:
 	Pixels();
+	Pixels(std::string file_path);
+	Pixels(glm::vec4* pixels, uint32_t width, uint32_t height);
 	~Pixels();
 
 	bool readFile(std::string file_path);

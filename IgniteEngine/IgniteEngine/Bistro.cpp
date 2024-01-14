@@ -12,9 +12,9 @@ void Bistro::start() {
 	Module::start();
 
 	// -- Loading info
-	//_bistro_info.loadWavefont("../assets/3d_objects/plan_textured/plan_tex.obj");
+	_bistro_info.loadWavefont("../assets/3d_objects/plan_textured/plan_tex.obj");
 	//_bistro_info.loadWavefont("../assets/3d_objects/cube_textured/cube_tex.obj");
-	_bistro_info.loadWavefont("../assets/3d_objects/cornell.obj");
+	//_bistro_info.loadWavefont("../assets/3d_objects/cornell.obj");
 	//_bistro_info.loadWavefont("../assets/Cat/12221_Cat_v1_l3.obj");
 	//_bistro_info.loadWavefont("../assets/bistro/bistro/exterior.obj");
 	_bistro.createFromObjectInfo(_bistro_info);

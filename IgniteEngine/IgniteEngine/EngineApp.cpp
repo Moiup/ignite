@@ -86,8 +86,7 @@ void EngineApp::init() {
 
 	// White Texture
 	//_white_texture.readFile("../assets/textures/white.png");
-	Pixels pixels;
-	pixels.readFile("../assets/textures/white.png");
+	Pixels pixels("../assets/textures/white.png");
 	_white_texture.setLogicalDevice(DefaultConf::logical_device);
 	_white_texture.setGPU(DefaultConf::gpu);
 	_white_texture.setCommandPool(DefaultConf::command_pool);

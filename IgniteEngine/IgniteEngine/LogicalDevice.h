@@ -21,13 +21,13 @@ private:
 	std::vector<VkQueueFamilyProperties2> _family_properties;
 	std::vector<uint32_t> _queue_family_indexes;
 
-	const VkPhysicalDevice* _gpu;
+	const PhysicalDevice* _gpu;
 	VkDevice _logical_device;
 
 public:
 	LogicalDevice();
 
-	void configure(const VkPhysicalDevice* gpu);
+	void configure(const PhysicalDevice* gpu);
 
 	bool setQueue(std::string name, std::vector<VkQueueFlagBits> flags);
 	const Queue* getQueue(std::string name) const;

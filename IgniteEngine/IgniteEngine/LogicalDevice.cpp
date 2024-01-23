@@ -8,12 +8,12 @@ LogicalDevice::LogicalDevice() :
 	;
 }
 
-void LogicalDevice::configure(const VkPhysicalDevice *gpu) {
+void LogicalDevice::configure(const PhysicalDevice *gpu) {
 	_gpu = gpu;
 
 	uint32_t family_count;
 	vkGetPhysicalDeviceQueueFamilyProperties2(
-		*_gpu,
+		_gpu->getGPU(),
 		&family_count,
 		nullptr
 	);
@@ -22,7 +22,7 @@ void LogicalDevice::configure(const VkPhysicalDevice *gpu) {
 		prop.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
 	}
 	vkGetPhysicalDeviceQueueFamilyProperties2(
-		*_gpu,
+		_gpu->getGPU(),
 		&family_count,
 		_family_properties.data()
 	);
@@ -143,7 +143,7 @@ void LogicalDevice::createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &qu
 	device_info.pEnabledFeatures = nullptr;
 
 	VkResult vk_result = vkCreateDevice(
-		*_gpu,
+		_gpu->getGPU(),
 		&device_info,
 		nullptr,
 		&_logical_device

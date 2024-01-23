@@ -52,7 +52,7 @@ void EngineApp::init() {
 	_gpu.configure(_instance);
 	
 	// Initialising logical device and queues
-	_logical_device.configure(&_gpu.getGPU());
+	_logical_device.configure(&_gpu);
 	_logical_device.setQueue(
 		"graphic_queue",
 		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT}

@@ -43,8 +43,9 @@ void EngineApp::init() {
 	_instance.create();
 
 	// Setting window
-	const VkInstance& insta = _instance.getInstance();
-	_render_window.setInstance(const_cast<VkInstance*>(&insta));
+	//const VkInstance& insta = _instance.getInstance();
+	//_render_window.setInstance(const_cast<VkInstance*>(&insta));
+	_render_window.setInstance(&_instance);
 	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
 	// Initialising

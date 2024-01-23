@@ -28,7 +28,7 @@ void WindowSurface::close() {
 	destroy();
 }
 
-void WindowSurface::setInstance(VkInstance* instance) {
+void WindowSurface::setInstance(Instance* instance) {
 	_instance = instance;
 }
 
@@ -49,7 +49,7 @@ void WindowSurface::create() {
 
 	SDL_bool  sdl_result = SDL_Vulkan_CreateSurface(
 		getWindow(),
-		*_instance,
+		_instance->getInstance(),
 		&_surface
 	);
 	if (!sdl_result) {
@@ -58,5 +58,5 @@ void WindowSurface::create() {
 }
 
 void WindowSurface::destroy() {
-	vkDestroySurfaceKHR(*_instance, _surface, nullptr);
+	vkDestroySurfaceKHR(_instance->getInstance(), _surface, nullptr);
 }

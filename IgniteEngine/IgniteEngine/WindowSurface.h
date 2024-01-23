@@ -8,7 +8,7 @@ class WindowSurface: public Window
 private:
 	bool created;
 	VkSurfaceKHR _surface;
-	VkInstance* _instance;
+	Instance* _instance;
 
 public:
 	WindowSurface();
@@ -19,7 +19,7 @@ public:
 	void init();
 	void close();
 
-	void setInstance(VkInstance* instance);
+	void setInstance(Instance* instance);
 
 	const VkSurfaceKHR& getSurface() const;
 

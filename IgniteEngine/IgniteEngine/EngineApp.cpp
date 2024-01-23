@@ -68,7 +68,7 @@ void EngineApp::init() {
 	_logical_device.create();
 
 	// Command Pool
-	_command_pool.setLogicalDevice(const_cast<VkDevice*>(_logical_device.getDevice()));
+	_command_pool.setLogicalDevice(&_logical_device);
 	_command_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	_command_pool.setQueueFamilyIndex(
 		_logical_device.getQueue("graphic_queue")->getInfos()->queueFamilyIndex

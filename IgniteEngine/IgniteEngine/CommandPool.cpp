@@ -10,7 +10,7 @@ CommandPool::CommandPool() :
 	;
 }
 
-void CommandPool::setLogicalDevice(VkDevice* logical_device) {
+void CommandPool::setLogicalDevice(LogicalDevice* logical_device) {
 	_logical_device = logical_device;
 }
 
@@ -30,7 +30,7 @@ void CommandPool::create() {
 	pool_info.queueFamilyIndex = _family_index;
 
 	VkResult vk_result = vkCreateCommandPool(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&pool_info,
 		nullptr,
 		&_pool
@@ -48,7 +48,7 @@ void CommandPool::destroy() {
 		return;
 	}
 
-	vkDestroyCommandPool(*_logical_device, _pool, nullptr);
+	vkDestroyCommandPool(*_logical_device->getDevice(), _pool, nullptr);
 }
 
 const VkCommandPool& CommandPool::getPool() const {

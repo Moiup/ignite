@@ -10,7 +10,7 @@ CommandBuffer::CommandBuffer() :
 	;
 }
 
-void CommandBuffer::setLogicalDevice(VkDevice* logical_device) {
+void CommandBuffer::setLogicalDevice(LogicalDevice* logical_device) {
 	_logical_device = logical_device;
 }
 
@@ -31,7 +31,7 @@ void CommandBuffer::create() {
 	info.level = _level;
 
 	VkResult vk_result = vkAllocateCommandBuffers(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&info,
 		&_command_buffer
 	);
@@ -48,7 +48,7 @@ void CommandBuffer::free() {
 		return;
 	}
 
-	vkFreeCommandBuffers(*_logical_device, *_command_pool, 1, &_command_buffer);
+	vkFreeCommandBuffers(*_logical_device->getDevice(), *_command_pool, 1, &_command_buffer);
 }
 
 void CommandBuffer::begin() {
@@ -106,7 +106,7 @@ void CommandBuffer::flush(const Queue* queue) {
 	VkFence fence;
 
 	VkResult result = vkCreateFence(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&fence_info,
 		nullptr,
 		&fence
@@ -125,7 +125,7 @@ void CommandBuffer::flush(const Queue* queue) {
 	);
 
 	result = vkWaitForFences(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		1,
 		&fence,
 		VK_TRUE,
@@ -134,7 +134,7 @@ void CommandBuffer::flush(const Queue* queue) {
 	if (result != VK_SUCCESS) {
 		throw std::runtime_error("Error while waiting for fences to finish.");
 	}
-	vkDestroyFence(*_logical_device, fence, nullptr);
+	vkDestroyFence(*_logical_device->getDevice(), fence, nullptr);
 }
 
 void CommandBuffer::setViewport(std::vector<VkViewport>& viewport_arr) {

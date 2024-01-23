@@ -6,7 +6,7 @@ class CommandBuffer
 {
 private:
 	VkCommandBuffer _command_buffer;
-	VkDevice* _logical_device;
+	LogicalDevice* _logical_device;
 	VkCommandPool* _command_pool;
 	VkCommandBufferLevel _level;
 	
@@ -15,7 +15,7 @@ private:
 public:
 	CommandBuffer();
 
-	void setLogicalDevice(VkDevice* logical_device);
+	void setLogicalDevice(LogicalDevice* logical_device);
 	void setCommandPool(VkCommandPool* command_pool);
 	void setLevel(VkCommandBufferLevel level);
 

@@ -7,7 +7,7 @@ class CommandPool
 {
 private:
 	VkCommandPool _pool;
-	VkDevice* _logical_device;
+	LogicalDevice* _logical_device;
 	VkCommandPoolCreateFlagBits _flags;
 	uint32_t _family_index;
 	bool _created;
@@ -15,7 +15,7 @@ private:
 public:
 	CommandPool();
 
-	void setLogicalDevice(VkDevice* logical_device);
+	void setLogicalDevice(LogicalDevice* logical_device);
 	void setFlags(VkCommandPoolCreateFlagBits flags);
 	void setQueueFamilyIndex(uint32_t family_index);
 	void create();

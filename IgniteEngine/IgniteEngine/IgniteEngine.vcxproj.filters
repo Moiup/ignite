@@ -563,6 +563,12 @@
     <ClInclude Include="Pixels.h">
       <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
+    <ClInclude Include="Pointer.h">
+      <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Pointer.hpp">
+      <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IgniteEngine.rc">

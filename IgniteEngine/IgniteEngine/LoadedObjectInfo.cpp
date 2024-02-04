@@ -38,11 +38,8 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];
 	}
 
-	std::vector<uint32_t> indices{};
+	_meshes.push_back(Mesh());
 	std::vector<uint32_t> mat_id{};
-	std::vector<glm::vec3> v_coord{};
-	std::vector<glm::vec3> n_coord{};
-	std::vector<glm::vec2> t_coord{};
 
 	std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::unordered_map<uint32_t, uint32_t>>> is_vertex;
 
@@ -50,26 +47,20 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		uint32_t f = 0;
 		uint32_t v_i = 0;
 		while (f < fom->face_count) {
-			buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i);
-			buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 1);
-			buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 2);
+			buildFace(fom, _meshes[0]._indices, mat_id, _meshes[0]._coords, _meshes[0]._normals, _meshes[0]._uv, is_vertex, f, v_i);
+			buildFace(fom, _meshes[0]._indices, mat_id, _meshes[0]._coords, _meshes[0]._normals, _meshes[0]._uv, is_vertex, f, v_i + 1);
+			buildFace(fom, _meshes[0]._indices, mat_id, _meshes[0]._coords, _meshes[0]._normals, _meshes[0]._uv, is_vertex, f, v_i + 2);
 
 			if (fom->face_vertices[f] == 4) {
-				buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i);
-				buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 2);
-				buildFace(fom, indices, mat_id, v_coord, n_coord, t_coord, is_vertex, f, v_i + 3);
+				buildFace(fom, _meshes[0]._indices, mat_id, _meshes[0]._coords, _meshes[0]._normals, _meshes[0]._uv, is_vertex, f, v_i);
+				buildFace(fom, _meshes[0]._indices, mat_id, _meshes[0]._coords, _meshes[0]._normals, _meshes[0]._uv, is_vertex, f, v_i + 2);
+				buildFace(fom, _meshes[0]._indices, mat_id, _meshes[0]._coords, _meshes[0]._normals, _meshes[0]._uv, is_vertex, f, v_i + 3);
 			}
 
 			v_i += fom->face_vertices[f];
 			f++;
 		}
 	}
-
-	_meshes.push_back(Mesh());
-	_meshes[0].setCoords(&v_coord[0][0], v_coord.size());
-	_meshes[0].setNormals(&n_coord[0][0], n_coord.size());
-	_meshes[0].setUV(&t_coord[0][0], t_coord.size());
-	_meshes[0].setIndices(indices.data(), indices.size());
 
 	_material_indices.push_back(std::vector<uint32_t>());
 	_material_indices[0].assign(mat_id.data(), mat_id.data() + mat_id.size());

@@ -289,6 +289,8 @@
     <ClInclude Include="PhysicalDevice.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Pixels.h" />
+    <ClInclude Include="Pointer.h" />
+    <ClInclude Include="Pointer.hpp" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTracerCPU.h" />

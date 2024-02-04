@@ -9,7 +9,7 @@
 Pixels::Pixels() :
 	_width{0},
 	_height{0},
-	_pixels{nullptr}
+	_pixels{}
 {
 	;
 }
@@ -18,12 +18,12 @@ Pixels::Pixels(std::string file_path) {
 	readFile(file_path);
 }
 
-Pixels::Pixels(glm::vec4* pixels, uint32_t width, uint32_t height) {
+Pixels::Pixels(Pointer<glm::vec4>& pixels, uint32_t width, uint32_t height) {
 	setPixels(pixels, width, height);
 }
 
 Pixels::~Pixels(){
-	delete[] _pixels;
+	;
 }
 
 bool Pixels::readFile(std::string file_path) {
@@ -31,20 +31,20 @@ bool Pixels::readFile(std::string file_path) {
 	int width, height, n;
 
 	data = stbi_load(file_path.c_str(), &width, &height, &n, _n);
+
 	if (!data) {
 		std::cerr << "Error: failed opening the texture '" << file_path << "'" << std::endl;
 		return false;
 	}
 
-	delete[] _pixels;
-
 	_pixels = new glm::vec4[width * height];
 	_width = width;
 	_height = height;
 
-	std::memcpy(_pixels, data, width * height * _n * sizeof(uint8_t));
+	std::memcpy(&_pixels[0], data, width * height * _n * sizeof(uint8_t));
 
 	stbi_image_free(data);
+
 
 	return true;
 }
@@ -52,15 +52,16 @@ bool Pixels::readFile(std::string file_path) {
 void Pixels::setPixels(uint32_t width, uint32_t height) {
 	_width = width;
 	_height = _height;
-	delete[] _pixels;
+	//delete[] _pixels;
 	_pixels = new glm::vec4[width * height];
 }
 
-void Pixels::setPixels(glm::vec4* pixels, uint32_t width, uint32_t height) {
+void Pixels::setPixels(Pointer<glm::vec4>& pixels, uint32_t width, uint32_t height) {
 	_width = width;
 	_height = height;
-	delete[] _pixels;
-	_pixels = static_cast<glm::vec4*>(std::memcpy(_pixels, pixels, width * height * sizeof(glm::vec4)));
+	//delete[] _pixels;
+	_pixels = new glm::vec4[width * height];
+	std::memcpy(&_pixels[0], &pixels[0], width * height * sizeof(glm::vec4));
 }
 
 uint32_t Pixels::getWidth() {
@@ -75,6 +76,6 @@ glm::vec4& Pixels::getPixel(uint32_t r, uint32_t c) {
 	return _pixels[r * _width + c];
 }
 
-glm::vec4* Pixels::getPixels() {
+Pointer<glm::vec4>& Pixels::getPixels() {
 	return _pixels;
 }

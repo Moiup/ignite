@@ -58,5 +58,7 @@ public:
 	uint32_t getIndicesNbElem();
 	uint32_t getUVNbElem();
 	uint32_t getNormalsNbElem();
+
+	friend class LoadedObjectInfo;
 };
 

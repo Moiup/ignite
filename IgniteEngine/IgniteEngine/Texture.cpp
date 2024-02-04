@@ -123,7 +123,7 @@ void Texture::update(Pixels& pixels) {
 	staging_buffer.bind();
 
 	// Copying the actual texture data into the staging buffer
-	staging_buffer.setValues(pixels.getPixels());
+	staging_buffer.setValues(pixels.getPixels().data());
 
 	std::vector<VkBufferImageCopy> image_copy_arr{};
 

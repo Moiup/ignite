@@ -399,9 +399,7 @@ void DefaultRenderer::createGraphicsPipeline() {
 			continue;
 		}
 		GraphicsPipeline gp{};
-		gp.setLogicalDevice(
-			(VkDevice*)_logical_device->getDevice()
-		);
+		gp.setLogicalDevice(_logical_device);
 		gp.setPhysicalDevice(_gpu);
 		gp.setNbFrame(_nb_frame);
 		gp.setSwapchain(&_swapchain);

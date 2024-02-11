@@ -1,3 +1,4 @@
+#pragma once
 #include "Pointer.hpp"
 
 template<class T>
@@ -134,12 +135,12 @@ T& Pointer<T>::operator*() {
 
 template<class T>
 T& Pointer<T>::operator[](int32_t i) {
-	return *(_p + i + offset());
+	return *(_p + i + _offset);
 }
 
 template<class T>
 T* Pointer<T>::data() const {
-	return  _p + _offset;
+	return _p + _offset;
 }
 
 template<class T>

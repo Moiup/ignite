@@ -6,8 +6,10 @@
 #include "TestModule.h"
 #include "MediapipeModule.h"
 #include "MenuModule.h"
-#include "Bistro.h"
 #include "Camera.h"
+
+#include "Bistro.h"
+#include "ComputeShaderTest.h"
 
 class Modules
 {
@@ -17,6 +19,7 @@ private:
 	//TestModule _test_module;
 	//MediapipeModule _mediapipe_module;
 	Bistro _bistro;
+	ComputeShaderTest _compute_shader_test;
 
 public:
 	Modules();

@@ -306,6 +306,9 @@
     <ClCompile Include="Pixels.cpp">
       <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
+    <ClCompile Include="ComputeShaderTest.cpp">
+      <Filter>Ignite\Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -568,6 +571,9 @@
     </ClInclude>
     <ClInclude Include="Pointer.hpp">
       <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputeShaderTest.h">
+      <Filter>Ignite\Module</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

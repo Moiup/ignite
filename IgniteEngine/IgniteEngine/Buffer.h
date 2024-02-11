@@ -1,5 +1,6 @@
 #pragma once
 #include "Ressource.h"
+#include "Pointer.h"
 #include <unordered_map>
 
 class Buffer : public Ressource
@@ -25,7 +26,7 @@ public:
 	void setPQueueFamilyIndices(const uint32_t* p_queue_family_indices);
 
 	VkBuffer& getBuffer();
-	void* getValues();
+	Pointer<uint8_t> getValues();
 
 
 protected:

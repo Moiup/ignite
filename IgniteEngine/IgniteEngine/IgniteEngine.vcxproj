@@ -158,6 +158,7 @@
     <ClCompile Include="CommandPool.cpp" />
     <ClCompile Include="ComputePipeline.cpp" />
     <ClCompile Include="ComputeShader.cpp" />
+    <ClCompile Include="ComputeShaderTest.cpp" />
     <ClCompile Include="DefaultConf.cpp" />
     <ClCompile Include="DefaultGPU.cpp" />
     <ClCompile Include="DefaultRenderer.cpp" />
@@ -240,6 +241,7 @@
     <ClInclude Include="CommandPool.h" />
     <ClInclude Include="ComputePipeline.h" />
     <ClInclude Include="ComputeShader.h" />
+    <ClInclude Include="ComputeShaderTest.h" />
     <ClInclude Include="DefaultConf.h" />
     <ClInclude Include="DefaultGPU.h" />
     <ClInclude Include="DefaultRenderer.h" />

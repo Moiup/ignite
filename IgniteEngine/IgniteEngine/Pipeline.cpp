@@ -13,7 +13,7 @@ Pipeline::Pipeline() :
 	;
 }
 
-void Pipeline::setLogicalDevice(VkDevice* logical_device) {
+void Pipeline::setLogicalDevice(LogicalDevice* logical_device) {
 	_logical_device = logical_device;
 }
 
@@ -107,7 +107,7 @@ void Pipeline::createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBindin
 	VkDescriptorSetLayout descriptor_set_layout{};
 	_descriptor_set_layout.push_back(descriptor_set_layout);
 	VkResult vk_result = vkCreateDescriptorSetLayout(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&descriptor_set_layout_info,
 		nullptr,
 		_descriptor_set_layout.data()
@@ -136,7 +136,7 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	descriptor_pool_info.pPoolSizes = descriptor_pool_size_arr.data();
 
 	VkResult vk_result = vkCreateDescriptorPool(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&descriptor_pool_info,
 		nullptr,
 		&_descriptor_pool
@@ -155,7 +155,7 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	descriptor_sets_info.pSetLayouts = _descriptor_set_layout.data();
 
 	vk_result = vkAllocateDescriptorSets(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&descriptor_sets_info,
 		_descriptor_sets.data()
 	);
@@ -288,7 +288,7 @@ void Pipeline::updateDescriptorSets() {
 	);
 
 	vkUpdateDescriptorSets(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		write_descriptor_set_arr.size(),
 		write_descriptor_set_arr.data(),
 		0,
@@ -321,14 +321,14 @@ void Pipeline::destroyDescriptorSet() {
 	}
 
 	vkFreeDescriptorSets(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_descriptor_pool,
 		_descriptor_sets.size(),
 		_descriptor_sets.data()
 	);
 
 	vkDestroyDescriptorPool(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_descriptor_pool,
 		nullptr
 	);
@@ -338,7 +338,7 @@ void Pipeline::destroyDescriptorSet() {
 void Pipeline::destroyDescriptorSetLayout() {
 	for (auto _dsl : _descriptor_set_layout) {
 		vkDestroyDescriptorSetLayout(
-			*_logical_device,
+			*_logical_device->getDevice(),
 			_dsl,
 			nullptr
 		);
@@ -356,7 +356,7 @@ void Pipeline::createPipelineLayout() {
 	pipeline_layout_info.pPushConstantRanges = nullptr;
 
 	VkResult vk_result = vkCreatePipelineLayout(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		&pipeline_layout_info,
 		nullptr,
 		&_pipeline_layout
@@ -368,7 +368,7 @@ void Pipeline::createPipelineLayout() {
 
 void Pipeline::destroyPipelineLayout() {
 	vkDestroyPipelineLayout(
-		*_logical_device,
+		*_logical_device->getDevice(),
 		_pipeline_layout,
 		nullptr
 	);

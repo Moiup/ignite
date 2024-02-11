@@ -7,7 +7,7 @@
 class Pipeline
 {
 protected:
-	VkDevice* _logical_device;
+	LogicalDevice* _logical_device;
 	PhysicalDevice* _physical_device;
 	Shader* _shader;
 
@@ -20,7 +20,7 @@ protected:
 public:
 	Pipeline();
 
-	void setLogicalDevice(VkDevice* logical_device);
+	void setLogicalDevice(LogicalDevice* logical_device);
 	void setPhysicalDevice(PhysicalDevice* physical_device);
 	void setShader(Shader* shader);
 

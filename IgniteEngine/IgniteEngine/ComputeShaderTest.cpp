@@ -64,7 +64,7 @@ void ComputeShaderTest::update() {
 	_dispatcher_sync.dispatch(10, 1, 1);
 
 	Pointer<uint8_t> tmp = _output_data.getValues();
-	int* output = (int*)&tmp[0];
+	int* output = reinterpret_cast<int*>(&tmp[0]);
 	for (uint32_t i = 0; i < 10; ++i) {
 		std::cout << output[i] << std::endl;
 	}

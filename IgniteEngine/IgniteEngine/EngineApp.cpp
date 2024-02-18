@@ -85,6 +85,9 @@ void EngineApp::init() {
 	DefaultConf::camera = &_camera;
 	DefaultConf::white_texture = &_white_texture;
 
+	DefaultConf::coord_buffer = &_coord_buffer;
+
+
 	// White Texture
 	Pixels pixels("../assets/textures/white.png");
 	_white_texture.setLogicalDevice(DefaultConf::logical_device);

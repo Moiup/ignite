@@ -14,3 +14,5 @@ CameraScene* DefaultConf::camera;
 Texture* DefaultConf::white_texture;
 uint64_t DefaultConf::delta_time; // ms
 SDL_Event* DefaultConf::event;
+
+VertexBuffer* DefaultConf::coord_buffer;

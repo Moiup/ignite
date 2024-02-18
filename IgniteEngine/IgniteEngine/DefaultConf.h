@@ -25,4 +25,6 @@ public:
 	static Texture* white_texture;
 	static uint64_t delta_time; // ms
 	static SDL_Event* event;
+
+	static VertexBuffer* coord_buffer;
 };

@@ -8,7 +8,7 @@ private:
 	LoadedObjectInfo _bistro_info;
 
 	Object3D _bistro;
-	bool is_ok{ true };
+	bool modify_vertex{ true };
 
 public:
 	Bistro();

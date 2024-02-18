@@ -194,6 +194,26 @@ std::vector<glm::vec3>& Object3D::getCoords(Renderer* renderer, GraphicShader* s
 	return Object3D::coords[renderer][shader];
 }
 
+std::vector<glm::vec3>& Object3D::updateCoords(Renderer* renderer, GraphicShader* shader) {
+	uint32_t offset = 0;
+	for (std::pair<Mesh* const, std::vector<Object3D*>>& m_o : Object3D::mesh_objects[renderer][shader]) {
+		Mesh* m = m_o.first;
+		//std::cout << m->getCoordsSize() << " " << m->getCoordsStride() << std::endl;
+		std::memcpy(&Object3D::coords[renderer][shader][0] + offset, &m->getCoords()[0], m->getCoordsSize());
+
+		//for (uint32_t i = 0; i < Object3D::coords[renderer][shader].size(); i++) {
+		//	std::cout << i << std::endl;
+		//	Object3D::coords[renderer][shader][i].x = 0.0f;
+		//	Object3D::coords[renderer][shader][i].y = 0.0f;
+		//	Object3D::coords[renderer][shader][i].z = 0.0f;
+		//}
+
+		offset += m->getCoordsSize();
+	}
+
+	return Object3D::coords[renderer][shader];
+}
+
 uint32_t Object3D::getCoordsStride(Renderer* renderer, GraphicShader* shader) {
 	return sizeof(*getCoords(renderer, shader).data());
 }

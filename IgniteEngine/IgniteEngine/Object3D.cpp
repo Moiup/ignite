@@ -106,7 +106,7 @@ void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi) {
 
 void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj) {
 	if (loi._meshes.size() == 1) {
-		obj->setMesh((Mesh*)&loi._meshes[0]);
+		obj->setMesh(const_cast<Mesh*>(&loi._meshes[0]));
 		const std::vector<Material>& mat = loi._materials[0];
 		obj->setMaterial(
 			mat,

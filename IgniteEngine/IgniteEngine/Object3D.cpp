@@ -546,11 +546,18 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 		for (auto& obj : objs) {
 			std::vector<Material*> mats = obj->getMaterial();
 
-			// When there is only one material
-			if (mats.size() == 1) {
-				uint32_t index = start_i;
+			// When there is no material
+			if (mats.size() == 0) {
 
-				if (is_mat.count(mats[0])) {
+			}
+
+			// When there is only one material
+			if (mats.size() <= 1) {
+				uint32_t index = start_i;
+				if (mats.size() == 0) {
+					index = 0;
+				}
+				else if (is_mat.count(mats[0])) {
 					index = is_mat[mats[0]];
 				}
 				else {
@@ -602,6 +609,7 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 	// And the default texture
 	if (Object3D::mesh_objects[renderer][shader].size()) {
 		Material mat{};
+		mat.Kd = glm::vec3(1.0f, 1.0f, 1.0f);
 		mat.map_Kd = 0;
 		Object3D::materials[renderer][shader].push_back(glsl::Mat(mat));
 		is_mat[(Material*)&mat] = true;

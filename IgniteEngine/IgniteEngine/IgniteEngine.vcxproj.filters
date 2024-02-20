@@ -309,6 +309,9 @@
     <ClCompile Include="ComputeShaderTest.cpp">
       <Filter>Ignite\Module</Filter>
     </ClCompile>
+    <ClCompile Include="Hand2D.cpp">
+      <Filter>Ignite\Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -573,6 +576,9 @@
       <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
     <ClInclude Include="ComputeShaderTest.h">
+      <Filter>Ignite\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="Hand2D.h">
       <Filter>Ignite\Module</Filter>
     </ClInclude>
   </ItemGroup>

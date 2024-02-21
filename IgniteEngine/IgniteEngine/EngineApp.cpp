@@ -86,6 +86,8 @@ void EngineApp::init() {
 	DefaultConf::white_texture = &_white_texture;
 
 	DefaultConf::coord_buffer = &_coord_buffer;
+	DefaultConf::index_buffer = &_index_buffer;
+	DefaultConf::uv_buffer = &_uv_buffer;
 
 
 	// White Texture

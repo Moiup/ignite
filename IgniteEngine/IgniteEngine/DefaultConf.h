@@ -27,4 +27,6 @@ public:
 	static SDL_Event* event;
 
 	static VertexBuffer* coord_buffer;
+	static VertexBuffer* uv_buffer;
+	static IndexBuffer* index_buffer;
 };

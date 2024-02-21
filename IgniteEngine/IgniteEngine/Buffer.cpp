@@ -27,12 +27,12 @@ void Buffer::setValues(void* values) {
 		*_logical_device->getDevice(),
 		_memory,
 		0,
-		_buffer_info.size,
+		_size,
 		0,
 		&copy
 	);
 
-	memcpy(copy, values, _buffer_info.size);
+	memcpy(copy, values, _size);
 	vkUnmapMemory(*_logical_device->getDevice(), _memory);
 }
 
@@ -58,7 +58,21 @@ void Buffer::setFlags(VkBufferCreateFlags flags) {
 }
 
 void Buffer::setSize(VkDeviceSize size) {
-	_buffer_info.size = size;
+	if (size > _capacity) {
+		_capacity = size;
+		_buffer_info.size = _capacity;
+	}
+	_size = size;
+}
+
+void Buffer::setCapacity(VkDeviceSize capacity) {
+	if (capacity < _buffer_info.size) {
+		std::cerr << "Buffer::setCapacity: Error! Capacity must be superior to size." << std::endl;
+		return;
+	}
+
+	_capacity = capacity;
+	_buffer_info.size = _capacity;
 }
 
 void Buffer::setUsage(VkBufferUsageFlags usage) {
@@ -82,21 +96,21 @@ VkBuffer& Buffer::getBuffer() {
 }
 
 Pointer<uint8_t> Buffer::getValues() {
-	if (_buffer_info.size == 0) {
+	if (_size == 0) {
 		return nullptr;
 	}
 
 	void* copy{};
-	uint8_t* v = new uint8_t[_buffer_info.size];
+	uint8_t* v = new uint8_t[_size];
 	vkMapMemory(
 		*_logical_device->getDevice(),
 		_memory,
 		0,
-		_buffer_info.size,
+		_size,
 		0,
 		(void**)&copy
 	);
-	memcpy(v, copy, _buffer_info.size);
+	memcpy(v, copy, _size);
 	vkUnmapMemory(*_logical_device->getDevice(), _memory);
 
 	return Pointer<uint8_t>(v);

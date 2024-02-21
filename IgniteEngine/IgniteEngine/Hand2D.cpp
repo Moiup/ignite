@@ -7,6 +7,9 @@ Hand2D::Hand2D() {
 void Hand2D::init() {
 	Module::init();
 
+	DefaultConf::coord_buffer->setCapacity(100 * sizeof(glm::vec3));
+	DefaultConf::index_buffer->setCapacity(100 * sizeof(uint32_t));
+	DefaultConf::uv_buffer->setCapacity(100 * sizeof(glm::vec3));
 }
 
 void rectangle(Mesh& mesh) {
@@ -80,7 +83,7 @@ void Hand2D::start() {
 	Module::start();
 
 	//rectangle(_circle_mesh);
-	circle(_circle_mesh, 1.0F, 1000);
+	circle(_circle_mesh, 1.0F, 5);
 	_circle_obj.setMesh(&_circle_mesh);
 	_circle_obj.setRenderer(DefaultConf::renderer);
 	_circle_obj.addShader(DefaultConf::graphic_shader);
@@ -110,17 +113,32 @@ void Hand2D::update() {
 		if (DefaultConf::event->key.keysym.sym == SDLK_m) {
 			_modify_vertex = true;
 		}
+		if (DefaultConf::event->key.keysym.sym == SDLK_l) {
+			_modify_buffer = true;
+		}
+	}
+
+	if (_modify_buffer) {
+		circle(_circle_mesh, 1.0F, 20);
+		DefaultConf::coord_buffer->setSize(_circle_mesh.getCoordsSize());
+		DefaultConf::index_buffer->setSize(_circle_mesh.getIndicesSize());
+
+		std::vector<glm::vec3> coords = _circle_mesh.getCoords();
+		DefaultConf::coord_buffer->setValues(
+			&coords[0]
+		);
+		std::vector<uint32_t> indices = _circle_mesh.getIndices();
+		DefaultConf::index_buffer->setValues(
+			&indices[0]
+		);
+
+		_modify_buffer = !_modify_buffer;
 	}
 
 	if (_modify_vertex) {
 		//std::cout << "modify" << std::endl;
 		std::vector<glm::vec3>& c = const_cast<std::vector<glm::vec3>&>(_circle_mesh.getCoords());
 		std::vector<glm::vec3> cc = c;
-
-		/*glm::vec3 d = c[3] - c[1];
-		glm::vec3 normal = glm::normalize(glm::vec3(d.y, -d.x, d.z));
-
-		c[2] = glm::vec3(c[2].x + normal.x, c[2].y + normal.y, c[2].z);*/
 
 		for (uint32_t i = 1; i < _circle_mesh.getCoords().size(); i++) {
 			int prev_i = i - 1;

@@ -8,6 +8,8 @@ class Buffer : public Ressource
 private:
 	VkBuffer _buffer;
 	VkBufferCreateInfo _buffer_info;
+	VkDeviceSize _capacity;
+	VkDeviceSize _size;
 
 public:
 	Buffer();
@@ -20,6 +22,7 @@ public:
 	void setPNext(const void * p_next);
 	void setFlags(VkBufferCreateFlags flags);
 	void setSize(VkDeviceSize size);
+	void setCapacity(VkDeviceSize capacity);
 	void setUsage(VkBufferUsageFlags usage);
 	void setSharingMode(VkSharingMode sharing_mode);
 	void setQueueFamilyIndexCount(uint32_t family_index_count);

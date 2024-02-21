@@ -16,3 +16,5 @@ uint64_t DefaultConf::delta_time; // ms
 SDL_Event* DefaultConf::event;
 
 VertexBuffer* DefaultConf::coord_buffer;
+VertexBuffer* DefaultConf::uv_buffer;
+IndexBuffer* DefaultConf::index_buffer;

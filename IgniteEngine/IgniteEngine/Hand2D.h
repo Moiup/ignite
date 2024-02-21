@@ -10,7 +10,8 @@ private:
 	Mesh _circle_mesh;
 	Object3D _circle_obj;
 
-	bool _modify_vertex{false};
+	bool _modify_vertex{ false };
+	bool _modify_buffer_test{ false };
 	bool _modify_buffer{ false };
 
 	Pixels _hand_img;

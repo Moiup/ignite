@@ -7,9 +7,14 @@ Hand2D::Hand2D() {
 void Hand2D::init() {
 	Module::init();
 
-	DefaultConf::coord_buffer->setCapacity(100 * sizeof(glm::vec3));
-	DefaultConf::index_buffer->setCapacity(100 * sizeof(uint32_t));
-	DefaultConf::uv_buffer->setCapacity(100 * sizeof(glm::vec3));
+	const uint32_t nb_elem_max = 100000;
+
+	DefaultConf::coord_buffer->setCapacity(nb_elem_max * sizeof(glm::vec3));
+	DefaultConf::index_buffer->setCapacity(nb_elem_max * sizeof(uint32_t));
+	DefaultConf::uv_buffer->setCapacity(nb_elem_max * sizeof(glm::vec3));
+
+	std::cout << "Total coord capacity: " << nb_elem_max * sizeof(glm::vec3) << std::endl;
+	std::cout << "Total index capacity: " << nb_elem_max * sizeof(uint32_t) << std::endl;
 }
 
 void rectangle(Mesh& mesh) {
@@ -60,7 +65,7 @@ void circle(Mesh& mesh, float r, uint32_t precision) {
 	
 	uint32_t index = 2;
 
-	for (uint32_t i = 1; i <= precision; i++) {
+	for (uint32_t i = 1; i < precision; i++) {
 		float x = r * std::cos(step * i);
 		float y = r * std::sin(step * i);
 	
@@ -68,8 +73,10 @@ void circle(Mesh& mesh, float r, uint32_t precision) {
 		uv.push_back(glm::vec2(0.0f, 0.0f));
 		n.push_back(glm::vec3(0.0F, 0.0F, 1.0F));
 		indices.push_back(0);
-		indices.push_back(i-1);
-		indices.push_back(i);
+		indices.push_back(index-1);
+		indices.push_back(index);
+
+		index++;
 	}
 
 	indices.push_back(0);
@@ -79,11 +86,67 @@ void circle(Mesh& mesh, float r, uint32_t precision) {
 	mesh.setVertex(coords, indices, uv, n);
 }
 
+void addVertices(Mesh& mesh, float distance) {
+	std::vector<glm::vec3> coords;
+	std::vector<uint32_t> indices;
+	std::vector<glm::vec2> uv;
+	std::vector<glm::vec3> n;
+
+	std::vector<glm::vec3> tmp_coords = mesh.getCoords();
+	std::vector<uint32_t> tmp_indices = mesh.getIndices();
+	std::vector<glm::vec2> tmp_uv = mesh.getUV();
+	std::vector<glm::vec3> tmp_n = mesh.getNormals();
+
+	coords.push_back(tmp_coords[0]);
+	coords.push_back(tmp_coords[1]);
+	uv.push_back(tmp_uv[0]);
+	uv.push_back(tmp_uv[1]);
+	n.push_back(tmp_n[0]);
+	n.push_back(tmp_n[1]);
+	//indices.push_back(0);
+	//indices.push_back(1);
+	
+	uint32_t index = 2;
+	for (uint32_t i = 1; i < tmp_coords.size() - 1; ++i) {
+		glm::vec3 cur = tmp_coords[i];
+		glm::vec3 next = tmp_coords[i + 1];
+
+		glm::vec3 cn = next - cur;
+		if (glm::length(cn) > distance) {
+			cn = glm::normalize(cn);
+			glm::vec3 new_c = cur + cn * 0.5f;
+
+			coords.push_back(new_c);
+			uv.push_back(glm::vec2(0.0f, 0.0f));
+			n.push_back(glm::vec3(0.0F, 0.0F, 1.0F));
+			indices.push_back(0);
+			indices.push_back(index - 1);
+			indices.push_back(index);
+			index++;
+		}
+		
+		coords.push_back(next);
+		uv.push_back(glm::vec2(0.0f, 0.0f));
+		n.push_back(glm::vec3(0.0F, 0.0F, 1.0F));
+		indices.push_back(0);
+		indices.push_back(index - 1);
+		indices.push_back(index);
+		
+		index++;
+	}
+
+	indices.push_back(0);
+	indices.push_back(index - 1);
+	indices.push_back(1);
+
+	mesh.setVertex(coords, indices, uv, n);
+}
+
 void Hand2D::start() {
 	Module::start();
 
 	//rectangle(_circle_mesh);
-	circle(_circle_mesh, 1.0F, 5);
+	circle(_circle_mesh, 1.0F, 2000);
 	_circle_obj.setMesh(&_circle_mesh);
 	_circle_obj.setRenderer(DefaultConf::renderer);
 	_circle_obj.addShader(DefaultConf::graphic_shader);
@@ -118,8 +181,34 @@ void Hand2D::update() {
 		}
 	}
 
+	//if (_modify_buffer_test) {
+	//	circle(_circle_mesh, 1.0F, 20);
+	//	DefaultConf::coord_buffer->setSize(_circle_mesh.getCoordsSize());
+	//	DefaultConf::index_buffer->setSize(_circle_mesh.getIndicesSize());
+
+	//	std::vector<glm::vec3> coords = _circle_mesh.getCoords();
+	//	DefaultConf::coord_buffer->setValues(
+	//		&coords[0]
+	//	);
+	//	//DefaultConf::coord_buffer->setValues(
+	//	//	&Object3D::updateCoords(DefaultConf::renderer, DefaultConf::graphic_shader)[0]
+	//	//);
+
+	//	std::vector<uint32_t> indices = _circle_mesh.getIndices();
+	//	DefaultConf::index_buffer->setValues(
+	//		&indices[0]
+	//	);
+
+	//	_modify_vertex = false;
+	//	_modify_buffer_test = false;
+	//}
+
 	if (_modify_buffer) {
-		circle(_circle_mesh, 1.0F, 20);
+		addVertices(_circle_mesh, 0.1);
+
+		std::cout << "coords size:  " << _circle_mesh.getCoordsSize() << std::endl;
+		std::cout << "indices size: " << _circle_mesh.getIndicesSize() << std::endl;
+
 		DefaultConf::coord_buffer->setSize(_circle_mesh.getCoordsSize());
 		DefaultConf::index_buffer->setSize(_circle_mesh.getIndicesSize());
 
@@ -127,12 +216,14 @@ void Hand2D::update() {
 		DefaultConf::coord_buffer->setValues(
 			&coords[0]
 		);
+
 		std::vector<uint32_t> indices = _circle_mesh.getIndices();
 		DefaultConf::index_buffer->setValues(
 			&indices[0]
 		);
 
-		_modify_buffer = !_modify_buffer;
+		_modify_vertex = false;
+		_modify_buffer = false;
 	}
 
 	if (_modify_vertex) {
@@ -157,6 +248,18 @@ void Hand2D::update() {
 			uint32_t pix_x = cc[i].x * _world_to_pix + _center_x;
 			uint32_t pix_y = cc[i].y * _world_to_pix + _center_y;
 
+
+			if (pix_x < 0 || pix_x >= _hand_img.getWidth() || pix_y < 0 || pix_y >= _hand_img.getHeight()) {
+				continue;
+			}
+			glm::vec4 pix = _hand_img.getPixel(pix_y, pix_x);
+
+			bool is_negatif{ false };
+			if (pix.a == 0) {
+				normal = -normal;
+				is_negatif = true;
+			}
+
 			pix_x += normal.x * _pix_to_world;
 			pix_y += normal.y * _pix_to_world;
 
@@ -164,16 +267,24 @@ void Hand2D::update() {
 				continue;
 			}
 
-			glm::vec4 pix = _hand_img.getPixel(pix_y, pix_x);
-			if (pix.a == 0) {
+			pix = _hand_img.getPixel(pix_y, pix_x);
+			if (pix.a == 0 && !is_negatif) {
+				continue;
+			}
+			else if (pix.a != 0 && is_negatif) {
 				continue;
 			}
 
 			c[i] = glm::vec3(cc[i].x + normal.x * _pix_to_world, cc[i].y + normal.y * _pix_to_world, cc[i].z);
 		}
 
+		//DefaultConf::coord_buffer->setValues(
+		//	&Object3D::updateCoords(DefaultConf::renderer, DefaultConf::graphic_shader)[0]
+		//);
+
+		std::vector<glm::vec3> coords = _circle_mesh.getCoords();
 		DefaultConf::coord_buffer->setValues(
-			&Object3D::updateCoords(DefaultConf::renderer, DefaultConf::graphic_shader)[0]
+			&coords[0]
 		);
 
 		//_modify_vertex = !_modify_vertex;

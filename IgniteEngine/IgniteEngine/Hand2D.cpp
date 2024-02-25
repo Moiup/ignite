@@ -103,8 +103,6 @@ void addVertices(Mesh& mesh, float distance) {
 	uv.push_back(tmp_uv[1]);
 	n.push_back(tmp_n[0]);
 	n.push_back(tmp_n[1]);
-	//indices.push_back(0);
-	//indices.push_back(1);
 	
 	uint32_t index = 2;
 	for (uint32_t i = 1; i < tmp_coords.size() - 1; ++i) {
@@ -146,7 +144,7 @@ void Hand2D::start() {
 	Module::start();
 
 	//rectangle(_circle_mesh);
-	circle(_circle_mesh, 1.0F, 2000);
+	circle(_circle_mesh, 1.0F, 5);
 	_circle_obj.setMesh(&_circle_mesh);
 	_circle_obj.setRenderer(DefaultConf::renderer);
 	_circle_obj.addShader(DefaultConf::graphic_shader);

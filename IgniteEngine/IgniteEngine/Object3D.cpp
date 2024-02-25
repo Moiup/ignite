@@ -542,14 +542,8 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
 		Mesh* m = m_o.first;
 		std::vector<Object3D*> objs = m_o.second;
-
 		for (auto& obj : objs) {
 			std::vector<Material*> mats = obj->getMaterial();
-
-			// When there is no material
-			if (mats.size() == 0) {
-
-			}
 
 			// When there is only one material
 			if (mats.size() <= 1) {
@@ -567,7 +561,7 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 
 				std::vector<uint32_t> indices(m->getCoords().size(), index);
 				Object3D::material_indices[renderer][shader].insert(
-					Object3D::material_indices[renderer][shader].begin(),
+					Object3D::material_indices[renderer][shader].end(),
 					indices.begin(),
 					indices.end()
 				);

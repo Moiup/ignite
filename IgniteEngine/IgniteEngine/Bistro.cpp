@@ -25,25 +25,25 @@ void Bistro::start() {
 void Bistro::update() {
 	Module::update();
 
-	if (modify_vertex) {
-		std::cout << _bistro_info._meshes[0].getCoords()[0][0] << std::endl;
+	//if (modify_vertex) {
+	//	std::cout << _bistro_info._meshes[0].getCoords()[0][0] << std::endl;
 
-		Mesh* m = const_cast<Mesh*>(_bistro.getMesh());
-		const std::vector<glm::vec3>& c = m->getCoords();
-		std::vector<glm::vec3>& cc = const_cast<std::vector<glm::vec3>&>(c);
-		cc[0] = glm::vec3(2.0f, cc[0].y, cc[0].z);
+	//	Mesh* m = const_cast<Mesh*>(_bistro.getMesh());
+	//	const std::vector<glm::vec3>& c = m->getCoords();
+	//	std::vector<glm::vec3>& cc = const_cast<std::vector<glm::vec3>&>(c);
+	//	cc[0] = glm::vec3(2.0f, cc[0].y, cc[0].z);
 
-		std::cout << _bistro_info._meshes[0].getCoords()[0][0] << std::endl;
+	//	std::cout << _bistro_info._meshes[0].getCoords()[0][0] << std::endl;
 
-		//
-		// IL FAUT METTRE LE RETOUR DU UPDATECOORDS DANS LE BUFFER
-		//
-		DefaultConf::coord_buffer->setValues(
-			&Object3D::updateCoords(DefaultConf::renderer, DefaultConf::graphic_shader)[0]
-		);
+	//	//
+	//	// IL FAUT METTRE LE RETOUR DU UPDATECOORDS DANS LE BUFFER
+	//	//
+	//	DefaultConf::coord_buffer->setValues(
+	//		&Object3D::updateCoords(DefaultConf::renderer, DefaultConf::graphic_shader)[0]
+	//	);
 
-		modify_vertex = !modify_vertex;
-	}
+	//	modify_vertex = !modify_vertex;
+	//}
 
 }
 

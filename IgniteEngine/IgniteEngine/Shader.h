@@ -17,6 +17,8 @@
 #include <fstream>
 #include <string>
 
+#include <shaderc/shaderc.hpp>
+
 class Shader
 {
 protected:
@@ -70,9 +72,10 @@ public:
 	const std::vector<VkPipelineShaderStageCreateInfo>& getShaderStages() const;
 
 private:
-	std::vector<char> virtual readShaderFile(const std::string& path);
+	std::string virtual readShaderFile(const std::string& path);
+	std::vector<uint32_t> compile(const std::string& glsl, const std::string& path, shaderc_shader_kind shader_kind);
 
 protected:
-	void createShaderModuleAndStage(const std::string& path, VkShaderStageFlagBits stage);
+	void createShaderModuleAndStage(const std::string& path, VkShaderStageFlagBits stage, shaderc_shader_kind shader_kind);
 };
 

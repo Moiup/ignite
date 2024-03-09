@@ -70,6 +70,10 @@ std::unordered_map<std::string, std::vector<IndexBuffer*>>& GraphicShader::getIn
 }
 
 void GraphicShader::read(std::string vertex_shader, std::string fragment_shader) {
-	createShaderModuleAndStage(vertex_shader, VK_SHADER_STAGE_VERTEX_BIT);
-	createShaderModuleAndStage(fragment_shader, VK_SHADER_STAGE_FRAGMENT_BIT);
+	createShaderModuleAndStage(
+		vertex_shader, VK_SHADER_STAGE_VERTEX_BIT, shaderc_glsl_vertex_shader
+	);
+	createShaderModuleAndStage(
+		fragment_shader, VK_SHADER_STAGE_FRAGMENT_BIT, shaderc_glsl_fragment_shader
+	);
 }

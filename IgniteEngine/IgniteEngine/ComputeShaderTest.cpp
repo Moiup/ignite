@@ -15,7 +15,7 @@ void ComputeShaderTest::start() {
 
 	_compute_shader.setLogicalDevice(DefaultConf::logical_device);
 	_compute_shader.setPhysicalDevice(DefaultConf::gpu);
-	_compute_shader.read("../shaders/compute_sum.spv");
+	_compute_shader.read("../shaders/compute_sum.comp");
 
 	_compute_shader.addStorageBufferInfo(
 		"inputData",

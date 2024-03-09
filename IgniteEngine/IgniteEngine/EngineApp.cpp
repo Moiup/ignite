@@ -116,8 +116,8 @@ void EngineApp::start() {
 	DefaultConf::graphic_shader->setLogicalDevice(DefaultConf::logical_device);
 	DefaultConf::graphic_shader->setPhysicalDevice(DefaultConf::gpu);
 	DefaultConf::graphic_shader->read(
-		"../shaders/vert.spv",
-		"../shaders/frag.spv"
+		"../shaders/vert.vert",
+		"../shaders/frag.frag"
 	);
 	// -- Vertex Shader -- //
 	// Configuring the Graphic Shader

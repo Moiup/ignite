@@ -161,37 +161,68 @@ const std::vector<VkPipelineShaderStageCreateInfo>& Shader::getShaderStages() co
 	return _shader_stages;
 }
 
-std::vector<char> Shader::readShaderFile(const std::string& path) {
-	size_t file_size{};
-	std::vector<char> buffer;
+std::string Shader::readShaderFile(const std::string& path) {
+	//size_t file_size{};
+	//std::vector<char> buffer;
 
-	std::ifstream file(path, std::ios::ate | std::ios::binary);
+	//std::ifstream file(path, std::ios::ate | std::ios::binary);
 
-	if (!file.is_open()) {
-		throw std::runtime_error("Error: failed to open file: " + path);
-	}
+	//if (!file.is_open()) {
+	//	throw std::runtime_error("Error: failed to open file: " + path);
+	//}
 
-	file_size = (size_t)file.tellg();
-	buffer.resize(file_size);
+	//file_size = (size_t)file.tellg();
+	//buffer.resize(file_size);
 
-	file.seekg(0);
-	file.read(buffer.data(), file_size);
+	//file.seekg(0);
+	//file.read(buffer.data(), file_size);
 
-	file.close();
+	//file.close();
 
-	return buffer;
+	std::ifstream file(path);
+	std::string content;
+
+	file.seekg(0, std::ios::end);
+	content.reserve(file.tellg());
+	file.seekg(0, std::ios::beg);
+
+	content.assign(
+		std::istreambuf_iterator<char>(file),
+		std::istreambuf_iterator<char>()
+	);
+
+	return content;
 }
 
-void Shader::createShaderModuleAndStage(const std::string& path, VkShaderStageFlagBits stage) {
-	std::vector<char> shader_text = readShaderFile(path);
+std::vector<uint32_t> Shader::compile(const std::string& glsl, const std::string& path, shaderc_shader_kind shader_kind) {
+	shaderc::Compiler compiler;
+	shaderc::CompileOptions options;
+
+	//options.AddMacroDefinition("MY_DEFINE", "1");
+
+	shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(glsl, shader_kind, path.c_str());
+
+	if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
+		std::cerr << "Error compiling shader \"" << path << "\"" << std::endl;
+		std::cerr << result.GetErrorMessage() << std::endl;
+		throw std::runtime_error("Error compiling shader");
+	}
+
+	return {result.cbegin(), result.cend()};
+}
+
+void Shader::createShaderModuleAndStage(const std::string& path, VkShaderStageFlagBits stage, shaderc_shader_kind shader_kind) {
+	std::string glsl = readShaderFile(path);
+	
+	std::vector<uint32_t> shader_text = compile(glsl, path, shader_kind);
 
 	VkShaderModule shader_module{ nullptr };
 	VkShaderModuleCreateInfo shader_module_info{};
 	shader_module_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 	shader_module_info.pNext = nullptr;
 	shader_module_info.flags = 0;
-	shader_module_info.codeSize = shader_text.size();
-	shader_module_info.pCode = reinterpret_cast<const uint32_t*>(shader_text.data());
+	shader_module_info.codeSize = shader_text.size() * sizeof(uint32_t);
+	shader_module_info.pCode = shader_text.data();
 
 	VkResult vk_result = vkCreateShaderModule(
 		*_logical_device->getDevice(),

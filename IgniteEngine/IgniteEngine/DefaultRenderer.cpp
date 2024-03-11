@@ -105,7 +105,6 @@ void DefaultRenderer::render() {
 		for (auto& pc_info : gp.getShader()->getPushConstantInfo()) {
 			std::string name = pc_info.first;
 			PushConstantInfo& info = pc_info.second;
-
 			_command_buffers[_current_frame].pushConstants(
 				gp.getPipelineLayout(),
 				info.getStageFlags(),

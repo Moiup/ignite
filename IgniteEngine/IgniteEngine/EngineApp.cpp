@@ -332,7 +332,7 @@ void EngineApp::close() {
 	_material_indices_buffer.destroy();
 	_uv_buffer.destroy();
 	_index_buffer.destroy();
-	_camera_buffer.destroy();
+	//_camera_buffer.destroy();
 	_obj_tr_buffer.destroy();
 	_materials_buffer.destroy();
 	_sampler.destroy();

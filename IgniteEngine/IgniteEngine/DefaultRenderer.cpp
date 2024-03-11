@@ -102,14 +102,18 @@ void DefaultRenderer::render() {
 			nullptr
 		);
 
-		vkCmdPushConstants(
-			*_command_buffers[_current_frame].getCommandBuffer(),
-			gp.getPipelineLayout(),
-			gp.getShader()->getPushConstantInfo()["pc"].getStageFlags(),
-			gp.getShader()->getPushConstantInfo()["pc"].getOffset(),
-			gp.getShader()->getPushConstantInfo()["pc"].getSize(),
-			gp.getShader()->getPushConstant()["pc"]
-		);
+		for (auto& pc_info : gp.getShader()->getPushConstantInfo()) {
+			std::string name = pc_info.first;
+			PushConstantInfo& info = pc_info.second;
+
+			_command_buffers[_current_frame].pushConstants(
+				gp.getPipelineLayout(),
+				info.getStageFlags(),
+				info.getOffset(),
+				info.getSize(),
+				gp.getShader()->getPushConstant()[name]
+			);
+		}
 
 		const VkDeviceSize buff_offset[1] = { 0 };
 		GraphicShader* gs = gp.getShader();

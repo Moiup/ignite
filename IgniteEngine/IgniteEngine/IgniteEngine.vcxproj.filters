@@ -313,7 +313,7 @@
       <Filter>Ignite\Module</Filter>
     </ClCompile>
     <ClCompile Include="PushConstantInfo.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -585,7 +585,7 @@
       <Filter>Ignite\Module</Filter>
     </ClInclude>
     <ClInclude Include="PushConstantInfo.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

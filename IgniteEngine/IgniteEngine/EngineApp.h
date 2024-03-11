@@ -52,7 +52,7 @@ private:
 	VertexBuffer _material_indices_buffer;
 	VertexBuffer _uv_buffer;
 	IndexBuffer _index_buffer;
-	UniformBuffer _camera_buffer;
+	//UniformBuffer _camera_buffer;
 	StorageBuffer _obj_tr_buffer;
 	StorageBuffer _materials_buffer;
 	Sampler _sampler;

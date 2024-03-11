@@ -169,6 +169,17 @@ void CommandBuffer::bindDescriptorSets(VkPipelineBindPoint bind_point, VkPipelin
 	);
 }
 
+void CommandBuffer::pushConstants(VkPipelineLayout layout, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size, const void* p_values) {
+	vkCmdPushConstants(
+		_command_buffer,
+		layout,
+		stage_flags,
+		offset,
+		size,
+		p_values
+	);
+}
+
 void CommandBuffer::bindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType index_type){
 	vkCmdBindIndexBuffer(
 		_command_buffer,

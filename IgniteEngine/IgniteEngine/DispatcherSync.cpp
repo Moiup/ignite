@@ -81,6 +81,21 @@ void DispatcherSync::dispatch(
 		nullptr
 	);
 
+	_compute_pipeline->getShader()->getPushConstant();
+
+	for (auto& pc_info : _compute_pipeline->getShader()->getPushConstantInfo()) {
+		std::string name = pc_info.first;
+		PushConstantInfo& info = pc_info.second;
+
+		_command_buffer.pushConstants(
+			_compute_pipeline->getPipelineLayout(),
+			info.getStageFlags(),
+			info.getOffset(),
+			info.getSize(),
+			_compute_pipeline->getShader()->getPushConstant()[name]
+		);
+	}
+
 	// Dispatch
 	_command_buffer.dispatch(
 		group_count_x,

@@ -312,6 +312,9 @@
     <ClCompile Include="Hand2D.cpp">
       <Filter>Ignite\Module</Filter>
     </ClCompile>
+    <ClCompile Include="PushConstantInfo.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -580,6 +583,9 @@
     </ClInclude>
     <ClInclude Include="Hand2D.h">
       <Filter>Ignite\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="PushConstantInfo.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

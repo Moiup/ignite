@@ -22,6 +22,32 @@ void Shader::setLogicalDevice(LogicalDevice* logical_device) {
 	_logical_device = logical_device;
 }
 
+void Shader::addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size) {
+	if (_push_constant_info.count(name)) {
+		std::string error = "Error: there already is a Push Constant info named " + name + "!";
+		throw std::runtime_error(error);
+	}
+
+	PushConstantInfo info{};
+	info.setStageFlags(stage_flags);
+	info.setOffset(offset);
+	info.setSize(size);
+
+	_push_constant_info[name] = info;
+}
+
+void Shader::addPushConstant(std::string name, void* push_constant) {
+	_push_constants[name] = push_constant;
+}
+
+std::unordered_map<std::string, PushConstantInfo>& Shader::getPushConstantInfo() {
+	return _push_constant_info;
+}
+
+std::unordered_map<std::string, void*>& Shader::getPushConstant() {
+	return _push_constants;
+}
+
 void Shader::addUniformBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
 	if (_uniform_buffers_info.count(name)) {
 		std::string error = "Error: there already is an Uniform buffer info named " + name + "!";

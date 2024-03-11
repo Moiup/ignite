@@ -208,6 +208,7 @@
     <ClCompile Include="PhysicalDevice.cpp" />
     <ClCompile Include="Pipeline.cpp" />
     <ClCompile Include="Pixels.cpp" />
+    <ClCompile Include="PushConstantInfo.cpp" />
     <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RayTracerCPU.cpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="Pixels.h" />
     <ClInclude Include="Pointer.h" />
     <ClInclude Include="Pointer.hpp" />
+    <ClInclude Include="PushConstantInfo.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTracerCPU.h" />

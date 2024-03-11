@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicalDevice.h"
+#include "PushConstantInfo.h"
 #include "VertexBufferInfo.h"
 #include "VertexBuffer.h"
 #include "IndexBufferInfo.h"
@@ -24,8 +25,12 @@ class Shader
 protected:
 	std::vector<VkPipelineShaderStageCreateInfo> _shader_stages;
 
+	std::unordered_map<std::string, PushConstantInfo> _push_constant_info;
+
 	std::unordered_map<std::string, ArrayBufferInfo> _uniform_buffers_info;
 	std::unordered_map<std::string, ArrayBufferInfo> _storage_buffers_info;
+
+	std::unordered_map<std::string, void*> _push_constants;
 
 	std::unordered_map<std::string, UniformBuffer*> _uniform_buffers;
 	std::unordered_map<std::string, StorageBuffer*> _storage_buffers;
@@ -44,6 +49,11 @@ public:
 
 	void setPhysicalDevice(PhysicalDevice* gpu);
 	void setLogicalDevice(LogicalDevice* logical_device);
+
+	void addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size);
+	void addPushConstant(std::string name, void* push_constant);
+	std::unordered_map<std::string, PushConstantInfo>& getPushConstantInfo();
+	std::unordered_map<std::string, void*>& getPushConstant();
 
 	void addUniformBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
 	void addUniformBuffer(std::string name, UniformBuffer* buffer);

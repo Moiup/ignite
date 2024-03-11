@@ -11,10 +11,15 @@ layout (location = 3) in vec2 uv;
 layout(location = 1) out uint material_i;
 layout(location = 2) out vec2 uv_frag;
 
-// UNIFORM BUFFER
-layout (std140, binding = 0) uniform camera_buf{
+// PUSH CONSTANT
+layout(push_constant, std430) uniform pc {
     mat4 mvp;
-} camera;
+};
+
+// UNIFORM BUFFER
+// layout (std140, binding = 0) uniform camera_buf{
+//     mat4 mvp;
+// } camera;
 
 layout(std430, binding = 1) readonly buffer obj_tr_buff {
     mat4 tr[];
@@ -28,5 +33,5 @@ void main(){
     material_i = material_id;
     uv_frag = vec2(uv.x, 1.0 - uv.y);
     
-    gl_Position = camera.mvp * tr * vec4(coord, 1.0);
+    gl_Position = mvp * tr * vec4(coord, 1.0);
 }

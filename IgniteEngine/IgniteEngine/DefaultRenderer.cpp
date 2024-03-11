@@ -102,6 +102,15 @@ void DefaultRenderer::render() {
 			nullptr
 		);
 
+		vkCmdPushConstants(
+			*_command_buffers[_current_frame].getCommandBuffer(),
+			gp.getPipelineLayout(),
+			gp.getShader()->getPushConstantInfo()["pc"].getStageFlags(),
+			gp.getShader()->getPushConstantInfo()["pc"].getOffset(),
+			gp.getShader()->getPushConstantInfo()["pc"].getSize(),
+			gp.getShader()->getPushConstant()["pc"]
+		);
+
 		const VkDeviceSize buff_offset[1] = { 0 };
 		GraphicShader* gs = gp.getShader();
 		// Vertex Buffers

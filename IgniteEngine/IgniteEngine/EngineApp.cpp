@@ -151,12 +151,20 @@ void EngineApp::start() {
 		Object3D::getIndicesNbElem(DefaultConf::renderer, DefaultConf::graphic_shader)
 	);
 
-	// Uniform buffer
-	DefaultConf::graphic_shader->addUniformBufferInfo(
-		"camera",
+	// Push constant
+	DefaultConf::graphic_shader->addPushConstantInfo(
+		"pc",
+		VK_SHADER_STAGE_VERTEX_BIT,
 		0,
-		VK_SHADER_STAGE_VERTEX_BIT
+		sizeof(DefaultConf::camera->getMVP())
 	);
+
+	// Uniform buffer
+	//DefaultConf::graphic_shader->addUniformBufferInfo(
+	//	"camera",
+	//	0,
+	//	VK_SHADER_STAGE_VERTEX_BIT
+	//);
 	
 	// Storage Buffers
 	// transform
@@ -228,13 +236,16 @@ void EngineApp::start() {
 	_index_buffer.setValues(Object3D::getIndices(DefaultConf::renderer, DefaultConf::graphic_shader).data());
 	DefaultConf::graphic_shader->addIndexBuffer("index", &_index_buffer);
 
+	// Push Constant
+	DefaultConf::graphic_shader->addPushConstant("pc", & _camera);
+
 	// Uniform buffer
-	_camera_buffer.setLogicalDevice(DefaultConf::logical_device);
-	_camera_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
-	_camera_buffer.setSize(sizeof(_camera.getMVP()));
-	_camera_buffer.create();
-	_camera_buffer.setValues(&_camera.getMVP()[0][0]);
-	DefaultConf::graphic_shader->addUniformBuffer("camera", &_camera_buffer);
+	//_camera_buffer.setLogicalDevice(DefaultConf::logical_device);
+	//_camera_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	//_camera_buffer.setSize(sizeof(_camera.getMVP()));
+	//_camera_buffer.create();
+	//_camera_buffer.setValues(&_camera.getMVP()[0][0]);
+	//DefaultConf::graphic_shader->addUniformBuffer("camera", &_camera_buffer);
 
 	// Storage Buffers
 	// transform
@@ -297,9 +308,9 @@ void EngineApp::update() {
 			)[0][0]
 		);
 
-		_camera_buffer.setValues(
-			&DefaultConf::camera->getMVP()[0][0]
-		);
+		//_camera_buffer.setValues(
+		//	&DefaultConf::camera->getMVP()[0][0]
+		//);
 
 		DefaultConf::renderer->render();
 		glfwPollEvents();

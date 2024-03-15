@@ -60,7 +60,7 @@ private:
 	Modules _modules;
 
 	CameraScene _camera;
-	glm::mat4 cam;
+	glm::mat4 _cam_mvp;
 
 public:
 	EngineApp();

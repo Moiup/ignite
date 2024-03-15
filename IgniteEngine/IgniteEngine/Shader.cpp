@@ -44,7 +44,7 @@ std::unordered_map<std::string, PushConstantInfo>& Shader::getPushConstantInfo()
 	return _push_constant_info;
 }
 
-std::unordered_map<std::string, void*>& Shader::getPushConstant() {
+std::unordered_map<std::string, void*>& Shader::getPushConstants() {
 	return _push_constants;
 }
 

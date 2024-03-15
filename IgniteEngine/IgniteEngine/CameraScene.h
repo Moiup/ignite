@@ -16,6 +16,7 @@ private:
 	bool _was_right_clicked;
 	bool _is_right_clicked;
 	glm::vec2 _right_prev_mouse;
+	glm::mat4 _mvp;
 
 public:
 	CameraScene();

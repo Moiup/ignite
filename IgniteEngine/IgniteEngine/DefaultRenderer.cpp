@@ -102,6 +102,7 @@ void DefaultRenderer::render() {
 			nullptr
 		);
 
+
 		for (auto& pc_info : gp.getShader()->getPushConstantInfo()) {
 			std::string name = pc_info.first;
 			PushConstantInfo& info = pc_info.second;
@@ -110,10 +111,10 @@ void DefaultRenderer::render() {
 				info.getStageFlags(),
 				info.getOffset(),
 				info.getSize(),
-				gp.getShader()->getPushConstant()[name]
+				gp.getShader()->getPushConstants()[name]
 			);
 		}
-
+		
 		const VkDeviceSize buff_offset[1] = { 0 };
 		GraphicShader* gs = gp.getShader();
 		// Vertex Buffers

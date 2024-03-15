@@ -53,7 +53,7 @@ public:
 	void addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size);
 	void addPushConstant(std::string name, void* push_constant);
 	std::unordered_map<std::string, PushConstantInfo>& getPushConstantInfo();
-	std::unordered_map<std::string, void*>& getPushConstant();
+	std::unordered_map<std::string, void*>& getPushConstants();
 
 	void addUniformBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
 	void addUniformBuffer(std::string name, UniformBuffer* buffer);

@@ -156,7 +156,7 @@ void EngineApp::start() {
 		"pc",
 		VK_SHADER_STAGE_VERTEX_BIT,
 		0,
-		sizeof(DefaultConf::camera->getMVP())
+		sizeof(_cam_mvp)
 	);
 
 	// Uniform buffer
@@ -165,7 +165,7 @@ void EngineApp::start() {
 	//	0,
 	//	VK_SHADER_STAGE_VERTEX_BIT
 	//);
-	
+
 	// Storage Buffers
 	// transform
 	DefaultConf::graphic_shader->addStorageBufferInfo(
@@ -236,8 +236,9 @@ void EngineApp::start() {
 	_index_buffer.setValues(Object3D::getIndices(DefaultConf::renderer, DefaultConf::graphic_shader).data());
 	DefaultConf::graphic_shader->addIndexBuffer("index", &_index_buffer);
 
+
 	// Push Constant
-	DefaultConf::graphic_shader->addPushConstant("pc", & _camera);
+	DefaultConf::graphic_shader->addPushConstant("pc", &_cam_mvp[0][0]);
 
 	// Uniform buffer
 	//_camera_buffer.setLogicalDevice(DefaultConf::logical_device);
@@ -286,7 +287,7 @@ void EngineApp::start() {
 
 void EngineApp::update() {
 	/*while (!glfwWindowShouldClose(_render_window.getWindow())) {*/
-	
+
 	//for (uint32_t i = 0; i < 1; i++) {
 	for (;;) {
 		std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
@@ -307,6 +308,8 @@ void EngineApp::update() {
 				DefaultConf::renderer, DefaultConf::graphic_shader
 			)[0][0]
 		);
+
+		_cam_mvp = DefaultConf::camera->getMVP();
 
 		//_camera_buffer.setValues(
 		//	&DefaultConf::camera->getMVP()[0][0]

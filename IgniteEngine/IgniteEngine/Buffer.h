@@ -31,6 +31,9 @@ public:
 	VkBuffer& getBuffer();
 	Pointer<uint8_t> getValues();
 
+	void* map();
+	void unmap();
+
 
 protected:
 	void createBuffer();

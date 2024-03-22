@@ -23,17 +23,9 @@ void Buffer::setValues(void* values) {
 	}
 	
 	void* copy;
-	VkResult vk_result = vkMapMemory(
-		*_logical_device->getDevice(),
-		_memory,
-		0,
-		_size,
-		0,
-		&copy
-	);
-
+	copy = map();
 	memcpy(copy, values, _size);
-	vkUnmapMemory(*_logical_device->getDevice(), _memory);
+	unmap();
 }
 
 void Buffer::bind() {
@@ -102,18 +94,36 @@ Pointer<uint8_t> Buffer::getValues() {
 
 	void* copy{};
 	uint8_t* v = new uint8_t[_size];
+	copy = map();
+	memcpy(v, copy, _size);
+	unmap();
+
+	return Pointer<uint8_t>(v);
+}
+
+void* Buffer::map() {
+	if (_size == 0) {
+		return nullptr;
+	}
+	
+	void* ptr{ nullptr };
 	vkMapMemory(
 		*_logical_device->getDevice(),
 		_memory,
 		0,
 		_size,
 		0,
-		(void**)&copy
+		&ptr
 	);
-	memcpy(v, copy, _size);
-	vkUnmapMemory(*_logical_device->getDevice(), _memory);
 
-	return Pointer<uint8_t>(v);
+	return ptr;
+}
+
+void Buffer::unmap() {
+	vkUnmapMemory(
+		*_logical_device->getDevice(),
+		_memory
+	);
 }
 
 void Buffer::createBuffer() {

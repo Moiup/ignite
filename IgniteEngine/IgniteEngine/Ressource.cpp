@@ -16,7 +16,11 @@ void Ressource::setMemoryProperties(VkPhysicalDeviceMemoryProperties* memory_pro
 	_memory_properties = memory_properties;
 }
 
-void Ressource::allocateMemory(VkMemoryPropertyFlags memory_property_flags) {
+void Ressource::setMemoryPropertyFlags(VkMemoryPropertyFlags memory_property_flags) {
+	_memory_property_flags = memory_property_flags;
+}
+
+void Ressource::allocateMemory() {
 	getMemoryRequirements();
 
 	if (_memory_req.size == 0) {
@@ -31,7 +35,7 @@ void Ressource::allocateMemory(VkMemoryPropertyFlags memory_property_flags) {
 
 	uint32_t memory_type_i = 0;
 	for (memory_type_i = 0; memory_type_i < _memory_properties->memoryTypeCount; memory_type_i++) {
-		if ((_memory_req.memoryTypeBits & (1 << memory_type_i)) && (_memory_properties->memoryTypes[memory_type_i].propertyFlags & memory_property_flags) == memory_property_flags) {
+		if ((_memory_req.memoryTypeBits & (1 << memory_type_i)) && (_memory_properties->memoryTypes[memory_type_i].propertyFlags & _memory_property_flags) == _memory_property_flags) {
 			allocate_info.memoryTypeIndex = memory_type_i;
 			break;
 		}

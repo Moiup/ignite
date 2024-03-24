@@ -3,15 +3,13 @@
 DepthBuffer::DepthBuffer() :
 	Image::Image()
 {
-	;
+	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 }
 
 void DepthBuffer::create() {
 	setImageInfo();
 	createImage();
-	allocateMemory(
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+	allocateMemory();
 	bind();
 	setImageViewInfo();
 	createImageView();

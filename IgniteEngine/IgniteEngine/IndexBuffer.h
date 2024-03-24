@@ -11,8 +11,6 @@ private:
 public:
 	IndexBuffer();
 
-	void create();
-
 	void setIndexType(VkIndexType index_type);
 	VkIndexType getIndexType();
 

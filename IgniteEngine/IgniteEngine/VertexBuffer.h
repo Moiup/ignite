@@ -11,8 +11,6 @@ private:
 public:
 	VertexBuffer();
 
-	void create();
-
 	void setFirstBinding(uint32_t binding_desc);
 
 	uint32_t getFirstBinding();

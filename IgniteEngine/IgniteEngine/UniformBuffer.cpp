@@ -9,12 +9,5 @@ UniformBuffer::UniformBuffer() :
 	setSharingMode(VK_SHARING_MODE_EXCLUSIVE);
 	setQueueFamilyIndexCount(0);
 	setPQueueFamilyIndices(nullptr);
-}
-
-void UniformBuffer::create() {
-	createBuffer();
-	allocateMemory(
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
-	bind();
+	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }

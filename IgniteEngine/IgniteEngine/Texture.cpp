@@ -86,9 +86,10 @@ void Texture::create() {
 	_image.setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
 	_image.setImageExtent(_width, _height, 1);
 	_image.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+	_image.setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	_image.createImage();
-	_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_image.allocateMemory();
 	_image.bind();
 
 	_image.setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
@@ -115,12 +116,8 @@ void Texture::update(Pixels& pixels) {
 	staging_buffer.setSize(_width * _height * _n * sizeof(uint8_t));
 	staging_buffer.setUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 	staging_buffer.setSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+	staging_buffer.setMemoryPropertyFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	staging_buffer.create();
-
-	staging_buffer.allocateMemory(
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
-	staging_buffer.bind();
 
 	// Copying the actual texture data into the staging buffer
 	staging_buffer.setValues(pixels.getPixels().data());

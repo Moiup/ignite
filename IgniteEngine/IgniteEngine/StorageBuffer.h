@@ -5,7 +5,5 @@ class StorageBuffer : public ArrayBuffer
 {
 public:
 	StorageBuffer();
-
-	void create();
 };
 

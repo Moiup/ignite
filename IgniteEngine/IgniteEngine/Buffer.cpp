@@ -10,6 +10,8 @@ Buffer::Buffer() :
 
 void Buffer::create() {
 	createBuffer();
+	allocateMemory();
+	bind();
 }
 
 void Buffer::destroy() {

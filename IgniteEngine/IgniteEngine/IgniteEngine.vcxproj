@@ -218,6 +218,7 @@
     <ClCompile Include="SamplerInfo.cpp" />
     <ClCompile Include="SecondaryMocapHeaderNetwork.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="StagingBuffer.cpp" />
     <ClCompile Include="StorageBuffer.cpp" />
     <ClCompile Include="Swapchain.cpp" />
     <ClCompile Include="TestModule.cpp" />
@@ -307,6 +308,7 @@
     <ClInclude Include="SamplerInfo.h" />
     <ClInclude Include="SecondaryMocapHeaderNetwork.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="StagingBuffer.h" />
     <ClInclude Include="stb_image\stb_image.h" />
     <ClInclude Include="stb_image\stb_image_resize.h" />
     <ClInclude Include="stb_image\stb_image_write.h" />

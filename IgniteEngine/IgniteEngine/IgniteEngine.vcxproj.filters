@@ -315,6 +315,9 @@
     <ClCompile Include="PushConstantInfo.cpp">
       <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
+    <ClCompile Include="StagingBuffer.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -586,6 +589,9 @@
     </ClInclude>
     <ClInclude Include="PushConstantInfo.h">
       <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="StagingBuffer.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

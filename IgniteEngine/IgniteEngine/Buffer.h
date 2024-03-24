@@ -16,6 +16,7 @@ public:
 
 	void create();
 	void setValues(void* values);
+	void setValues(Buffer buff);
 	void bind();
 	void destroy();
 
@@ -33,6 +34,7 @@ public:
 
 	void* map();
 	void unmap();
+
 
 
 protected:

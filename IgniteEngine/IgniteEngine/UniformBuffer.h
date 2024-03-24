@@ -5,7 +5,5 @@ class UniformBuffer : public ArrayBuffer
 {
 public:
 	UniformBuffer();
-
-	void create();
 };
 

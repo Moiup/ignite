@@ -3,7 +3,7 @@
 #include "LogicalDevice.h"
 #include "CommandPool.h"
 #include "CommandBuffer.h"
-#include "Buffer.h"
+#include "StagingBuffer.h"
 #include "Image.h"
 #include "PhysicalDevice.h"
 #include "Pixels.h"

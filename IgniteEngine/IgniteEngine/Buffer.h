@@ -16,7 +16,6 @@ public:
 
 	void create();
 	void setValues(void* values);
-	void setValues(Buffer buff);
 	void bind();
 	void destroy();
 
@@ -31,6 +30,8 @@ public:
 
 	VkBuffer& getBuffer();
 	Pointer<uint8_t> getValues();
+	
+	void copy(Buffer buff);
 
 	void* map();
 	void unmap();

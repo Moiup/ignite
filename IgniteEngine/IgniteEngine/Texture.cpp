@@ -106,17 +106,10 @@ void Texture::create() {
 
 void Texture::update(Pixels& pixels) {
 	// Creating the staging buffer
-	Buffer staging_buffer{};
+	StagingBuffer staging_buffer{};
 	staging_buffer.setLogicalDevice(_logical_device);
 	staging_buffer.setMemoryProperties(_gpu->getMemoryProperties());
-	staging_buffer.setFlags(0);
-	staging_buffer.setPNext(nullptr);
-	staging_buffer.setQueueFamilyIndexCount(0);
-	staging_buffer.setPQueueFamilyIndices(nullptr);
 	staging_buffer.setSize(_width * _height * _n * sizeof(uint8_t));
-	staging_buffer.setUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-	staging_buffer.setSharingMode(VK_SHARING_MODE_EXCLUSIVE);
-	staging_buffer.setMemoryPropertyFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	staging_buffer.create();
 
 	// Copying the actual texture data into the staging buffer

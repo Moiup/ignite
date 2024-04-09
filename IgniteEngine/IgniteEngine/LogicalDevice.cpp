@@ -1,9 +1,7 @@
 #include "LogicalDevice.h"
 
 
-LogicalDevice::LogicalDevice() : 
-	_logical_device{},
-	_gpu{nullptr}
+LogicalDevice::LogicalDevice()
 {
 	;
 }
@@ -28,7 +26,7 @@ void LogicalDevice::configure(const PhysicalDevice *gpu) {
 	);
 }
 
-bool LogicalDevice::setQueue(std::string name, std::vector<VkQueueFlagBits> flags){
+bool LogicalDevice::setQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count){
 	uint32_t family_index{0};
 	bool is_flag{false};
 
@@ -38,7 +36,7 @@ bool LogicalDevice::setQueue(std::string name, std::vector<VkQueueFlagBits> flag
 
 	for (uint32_t i = 0; i < _family_properties.size(); i++) {
 		is_flag = isFlag(_family_properties[i].queueFamilyProperties.queueFlags, flags);
-		if(is_flag) {
+		if (is_flag) {
 			family_index = i;
 			break;
 		}
@@ -48,45 +46,41 @@ bool LogicalDevice::setQueue(std::string name, std::vector<VkQueueFlagBits> flag
 		return false;
 	}
 
-	// Create the VkDeviceQueueCreateInfo
-	float queue_priorities = 1.0f;
-	Queue queue{};
-	queue.setQueueFamilyIndex(family_index);
 
-	_queues.insert({ name, queue });
+	for (uint32_t q = 0; q < count; q++) {
+		float queue_priorities = 1.0f;
+		Queue queue{};
+		queue.setDevice(_device);
+		queue.setFamilyIndex(family_index);
+
+		_queues[name].push_back(queue);
+	}
 
 	return true;
 }
 
-const Queue* LogicalDevice::getQueue(std::string name) const {
-	return &_queues.at(name);
-}
-
-const Queue* LogicalDevice::getDefaultQueue() const {
-	return &_queues.begin()->second;
-}
-
-const std::vector<uint32_t>& LogicalDevice::getQueueFamilyIndexes() const {
-	return _queue_family_indexes;
+std::vector<Queue>& LogicalDevice::getQueues(const std::string& name) {
+	return _queues[name];
 }
 
 void LogicalDevice::create() {
-	std::vector<VkDeviceQueueCreateInfo> queues_info;
-	createQueueCreateInfo(queues_info);
+	std::vector<VkDeviceQueueCreateInfo> queues_info{};
+	std::unordered_map<std::string, std::vector<float>> priorities{};
+	createQueueCreateInfo(queues_info, priorities);
 	createLogicalDevice(queues_info);
 	gettingTheQueues();
 }
 
 void LogicalDevice::destroy() {
-	vkDestroyDevice(_logical_device, nullptr);
+	vkDestroyDevice(_device, nullptr);
 }
 
-const VkDevice* LogicalDevice::getDevice() const {
-	return &_logical_device;
+const VkDevice LogicalDevice::getDevice() const {
+	return _device;
 }
 
 void LogicalDevice::waitIdle() {
-	vkDeviceWaitIdle(_logical_device);
+	vkDeviceWaitIdle(_device);
 }
 
 bool LogicalDevice::isFlag(VkQueueFlags family_flags, std::vector<VkQueueFlagBits> flags) {
@@ -102,17 +96,29 @@ bool LogicalDevice::isFlag(VkQueueFlags family_flags, std::vector<VkQueueFlagBit
 	return is_ok;
 }
 
-void LogicalDevice::createQueueCreateInfo(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
-	std::set<uint32_t> queues_index;
+void LogicalDevice::createQueueCreateInfo(
+	std::vector<VkDeviceQueueCreateInfo>& queues_info,
+	std::unordered_map<std::string, std::vector<float>> priorities
+	) {
+
 	for (auto& q : _queues) {
-		uint32_t index = q.second.getInfos()->queueFamilyIndex;
-		if (queues_index.count(index)) {
+		std::vector<Queue>& queues = q.second;
+		const std::string& name = q.first;
+		if (queues.size()) {
 			continue;
 		}
 
-		queues_index.insert(index);
-		queues_info.push_back(*q.second.getInfos());
-		_queue_family_indexes.push_back(index);
+		priorities[name] = std::vector<float>(queues.size(), 0.0f);
+
+		VkDeviceQueueCreateInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		info.pNext = nullptr;
+		info.flags = 0;
+		info.queueFamilyIndex = q.second[0].getFamilyIndex();
+		info.queueCount = queues.size();
+		info.pQueuePriorities = priorities[name].data();
+
+		queues_info.push_back(info);
 	}
 }
 
@@ -146,7 +152,7 @@ void LogicalDevice::createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &qu
 		_gpu->getGPU(),
 		&device_info,
 		nullptr,
-		&_logical_device
+		&_device
 	);
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed creating logical device.");
@@ -156,11 +162,6 @@ void LogicalDevice::createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &qu
 void LogicalDevice::gettingTheQueues() {
 	// Getting the queues
 	for (auto& q : _queues) {
-		vkGetDeviceQueue(
-			_logical_device,
-			q.second.getInfos()->queueFamilyIndex,
-			0,
-			q.second.getQueue()
-		);
+		
 	}
 }

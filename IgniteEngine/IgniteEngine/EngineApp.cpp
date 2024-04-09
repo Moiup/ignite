@@ -55,15 +55,18 @@ void EngineApp::init() {
 	_logical_device.configure(&_gpu);
 	_logical_device.setQueue(
 		"graphic_queue",
-		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT}
+		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
+		1
 	);
 	_logical_device.setQueue(
 		"present_queue",
-		{ VK_QUEUE_GRAPHICS_BIT }
+		{ VK_QUEUE_GRAPHICS_BIT },
+		1
 	);
 	_logical_device.setQueue(
 		"compute_queue",
-		{ VK_QUEUE_COMPUTE_BIT }
+		{ VK_QUEUE_COMPUTE_BIT },
+		1
 	);
 	_logical_device.create();
 

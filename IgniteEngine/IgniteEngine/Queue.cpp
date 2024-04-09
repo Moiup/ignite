@@ -1,27 +1,40 @@
 #include "Queue.h"
 
-Queue::Queue() :
-	_queue{},
-	_infos{}
+Queue::Queue()
 {
-	float priorities = 1.0f;
-	_infos.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	_infos.pNext = nullptr;
-	_infos.flags = 0;
-	_infos.queueCount = 1;
-	_infos.pQueuePriorities = &priorities;
+
+}
+
+void Queue::setDevice(VkDevice device) {
+	_device = device;
+}
+
+void Queue::setFamilyIndex(uint32_t family_index) {
+	_family_index = family_index;
+}
+
+void Queue::setQueue() {
+	vkGetDeviceQueue(
+		_device,
+		_family_index,
+		0,
+		&_queue
+	);
+}
+
+void Queue::createCommandPool() {
+	_cmd_pool.setFlags(
+	VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+	_cmd_pool.setQueueFamilyIndex(_family_index);
+	_cmd_pool.create();
 }
 
 VkQueue* Queue::getQueue() {
 	return &_queue;
 }
 
-void Queue::setQueueFamilyIndex(uint32_t index) {
-	_infos.queueFamilyIndex = index;
-}
-
-const VkDeviceQueueCreateInfo* Queue::getInfos() const {
-	return &_infos;
+uint32_t Queue::getFamilyIndex() {
+	return _family_index;
 }
 
 const void Queue::submit(

@@ -7,6 +7,7 @@ DefaultGPU* DefaultConf::gpu;
 LogicalDevice* DefaultConf::logical_device;
 GraphicShader* DefaultConf::graphic_shader;
 CommandPool* DefaultConf::command_pool;
+CommandBuffer* DefaultConf::copy_cmd_buf;
 WindowSurface* DefaultConf::render_window;
 Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;

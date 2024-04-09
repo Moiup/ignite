@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Ressource.h"
 #include "Pointer.h"
 #include <unordered_map>
@@ -31,7 +32,8 @@ public:
 	VkBuffer& getBuffer();
 	Pointer<uint8_t> getValues();
 	
-	void copy(Buffer buff);
+	void copy(const Buffer& buff);
+	void copySync(const Buffer& buff);
 
 	void* map();
 	void unmap();

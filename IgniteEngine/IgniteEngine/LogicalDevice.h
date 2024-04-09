@@ -17,27 +17,26 @@ private:
 	};
 
 	// <Name of the queue, <The queue, the Queue info>>
-	std::unordered_map<std::string, Queue> _queues;
+	std::unordered_map<std::string, std::vector<Queue>> _queues;
 	std::vector<VkQueueFamilyProperties2> _family_properties;
 	std::vector<uint32_t> _queue_family_indexes;
 
-	const PhysicalDevice* _gpu;
-	VkDevice _logical_device;
+	const PhysicalDevice* _gpu{ nullptr };
+	VkDevice _device{};
 
 public:
 	LogicalDevice();
 
 	void configure(const PhysicalDevice* gpu);
 
-	bool setQueue(std::string name, std::vector<VkQueueFlagBits> flags);
-	const Queue* getQueue(std::string name) const;
-	const Queue* getDefaultQueue() const;
+	bool setQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count);
+	std::vector<Queue>& getQueues(const std::string& name);
 	const std::vector<uint32_t>& getQueueFamilyIndexes() const;
 
 	void create();
 	void destroy();
 
-	const VkDevice* getDevice() const;
+	const VkDevice getDevice() const;
 
 	void waitIdle();
 

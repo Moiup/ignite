@@ -1,22 +1,30 @@
 #pragma once
 
 #include "PhysicalDevice.h"
+#include "CommandPool.h"
 #include <vector>
 
 class Queue
 {
 private:
-	VkQueue _queue;
-	VkDeviceQueueCreateInfo _infos;
+	VkQueue _queue{};
+	VkDevice _device{};
+	CommandPool _cmd_pool{};
+
+	uint32_t  _family_index{};
 
 public:
 	Queue();
 
-	VkQueue* getQueue();
+	void setDevice(VkDevice device);
+	void setFamilyIndex(uint32_t family_index);
+	void setQueue();
+	void createCommandPool();
 
-	void setQueueFamilyIndex(uint32_t index);
+	VkQueue* getQueue();
 	
-	const VkDeviceQueueCreateInfo* getInfos() const;
+	uint32_t getFamilyIndex();
+
 	const void submit(
 		uint32_t waitSemaphorecount,
 		const VkSemaphore* pWaitSemaphores,

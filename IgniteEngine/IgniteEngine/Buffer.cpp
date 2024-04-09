@@ -103,6 +103,14 @@ Pointer<uint8_t> Buffer::getValues() {
 	return Pointer<uint8_t>(v);
 }
 
+void Buffer::copy(const Buffer& buffer) {
+
+}
+
+void Buffer::copySync(const Buffer& buffer) {
+
+}
+
 void* Buffer::map() {
 	if (_size == 0) {
 		return nullptr;

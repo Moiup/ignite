@@ -21,6 +21,8 @@ public:
 	void setQueue();
 	void createCommandPool();
 
+	CommandPool& getCommandPool();
+
 	VkQueue* getQueue();
 	
 	uint32_t getFamilyIndex();

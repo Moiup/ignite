@@ -17,7 +17,6 @@ public:
 	static DefaultGPU* gpu;
 	static LogicalDevice* logical_device;
 	static GraphicShader* graphic_shader;
-	static CommandPool* command_pool;
 	static CommandBuffer* copy_cmd_buf;
 	static WindowSurface* render_window;
 	static Instance* instance;

@@ -66,24 +66,15 @@ void EngineApp::init() {
 	_logical_device.setQueue(
 		"compute_queue",
 		{ VK_QUEUE_COMPUTE_BIT },
-		1
+		8
 	);
 	_logical_device.create();
-
-	// Command Pool
-	_command_pool.setLogicalDevice(&_logical_device);
-	_command_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-	_command_pool.setQueueFamilyIndex(
-		_logical_device.getQueue("graphic_queue")->getInfos()->queueFamilyIndex
-	);
-	_command_pool.create();
 
 	DefaultConf::gpu = &_gpu;
 	DefaultConf::logical_device = &_logical_device;
 	DefaultConf::render_window = &_render_window;
 	DefaultConf::graphic_shader = &_graphic_shader;
 	DefaultConf::instance = &_instance;
-	DefaultConf::command_pool = &_command_pool;
 	DefaultConf::renderer = &_renderer;
 	DefaultConf::camera = &_camera;
 	DefaultConf::white_texture = &_white_texture;
@@ -97,7 +88,7 @@ void EngineApp::init() {
 	Pixels pixels("../assets/textures/white.png");
 	_white_texture.setLogicalDevice(DefaultConf::logical_device);
 	_white_texture.setGPU(DefaultConf::gpu);
-	_white_texture.setCommandPool(DefaultConf::command_pool);
+	//_white_texture.setCommandPool(DefaultConf::command_pool);
 	_white_texture.setDimensions(pixels.getWidth(), pixels.getHeight());
 	_white_texture.create();
 	_white_texture.update(pixels);
@@ -282,7 +273,7 @@ void EngineApp::start() {
 	// Renderer
 	DefaultConf::renderer->setNbFrame(NB_FRAME);
 	DefaultConf::renderer->setLogicalDevice(DefaultConf::logical_device);
-	DefaultConf::renderer->setCommandPool(DefaultConf::command_pool);
+	//DefaultConf::renderer->setCommandPool(DefaultConf::command_pool);
 	DefaultConf::renderer->setPhysicalDevice(DefaultConf::gpu);
 	DefaultConf::renderer->setWindow(DefaultConf::render_window);
 	DefaultConf::renderer->create();

@@ -20,6 +20,11 @@ void Queue::setQueue() {
 		0,
 		&_queue
 	);
+
+	_cmd_pool.setDevice(_device);
+	_cmd_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+	_cmd_pool.setQueueFamilyIndex(_family_index);
+	_cmd_pool.create();
 }
 
 void Queue::createCommandPool() {
@@ -27,6 +32,10 @@ void Queue::createCommandPool() {
 	VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	_cmd_pool.setQueueFamilyIndex(_family_index);
 	_cmd_pool.create();
+}
+
+CommandPool& Queue::getCommandPool() {
+	return _cmd_pool;
 }
 
 VkQueue* Queue::getQueue() {

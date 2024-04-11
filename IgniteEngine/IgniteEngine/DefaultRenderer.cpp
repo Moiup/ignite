@@ -26,18 +26,18 @@ void DefaultRenderer::destroy() {
 	}
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vkDestroySemaphore(
-			*_logical_device->getDevice(),
+			(*_graphics_queues)[0].getDevice(),
 			_sem_render_starts[i],
 			nullptr
 		);
 		vkDestroySemaphore(
-			*_logical_device->getDevice(),
+			(*_graphics_queues)[0].getDevice(),
 			_sem_render_ends[i],
 			nullptr
 		);
 
 		vkDestroyFence(
-			*_logical_device->getDevice(),
+			(*_graphics_queues)[0].getDevice(),
 			_fences[i],
 			nullptr
 		);
@@ -49,20 +49,20 @@ void DefaultRenderer::render() {
 	uint32_t available_img{ 0 };
 
 	vkWaitForFences(
-		*_logical_device->getDevice(),
+		(*_graphics_queues)[0].getDevice(),
 		1,
 		&_fences[_current_frame],
 		VK_TRUE,
 		UINT64_MAX
 	);
 	vkResetFences(
-		*_logical_device->getDevice(),
+		(*_graphics_queues)[0].getDevice(),
 		1,
 		&_fences[_current_frame]
 	);
 
 	vk_result = vkAcquireNextImageKHR(
-		*_logical_device->getDevice(),
+		(*_graphics_queues)[0].getDevice(),
 		_swapchain.getSwapchain(),
 		UINT64_MAX,
 		_sem_render_starts[_current_frame],
@@ -169,7 +169,7 @@ void DefaultRenderer::render() {
 	_command_buffers[_current_frame].end();
 
 	// Submit and present
-	_logical_device->getQueue("graphic_queue")->submit(
+	(*_graphics_queues)[0].submit(
 		1,
 		&_sem_render_starts[_current_frame],
 		_pipeline_stage_flags.data(),
@@ -180,7 +180,7 @@ void DefaultRenderer::render() {
 		&_fences[_current_frame]
 	);	
 
-	_logical_device->getQueue("present_queue")->present(
+	(*_present_queues)[0].present(
 		1,
 		&_sem_render_ends[_current_frame],
 		1,
@@ -337,7 +337,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vk_result = vkCreateSemaphore(
-			*_logical_device->getDevice(),
+			_logical_device->getDevice(),
 			&semaphore_info,
 			nullptr,
 			&_sem_render_starts[i]
@@ -347,7 +347,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 		}
 
 		vk_result = vkCreateSemaphore(
-			*_logical_device->getDevice(),
+			_logical_device->getDevice(),
 			&semaphore_info,
 			nullptr,
 			&_sem_render_ends[i]
@@ -357,7 +357,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 		}
 
 		vk_result = vkCreateFence(
-			*_logical_device->getDevice(),
+			_logical_device->getDevice(),
 			&fence_info,
 			nullptr,
 			&_fences[i]
@@ -369,8 +369,8 @@ void DefaultRenderer::createFencesAndSemaphores() {
 }
 
 void DefaultRenderer::createSwapchain() {
-	_swapchain.setLogicalDevice(
-		_logical_device
+	_swapchain.setDevice(
+		(*_graphics_queues)[0].getDevice()
 	);
 	_swapchain.setSurface(
 		_window->getSurface()
@@ -381,14 +381,14 @@ void DefaultRenderer::createSwapchain() {
 		_window->getHeightInPixel()
 	);
 	_swapchain.setQueueFamilyIndices(
-		_logical_device->getQueueFamilyIndexes()
+		(*_graphics_queues)[0].getFamilyIndex()
 	);
 	_swapchain.create();
 }
 
 void DefaultRenderer::createDepthBuffer() {
 	_depth_buffer.setLogicalDevice(
-		_logical_device
+		(*_graphics_queues)[0].getDevice()
 	);
 	_depth_buffer.setImageWidthHeight(
 		_window->getWidthInPixel(),

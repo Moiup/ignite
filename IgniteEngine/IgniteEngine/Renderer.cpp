@@ -24,16 +24,16 @@ void Renderer::render() {
 	;
 }
 
+void Renderer::setGraphicsQueues(std::vector<Queue>* graphics_queues) {
+	_graphics_queues = graphics_queues;
+}
+
+void Renderer::setPresentQueues(std::vector<Queue>* present_queues) {
+	_present_queues = present_queues;
+}
+
 void Renderer::setNbFrame(uint32_t nb_frame) {
 	_nb_frame = nb_frame;
-}
-
-void Renderer::setLogicalDevice(LogicalDevice* logical_device) {
-	_logical_device = logical_device;
-}
-
-void Renderer::setCommandPool(CommandPool* command_pool) {
-	_command_pool = command_pool;
 }
 
 void Renderer::setPhysicalDevice(PhysicalDevice* gpu) {

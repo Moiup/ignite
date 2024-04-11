@@ -38,8 +38,12 @@ CommandPool& Queue::getCommandPool() {
 	return _cmd_pool;
 }
 
-VkQueue* Queue::getQueue() {
-	return &_queue;
+VkQueue Queue::getQueue() {
+	return _queue;
+}
+
+VkDevice Queue::getDevice() {
+	return _device;
 }
 
 uint32_t Queue::getFamilyIndex() {

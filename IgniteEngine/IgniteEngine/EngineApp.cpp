@@ -54,17 +54,17 @@ void EngineApp::init() {
 	// Initialising logical device and queues
 	_logical_device.configure(&_gpu);
 	_logical_device.setQueue(
-		"graphic_queue",
+		"graphic_queues",
 		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
 		1
 	);
 	_logical_device.setQueue(
-		"present_queue",
+		"present_queues",
 		{ VK_QUEUE_GRAPHICS_BIT },
 		1
 	);
 	_logical_device.setQueue(
-		"compute_queue",
+		"compute_queues",
 		{ VK_QUEUE_COMPUTE_BIT },
 		8
 	);
@@ -271,9 +271,9 @@ void EngineApp::start() {
 	);
 
 	// Renderer
+	DefaultConf::renderer->setGraphicsQueues(&_logical_device.getQueues("graphics_queues"));
+	DefaultConf::renderer->setPresentQueues(&_logical_device.getQueues("present_queues"));
 	DefaultConf::renderer->setNbFrame(NB_FRAME);
-	DefaultConf::renderer->setLogicalDevice(DefaultConf::logical_device);
-	//DefaultConf::renderer->setCommandPool(DefaultConf::command_pool);
 	DefaultConf::renderer->setPhysicalDevice(DefaultConf::gpu);
 	DefaultConf::renderer->setWindow(DefaultConf::render_window);
 	DefaultConf::renderer->create();

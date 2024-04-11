@@ -31,7 +31,6 @@ public:
 
 	bool setQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count);
 	std::vector<Queue>& getQueues(const std::string& name);
-	const std::vector<uint32_t>& getQueueFamilyIndexes() const;
 
 	void create();
 	void destroy();
@@ -43,7 +42,10 @@ public:
 private:
 	bool isFlag(VkQueueFlags family_flags, std::vector<VkQueueFlagBits> flags);
 
-	void createQueueCreateInfo(std::vector<VkDeviceQueueCreateInfo>& queues_info);
+	void createQueueCreateInfo(
+		std::vector<VkDeviceQueueCreateInfo>& queues_info,
+		std::unordered_map<std::string, std::vector<float>> priorities
+	);
 	void createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &queues_info);
 	void gettingTheQueues();
 };

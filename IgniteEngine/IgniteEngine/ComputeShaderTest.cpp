@@ -52,7 +52,7 @@ void ComputeShaderTest::start() {
 
 	// The dispatcher
 	_dispatcher_sync.setLogicalDevice(DefaultConf::logical_device);
-	_dispatcher_sync.setCommandPool(DefaultConf::command_pool);
+	//_dispatcher_sync.setCommandPool(DefaultConf::command_pool);
 	_dispatcher_sync.setComputePipeline(&_compute_pipeline);
 	_dispatcher_sync.create();
 }

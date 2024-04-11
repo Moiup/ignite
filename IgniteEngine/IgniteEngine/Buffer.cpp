@@ -32,7 +32,7 @@ void Buffer::setValues(void* values) {
 
 void Buffer::bind() {
 	VkResult vk_result = vkBindBufferMemory(
-		*_logical_device->getDevice(),
+		_logical_device->getDevice(),
 		_buffer,
 		_memory,
 		0
@@ -118,7 +118,7 @@ void* Buffer::map() {
 	
 	void* ptr{ nullptr };
 	vkMapMemory(
-		*_logical_device->getDevice(),
+		_logical_device->getDevice(),
 		_memory,
 		0,
 		_size,
@@ -131,14 +131,14 @@ void* Buffer::map() {
 
 void Buffer::unmap() {
 	vkUnmapMemory(
-		*_logical_device->getDevice(),
+		_logical_device->getDevice(),
 		_memory
 	);
 }
 
 void Buffer::createBuffer() {
 	VkResult vk_result = vkCreateBuffer(
-		*_logical_device->getDevice(),
+		_logical_device->getDevice(),
 		&_buffer_info,
 		nullptr,
 		&_buffer
@@ -150,7 +150,7 @@ void Buffer::createBuffer() {
 
 void Buffer::destroyBuffer() {
 	vkDestroyBuffer(
-		*_logical_device->getDevice(),
+		_logical_device->getDevice(),
 		_buffer,
 		nullptr
 	);
@@ -158,7 +158,7 @@ void Buffer::destroyBuffer() {
 
 void Buffer::getMemoryRequirements() {
 	vkGetBufferMemoryRequirements(
-		*_logical_device->getDevice(),
+		_logical_device->getDevice(),
 		_buffer,
 		&_memory_req
 	);

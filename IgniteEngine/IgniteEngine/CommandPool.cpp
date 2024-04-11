@@ -2,7 +2,6 @@
 
 CommandPool::CommandPool() :
 	_pool{},
-	_logical_device{ nullptr },
 	_flags{},
 	_family_index{},
 	_created{false}
@@ -10,9 +9,6 @@ CommandPool::CommandPool() :
 	;
 }
 
-void CommandPool::setLogicalDevice(LogicalDevice* logical_device) {
-	_logical_device = logical_device;
-}
 
 void CommandPool::setFlags(VkCommandPoolCreateFlagBits flags) {
 	_flags = flags;
@@ -30,7 +26,7 @@ void CommandPool::create() {
 	pool_info.queueFamilyIndex = _family_index;
 
 	VkResult vk_result = vkCreateCommandPool(
-		*_logical_device->getDevice(),
+		_device,
 		&pool_info,
 		nullptr,
 		&_pool
@@ -48,7 +44,7 @@ void CommandPool::destroy() {
 		return;
 	}
 
-	vkDestroyCommandPool(*_logical_device->getDevice(), _pool, nullptr);
+	vkDestroyCommandPool(_device, _pool, nullptr);
 }
 
 const VkCommandPool& CommandPool::getPool() const {
@@ -57,7 +53,7 @@ const VkCommandPool& CommandPool::getPool() const {
 
 CommandBuffer CommandPool::createCommandBuffer(VkCommandBufferLevel level) {
 	CommandBuffer cmd_buffer{};
-	cmd_buffer.setLogicalDevice(_logical_device);
+	cmd_buffer.setDevice(_device);
 	cmd_buffer.setCommandPool(&_pool);
 	cmd_buffer.setLevel(level);
 

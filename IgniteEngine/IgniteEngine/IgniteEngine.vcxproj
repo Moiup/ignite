@@ -163,6 +163,7 @@
     <ClCompile Include="DefaultGPU.cpp" />
     <ClCompile Include="DefaultRenderer.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
+    <ClCompile Include="DeviceBuffer.cpp" />
     <ClCompile Include="Dispatcher.cpp" />
     <ClCompile Include="DispatcherSync.cpp" />
     <ClCompile Include="EngineApp.cpp" />
@@ -249,6 +250,7 @@
     <ClInclude Include="DefaultGPU.h" />
     <ClInclude Include="DefaultRenderer.h" />
     <ClInclude Include="DepthBuffer.h" />
+    <ClInclude Include="DeviceBuffer.h" />
     <ClInclude Include="Dispatcher.h" />
     <ClInclude Include="DispatcherSync.h" />
     <ClInclude Include="EngineApp.h" />

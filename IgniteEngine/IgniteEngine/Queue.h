@@ -7,9 +7,9 @@
 class Queue
 {
 private:
-	VkQueue _queue{};
-	VkDevice _device{};
-	CommandPool _cmd_pool{};
+	VkQueue _queue;
+	VkDevice _device;
+	CommandPool _cmd_pool;
 
 	uint32_t  _family_index{};
 
@@ -23,7 +23,8 @@ public:
 
 	CommandPool& getCommandPool();
 
-	VkQueue* getQueue();
+	VkQueue getQueue();
+	VkDevice getDevice();
 	
 	uint32_t getFamilyIndex();
 

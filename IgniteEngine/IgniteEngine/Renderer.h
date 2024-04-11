@@ -12,13 +12,15 @@ class Renderer
 {
 protected:
 	uint32_t _nb_frame;
-	LogicalDevice* _logical_device;
 	CommandPool* _command_pool;
 	PhysicalDevice* _gpu;
 	WindowSurface* _window;
 	VkClearColorValue _clear_color_value;
 
 	std::vector<CommandBuffer> _command_buffers;
+
+	std::vector<Queue>* _graphics_queues;
+	std::vector<Queue>* _present_queues;
 
 	uint32_t _current_frame;
 
@@ -31,9 +33,10 @@ public:
 	virtual void destroy();
 	virtual void render();
 
+	void setGraphicsQueues(std::vector<Queue>* graphics_queues);
+	void setPresentQueues(std::vector<Queue>* present_queues);
+
 	void setNbFrame(uint32_t nb_frame);
-	void setLogicalDevice(LogicalDevice* logical_device);
-	void setCommandPool(CommandPool* command_pool);
 	void setPhysicalDevice(PhysicalDevice* gpu);
 	void setWindow(WindowSurface* _window);
 	void setClearColorValue(VkClearColorValue clear_color_value);

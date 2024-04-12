@@ -5,7 +5,7 @@ Queue::Queue()
 
 }
 
-void Queue::setDevice(VkDevice device) {
+void Queue::setDevice(Device* device) {
 	_device = device;
 }
 
@@ -15,7 +15,7 @@ void Queue::setFamilyIndex(uint32_t family_index) {
 
 void Queue::setQueue() {
 	vkGetDeviceQueue(
-		_device,
+		_device->getDevice(),
 		_family_index,
 		0,
 		&_queue
@@ -23,13 +23,6 @@ void Queue::setQueue() {
 
 	_cmd_pool.setDevice(_device);
 	_cmd_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-	_cmd_pool.setQueueFamilyIndex(_family_index);
-	_cmd_pool.create();
-}
-
-void Queue::createCommandPool() {
-	_cmd_pool.setFlags(
-	VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	_cmd_pool.setQueueFamilyIndex(_family_index);
 	_cmd_pool.create();
 }
@@ -42,12 +35,89 @@ VkQueue Queue::getQueue() {
 	return _queue;
 }
 
-VkDevice Queue::getDevice() {
+Device* Queue::getDevice() {
 	return _device;
 }
 
 uint32_t Queue::getFamilyIndex() {
 	return _family_index;
+}
+
+//void Queue::copy(Buffer src, Buffer dst, VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT) {
+//	CommandBuffer cmd_buf = _cmd_pool.allocateCommandBuffer();
+//	cmd_buf.end();
+//
+//	VkBufferCopy2 region{};
+//	region.sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
+//	region.pNext = nullptr;
+//	region.srcOffset = 0;
+//	region.dstOffset = 0;
+//	region.size = src.getSize();
+//
+//	VkCopyBufferInfo2 info{};
+//	info.sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
+//	info.pNext = nullptr;
+//	info.srcBuffer = src.getBuffer();
+//	info.dstBuffer = dst.getBuffer();
+//	info.regionCount = 1;
+//	info.pRegions = &region;
+//
+//	vkCmdCopyBuffer2(
+//		cmd_buf.getCommandBuffer(),
+//		&info
+//	);
+//
+//	cmd_buf.pipelineBarrier(
+//		src_stage_mask,
+//		dst_stage_mask,
+//		0,
+//		0,
+//		nullptr,
+//		0,
+//		nullptr,
+//		0,
+//		nullptr
+//	);
+//
+//	cmd_buf.end();
+//
+//	_pending_command_buffers.push_back(cmd_buf.getCommandBuffer());
+//}
+//
+//void Queue::changeLayout(Image img, VkImageLayout) {
+//
+//}
+//
+//void Queue::changeToTexture(Image img) {
+//
+//}
+//
+//void Queue::changeToSurface(Image img) {
+//
+//}
+
+void Queue::flush() {
+	VkSubmitInfo info{};
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info.pNext = nullptr;
+	info.waitSemaphoreCount = 0;
+	info.pWaitSemaphores = nullptr;
+	info.pWaitDstStageMask = nullptr;
+	info.commandBufferCount = _pending_command_buffers.size();
+	info.pCommandBuffers = _pending_command_buffers.data();
+	info.signalSemaphoreCount = 0;
+	info.pSignalSemaphores = nullptr;
+
+	VkResult vk_result = vkQueueSubmit(
+		_queue,
+		1,
+		&info,
+		nullptr
+	);
+	if (vk_result != VK_SUCCESS) {
+		std::cerr << "Error flushing!" << std::endl;
+		throw "Error flushing!";
+	}
 }
 
 const void Queue::submit(
@@ -74,7 +144,7 @@ const void Queue::submit(
 	VkResult vk_result = vkQueueSubmit(_queue, 1, &submit_info, *fence);
 
 	if (vk_result != VK_SUCCESS) {
-		std::cout << "Queue submit failed: " << vk_result << std::endl;
+		std::cerr << "Queue submit failed: " << vk_result << std::endl;
 		throw std::runtime_error("Error: failed submitting queue!");
 	}
 }
@@ -110,4 +180,12 @@ const void Queue::present(
 
 void Queue::waitIdle() {
 	vkQueueWaitIdle(_queue);
+}
+
+void Queue::createFence() {
+	VkFenceCreateInfo info{};
+
+	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	info.pNext = nullptr;
+	info.flags = 0;
 }

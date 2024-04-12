@@ -6,8 +6,8 @@ class CommandBuffer
 {
 private:
 	VkCommandBuffer _command_buffer;
-	VkDevice _device;
-	VkCommandPool* _command_pool;
+	Device* _device;
+	CommandPool* _command_pool;
 	VkCommandBufferLevel _level;
 	
 	bool _created;
@@ -15,11 +15,22 @@ private:
 public:
 	CommandBuffer();
 
-	void setDevice(VkDevice device);
-	void setCommandPool(VkCommandPool* command_pool);
+	CommandBuffer(CommandBuffer& cmd_buf);
+	CommandBuffer(CommandBuffer&& cmd_buf);
+
+	CommandBuffer& operator=(const CommandBuffer& cmd_buf);
+
+	void setDevice(Device* device);
+	void setCommandPool(CommandPool* command_pool);
 	void setLevel(VkCommandBufferLevel level);
 
-	void create();
+	VkCommandBuffer getCommandBuffer();
+	Device* getDevice();
+	CommandPool* getCommandPool();
+	VkCommandBufferLevel getLevel();
+	bool getIsCreated();
+
+	void allocate();
 	void free();
 
 	void begin();
@@ -30,8 +41,6 @@ public:
 	void beginRendering(VkRenderingInfoKHR& info);
 	void bindPipeline(VkPipelineBindPoint bind_point, VkPipeline& pipeline);
 
-	void flush(const Queue* queue);
-
 	void setViewport(std::vector<VkViewport>& viewport_arr);
 	void setScissor(std::vector<VkRect2D>& scissor_arr);
 	void bindDescriptorSets(VkPipelineBindPoint bind_point, VkPipelineLayout pipeline_layout, uint32_t first_set, uint32_t descriptor_count, const VkDescriptorSet* p_descriptor_sets,
@@ -41,8 +50,6 @@ public:
 	void bindVertexBuffer(uint32_t first_binding, uint32_t binding_count, const VkBuffer* p_buffers, const VkDeviceSize* p_offsets);
 	void drawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance);
 	void dispatch(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
-
-	void dispatchSyncAIO(const Queue* queue, uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
 
 	void endRendering();
 
@@ -65,7 +72,5 @@ public:
 		uint32_t regionCount,
 		const VkBufferImageCopy* pRegions
 	);
-
-	const VkCommandBuffer* getCommandBuffer();
 };
 

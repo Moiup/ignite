@@ -1,13 +1,12 @@
 #pragma once
 
-#include "LogicalDevice.h"
 #include "CommandBuffer.h"
 
 class CommandPool
 {
 private:
 	VkCommandPool _pool;
-	VkDevice _device;
+	Device* _device;
 	VkCommandPoolCreateFlagBits _flags;
 	uint32_t _family_index;
 	bool _created;
@@ -15,7 +14,7 @@ private:
 public:
 	CommandPool();
 
-	void setDevice(VkDevice device);
+	void setDevice(Device* device);
 	void setFlags(VkCommandPoolCreateFlagBits flags);
 	void setQueueFamilyIndex(uint32_t family_index);
 	void create();
@@ -23,6 +22,6 @@ public:
 
 	const VkCommandPool& getPool() const;
 
-	CommandBuffer createCommandBuffer(VkCommandBufferLevel level= VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	CommandBuffer allocateCommandBuffer(VkCommandBufferLevel level= VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 };
 

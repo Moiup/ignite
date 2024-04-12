@@ -31,13 +31,12 @@ public:
 
 	VkBuffer& getBuffer();
 	Pointer<uint8_t> getValues();
-	
-	void copy(const Buffer& buff);
-	void copySync(const Buffer& buff);
 
+	uint32_t getSize();
+	uint32_t getCapacity();
+	
 	void* map();
 	void unmap();
-
 
 
 protected:

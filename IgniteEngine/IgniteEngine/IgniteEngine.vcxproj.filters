@@ -319,6 +319,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="DeviceBuffer.cpp">
+      <Filter>Ignite\Engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Device.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -597,6 +600,9 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="DeviceBuffer.h">
+      <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Device.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

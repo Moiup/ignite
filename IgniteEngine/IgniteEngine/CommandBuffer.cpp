@@ -3,17 +3,41 @@
 CommandBuffer::CommandBuffer() :
 	_command_buffer{},
 	_command_pool{nullptr},
-	_level{},
+	_level{VK_COMMAND_BUFFER_LEVEL_PRIMARY},
 	_created{false}
 {
 	;
 }
 
-void CommandBuffer::setDevice(VkDevice device) {
+CommandBuffer::CommandBuffer(CommandBuffer& cmd_buf) {
+	_command_buffer = cmd_buf.getCommandBuffer();
+	_device = cmd_buf.getDevice();
+	_command_pool = cmd_buf.getCommandPool();
+	_level = cmd_buf.getLevel();
+	_created = cmd_buf.getIsCreated();
+}
+
+CommandBuffer::CommandBuffer(CommandBuffer&& cmd_buf) {
+	_command_buffer = cmd_buf.getCommandBuffer();
+	_device = cmd_buf.getDevice();
+	_command_pool = cmd_buf.getCommandPool();
+	_level = cmd_buf.getLevel();
+	_created = cmd_buf.getIsCreated();
+}
+
+CommandBuffer& CommandBuffer::operator=(const CommandBuffer& cmd_buf) {
+	_command_buffer = cmd_buf._command_buffer;
+	_device = cmd_buf._device;
+	_command_pool = cmd_buf._command_pool;
+	_level = cmd_buf._level;
+	_created = cmd_buf._created;
+}
+
+void CommandBuffer::setDevice(Device* device) {
 	_device = device;
 }
 
-void CommandBuffer::setCommandPool(VkCommandPool* command_pool) {
+void CommandBuffer::setCommandPool(CommandPool* command_pool) {
 	_command_pool = command_pool;
 }
 
@@ -21,16 +45,36 @@ void CommandBuffer::setLevel(VkCommandBufferLevel level) {
 	_level = level;
 }
 
-void CommandBuffer::create() {
+VkCommandBuffer CommandBuffer::getCommandBuffer() {
+	return _command_buffer;
+}
+
+Device* CommandBuffer::getDevice() {
+	return _device;
+}
+
+CommandPool* CommandBuffer::getCommandPool() {
+	return _command_pool;
+}
+
+VkCommandBufferLevel CommandBuffer::getLevel() {
+	return _level;
+}
+
+bool CommandBuffer::getIsCreated() {
+	return _created;
+}
+
+void CommandBuffer::allocate() {
 	VkCommandBufferAllocateInfo info{};
 	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	info.pNext = nullptr;
-	info.commandPool = *_command_pool;
+	info.commandPool = _command_pool->getPool();
 	info.commandBufferCount = 1;
 	info.level = _level;
 
 	VkResult vk_result = vkAllocateCommandBuffers(
-		_device,
+		_device->getDevice(),
 		&info,
 		&_command_buffer
 	);
@@ -48,8 +92,8 @@ void CommandBuffer::free() {
 	}
 
 	vkFreeCommandBuffers(
-		_device,
-		*_command_pool,
+		_device->getDevice(),
+		_command_pool->getPool(),
 		1,
 		&_command_buffer
 	);
@@ -98,50 +142,6 @@ void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, VkPipeline& pip
 		_command_buffer,
 		bind_point,
 		pipeline
-	);
-}
-
-void CommandBuffer::flush(const Queue* queue) {
-	VkFenceCreateInfo fence_info{};
-	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fence_info.pNext = nullptr;
-	fence_info.flags = 0;
-
-	VkFence fence;
-
-	VkResult result = vkCreateFence(
-		_device,
-		&fence_info,
-		nullptr,
-		&fence
-	);
-
-	if (result != VK_SUCCESS) {
-		throw std::runtime_error("Error while creating the fence.");
-	}
-
-	queue->submit(
-		0, nullptr,
-		nullptr,
-		1, &_command_buffer,
-		0, nullptr,
-		&fence
-	);
-
-	result = vkWaitForFences(
-		_device,
-		1,
-		&fence,
-		VK_TRUE,
-		UINT64_MAX
-	);
-	if (result != VK_SUCCESS) {
-		throw std::runtime_error("Error while waiting for fences to finish.");
-	}
-	vkDestroyFence(
-		_device,
-		fence,
-		nullptr
 	);
 }
 
@@ -271,8 +271,4 @@ void CommandBuffer::copyBufferToImage(
 		regionCount,
 		pRegions
 	);
-}
-
-const VkCommandBuffer* CommandBuffer::getCommandBuffer() {
-	return &_command_buffer;
 }

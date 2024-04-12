@@ -9,7 +9,9 @@ CommandPool::CommandPool() :
 	;
 }
 
-
+void CommandPool::setDevice(Device* device) {
+	_device = device;
+}
 void CommandPool::setFlags(VkCommandPoolCreateFlagBits flags) {
 	_flags = flags;
 }
@@ -26,7 +28,7 @@ void CommandPool::create() {
 	pool_info.queueFamilyIndex = _family_index;
 
 	VkResult vk_result = vkCreateCommandPool(
-		_device,
+		_device->getDevice(),
 		&pool_info,
 		nullptr,
 		&_pool
@@ -44,20 +46,24 @@ void CommandPool::destroy() {
 		return;
 	}
 
-	vkDestroyCommandPool(_device, _pool, nullptr);
+	vkDestroyCommandPool(
+		_device->getDevice(),
+		_pool,
+		nullptr
+	);
 }
 
 const VkCommandPool& CommandPool::getPool() const {
 	return _pool;
 }
 
-CommandBuffer CommandPool::createCommandBuffer(VkCommandBufferLevel level) {
+CommandBuffer CommandPool::allocateCommandBuffer(VkCommandBufferLevel level) {
 	CommandBuffer cmd_buffer{};
 	cmd_buffer.setDevice(_device);
-	cmd_buffer.setCommandPool(&_pool);
+	cmd_buffer.setCommandPool(this);
 	cmd_buffer.setLevel(level);
 
-	cmd_buffer.create();
+	cmd_buffer.allocate();
 
 	return cmd_buffer;
 }

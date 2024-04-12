@@ -149,8 +149,7 @@ void Texture::update(Pixels& pixels) {
 	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
 	// Creating the command buffer
-	CommandBuffer copy_cmd = _command_pool->createCommandBuffer();
-	copy_cmd.create();
+	CommandBuffer copy_cmd = _command_pool->allocateCommandBuffer();
 	copy_cmd.begin();
 
 	copy_cmd.pipelineBarrier(
@@ -189,7 +188,6 @@ void Texture::update(Pixels& pixels) {
 	_image_layout = image_memory_barrier.newLayout;
 
 	copy_cmd.end();
-	copy_cmd.flush(_logical_device->getDefaultQueue());
 
 	copy_cmd.free();
 	staging_buffer.destroy();

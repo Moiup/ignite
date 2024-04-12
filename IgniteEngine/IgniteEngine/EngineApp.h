@@ -7,23 +7,23 @@
 #include "Window.h"
 #include "WindowSurface.h"
 #include "LogicalDevice.h"
-#include "CommandPool.h"
-#include "Swapchain.h"
-#include "Image.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "UniformBuffer.h"
-#include "StorageBuffer.h"
-#include "GraphicsPipeline.h"
-#include "Renderer.h"
-#include "DefaultRenderer.h"
-#include "Mesh.h"
-#include "Object3D.h"
-#include "Modules.h"
-#include "PerspectiveCamera.h"
-#include "CameraScene.h"
-
-#include "DefaultConf.h"
+//#include "CommandPool.h"
+//#include "Swapchain.h"
+//#include "Image.h"
+//#include "VertexBuffer.h"
+//#include "IndexBuffer.h"
+//#include "UniformBuffer.h"
+//#include "StorageBuffer.h"
+//#include "GraphicsPipeline.h"
+//#include "Renderer.h"
+//#include "DefaultRenderer.h"
+//#include "Mesh.h"
+//#include "Object3D.h"
+//#include "Modules.h"
+//#include "PerspectiveCamera.h"
+//#include "CameraScene.h"
+//
+//#include "DefaultConf.h"
 
 #include <SDL.h>
 #include "imgui.h"
@@ -40,27 +40,26 @@ private:
 	DefaultGPU _gpu;
 	WindowSurface _render_window;
 	LogicalDevice _logical_device;
-	CommandPool _command_pool;
-	GraphicShader _graphic_shader;
-	DefaultRenderer _renderer;
+	//GraphicShader _graphic_shader;
+	//DefaultRenderer _renderer;
 
-	Texture _white_texture;
+	//Texture _white_texture;
 
-	// Buffers
-	VertexBuffer _coord_buffer;
-	VertexBuffer _object_id_buffer;
-	VertexBuffer _material_indices_buffer;
-	VertexBuffer _uv_buffer;
-	IndexBuffer _index_buffer;
-	//UniformBuffer _camera_buffer;
-	StorageBuffer _obj_tr_buffer;
-	StorageBuffer _materials_buffer;
-	Sampler _sampler;
+	//// Buffers
+	//VertexBuffer _coord_buffer;
+	//VertexBuffer _object_id_buffer;
+	//VertexBuffer _material_indices_buffer;
+	//VertexBuffer _uv_buffer;
+	//IndexBuffer _index_buffer;
+	////UniformBuffer _camera_buffer;
+	//StorageBuffer _obj_tr_buffer;
+	//StorageBuffer _materials_buffer;
+	//Sampler _sampler;
 
-	Modules _modules;
+	//Modules _modules;
 
-	CameraScene _camera;
-	glm::mat4 _cam_mvp;
+	//CameraScene _camera;
+	//glm::mat4 _cam_mvp;
 
 public:
 	EngineApp();

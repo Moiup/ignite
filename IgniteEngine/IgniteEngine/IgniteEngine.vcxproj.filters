@@ -322,7 +322,7 @@
       <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
     <ClCompile Include="Device.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -603,7 +603,7 @@
       <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
     <ClInclude Include="Device.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -9,7 +9,7 @@ Shader::Shader() :
 	_sampler{},
 	_texture_info{},
 	_gpu{nullptr},
-	_logical_device{nullptr}
+	_device{nullptr}
 {
 	;
 }
@@ -18,8 +18,8 @@ void Shader::setPhysicalDevice(PhysicalDevice* gpu) {
 	_gpu = gpu;
 }
 
-void Shader::setLogicalDevice(LogicalDevice* logical_device) {
-	_logical_device = logical_device;
+void Shader::setDevice(Device* device) {
+	_device = device;
 }
 
 void Shader::addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size) {
@@ -179,7 +179,11 @@ std::unordered_map<std::string, std::vector<Texture*>>& Shader::getTexture() {
 
 void Shader::destroy() {
 	for (auto& stage : _shader_stages) {
-		vkDestroyShaderModule(*_logical_device->getDevice(), stage.module, nullptr);
+		vkDestroyShaderModule(
+			_device->getDevice(),
+			stage.module,
+			nullptr
+		);
 	}
 }
 
@@ -251,7 +255,7 @@ void Shader::createShaderModuleAndStage(const std::string& path, VkShaderStageFl
 	shader_module_info.pCode = shader_text.data();
 
 	VkResult vk_result = vkCreateShaderModule(
-		*_logical_device->getDevice(),
+		_device->getDevice(),
 		&shader_module_info,
 		nullptr,
 		&shader_module

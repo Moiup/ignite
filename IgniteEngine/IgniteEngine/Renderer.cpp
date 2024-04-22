@@ -2,7 +2,7 @@
 
 Renderer::Renderer() :
 	_nb_frame{ 2 },
-	_logical_device{ nullptr },
+	_device{},
 	_command_pool{ nullptr },
 	_gpu{ nullptr },
 	_window{nullptr},
@@ -24,12 +24,20 @@ void Renderer::render() {
 	;
 }
 
+void Renderer::setDevice(Device* device) {
+	_device = device;
+}
+
 void Renderer::setGraphicsQueues(std::vector<Queue>* graphics_queues) {
 	_graphics_queues = graphics_queues;
 }
 
 void Renderer::setPresentQueues(std::vector<Queue>* present_queues) {
 	_present_queues = present_queues;
+}
+
+void Renderer::setComputeQueues(std::vector<Queue>* compute_queues) {
+	_compute_queues = compute_queues;
 }
 
 void Renderer::setNbFrame(uint32_t nb_frame) {

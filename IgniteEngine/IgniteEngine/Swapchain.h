@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Image.h"
-#include "LogicalDevice.h"
+#include "Device.h"
 
 class Swapchain
 {
 private:
-	VkDevice _device;
+	Device* _device;
 
 	VkSwapchainKHR _swapchain;
 	VkSwapchainCreateInfoKHR _info;
@@ -22,7 +22,7 @@ private:
 public:
 	Swapchain();
 
-	void setDevice(VkDevice device);
+	void setDevice(Device* device);
 
 	void setPNext(void *p_next);
 	void setFlags(VkSwapchainCreateFlagsKHR flags);

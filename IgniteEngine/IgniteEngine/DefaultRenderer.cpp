@@ -26,18 +26,18 @@ void DefaultRenderer::destroy() {
 	}
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vkDestroySemaphore(
-			(*_graphics_queues)[0].getDevice(),
+			(*_graphics_queues)[0].getDevice()->getDevice(),
 			_sem_render_starts[i],
 			nullptr
 		);
 		vkDestroySemaphore(
-			(*_graphics_queues)[0].getDevice(),
+			(*_graphics_queues)[0].getDevice()->getDevice(),
 			_sem_render_ends[i],
 			nullptr
 		);
 
 		vkDestroyFence(
-			(*_graphics_queues)[0].getDevice(),
+			(*_graphics_queues)[0].getDevice()->getDevice(),
 			_fences[i],
 			nullptr
 		);
@@ -49,20 +49,20 @@ void DefaultRenderer::render() {
 	uint32_t available_img{ 0 };
 
 	vkWaitForFences(
-		(*_graphics_queues)[0].getDevice(),
+		(*_graphics_queues)[0].getDevice()->getDevice(),
 		1,
 		&_fences[_current_frame],
 		VK_TRUE,
 		UINT64_MAX
 	);
 	vkResetFences(
-		(*_graphics_queues)[0].getDevice(),
+		(*_graphics_queues)[0].getDevice()->getDevice(),
 		1,
 		&_fences[_current_frame]
 	);
 
 	vk_result = vkAcquireNextImageKHR(
-		(*_graphics_queues)[0].getDevice(),
+		(*_graphics_queues)[0].getDevice()->getDevice(),
 		_swapchain.getSwapchain(),
 		UINT64_MAX,
 		_sem_render_starts[_current_frame],
@@ -72,6 +72,8 @@ void DefaultRenderer::render() {
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed acquiring next image!");
 	}
+
+	//CommandBuffer& cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
 
 	_command_buffers[_current_frame].reset();
 	_command_buffers[_current_frame].begin();
@@ -167,14 +169,14 @@ void DefaultRenderer::render() {
 
 	dynamicRenderingPipelineBarrierBack();
 	_command_buffers[_current_frame].end();
-
+	VkCommandBuffer cmd_buf = _command_buffers[_current_frame].getCommandBuffer();
 	// Submit and present
 	(*_graphics_queues)[0].submit(
 		1,
 		&_sem_render_starts[_current_frame],
 		_pipeline_stage_flags.data(),
 		1,
-		_command_buffers[_current_frame].getCommandBuffer(),
+		&cmd_buf,
 		1,
 		&_sem_render_ends[_current_frame],
 		&_fences[_current_frame]
@@ -337,7 +339,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vk_result = vkCreateSemaphore(
-			_logical_device->getDevice(),
+			_device->getDevice(),
 			&semaphore_info,
 			nullptr,
 			&_sem_render_starts[i]
@@ -347,7 +349,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 		}
 
 		vk_result = vkCreateSemaphore(
-			_logical_device->getDevice(),
+			_device->getDevice(),
 			&semaphore_info,
 			nullptr,
 			&_sem_render_ends[i]
@@ -357,7 +359,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 		}
 
 		vk_result = vkCreateFence(
-			_logical_device->getDevice(),
+			_device->getDevice(),
 			&fence_info,
 			nullptr,
 			&_fences[i]
@@ -381,21 +383,22 @@ void DefaultRenderer::createSwapchain() {
 		_window->getHeightInPixel()
 	);
 	_swapchain.setQueueFamilyIndices(
-		(*_graphics_queues)[0].getFamilyIndex()
+		{(*_graphics_queues)[0].getFamilyIndex()}
 	);
 	_swapchain.create();
 }
 
 void DefaultRenderer::createDepthBuffer() {
-	_depth_buffer.setLogicalDevice(
+	_depth_buffer.setDevice(
 		(*_graphics_queues)[0].getDevice()
 	);
 	_depth_buffer.setImageWidthHeight(
 		_window->getWidthInPixel(),
 		_window->getHeightInPixel()
 	);
+
 	_depth_buffer.setImageQueueFamilyIndices(
-		_logical_device->getQueueFamilyIndexes()
+		{(*_graphics_queues)[0].getFamilyIndex()}
 	);
 	_depth_buffer.setMemoryProperties(
 		_gpu->getMemoryProperties()
@@ -412,7 +415,7 @@ void DefaultRenderer::createGraphicsPipeline() {
 			continue;
 		}
 		GraphicsPipeline gp{};
-		gp.setLogicalDevice(_logical_device);
+		gp.setDevice(_device);
 		gp.setPhysicalDevice(_gpu);
 		gp.setNbFrame(_nb_frame);
 		gp.setSwapchain(&_swapchain);
@@ -425,11 +428,11 @@ void DefaultRenderer::createGraphicsPipeline() {
 }
 
 void DefaultRenderer::createCommandBuffers() {
-	for (uint32_t i = 0; i < _nb_frame; i++) {
-		_command_buffers.push_back(
-			_command_pool->createCommandBuffer()
-		);
-	}
+	//for (uint32_t i = 0; i < _nb_frame; i++) {
+	//	_command_buffers.push_back(
+	//		_command_pool->createCommandBuffer()
+	//	);
+	//}
 }
 
 void DefaultRenderer::dynamicRenderingPipelineBarrier() {

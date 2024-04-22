@@ -53,27 +53,27 @@ void EngineApp::init() {
 	
 	// Initialising logical device and queues
 	_logical_device.configure(&_gpu);
-	_logical_device.setQueue(
+	_logical_device.defineQueue(
 		"graphic_queues",
 		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
 		1
 	);
-	_logical_device.setQueue(
+	_logical_device.defineQueue(
 		"present_queues",
 		{ VK_QUEUE_GRAPHICS_BIT },
 		1
 	);
-	_logical_device.setQueue(
+	_logical_device.defineQueue(
 		"compute_queues",
 		{ VK_QUEUE_COMPUTE_BIT },
-		8
+		1
 	);
-	_logical_device.setGPU(&_gpu);
+	//_logical_device.setGPU(&_gpu);
 	_logical_device.create();
 
-	//DefaultConf::gpu = &_gpu;
-	//DefaultConf::logical_device = &_logical_device;
-	//DefaultConf::render_window = &_render_window;
+	DefaultConf::gpu = &_gpu;
+	DefaultConf::logical_device = &_logical_device;
+	DefaultConf::render_window = &_render_window;
 	//DefaultConf::graphic_shader = &_graphic_shader;
 	//DefaultConf::instance = &_instance;
 	//DefaultConf::renderer = &_renderer;
@@ -284,20 +284,20 @@ void EngineApp::update() {
 	/*while (!glfwWindowShouldClose(_render_window.getWindow())) {*/
 
 	//for (uint32_t i = 0; i < 1; i++) {
-	//for (;;) {
-	//	std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
-	//	SDL_Event event{};
-	//	if (SDL_PollEvent(&event)) {
-	//		//ImGui_ImplSDL2_ProcessEvent(&event);
-	//		if (event.type == SDL_QUIT 
-	//			|| event.window.event == SDL_WINDOWEVENT_CLOSE
-	//			 && event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())) {
-	//			break;
-	//		}
-	//	}
+	for (;;) {
+		std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+		SDL_Event event{};
+		if (SDL_PollEvent(&event)) {
+			//ImGui_ImplSDL2_ProcessEvent(&event);
+			if (event.type == SDL_QUIT 
+				|| event.window.event == SDL_WINDOWEVENT_CLOSE
+				 && event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())) {
+				break;
+			}
+		}
 
-	//	DefaultConf::event = &event;
-	//	EngineEntity::updateAll();
+		DefaultConf::event = &event;
+		EngineEntity::updateAll();
 	//	_obj_tr_buffer.setValues(
 	//		&Object3D::updateTransformMatrices(
 	//			DefaultConf::renderer, DefaultConf::graphic_shader
@@ -314,12 +314,12 @@ void EngineApp::update() {
 	//	glfwPollEvents();
 	//	
 
-	//	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-	//	uint64_t delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
-	//	DefaultConf::delta_time = delta_time;
-	//}
+		std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+		uint64_t delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
+		DefaultConf::delta_time = delta_time;
+	}
 
-	//DefaultConf::logical_device->waitIdle();
+	DefaultConf::logical_device->waitIdle();
 }
 
 void EngineApp::close() {

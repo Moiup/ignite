@@ -1,14 +1,15 @@
 #pragma once
 
-#include "LogicalDevice.h"
+#include "Device.h"
+#include "CommandPool.h"
 
 class CommandBuffer
 {
 private:
 	VkCommandBuffer _command_buffer;
 	Device* _device;
+	VkCommandBufferLevel _level{ VK_COMMAND_BUFFER_LEVEL_PRIMARY };
 	CommandPool* _command_pool;
-	VkCommandBufferLevel _level;
 	
 	bool _created;
 
@@ -26,7 +27,6 @@ public:
 
 	VkCommandBuffer getCommandBuffer();
 	Device* getDevice();
-	CommandPool* getCommandPool();
 	VkCommandBufferLevel getLevel();
 	bool getIsCreated();
 

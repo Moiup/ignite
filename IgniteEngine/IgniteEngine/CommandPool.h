@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CommandBuffer.h"
+#include "Device.h"
 
 class CommandPool
 {
@@ -21,7 +21,5 @@ public:
 	void destroy();
 
 	const VkCommandPool& getPool() const;
-
-	CommandBuffer allocateCommandBuffer(VkCommandBufferLevel level= VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 };
 

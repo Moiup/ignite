@@ -19,11 +19,11 @@
 //#include "DefaultRenderer.h"
 //#include "Mesh.h"
 //#include "Object3D.h"
-//#include "Modules.h"
+#include "Modules.h"
 //#include "PerspectiveCamera.h"
 //#include "CameraScene.h"
 //
-//#include "DefaultConf.h"
+#include "DefaultConf.h"
 
 #include <SDL.h>
 #include "imgui.h"
@@ -56,7 +56,7 @@ private:
 	//StorageBuffer _materials_buffer;
 	//Sampler _sampler;
 
-	//Modules _modules;
+	Modules _modules;
 
 	//CameraScene _camera;
 	//glm::mat4 _cam_mvp;

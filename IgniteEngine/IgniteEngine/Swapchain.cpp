@@ -42,7 +42,7 @@ Swapchain::Swapchain() :
 	_image_view_info.subresourceRange.layerCount = 1;
 }
 
-void Swapchain::setDevice(VkDevice device) {
+void Swapchain::setDevice(Device* device) {
 	_device = device;
 }
 
@@ -172,7 +172,7 @@ void Swapchain::createSwapchain() {
 	}
 
 	VkResult vk_result = vkCreateSwapchainKHR(
-		_device,
+		_device->getDevice(),
 		&_info,
 		nullptr,
 		&_swapchain
@@ -184,7 +184,7 @@ void Swapchain::createSwapchain() {
 
 void Swapchain::gettingImages(){
 	VkResult vk_result = vkGetSwapchainImagesKHR(
-		_device,
+		_device->getDevice(),
 		_swapchain,
 		&_image_count,
 		nullptr
@@ -196,7 +196,7 @@ void Swapchain::gettingImages(){
 	_images.resize(_image_count);
 	std::vector<VkImage> imgs(_image_count);
 	vk_result = vkGetSwapchainImagesKHR(
-		_device,
+		_device->getDevice(),
 		_swapchain,
 		&_image_count,
 		imgs.data()
@@ -206,7 +206,7 @@ void Swapchain::gettingImages(){
 	}
 
 	for (uint32_t i = 0; i < _image_count; i++) {
-		_images[i].setLogicalDevice(_device);
+		_images[i].setDevice(_device);
 		_images[i].setImage(imgs[i]);
 	}
 }
@@ -223,7 +223,11 @@ void Swapchain::createImagesViews(){
 }
 
 void Swapchain::destroySwapchain() {
-	vkDestroySwapchainKHR(_device, _swapchain, nullptr);
+	vkDestroySwapchainKHR(
+		_device->getDevice(),
+		_swapchain,
+		nullptr
+	);
 }
 
 void Swapchain::destroyImageViews() {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LogicalDevice.h"
+#include "Device.h"
 #include "CommandPool.h"
 #include "CommandBuffer.h"
 #include "StagingBuffer.h"
@@ -24,7 +24,7 @@ private:
 
 	static const uint8_t _n{4};
 
-	LogicalDevice* _logical_device;
+	Device* _device;
 	PhysicalDevice* _gpu;
 	CommandPool* _command_pool;	
 
@@ -39,7 +39,7 @@ public:
 	//Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
 	//Texture(uint64_t width, uint64_t height);
 
-	void setLogicalDevice(LogicalDevice* _logical_device);
+	void setDevice(Device* _device);
 	void setGPU(PhysicalDevice* gpu);
 	void setCommandPool(CommandPool* command_pool);
 	void setFormat(VkFormat format);

@@ -8,7 +8,7 @@ LogicalDevice::LogicalDevice()
 
 
 
-bool LogicalDevice::setQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count){
+bool LogicalDevice::defineQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count){
 	uint32_t family_index{0};
 	bool is_flag{false};
 
@@ -16,7 +16,7 @@ bool LogicalDevice::setQueue(std::string name, std::vector<VkQueueFlagBits> flag
 		return false;
 	}
 
-	auto& family_properties = _device->getFamilyProperties();
+	auto& family_properties = _device.getFamilyProperties();
 	for (uint32_t i = 0; i < family_properties.size(); i++) {
 		is_flag = isFlag(family_properties[i].queueFamilyProperties.queueFlags, flags);
 		if (is_flag) {
@@ -31,19 +31,20 @@ bool LogicalDevice::setQueue(std::string name, std::vector<VkQueueFlagBits> flag
 
 
 	for (uint32_t q = 0; q < count; q++) {
-		float queue_priorities = 1.0f;
-		Queue queue{};
-		queue.setDevice(_device);
-		queue.setFamilyIndex(family_index);
+		//Queue queue{};
+		//queue.setDevice(&_device);
+		_queues[name].resize(_queues[name].size() + 1);
+		_queues[name][_queues[name].size() - 1].setFamilyIndex(family_index);
 
-		_queues[name].push_back(queue);
+		//_queues[name].push_back(queue);
 	}
 
 	return true;
 }
 
-void LogicalDevice::setGPU(PhysicalDevice* gpu) {
-	_gpu = gpu;
+void LogicalDevice::configure(PhysicalDevice* gpu) {
+	//_gpu = gpu;
+	_device.configure(gpu);
 }
 
 std::vector<Queue>& LogicalDevice::getQueues(const std::string& name) {
@@ -52,19 +53,19 @@ std::vector<Queue>& LogicalDevice::getQueues(const std::string& name) {
 
 void LogicalDevice::create() {
 	std::vector<VkDeviceQueueCreateInfo> queues_info{};
-	std::unordered_map<std::string, std::vector<float>> priorities{};
+	std::unordered_map<uint32_t, std::vector<float>> priorities{};
 	createQueueCreateInfo(queues_info, priorities);
-	_device->configure(_gpu);
-	_device->create(queues_info);
+	//_device.configure(_gpu);
+	_device.create(queues_info);
 	gettingTheQueues();
 }
 
-const Device* LogicalDevice::getDevice() const {
-	return _device;
+Device* LogicalDevice::getDevice() {
+	return &_device;
 }
 
 void LogicalDevice::waitIdle() {
-	vkDeviceWaitIdle(_device->getDevice());
+	vkDeviceWaitIdle(_device.getDevice());
 }
 
 bool LogicalDevice::isFlag(VkQueueFlags family_flags, std::vector<VkQueueFlagBits> flags) {
@@ -82,25 +83,35 @@ bool LogicalDevice::isFlag(VkQueueFlags family_flags, std::vector<VkQueueFlagBit
 
 void LogicalDevice::createQueueCreateInfo(
 	std::vector<VkDeviceQueueCreateInfo>& queues_info,
-	std::unordered_map<std::string, std::vector<float>> priorities
+	std::unordered_map<uint32_t, std::vector<float>>& priorities
 	) {
+
+	std::unordered_map<uint32_t, uint32_t> is_fam{};
 
 	for (auto& q : _queues) {
 		std::vector<Queue>& queues = q.second;
-		const std::string& name = q.first;
-		if (queues.size()) {
-			continue;
+		const uint32_t fam_i = queues[0].getFamilyIndex();
+		if(is_fam.count(fam_i)){
+			is_fam[fam_i] += queues.size();
 		}
+		else {
+			is_fam[fam_i] = 0;
+		}
+	}
 
-		priorities[name] = std::vector<float>(queues.size(), 0.0f);
+	for (auto& fam: is_fam) {
+		uint32_t fam_i = fam.first;
+		uint32_t count = fam.second;
+
+		priorities[fam_i] = std::vector<float>(count, 0.0f);
 
 		VkDeviceQueueCreateInfo info{};
 		info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		info.pNext = nullptr;
 		info.flags = 0;
-		info.queueFamilyIndex = q.second[0].getFamilyIndex();
-		info.queueCount = queues.size();
-		info.pQueuePriorities = priorities[name].data();
+		info.queueFamilyIndex = fam_i;
+		info.queueCount = priorities[fam_i].size();
+		info.pQueuePriorities = priorities[fam_i].data();
 
 		queues_info.push_back(info);
 	}
@@ -108,7 +119,10 @@ void LogicalDevice::createQueueCreateInfo(
 
 void LogicalDevice::gettingTheQueues() {
 	// Getting the queues
-	for (auto& q : _queues) {
-		
+	for (auto& n_q : _queues) {
+		for (Queue& q : n_q.second) {
+			q.setDevice(&_device);
+			q.create();
+		}
 	}
 }

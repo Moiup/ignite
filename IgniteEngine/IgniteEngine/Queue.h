@@ -6,30 +6,52 @@
 //#include "Buffer.h"
 //#include "Image.h"
 #include <vector>
+#include <unordered_map>
+
+struct CommandPoolSubmitBuffersIndices {
+	uint32_t start_i;
+	uint32_t nb_cmd_buf;
+};
 
 class Queue
 {
 private:
-	VkQueue _queue;
-	Device* _device;
-	VkFence _fence;
-	CommandPool _cmd_pool;
+	static std::unordered_map<VkQueue, std::vector<CommandPool>> _cmd_pools;
+	static std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> _pending_command_buffers;
+	static std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> command_pool_indices;
 
-	uint32_t  _family_index{};
 
-	std::vector<VkCommandBuffer> _pending_command_buffers;
+	VkQueue _queue{ nullptr };
+	Device* _device{ nullptr };
+	VkFence _fence{ nullptr };
+	uint32_t _cmd_pool_i{ 0 };
+
+	uint32_t _family_index{};
 
 public:
 	Queue();
+	Queue(Queue& q);
+	Queue(const Queue& q);
+	//Queue(Queue&& q);
+
+	Queue& operator=(const Queue& q);
 
 	void setDevice(Device* device);
 	void setFamilyIndex(uint32_t family_index);
-	void setQueue();
+	void setCommandPoolIndex(uint32_t cmd_pool_i);
+	void create();
 
+	std::vector<CommandPool>& getCommandPools();
 	CommandPool& getCommandPool();
 	VkQueue getQueue();
 	Device* getDevice();
 	uint32_t getFamilyIndex();
+	uint32_t getCommandPoolIndex();
+	std::vector<VkCommandBuffer>& getPendingCommandBuffers();
+
+	void addCommandPool();
+
+	CommandBuffer& allocateCommandBuffer(VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
 	//void copy(Buffer src, Buffer dst, VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 	//void changeLayout(Image img, VkImageLayout layout);
@@ -37,6 +59,7 @@ public:
 	//void changeToSurface(Image img);
 
 	void flush();
+	void flushSync();
 
 	const void submit(
 		uint32_t waitSemaphorecount,

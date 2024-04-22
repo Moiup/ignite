@@ -9,7 +9,7 @@
 class LogicalDevice
 {
 private:
-	Device* _device;
+	Device _device;
 	PhysicalDevice* _gpu;
 	// <Name of the queue, <The queue, the Queue info>>
 	std::unordered_map<std::string, std::vector<Queue>> _queues;
@@ -18,13 +18,13 @@ private:
 public:
 	LogicalDevice();
 
-	bool setQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count);
+	void configure(PhysicalDevice* gpu);
+	bool defineQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count);
 	std::vector<Queue>& getQueues(const std::string& name);
-	void setGPU(PhysicalDevice* gpu);
 
 	void create();
 
-	const Device* getDevice() const;
+	Device* getDevice();
 
 	void waitIdle();
 
@@ -33,7 +33,7 @@ private:
 
 	void createQueueCreateInfo(
 		std::vector<VkDeviceQueueCreateInfo>& queues_info,
-		std::unordered_map<std::string, std::vector<float>> priorities
+		std::unordered_map<uint32_t, std::vector<float>>& priorities
 	);
 	void createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &queues_info);
 	void gettingTheQueues();

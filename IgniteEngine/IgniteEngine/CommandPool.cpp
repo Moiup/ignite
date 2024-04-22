@@ -56,14 +56,3 @@ void CommandPool::destroy() {
 const VkCommandPool& CommandPool::getPool() const {
 	return _pool;
 }
-
-CommandBuffer CommandPool::allocateCommandBuffer(VkCommandBufferLevel level) {
-	CommandBuffer cmd_buffer{};
-	cmd_buffer.setDevice(_device);
-	cmd_buffer.setCommandPool(this);
-	cmd_buffer.setLevel(level);
-
-	cmd_buffer.allocate();
-
-	return cmd_buffer;
-}

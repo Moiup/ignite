@@ -1,15 +1,12 @@
 #include "Ressource.h"
 
-Ressource::Ressource() :
-	_logical_device{nullptr},
-	_memory_req{},
-	_memory{}
+Ressource::Ressource()
 {
 	;
 }
 
-void Ressource::setLogicalDevice(LogicalDevice* logical_device) {
-	_logical_device = logical_device;
+void Ressource::setDevice(Device* device) {
+	_device = device;
 }
 
 void Ressource::setMemoryProperties(VkPhysicalDeviceMemoryProperties* memory_properties) {
@@ -45,7 +42,7 @@ void Ressource::allocateMemory() {
 	}
 
 	VkResult vk_result = vkAllocateMemory(
-		*_logical_device->getDevice(),
+		_device->getDevice(),
 		&allocate_info,
 		nullptr,
 		&_memory
@@ -60,7 +57,7 @@ void Ressource::bind() {
 }
 
 void Ressource::freeMemory() {
-	vkFreeMemory(*_logical_device->getDevice(), _memory, nullptr);
+	vkFreeMemory(_device->getDevice(), _memory, nullptr);
 }
 
 void Ressource::getMemoryRequirements() {

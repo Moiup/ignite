@@ -7,8 +7,8 @@
 class Dispatcher
 {
 protected:
-	CommandPool* _command_pool;
-	LogicalDevice* _logical_device;
+	Queue* _queue;
+	Device* _device;
 
 	CommandBuffer _command_buffer;
 
@@ -16,13 +16,9 @@ protected:
 
 public:
 	Dispatcher();
-	Dispatcher(
-		LogicalDevice* logical_device,
-		CommandPool* command_pool
-	);
 
-	void setLogicalDevice(LogicalDevice* logical_device);
-	void setCommandPool(CommandPool* command_pool);
+	void setDevice(Device* device);
+	void setQueue(Queue* queue);
 
 	void create();
 	void destroy();

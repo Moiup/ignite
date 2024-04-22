@@ -31,7 +31,7 @@ void DispatcherSync::create() {
 	fence_info.flags = 0;
 
 	VkResult result = vkCreateFence(
-		*_logical_device->getDevice(),
+		_device->getDevice(),
 		&fence_info,
 		nullptr,
 		&_fence
@@ -45,7 +45,7 @@ void DispatcherSync::destroy() {
 	Dispatcher::destroy();
 
 	vkDestroyFence(
-		*_logical_device->getDevice(),
+		_device->getDevice(),
 		_fence,
 		nullptr
 	);
@@ -57,7 +57,7 @@ void DispatcherSync::dispatch(
 	uint32_t group_count_z
 ) {
 	vkResetFences(
-		*_logical_device->getDevice(),
+		_device->getDevice(),
 		1,
 		&_fence
 	);
@@ -105,17 +105,17 @@ void DispatcherSync::dispatch(
 
 	// End recording
 	_command_buffer.end();
-
-	_logical_device->getQueue("compute_queue")->submit(
+	VkCommandBuffer cmd_buf = _command_buffer.getCommandBuffer();
+	_queue->submit(
 		0, nullptr,
 		nullptr,
-		1, _command_buffer.getCommandBuffer(),
+		1, &cmd_buf,
 		0, nullptr,
 		&_fence
 	);
 
 	VkResult result = vkWaitForFences(
-		*_logical_device->getDevice(),
+		_device->getDevice(),
 		1, &_fence,
 		VK_TRUE,
 		UINT64_MAX

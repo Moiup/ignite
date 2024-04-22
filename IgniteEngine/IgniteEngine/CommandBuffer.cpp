@@ -2,7 +2,6 @@
 
 CommandBuffer::CommandBuffer() :
 	_command_buffer{},
-	_command_pool{nullptr},
 	_level{VK_COMMAND_BUFFER_LEVEL_PRIMARY},
 	_created{false}
 {
@@ -10,27 +9,20 @@ CommandBuffer::CommandBuffer() :
 }
 
 CommandBuffer::CommandBuffer(CommandBuffer& cmd_buf) {
-	_command_buffer = cmd_buf.getCommandBuffer();
-	_device = cmd_buf.getDevice();
-	_command_pool = cmd_buf.getCommandPool();
-	_level = cmd_buf.getLevel();
-	_created = cmd_buf.getIsCreated();
+	*this = cmd_buf;
 }
 
 CommandBuffer::CommandBuffer(CommandBuffer&& cmd_buf) {
-	_command_buffer = cmd_buf.getCommandBuffer();
-	_device = cmd_buf.getDevice();
-	_command_pool = cmd_buf.getCommandPool();
-	_level = cmd_buf.getLevel();
-	_created = cmd_buf.getIsCreated();
+	*this = cmd_buf;
 }
 
 CommandBuffer& CommandBuffer::operator=(const CommandBuffer& cmd_buf) {
 	_command_buffer = cmd_buf._command_buffer;
 	_device = cmd_buf._device;
-	_command_pool = cmd_buf._command_pool;
 	_level = cmd_buf._level;
 	_created = cmd_buf._created;
+
+	return *this;
 }
 
 void CommandBuffer::setDevice(Device* device) {
@@ -51,10 +43,6 @@ VkCommandBuffer CommandBuffer::getCommandBuffer() {
 
 Device* CommandBuffer::getDevice() {
 	return _device;
-}
-
-CommandPool* CommandBuffer::getCommandPool() {
-	return _command_pool;
 }
 
 VkCommandBufferLevel CommandBuffer::getLevel() {

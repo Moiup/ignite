@@ -1,8 +1,36 @@
 #include "Queue.h"
 
+std::unordered_map<VkQueue, std::vector<CommandPool>> Queue::_cmd_pools;
+std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> Queue::_pending_command_buffers;
+std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> Queue::command_pool_indices;
+
 Queue::Queue()
 {
 
+}
+
+Queue::Queue(Queue& q) {
+	*this = q;
+}
+
+
+Queue::Queue(const Queue& q) {
+	*this = q;
+}
+
+//
+//Queue::Queue(Queue&& q) {
+//	*this = q;
+//}
+
+Queue& Queue::operator=(const Queue& q) {
+	_queue = q._queue;
+	_device = q._device;
+	_fence = q._fence;
+	_cmd_pool_i = q._cmd_pool_i;
+	_family_index = q._family_index;
+
+	return *this;
 }
 
 void Queue::setDevice(Device* device) {
@@ -13,7 +41,7 @@ void Queue::setFamilyIndex(uint32_t family_index) {
 	_family_index = family_index;
 }
 
-void Queue::setQueue() {
+void Queue::create() {
 	vkGetDeviceQueue(
 		_device->getDevice(),
 		_family_index,
@@ -21,14 +49,26 @@ void Queue::setQueue() {
 		&_queue
 	);
 
-	_cmd_pool.setDevice(_device);
-	_cmd_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-	_cmd_pool.setQueueFamilyIndex(_family_index);
-	_cmd_pool.create();
+	addCommandPool();
+
+	VkFenceCreateInfo fence_info{};
+	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fence_info.pNext = nullptr;
+	fence_info.flags = 0;
+
+	VkResult vk_result = vkCreateFence(
+		_device->getDevice(),
+		&fence_info,
+		nullptr,
+		&_fence
+	);
+	if (vk_result != VK_SUCCESS) {
+		throw std::runtime_error("Error: failed creating fence!");
+	}
 }
 
 CommandPool& Queue::getCommandPool() {
-	return _cmd_pool;
+	return _cmd_pools[_queue][_cmd_pool_i];
 }
 
 VkQueue Queue::getQueue() {
@@ -41,6 +81,31 @@ Device* Queue::getDevice() {
 
 uint32_t Queue::getFamilyIndex() {
 	return _family_index;
+}
+
+std::vector<VkCommandBuffer>& Queue::getPendingCommandBuffers() {
+	return _pending_command_buffers[&getCommandPool()];
+}
+
+void Queue::addCommandPool() {
+	CommandPool cmd_pool{};
+	cmd_pool.setDevice(_device);
+	cmd_pool.setQueueFamilyIndex(getFamilyIndex());
+	cmd_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+	cmd_pool.create();
+
+	_cmd_pools[_queue].push_back(cmd_pool);
+}
+
+CommandBuffer& Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
+	CommandBuffer cmd_buf;
+
+	cmd_buf.setDevice(getDevice());
+	cmd_buf.setCommandPool(&getCommandPool());
+	cmd_buf.setLevel(level);
+	cmd_buf.allocate();
+
+	return cmd_buf;
 }
 
 //void Queue::copy(Buffer src, Buffer dst, VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT) {
@@ -103,8 +168,8 @@ void Queue::flush() {
 	info.waitSemaphoreCount = 0;
 	info.pWaitSemaphores = nullptr;
 	info.pWaitDstStageMask = nullptr;
-	info.commandBufferCount = _pending_command_buffers.size();
-	info.pCommandBuffers = _pending_command_buffers.data();
+	info.commandBufferCount = command_pool_indices[&getCommandPool()].nb_cmd_buf;
+	info.pCommandBuffers = &_pending_command_buffers[&getCommandPool()][command_pool_indices[&getCommandPool()].start_i];
 	info.signalSemaphoreCount = 0;
 	info.pSignalSemaphores = nullptr;
 

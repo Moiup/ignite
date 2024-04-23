@@ -22,6 +22,9 @@ public:
 	static Instance* instance;
 	static Renderer* renderer;
 	static CameraScene* camera;
+	static Queue* graphics_queue;
+	static Queue* present_queue;
+	static Queue* compute_queue;
 	static Texture* white_texture;
 	static uint64_t delta_time; // ms
 	static SDL_Event* event;

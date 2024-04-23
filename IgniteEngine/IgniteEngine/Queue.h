@@ -24,6 +24,7 @@ private:
 	VkQueue _queue{ nullptr };
 	Device* _device{ nullptr };
 	VkFence _fence{ nullptr };
+	PhysicalDevice* _gpu;
 	uint32_t _cmd_pool_i{ 0 };
 
 	uint32_t _family_index{};
@@ -38,7 +39,8 @@ public:
 
 	void setDevice(Device* device);
 	void setFamilyIndex(uint32_t family_index);
-	void setCommandPoolIndex(uint32_t cmd_pool_i);
+	//void setCommandPoolIndex(uint32_t cmd_pool_i);
+	void setGPU(PhysicalDevice* gpu);
 	void create();
 
 	std::vector<CommandPool>& getCommandPools();
@@ -47,6 +49,7 @@ public:
 	Device* getDevice();
 	uint32_t getFamilyIndex();
 	uint32_t getCommandPoolIndex();
+	PhysicalDevice* getGPU();
 	std::vector<VkCommandBuffer>& getPendingCommandBuffers();
 
 	void addCommandPool();

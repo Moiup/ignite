@@ -40,7 +40,7 @@ private:
 	DefaultGPU _gpu;
 	WindowSurface _render_window;
 	LogicalDevice _logical_device;
-	//GraphicShader _graphic_shader;
+	GraphicShader _graphic_shader;
 	//DefaultRenderer _renderer;
 
 	//Texture _white_texture;

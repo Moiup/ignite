@@ -2,7 +2,7 @@
 
 std::unordered_map<VkQueue, std::vector<CommandPool>> Queue::_cmd_pools;
 std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> Queue::_pending_command_buffers;
-std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> Queue::command_pool_indices;
+std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> Queue::_command_pool_indices;
 
 Queue::Queue()
 {
@@ -39,6 +39,10 @@ void Queue::setDevice(Device* device) {
 
 void Queue::setFamilyIndex(uint32_t family_index) {
 	_family_index = family_index;
+}
+
+void Queue::setGPU(PhysicalDevice* gpu) {
+	_gpu = gpu;
 }
 
 void Queue::create() {
@@ -105,6 +109,10 @@ CommandBuffer& Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
 	cmd_buf.setLevel(level);
 	cmd_buf.allocate();
 
+	
+	_pending_command_buffers[&getCommandPool()].push_back(cmd_buf.getCommandBuffer());
+	_command_pool_indices[&getCommandPool()]
+
 	return cmd_buf;
 }
 
@@ -168,8 +176,8 @@ void Queue::flush() {
 	info.waitSemaphoreCount = 0;
 	info.pWaitSemaphores = nullptr;
 	info.pWaitDstStageMask = nullptr;
-	info.commandBufferCount = command_pool_indices[&getCommandPool()].nb_cmd_buf;
-	info.pCommandBuffers = &_pending_command_buffers[&getCommandPool()][command_pool_indices[&getCommandPool()].start_i];
+	info.commandBufferCount = _command_pool_indices[&getCommandPool()].nb_cmd_buf;
+	info.pCommandBuffers = &_pending_command_buffers[&getCommandPool()][_command_pool_indices[&getCommandPool()].start_i];
 	info.signalSemaphoreCount = 0;
 	info.pSignalSemaphores = nullptr;
 

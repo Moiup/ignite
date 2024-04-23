@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Device.h"
-#include "CommandPool.h"
-#include "CommandBuffer.h"
+#include "Queue.h"
 #include "StagingBuffer.h"
 #include "Image.h"
 #include "PhysicalDevice.h"
@@ -24,14 +23,14 @@ private:
 
 	static const uint8_t _n{4};
 
-	Device* _device;
-	PhysicalDevice* _gpu;
-	CommandPool* _command_pool;	
+	Queue* _queue;
 
 	Image _image;
 	VkImageLayout _image_layout;
 
 	VkFormat _format;
+
+	StagingBuffer _staging_buffer{};
 
 public:
 	Texture();
@@ -39,9 +38,10 @@ public:
 	//Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
 	//Texture(uint64_t width, uint64_t height);
 
-	void setDevice(Device* _device);
-	void setGPU(PhysicalDevice* gpu);
-	void setCommandPool(CommandPool* command_pool);
+	//void setDevice(Device* _device);
+	//void setGPU(PhysicalDevice* gpu);
+	//void setCommandPool(CommandPool* command_pool);
+	void setQueue(Queue* queue);
 	void setFormat(VkFormat format);
 	void setDimensions(uint32_t width, uint32_t height);
 

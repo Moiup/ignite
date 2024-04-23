@@ -5,9 +5,8 @@ EngineApp::EngineApp() :
 	_instance{},
 	_gpu{},
 	_render_window{},
-	_logical_device{}
-	//_command_pool{},
-	//_graphic_shader{},
+	_logical_device{},
+	_graphic_shader{}
 	//_renderer{},
 	//_white_texture{},
 	//_camera{},
@@ -74,7 +73,10 @@ void EngineApp::init() {
 	DefaultConf::gpu = &_gpu;
 	DefaultConf::logical_device = &_logical_device;
 	DefaultConf::render_window = &_render_window;
-	//DefaultConf::graphic_shader = &_graphic_shader;
+	DefaultConf::graphics_queue = &_logical_device.getQueues("graphic_queues")[0];
+	DefaultConf::present_queue = &_logical_device.getQueues("present_queues")[0];
+	DefaultConf::compute_queue = &_logical_device.getQueues("compute_queues")[0];
+	DefaultConf::graphic_shader = &_graphic_shader;
 	//DefaultConf::instance = &_instance;
 	//DefaultConf::renderer = &_renderer;
 	//DefaultConf::camera = &_camera;

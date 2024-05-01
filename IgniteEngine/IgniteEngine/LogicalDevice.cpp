@@ -42,9 +42,12 @@ bool LogicalDevice::defineQueue(std::string name, std::vector<VkQueueFlagBits> f
 	return true;
 }
 
-void LogicalDevice::configure(PhysicalDevice* gpu) {
-	//_gpu = gpu;
-	_device.configure(gpu);
+void LogicalDevice::setGPU(PhysicalDevice* gpu) {
+	_gpu = gpu;
+}
+
+void LogicalDevice::configure() {
+	_device.configure(_gpu);
 }
 
 std::vector<Queue>& LogicalDevice::getQueues(const std::string& name) {
@@ -62,6 +65,10 @@ void LogicalDevice::create() {
 
 Device* LogicalDevice::getDevice() {
 	return &_device;
+}
+
+PhysicalDevice* LogicalDevice::getGPU() {
+	return _gpu;
 }
 
 void LogicalDevice::waitIdle() {
@@ -122,6 +129,7 @@ void LogicalDevice::gettingTheQueues() {
 	for (auto& n_q : _queues) {
 		for (Queue& q : n_q.second) {
 			q.setDevice(&_device);
+			q.setGPU(_gpu);
 			q.create();
 		}
 	}

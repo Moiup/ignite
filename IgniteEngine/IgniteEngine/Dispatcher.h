@@ -8,7 +8,6 @@ class Dispatcher
 {
 protected:
 	Queue* _queue;
-	Device* _device;
 
 	CommandBuffer _command_buffer;
 
@@ -17,7 +16,6 @@ protected:
 public:
 	Dispatcher();
 
-	void setDevice(Device* device);
 	void setQueue(Queue* queue);
 
 	void create();

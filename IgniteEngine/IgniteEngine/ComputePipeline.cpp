@@ -22,7 +22,7 @@ void ComputePipeline::createPipeline() {
 	info.basePipelineIndex = 0;
 
 	VkResult vk_result = vkCreateComputePipelines(
-		_device->getDevice(),
+		_shader->getLogicalDevice()->getDevice()->getDevice(),
 		VK_NULL_HANDLE,
 		1,
 		&info,
@@ -37,7 +37,7 @@ void ComputePipeline::createPipeline() {
 
 void ComputePipeline::destroyPipeline() {
 	vkDestroyPipeline(
-		_device->getDevice(),
+		_shader->getLogicalDevice()->getDevice()->getDevice(),
 		_pipeline,
 		nullptr
 	);

@@ -31,7 +31,7 @@ void DispatcherSync::create() {
 	fence_info.flags = 0;
 
 	VkResult result = vkCreateFence(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		&fence_info,
 		nullptr,
 		&_fence
@@ -45,7 +45,7 @@ void DispatcherSync::destroy() {
 	Dispatcher::destroy();
 
 	vkDestroyFence(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		_fence,
 		nullptr
 	);
@@ -57,7 +57,7 @@ void DispatcherSync::dispatch(
 	uint32_t group_count_z
 ) {
 	vkResetFences(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		1,
 		&_fence
 	);
@@ -115,7 +115,7 @@ void DispatcherSync::dispatch(
 	);
 
 	VkResult result = vkWaitForFences(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		1, &_fence,
 		VK_TRUE,
 		UINT64_MAX

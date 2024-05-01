@@ -7,8 +7,6 @@
 class Pipeline
 {
 protected:
-	Device* _device;
-	PhysicalDevice* _physical_device;
 	Shader* _shader;
 
 	std::vector<VkDescriptorSetLayout> _descriptor_set_layout;
@@ -20,8 +18,6 @@ protected:
 public:
 	Pipeline();
 
-	void setDevice(Device* device);
-	void setPhysicalDevice(PhysicalDevice* physical_device);
 	void setShader(Shader* shader);
 
 	const VkPipeline& getPipeline() const;

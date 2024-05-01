@@ -389,8 +389,8 @@ void DefaultRenderer::createSwapchain() {
 }
 
 void DefaultRenderer::createDepthBuffer() {
-	_depth_buffer.setDevice(
-		(*_graphics_queues)[0].getDevice()
+	_depth_buffer.setQueue(
+		&(*_graphics_queues)[0]
 	);
 	_depth_buffer.setImageWidthHeight(
 		_window->getWidthInPixel(),
@@ -399,9 +399,6 @@ void DefaultRenderer::createDepthBuffer() {
 
 	_depth_buffer.setImageQueueFamilyIndices(
 		{(*_graphics_queues)[0].getFamilyIndex()}
-	);
-	_depth_buffer.setMemoryProperties(
-		_gpu->getMemoryProperties()
 	);
 	_depth_buffer.create();
 }
@@ -415,13 +412,11 @@ void DefaultRenderer::createGraphicsPipeline() {
 			continue;
 		}
 		GraphicsPipeline gp{};
-		gp.setDevice(_device);
-		gp.setPhysicalDevice(_gpu);
+		gp.setShader(shader);
 		gp.setNbFrame(_nb_frame);
 		gp.setSwapchain(&_swapchain);
 		gp.setDepthBuffer(&_depth_buffer);
 		//gp.setCullMode(VK_CULL_MODE_BACK_BIT);
-		gp.setShader(shader);
 		gp.create();
 		_graphics_pipelines.push_back(gp);
 	}

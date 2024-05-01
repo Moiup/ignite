@@ -5,10 +5,6 @@ Dispatcher::Dispatcher()
 	;
 }
 
-void Dispatcher::setDevice(Device* device) {
-	_device = device;
-}
-
 void Dispatcher::setQueue(Queue* queue) {
 	_queue = queue;
 }

@@ -75,8 +75,7 @@ void Texture::setDimensions(uint32_t width, uint32_t height) {
 
 void Texture::create() {
 	// Create the image to copy the buffer to
-	_image.setDevice(_queue->getDevice());
-	_image.setMemoryProperties(_queue->getGPU()->getMemoryProperties());
+	_image.setQueue(_queue);
 	_image.setImageImageType(VK_IMAGE_TYPE_2D);
 	_image.setImageFormat(_format);
 	_image.setImageMipLevels(1);
@@ -103,15 +102,14 @@ void Texture::create() {
 		1  // layer count
 	);
 	_image.createImageView();
+
+	// Creating the staging buffer
+	_staging_buffer.setQueue(_queue);
+	_staging_buffer.setSize(_width * _height * _n * sizeof(uint8_t));
+	_staging_buffer.create();
 }
 
 void Texture::update(Pixels& pixels) {
-	// Creating the staging buffer
-	_staging_buffer.setDevice(_queue->getDevice());
-	_staging_buffer.setMemoryProperties(_queue->getGPU()->getMemoryProperties());
-	_staging_buffer.setSize(_width * _height * _n * sizeof(uint8_t));
-	_staging_buffer.create();
-
 	// Copying the actual texture data into the staging buffer
 	_staging_buffer.setValues(pixels.getPixels().data());
 

@@ -13,8 +13,7 @@ void ComputeShaderTest::init() {
 void ComputeShaderTest::start() {
 	Module::start();
 
-	_compute_shader.setDevice(DefaultConf::logical_device->getDevice());
-	_compute_shader.setPhysicalDevice(DefaultConf::gpu);
+	_compute_shader.setLogicalDevice(DefaultConf::logical_device);
 	_compute_shader.read("../shaders/compute_sum.comp");
 
 	_compute_shader.addStorageBufferInfo(
@@ -30,28 +29,23 @@ void ComputeShaderTest::start() {
 
 	std::vector<int> input_data_vec(10, 0);
 
-	_input_data.setDevice(DefaultConf::logical_device->getDevice());
-	_input_data.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_input_data.setQueue(DefaultConf::compute_queue);
 	_input_data.setSize(input_data_vec.size() * sizeof(input_data_vec[0]));
 	_input_data.create();
 	_input_data.setValues(input_data_vec.data());
 	_compute_shader.addStorageBuffer("inputData", &_input_data);
 
 
-	_output_data.setDevice(DefaultConf::logical_device->getDevice());
-	_output_data.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	_output_data.setQueue(DefaultConf::compute_queue);
 	_output_data.setSize(input_data_vec.size() * sizeof(input_data_vec[0]));
 	_output_data.create();
 	_compute_shader.addStorageBuffer("outputData", &_output_data);
 
 	// The compute pipeline
-	_compute_pipeline.setDevice(DefaultConf::logical_device->getDevice());
-	_compute_pipeline.setPhysicalDevice(DefaultConf::gpu);
 	_compute_pipeline.setShader(&_compute_shader);
 	_compute_pipeline.create();
 
 	// The dispatcher
-	_dispatcher_sync.setDevice(DefaultConf::logical_device->getDevice());
 	_dispatcher_sync.setQueue(&DefaultConf::logical_device->getQueues("compute_queues")[0]);
 	_dispatcher_sync.setComputePipeline(&_compute_pipeline);
 	_dispatcher_sync.create();

@@ -236,7 +236,7 @@ void GraphicsPipeline::createPipeline() {
 	pipeline_info.basePipelineIndex = 0;
 
 	VkResult vk_result = vkCreateGraphicsPipelines(
-		_device->getDevice(),
+		_shader->getLogicalDevice()->getDevice()->getDevice(),
 		VK_NULL_HANDLE,
 		1,
 		&pipeline_info,
@@ -250,7 +250,7 @@ void GraphicsPipeline::createPipeline() {
 
 void GraphicsPipeline::destroyPipeline() {
 	vkDestroyPipeline(
-		_device->getDevice(),
+		_shader->getLogicalDevice()->getDevice()->getDevice(),
 		_pipeline,
 		nullptr
 	);

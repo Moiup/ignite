@@ -41,14 +41,13 @@ protected:
 	std::unordered_map<std::string, TextureInfo> _texture_info;
 	std::unordered_map<std::string, std::vector<Texture*>> _textures;
 
-	PhysicalDevice* _gpu;
-	Device* _device;
+	LogicalDevice* _logical_device;
 
 public:
 	Shader();
 
-	void setPhysicalDevice(PhysicalDevice* gpu);
-	void setDevice(Device* logical_device);
+	void setLogicalDevice(LogicalDevice* logical_device);
+	LogicalDevice* getLogicalDevice();
 
 	void addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size);
 	void addPushConstant(std::string name, void* push_constant);

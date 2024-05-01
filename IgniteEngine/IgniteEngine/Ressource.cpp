@@ -5,12 +5,8 @@ Ressource::Ressource()
 	;
 }
 
-void Ressource::setDevice(Device* device) {
-	_device = device;
-}
-
-void Ressource::setMemoryProperties(VkPhysicalDeviceMemoryProperties* memory_properties) {
-	_memory_properties = memory_properties;
+void Ressource::setQueue(Queue* queue) {
+	_queue = queue;
 }
 
 void Ressource::setMemoryPropertyFlags(VkMemoryPropertyFlags memory_property_flags) {
@@ -30,19 +26,21 @@ void Ressource::allocateMemory() {
 	allocate_info.allocationSize = _memory_req.size;
 	allocate_info.memoryTypeIndex = 0;
 
+	VkPhysicalDeviceMemoryProperties* mem_prop = _queue->getGPU()->getMemoryProperties();
+
 	uint32_t memory_type_i = 0;
-	for (memory_type_i = 0; memory_type_i < _memory_properties->memoryTypeCount; memory_type_i++) {
-		if ((_memory_req.memoryTypeBits & (1 << memory_type_i)) && (_memory_properties->memoryTypes[memory_type_i].propertyFlags & _memory_property_flags) == _memory_property_flags) {
+	for (memory_type_i = 0; memory_type_i < mem_prop->memoryTypeCount; memory_type_i++) {
+		if ((_memory_req.memoryTypeBits & (1 << memory_type_i)) && (mem_prop->memoryTypes[memory_type_i].propertyFlags & _memory_property_flags) == _memory_property_flags) {
 			allocate_info.memoryTypeIndex = memory_type_i;
 			break;
 		}
 	}
-	if (memory_type_i > _memory_properties->memoryTypeCount) {
+	if (memory_type_i > mem_prop->memoryTypeCount) {
 		throw std::runtime_error("Error: buffer memory type not found!");
 	}
 
 	VkResult vk_result = vkAllocateMemory(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		&allocate_info,
 		nullptr,
 		&_memory
@@ -57,7 +55,7 @@ void Ressource::bind() {
 }
 
 void Ressource::freeMemory() {
-	vkFreeMemory(_device->getDevice(), _memory, nullptr);
+	vkFreeMemory(_queue->getDevice()->getDevice(), _memory, nullptr);
 }
 
 void Ressource::getMemoryRequirements() {

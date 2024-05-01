@@ -18,7 +18,7 @@ class Queue
 private:
 	static std::unordered_map<VkQueue, std::vector<CommandPool>> _cmd_pools;
 	static std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> _pending_command_buffers;
-	static std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> command_pool_indices;
+	static std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> _command_pool_indices;
 
 
 	VkQueue _queue{ nullptr };

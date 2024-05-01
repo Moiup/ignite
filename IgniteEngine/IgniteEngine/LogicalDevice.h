@@ -18,13 +18,16 @@ private:
 public:
 	LogicalDevice();
 
-	void configure(PhysicalDevice* gpu);
+	void setGPU(PhysicalDevice* gpu);
+
+	void configure();
 	bool defineQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count);
 	std::vector<Queue>& getQueues(const std::string& name);
 
 	void create();
 
 	Device* getDevice();
+	PhysicalDevice* getGPU();
 
 	void waitIdle();
 

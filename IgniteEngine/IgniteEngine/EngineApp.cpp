@@ -51,7 +51,8 @@ void EngineApp::init() {
 	_gpu.configure(_instance);
 	
 	// Initialising logical device and queues
-	_logical_device.configure(&_gpu);
+	_logical_device.setGPU(&_gpu);
+	_logical_device.configure();
 	_logical_device.defineQueue(
 		"graphic_queues",
 		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
@@ -77,28 +78,27 @@ void EngineApp::init() {
 	DefaultConf::present_queue = &_logical_device.getQueues("present_queues")[0];
 	DefaultConf::compute_queue = &_logical_device.getQueues("compute_queues")[0];
 	DefaultConf::graphic_shader = &_graphic_shader;
-	//DefaultConf::instance = &_instance;
-	//DefaultConf::renderer = &_renderer;
-	//DefaultConf::camera = &_camera;
-	//DefaultConf::white_texture = &_white_texture;
+
+	DefaultConf::instance = &_instance;
+	DefaultConf::renderer = &_renderer;
+	DefaultConf::camera = &_camera;
+	DefaultConf::white_texture = &_white_texture;
 
 	//DefaultConf::coord_buffer = &_coord_buffer;
 	//DefaultConf::index_buffer = &_index_buffer;
 	//DefaultConf::uv_buffer = &_uv_buffer;
 
 
-	//// White Texture
-	//Pixels pixels("../assets/textures/white.png");
-	//_white_texture.setLogicalDevice(DefaultConf::logical_device);
-	//_white_texture.setGPU(DefaultConf::gpu);
-	////_white_texture.setCommandPool(DefaultConf::command_pool);
-	//_white_texture.setDimensions(pixels.getWidth(), pixels.getHeight());
-	//_white_texture.create();
-	//_white_texture.update(pixels);
+	// White Texture
+	Pixels pixels("../assets/textures/white.png");
+	_white_texture.setQueue(DefaultConf::graphics_queue);
+	_white_texture.setDimensions(pixels.getWidth(), pixels.getHeight());
+	_white_texture.create();
+	_white_texture.update(pixels);
 	
 	initEngineEntities();
 
-	//_modules.init();
+	_modules.init();
 }
 
 void EngineApp::start() {
@@ -110,7 +110,7 @@ void EngineApp::start() {
 	// Shader    //
 	//-----------//
 	//DefaultConf::graphic_shader->setNbFrame(NB_FRAME);
-	//DefaultConf::graphic_shader->setLogicalDevice(DefaultConf::logical_device);
+	//DefaultConf::graphic_shader->setDevice(DefaultConf::logical_device->getDevice());
 	//DefaultConf::graphic_shader->setPhysicalDevice(DefaultConf::gpu);
 	//DefaultConf::graphic_shader->read(
 	//	"../shaders/vert.vert",
@@ -192,13 +192,12 @@ void EngineApp::start() {
 	//	Object3D::getTextures(DefaultConf::renderer, DefaultConf::graphic_shader).size()
 	//);
 
-	////----------------------//
-	//// Creating the buffers //
-	////----------------------//
-	//// Coord
-	//// Mesh offsets
-	//_coord_buffer.setLogicalDevice(DefaultConf::logical_device);
-	//_coord_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
+	//----------------------//
+	// Creating the buffers //
+	//----------------------//
+	// Coord
+	// Mesh offsets
+	//_coord_buffer.setQueue(DefaultConf::graphics_queue);
 	//_coord_buffer.setSize(Object3D::getCoordsSize(DefaultConf::renderer, DefaultConf::graphic_shader));
 	//_coord_buffer.create();
 	//_coord_buffer.setValues(Object3D::getCoords(DefaultConf::renderer, DefaultConf::graphic_shader).data());

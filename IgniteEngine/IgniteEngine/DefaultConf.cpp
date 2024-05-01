@@ -11,6 +11,9 @@ WindowSurface* DefaultConf::render_window;
 Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;
 CameraScene* DefaultConf::camera;
+Queue* DefaultConf::graphics_queue;
+Queue* DefaultConf::present_queue;
+Queue* DefaultConf::compute_queue;
 Texture* DefaultConf::white_texture;
 uint64_t DefaultConf::delta_time; // ms
 SDL_Event* DefaultConf::event;

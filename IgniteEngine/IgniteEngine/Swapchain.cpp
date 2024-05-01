@@ -206,7 +206,7 @@ void Swapchain::gettingImages(){
 	}
 
 	for (uint32_t i = 0; i < _image_count; i++) {
-		_images[i].setDevice(_device);
+		//_images[i].setQueue();
 		_images[i].setImage(imgs[i]);
 	}
 }

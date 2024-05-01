@@ -13,7 +13,7 @@ Image::Image() :
 
 void Image::createImage() {
 	VkResult vk_result = vkCreateImage(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		&_image_info,
 		nullptr,
 		&_image
@@ -25,7 +25,7 @@ void Image::createImage() {
 
 void Image::bind(){
 	vkBindImageMemory(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		_image,
 		_memory,
 		0
@@ -36,7 +36,7 @@ void Image::createImageView() {
 	_image_view_info.image = _image;
 
 	VkResult vk_result = vkCreateImageView(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		&_image_view_info,
 		nullptr,
 		&_image_view
@@ -47,11 +47,19 @@ void Image::createImageView() {
 }
 
 void Image::destroyImage() {
-	vkDestroyImage(_device->getDevice(), _image, nullptr);
+	vkDestroyImage(
+		_queue->getDevice()->getDevice(),
+		_image,
+		nullptr
+	);
 }
 
 void Image::destroyImageView() {
-	vkDestroyImageView(_device->getDevice(), _image_view, nullptr);
+	vkDestroyImageView(
+		_queue->getDevice()->getDevice(),
+		_image_view,
+		nullptr
+	);
 }
 
 void Image::setImagePNext(const void* p_next) {
@@ -177,7 +185,7 @@ const VkImageView& Image::getImageView() const {
 
 void Image::getMemoryRequirements() {
 	vkGetImageMemoryRequirements(
-		_device->getDevice(),
+		_queue->getDevice()->getDevice(),
 		_image,
 		&_memory_req
 	);

@@ -87,6 +87,10 @@ uint32_t Queue::getFamilyIndex() {
 	return _family_index;
 }
 
+PhysicalDevice* Queue::getGPU() {
+	return _gpu;
+}
+
 std::vector<VkCommandBuffer>& Queue::getPendingCommandBuffers() {
 	return _pending_command_buffers[&getCommandPool()];
 }
@@ -111,7 +115,7 @@ CommandBuffer& Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
 
 	
 	_pending_command_buffers[&getCommandPool()].push_back(cmd_buf.getCommandBuffer());
-	_command_pool_indices[&getCommandPool()]
+	_command_pool_indices[&getCommandPool()].nb_cmd_buf++;
 
 	return cmd_buf;
 }

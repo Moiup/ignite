@@ -24,7 +24,7 @@ Sampler::Sampler() :
 
 void Sampler::create() {
 	VkResult result = vkCreateSampler(
-		*_logical_device,
+		_device->getDevice(),
 		&_info,
 		nullptr,
 		&_sampler
@@ -37,7 +37,7 @@ void Sampler::create() {
 
 void Sampler::destroy() {
 	vkDestroySampler(
-		*_logical_device,
+		_device->getDevice(),
 		_sampler,
 		nullptr
 	);
@@ -47,8 +47,8 @@ const VkSampler* Sampler::getSampler() const {
 	return &_sampler;
 }
 
-void Sampler::setLogicalDevice(VkDevice* logical_device) {
-	_logical_device = logical_device;
+void Sampler::setDevice(Device* device) {
+	_device = device;
 }
 
 void Sampler::setPNext(const void* p_next) {

@@ -7,10 +7,10 @@
 class Buffer : public Ressource
 {
 private:
-	VkBuffer _buffer;
-	VkBufferCreateInfo _buffer_info;
-	VkDeviceSize _capacity;
-	VkDeviceSize _size;
+	VkBuffer _buffer{ nullptr };
+	VkBufferCreateInfo _buffer_info{};
+	VkDeviceSize _capacity{ 0 };
+	VkDeviceSize _size{ 0 };
 
 public:
 	Buffer();

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "Device.h"
+
 #include <iostream>
 
 class Sampler
@@ -9,7 +10,7 @@ private:
 	VkSamplerCreateInfo _info;
 	VkSampler _sampler;
 
-	VkDevice* _logical_device;
+	Device* _device;
 
 public:
 	Sampler();
@@ -19,7 +20,7 @@ public:
 
 	const VkSampler* getSampler() const;
 
-	void setLogicalDevice(VkDevice* logical_device);
+	void setDevice(Device* device);
 
 	void setPNext(const void* p_next);
 	void setFlags(VkSamplerCreateFlags flags);

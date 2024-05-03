@@ -45,19 +45,19 @@ private:
 
 	// Buffers
 	VertexBuffer _coord_buffer;
-	//VertexBuffer _object_id_buffer;
-	//VertexBuffer _material_indices_buffer;
-	//VertexBuffer _uv_buffer;
-	//IndexBuffer _index_buffer;
-	////UniformBuffer _camera_buffer;
-	//StorageBuffer _obj_tr_buffer;
-	//StorageBuffer _materials_buffer;
-	//Sampler _sampler;
+	VertexBuffer _object_id_buffer;
+	VertexBuffer _material_indices_buffer;
+	VertexBuffer _uv_buffer;
+	IndexBuffer _index_buffer;
+	//UniformBuffer _camera_buffer;
+	StorageBuffer _obj_tr_buffer;
+	StorageBuffer _materials_buffer;
+	Sampler _sampler;
 
 	Modules _modules;
 
 	CameraScene _camera;
-	//glm::mat4 _cam_mvp;
+	glm::mat4 _cam_mvp;
 
 public:
 	EngineApp();

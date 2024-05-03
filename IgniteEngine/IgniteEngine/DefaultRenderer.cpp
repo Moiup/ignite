@@ -371,8 +371,8 @@ void DefaultRenderer::createFencesAndSemaphores() {
 }
 
 void DefaultRenderer::createSwapchain() {
-	_swapchain.setDevice(
-		(*_graphics_queues)[0].getDevice()
+	_swapchain.setQueue(
+		&(*_graphics_queues)[0]
 	);
 	_swapchain.setSurface(
 		_window->getSurface()

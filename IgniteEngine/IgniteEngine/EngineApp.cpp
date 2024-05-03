@@ -266,6 +266,7 @@ void EngineApp::start() {
 	);
 
 	// Renderer
+	
 	DefaultConf::renderer->setGraphicsQueues(&_logical_device.getQueues("graphics_queues"));
 	DefaultConf::renderer->setPresentQueues(&_logical_device.getQueues("present_queues"));
 	DefaultConf::renderer->setNbFrame(NB_FRAME);
@@ -292,13 +293,13 @@ void EngineApp::update() {
 
 		DefaultConf::event = &event;
 		EngineEntity::updateAll();
-		//_obj_tr_buffer.setValues(
-		//	&Object3D::updateTransformMatrices(
-		//		DefaultConf::renderer, DefaultConf::graphic_shader
-		//	)[0][0]
-		//);
+		_obj_tr_buffer.setValues(
+			&Object3D::updateTransformMatrices(
+				DefaultConf::renderer, DefaultConf::graphic_shader
+			)[0][0]
+		);
 
-		//_cam_mvp = DefaultConf::camera->getMVP();
+		_cam_mvp = DefaultConf::camera->getMVP();
 
 		////_camera_buffer.setValues(
 		////	&DefaultConf::camera->getMVP()[0][0]

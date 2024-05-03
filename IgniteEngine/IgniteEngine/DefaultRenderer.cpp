@@ -191,6 +191,8 @@ void DefaultRenderer::render() {
 		nullptr
 	);
 
+	std::cout << "Rendering" << std::endl;
+
 	//// Copying depth image to a buffer
 	//// Staging buffer
 	//Buffer staging_buffer{};
@@ -339,7 +341,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vk_result = vkCreateSemaphore(
-			_device->getDevice(),
+			(*_graphics_queues)[0].getDevice()->getDevice(),
 			&semaphore_info,
 			nullptr,
 			&_sem_render_starts[i]
@@ -349,7 +351,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 		}
 
 		vk_result = vkCreateSemaphore(
-			_device->getDevice(),
+			(*_graphics_queues)[0].getDevice()->getDevice(),
 			&semaphore_info,
 			nullptr,
 			&_sem_render_ends[i]
@@ -359,7 +361,7 @@ void DefaultRenderer::createFencesAndSemaphores() {
 		}
 
 		vk_result = vkCreateFence(
-			_device->getDevice(),
+			(*_graphics_queues)[0].getDevice()->getDevice(),
 			&fence_info,
 			nullptr,
 			&_fences[i]

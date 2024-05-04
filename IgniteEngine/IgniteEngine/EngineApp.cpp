@@ -293,11 +293,11 @@ void EngineApp::update() {
 
 		DefaultConf::event = &event;
 		EngineEntity::updateAll();
-		_obj_tr_buffer.setValues(
-			&Object3D::updateTransformMatrices(
-				DefaultConf::renderer, DefaultConf::graphic_shader
-			)[0][0]
-		);
+		//_obj_tr_buffer.setValues(
+		//	&Object3D::updateTransformMatrices(
+		//		DefaultConf::renderer, DefaultConf::graphic_shader
+		//	)[0][0]
+		//);
 
 		_cam_mvp = DefaultConf::camera->getMVP();
 

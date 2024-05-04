@@ -61,7 +61,7 @@ void DispatcherSync::dispatch(
 	//	1,
 	//	&_fence
 	//);
-
+	std::vector<VkCommandBuffer>& buffs = _queue->getPendingCommandBuffers();
 	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
 
 	cmd_buf.reset();

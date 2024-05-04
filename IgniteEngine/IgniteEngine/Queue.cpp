@@ -87,6 +87,10 @@ uint32_t Queue::getFamilyIndex() {
 	return _family_index;
 }
 
+uint32_t Queue::getCommandPoolIndex() {
+	return _cmd_pool_i;
+}
+
 PhysicalDevice* Queue::getGPU() {
 	return _gpu;
 }
@@ -240,6 +244,8 @@ const void Queue::submitSync(
 
 	getStartIndexPendingCommendBuffers() = 0;
 	getNbPendingCommandBuffers() = 0;
+
+	getPendingCommandBuffers().clear();
 }
 
 const void Queue::submit(

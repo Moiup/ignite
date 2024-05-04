@@ -29,6 +29,8 @@ void ComputeShaderTest::start() {
 
 	std::vector<int> input_data_vec(10, 0);
 
+	std::cout << DefaultConf::compute_queue->getCommandPoolIndex() << std::endl;
+
 	_input_data.setQueue(DefaultConf::compute_queue);
 	_input_data.setSize(input_data_vec.size() * sizeof(input_data_vec[0]));
 	_input_data.create();

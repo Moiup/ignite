@@ -12,6 +12,8 @@ private:
 
 	std::vector<GraphicsPipeline> _graphics_pipelines;
 
+	std::vector<Queue> _graphics_queues_in_flight;
+	std::vector<Queue> _present_queues_in_flight;
 	std::vector<VkSemaphore> _sem_render_starts;
 	std::vector<VkSemaphore> _sem_render_ends;
 	std::vector<VkFence> _fences;
@@ -27,6 +29,7 @@ public:
 protected:
 	void createFencesAndSemaphores();
 
+	void configureQueues();
 	void createSwapchain();
 	void createDepthBuffer();
 	void createGraphicsPipeline();

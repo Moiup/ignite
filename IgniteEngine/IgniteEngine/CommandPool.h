@@ -18,6 +18,7 @@ public:
 	void setFlags(VkCommandPoolCreateFlagBits flags);
 	void setQueueFamilyIndex(uint32_t family_index);
 	void create();
+	void reset();
 	void destroy();
 
 	const VkCommandPool& getPool() const;

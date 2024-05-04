@@ -305,7 +305,7 @@ void EngineApp::update() {
 		////	&DefaultConf::camera->getMVP()[0][0]
 		////);
 
-		//DefaultConf::renderer->render();
+		DefaultConf::renderer->render();
 	//	glfwPollEvents();
 	//	
 

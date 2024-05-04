@@ -16,7 +16,7 @@ private:
 public:
 	CommandBuffer();
 
-	CommandBuffer(CommandBuffer& cmd_buf);
+	CommandBuffer(const CommandBuffer& cmd_buf);
 	CommandBuffer(CommandBuffer&& cmd_buf);
 
 	CommandBuffer& operator=(const CommandBuffer& cmd_buf);

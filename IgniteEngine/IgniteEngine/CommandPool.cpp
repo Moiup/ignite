@@ -41,6 +41,14 @@ void CommandPool::create() {
 	_created = true;
 }
 
+void CommandPool::reset() {
+	VkResult vk_result = vkResetCommandPool(
+		_device->getDevice(),
+		_pool,
+		VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT
+	);
+}
+
 void CommandPool::destroy() {
 	if (!_created) {
 		return;

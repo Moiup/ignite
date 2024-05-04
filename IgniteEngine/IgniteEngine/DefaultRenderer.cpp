@@ -7,7 +7,7 @@ DefaultRenderer::DefaultRenderer() :
 }
 
 void DefaultRenderer::create() {
-	createCommandBuffers();
+	configureQueues();
 	createSwapchain();
 	createDepthBuffer();
 	createGraphicsPipeline();
@@ -179,7 +179,7 @@ void DefaultRenderer::render() {
 		&cmd_buf,
 		1,
 		&_sem_render_ends[_current_frame],
-		&_fences[_current_frame]
+		_fences[_current_frame]
 	);	
 
 	(*_present_queues)[0].present(
@@ -323,6 +323,25 @@ void DefaultRenderer::render() {
 	_current_frame = (_current_frame + 1) % _nb_frame;
 }
 
+void DefaultRenderer::configureQueues() {
+	_graphics_queues_in_flight.resize(_nb_frame);
+	_present_queues_in_flight.resize(_nb_frame);
+
+	for (uint32_t i = 0; i < _nb_frame; i++) {
+		Queue gq = (*_graphics_queues)[0];
+		gq.addCommandPool();
+		_graphics_queues_in_flight.push_back(
+			(*_graphics_queues)[0]
+		);
+
+		Queue pq = (*_present_queues)[0];
+		pq.addCommandPool();
+		_present_queues_in_flight.push_back(
+			(*_present_queues)[0]
+		);
+	}
+}
+
 void DefaultRenderer::createFencesAndSemaphores() {
 	VkResult vk_result;
 	VkSemaphoreCreateInfo semaphore_info{};
@@ -425,11 +444,12 @@ void DefaultRenderer::createGraphicsPipeline() {
 }
 
 void DefaultRenderer::createCommandBuffers() {
-	//for (uint32_t i = 0; i < _nb_frame; i++) {
-	//	_command_buffers.push_back(
-	//		_command_pool->createCommandBuffer()
-	//	);
-	//}
+	for (uint32_t i = 0; i < _nb_frame; i++) {
+		CommandBuffer& cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
+		_command_buffers.push_back(
+			cmd_buf
+		);
+	}
 }
 
 void DefaultRenderer::dynamicRenderingPipelineBarrier() {

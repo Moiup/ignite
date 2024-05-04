@@ -8,7 +8,7 @@ CommandBuffer::CommandBuffer() :
 	;
 }
 
-CommandBuffer::CommandBuffer(CommandBuffer& cmd_buf) {
+CommandBuffer::CommandBuffer(const CommandBuffer& cmd_buf) {
 	*this = cmd_buf;
 }
 

@@ -10,9 +10,9 @@ void Dispatcher::setQueue(Queue* queue) {
 }
 
 void Dispatcher::create() {
-	_command_buffer = _queue->allocateCommandBuffer();
+
 }
 
 void Dispatcher::destroy() {
-	_command_buffer.free();
+
 }

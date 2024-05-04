@@ -9,8 +9,6 @@ class Dispatcher
 protected:
 	Queue* _queue;
 
-	CommandBuffer _command_buffer;
-
 	std::vector<VkPipelineStageFlags> _pipeline_stage_flags;
 
 public:

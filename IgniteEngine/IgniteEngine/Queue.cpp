@@ -106,7 +106,7 @@ void Queue::addCommandPool() {
 	_cmd_pool_i = _cmd_pools[_queue].size() - 1;
 }
 
-CommandBuffer& Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
+CommandBuffer Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
 	CommandBuffer cmd_buf;
 
 	cmd_buf.setDevice(getDevice());
@@ -219,11 +219,24 @@ const void Queue::submitSync(
 		_fence
 	);
 
+	VkResult result = vkWaitForFences(
+		_device->getDevice(),
+		1, &_fence,
+		VK_TRUE,
+		UINT64_MAX
+	);
+
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Queue::submitSync: Error while waiting for the fence to finish.");
+	}
+
 	vkResetFences(
 		_device->getDevice(),
 		1,
 		&_fence
 	);
+
+	getCommandPool().reset();
 
 	getStartIndexPendingCommendBuffers() = 0;
 	getNbPendingCommandBuffers() = 0;

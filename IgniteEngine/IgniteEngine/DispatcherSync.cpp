@@ -56,22 +56,24 @@ void DispatcherSync::dispatch(
 	uint32_t group_count_y,
 	uint32_t group_count_z
 ) {
-	vkResetFences(
-		_queue->getDevice()->getDevice(),
-		1,
-		&_fence
-	);
+	//vkResetFences(
+	//	_queue->getDevice()->getDevice(),
+	//	1,
+	//	&_fence
+	//);
 
-	_command_buffer.reset();
+	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
+
+	cmd_buf.reset();
 	// Start recording
-	_command_buffer.begin();
+	cmd_buf.begin();
 
 	// Bindings
-	_command_buffer.bindPipeline(
+	cmd_buf.bindPipeline(
 		VK_PIPELINE_BIND_POINT_COMPUTE,
 		(VkPipeline&)_compute_pipeline->getPipeline()
 	);
-	_command_buffer.bindDescriptorSets(
+	cmd_buf.bindDescriptorSets(
 		VK_PIPELINE_BIND_POINT_COMPUTE,
 		_compute_pipeline->getPipelineLayout(),
 		0,
@@ -87,7 +89,7 @@ void DispatcherSync::dispatch(
 		std::string name = pc_info.first;
 		PushConstantInfo& info = pc_info.second;
 
-		_command_buffer.pushConstants(
+		cmd_buf.pushConstants(
 			_compute_pipeline->getPipelineLayout(),
 			info.getStageFlags(),
 			info.getOffset(),
@@ -97,30 +99,13 @@ void DispatcherSync::dispatch(
 	}
 
 	// Dispatch
-	_command_buffer.dispatch(
+	cmd_buf.dispatch(
 		group_count_x,
 		group_count_y,
 		group_count_z
 	);
 
 	// End recording
-	_command_buffer.end();
-	VkCommandBuffer cmd_buf = _command_buffer.getCommandBuffer();
-	_queue->submit(
-		0, nullptr,
-		nullptr,
-		1, &cmd_buf,
-		0, nullptr,
-		&_fence
-	);
-
-	VkResult result = vkWaitForFences(
-		_queue->getDevice()->getDevice(),
-		1, &_fence,
-		VK_TRUE,
-		UINT64_MAX
-	);
-	if (result != VK_SUCCESS) {
-		throw std::runtime_error("DispatcherSync::dispatch: Error while waiting for fences to finish.");
-	}
+	cmd_buf.end();
+	_queue->submitSync();
 }

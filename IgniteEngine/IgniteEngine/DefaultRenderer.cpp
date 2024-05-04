@@ -445,7 +445,7 @@ void DefaultRenderer::createGraphicsPipeline() {
 
 void DefaultRenderer::createCommandBuffers() {
 	for (uint32_t i = 0; i < _nb_frame; i++) {
-		CommandBuffer& cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
+		CommandBuffer cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
 		_command_buffers.push_back(
 			cmd_buf
 		);

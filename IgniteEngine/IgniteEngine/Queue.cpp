@@ -325,9 +325,6 @@ void Queue::createFence() {
 }
 
 VkCommandBuffer* Queue::getPendingCommandBufferStartPointer() const {
-	std::cout << "_command_pool_indices[&getCommandPool()].start_i: " << _command_pool_indices[&getCommandPool()].start_i << std::endl;
-	std::vector<VkCommandBuffer>& pcd = _pending_command_buffers[&getCommandPool()];
-
 	return &_pending_command_buffers[&getCommandPool()][_command_pool_indices[&getCommandPool()].start_i];
 }
 

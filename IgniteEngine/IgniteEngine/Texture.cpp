@@ -182,6 +182,9 @@ void Texture::update(Pixels& pixels) {
 	_image_layout = image_memory_barrier.newLayout;
 
 	copy_cmd.end();
+
+	_queue->submit();
+	_queue->wait();
 }
 
 void Texture::destroy() {

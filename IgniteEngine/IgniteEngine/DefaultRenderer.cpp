@@ -167,8 +167,6 @@ void DefaultRenderer::render() {
 		&available_img
 	);
 
-	std::cout << "Rendering" << std::endl;
-
 	//// Copying depth image to a buffer
 	//// Staging buffer
 	//Buffer staging_buffer{};

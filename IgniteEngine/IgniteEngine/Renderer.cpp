@@ -3,11 +3,9 @@
 Renderer::Renderer() :
 	_nb_frame{ 2 },
 	_device{},
-	_command_pool{ nullptr },
 	_gpu{ nullptr },
 	_window{nullptr},
 	_clear_color_value{0.2f, 0.2f, 0.2f, 1.0f},
-	_command_buffers{},
 	_current_frame{0},
 	_pipeline_stage_flags{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}
 { ; }

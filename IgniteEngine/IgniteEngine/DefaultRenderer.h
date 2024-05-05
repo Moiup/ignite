@@ -16,7 +16,6 @@ private:
 	std::vector<Queue> _present_queues_in_flight;
 	std::vector<VkSemaphore> _sem_render_starts;
 	std::vector<VkSemaphore> _sem_render_ends;
-	std::vector<VkFence> _fences;
 
 public:
 	DefaultRenderer();
@@ -27,16 +26,15 @@ public:
 	void render();
 
 protected:
-	void createFencesAndSemaphores();
+	void createSemaphores();
 
 	void configureQueues();
 	void createSwapchain();
 	void createDepthBuffer();
 	void createGraphicsPipeline();
-	void createCommandBuffers();
 
-	void dynamicRenderingPipelineBarrier();
-	void dynamicRenderingPipelineBarrierBack();
-	void beginRendering();
+	void dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf);
+	void dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf);
+	void beginRendering(CommandBuffer& cmd_buf);
 };
 

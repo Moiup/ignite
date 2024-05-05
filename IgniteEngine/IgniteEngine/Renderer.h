@@ -14,12 +14,9 @@ class Renderer
 protected:
 	uint32_t _nb_frame;
 	Device* _device;
-	CommandPool* _command_pool;
 	PhysicalDevice* _gpu;
 	WindowSurface* _window;
 	VkClearColorValue _clear_color_value;
-
-	std::vector<CommandBuffer> _command_buffers;
 
 	std::vector<Queue>* _graphics_queues;
 	std::vector<Queue>* _present_queues;

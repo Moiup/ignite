@@ -56,11 +56,7 @@ void DispatcherSync::dispatch(
 	uint32_t group_count_y,
 	uint32_t group_count_z
 ) {
-	//vkResetFences(
-	//	_queue->getDevice()->getDevice(),
-	//	1,
-	//	&_fence
-	//);
+
 	std::vector<VkCommandBuffer>& buffs = _queue->getPendingCommandBuffers();
 	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
 
@@ -107,5 +103,7 @@ void DispatcherSync::dispatch(
 
 	// End recording
 	cmd_buf.end();
-	_queue->submitSync();
+
+	_queue->submit();
+	_queue->wait();
 }

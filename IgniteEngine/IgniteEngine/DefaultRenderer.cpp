@@ -11,7 +11,7 @@ void DefaultRenderer::create() {
 	createSwapchain();
 	createDepthBuffer();
 	createGraphicsPipeline();
-	createFencesAndSemaphores();
+	createSemaphores();
 }
 
 void DefaultRenderer::destroy() {
@@ -21,9 +21,6 @@ void DefaultRenderer::destroy() {
 		gp.destroy();
 	}
 
-	for (auto& cmd_buffer : _command_buffers) {
-		cmd_buffer.free();
-	}
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vkDestroySemaphore(
 			(*_graphics_queues)[0].getDevice()->getDevice(),
@@ -35,12 +32,6 @@ void DefaultRenderer::destroy() {
 			_sem_render_ends[i],
 			nullptr
 		);
-
-		vkDestroyFence(
-			(*_graphics_queues)[0].getDevice()->getDevice(),
-			_fences[i],
-			nullptr
-		);
 	}
 }
 
@@ -48,18 +39,7 @@ void DefaultRenderer::render() {
 	VkResult vk_result{};
 	uint32_t available_img{ 0 };
 
-	vkWaitForFences(
-		(*_graphics_queues)[0].getDevice()->getDevice(),
-		1,
-		&_fences[_current_frame],
-		VK_TRUE,
-		UINT64_MAX
-	);
-	vkResetFences(
-		(*_graphics_queues)[0].getDevice()->getDevice(),
-		1,
-		&_fences[_current_frame]
-	);
+	_graphics_queues_in_flight[_current_frame].wait();
 
 	vk_result = vkAcquireNextImageKHR(
 		(*_graphics_queues)[0].getDevice()->getDevice(),
@@ -73,28 +53,28 @@ void DefaultRenderer::render() {
 		throw std::runtime_error("Error: failed acquiring next image!");
 	}
 
-	//CommandBuffer& cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
+	CommandBuffer cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
 
-	_command_buffers[_current_frame].reset();
-	_command_buffers[_current_frame].begin();
+	cmd_buf.reset();
+	cmd_buf.begin();
 	
-	dynamicRenderingPipelineBarrier();
-	beginRendering();
+	dynamicRenderingPipelineBarrier(cmd_buf);
+	beginRendering(cmd_buf);
 
 	for (GraphicsPipeline& gp : _graphics_pipelines) {
-		_command_buffers[_current_frame].bindPipeline(
+		cmd_buf.bindPipeline(
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			(VkPipeline&)gp.getPipeline()
 		);
-		_command_buffers[_current_frame].setViewport(
+		cmd_buf.setViewport(
 			(std::vector<VkViewport>&)gp.getViewport()
 		);
-		_command_buffers[_current_frame].setScissor(
+		cmd_buf.setScissor(
 			(std::vector<VkRect2D>&)gp.getScissors()
 		);
 
 		// Descriptor sets
-		_command_buffers[_current_frame].bindDescriptorSets(
+		cmd_buf.bindDescriptorSets(
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			gp.getPipelineLayout(),
 			0,
@@ -108,7 +88,7 @@ void DefaultRenderer::render() {
 		for (auto& pc_info : gp.getShader()->getPushConstantInfo()) {
 			std::string name = pc_info.first;
 			PushConstantInfo& info = pc_info.second;
-			_command_buffers[_current_frame].pushConstants(
+			cmd_buf.pushConstants(
 				gp.getPipelineLayout(),
 				info.getStageFlags(),
 				info.getOffset(),
@@ -129,7 +109,7 @@ void DefaultRenderer::render() {
 		for (uint32_t i = 0; i < nb_buff; i++) {
 			// Index buffer binding
 			IndexBuffer* ib = ibs[i];
-			_command_buffers[_current_frame].bindIndexBuffer(
+			cmd_buf.bindIndexBuffer(
 				ib->getBuffer(),
 				buff_offset[0],
 				ib->getIndexType()
@@ -140,7 +120,7 @@ void DefaultRenderer::render() {
 				std::string name = vbs_pair.first;
 				std::vector<VertexBuffer*>& vertex_buffers = vbs_pair.second;
 				VertexBuffer* vertex_buffer = vertex_buffers[i];
-				_command_buffers[_current_frame].bindVertexBuffer(
+				cmd_buf.bindVertexBuffer(
 					gs->getVertexBufferInfo(name).getFirstBinding(),
 					1,
 					&vertex_buffer->getBuffer(),
@@ -153,7 +133,7 @@ void DefaultRenderer::render() {
 			for (auto& m_o : Object3D::getMeshObjects(this, gp.getShader())) {
 				Mesh* mesh = m_o.first;
 				std::vector<Object3D*>& objects = m_o.second;
-				_command_buffers[_current_frame].drawIndexed(
+				cmd_buf.drawIndexed(
 					mesh->getIndicesNbElem(),
 					objects.size(),
 					first_index,
@@ -165,30 +145,26 @@ void DefaultRenderer::render() {
 		}
 	}
 	
-	_command_buffers[_current_frame].endRendering();
+	cmd_buf.endRendering();
+	dynamicRenderingPipelineBarrierBack(cmd_buf);
+	cmd_buf.end();
 
-	dynamicRenderingPipelineBarrierBack();
-	_command_buffers[_current_frame].end();
-	VkCommandBuffer cmd_buf = _command_buffers[_current_frame].getCommandBuffer();
+	VkCommandBuffer vk_cmd_buf = cmd_buf.getCommandBuffer();
 	// Submit and present
-	(*_graphics_queues)[0].submit(
+	_graphics_queues_in_flight[_current_frame].submit(
 		1,
 		&_sem_render_starts[_current_frame],
 		_pipeline_stage_flags.data(),
 		1,
-		&cmd_buf,
-		1,
-		&_sem_render_ends[_current_frame],
-		_fences[_current_frame]
-	);	
+		&_sem_render_ends[_current_frame]
+	);
 
-	(*_present_queues)[0].present(
+	_present_queues_in_flight[_current_frame].present(
 		1,
 		&_sem_render_ends[_current_frame],
 		1,
 		&_swapchain.getSwapchain(),
-		&available_img,
-		nullptr
+		&available_img
 	);
 
 	std::cout << "Rendering" << std::endl;
@@ -324,25 +300,22 @@ void DefaultRenderer::render() {
 }
 
 void DefaultRenderer::configureQueues() {
-	_graphics_queues_in_flight.resize(_nb_frame);
-	_present_queues_in_flight.resize(_nb_frame);
-
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		Queue gq = (*_graphics_queues)[0];
-		gq.addCommandPool();
+		gq.addCommandPool(VK_FENCE_CREATE_SIGNALED_BIT);
 		_graphics_queues_in_flight.push_back(
-			(*_graphics_queues)[0]
+			gq
 		);
 
 		Queue pq = (*_present_queues)[0];
 		pq.addCommandPool();
 		_present_queues_in_flight.push_back(
-			(*_present_queues)[0]
+			pq
 		);
 	}
 }
 
-void DefaultRenderer::createFencesAndSemaphores() {
+void DefaultRenderer::createSemaphores() {
 	VkResult vk_result;
 	VkSemaphoreCreateInfo semaphore_info{};
 	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -356,7 +329,6 @@ void DefaultRenderer::createFencesAndSemaphores() {
 
 	_sem_render_starts.resize(_nb_frame);
 	_sem_render_ends.resize(_nb_frame);
-	_fences.resize(_nb_frame);
 
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vk_result = vkCreateSemaphore(
@@ -377,16 +349,6 @@ void DefaultRenderer::createFencesAndSemaphores() {
 		);
 		if (vk_result != VK_SUCCESS) {
 			throw std::runtime_error("Error: failed creating semaphore!");
-		}
-
-		vk_result = vkCreateFence(
-			(*_graphics_queues)[0].getDevice()->getDevice(),
-			&fence_info,
-			nullptr,
-			&_fences[i]
-		);
-		if (vk_result != VK_SUCCESS) {
-			throw std::runtime_error("Error: failed creating fence!");
 		}
 	}
 }
@@ -443,16 +405,7 @@ void DefaultRenderer::createGraphicsPipeline() {
 	}
 }
 
-void DefaultRenderer::createCommandBuffers() {
-	for (uint32_t i = 0; i < _nb_frame; i++) {
-		CommandBuffer cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
-		_command_buffers.push_back(
-			cmd_buf
-		);
-	}
-}
-
-void DefaultRenderer::dynamicRenderingPipelineBarrier() {
+void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
 	VkImageSubresourceRange subresource_range_frame{};
 	subresource_range_frame.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subresource_range_frame.baseMipLevel = 0;
@@ -491,7 +444,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier() {
 	depth_memory_barrier_frame.image = _depth_buffer.getImage();
 	depth_memory_barrier_frame.subresourceRange = depth_subresource_range_frame;
 
-	_command_buffers[_current_frame].pipelineBarrier(
+	cmd_buf.pipelineBarrier(
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		0,
@@ -500,7 +453,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier() {
 		1, &image_memory_barrier_frame
 	);
 
-	_command_buffers[_current_frame].pipelineBarrier(
+	cmd_buf.pipelineBarrier(
 		VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
 		VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
 		0,
@@ -510,7 +463,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier() {
 	);
 }
 
-void DefaultRenderer::dynamicRenderingPipelineBarrierBack() {
+void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf) {
 	// Changing image layout
 	VkImageSubresourceRange subresource_range_frame_bk{};
 	subresource_range_frame_bk.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -531,7 +484,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack() {
 	image_memory_barrier_frame_bk.image = _swapchain.getImages()[_current_frame].getImage();
 	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
 
-	_command_buffers[_current_frame].pipelineBarrier(
+	cmd_buf.pipelineBarrier(
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 		0,
@@ -541,7 +494,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack() {
 	);
 }
 
-void DefaultRenderer::beginRendering() {
+void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
 	color_attachment.imageView = _swapchain.getImages()[_current_frame].getImageView();
@@ -577,7 +530,7 @@ void DefaultRenderer::beginRendering() {
 	rendering_info_khr.pDepthAttachment = &depth_stencil_attachment;
 	rendering_info_khr.pStencilAttachment = &depth_stencil_attachment;
 
-	_command_buffers[_current_frame].beginRendering(
+	cmd_buf.beginRendering(
 		rendering_info_khr
 	);
 }

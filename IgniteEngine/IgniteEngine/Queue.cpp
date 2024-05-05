@@ -54,21 +54,6 @@ void Queue::create() {
 	);
 
 	addCommandPool();
-
-	VkFenceCreateInfo fence_info{};
-	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fence_info.pNext = nullptr;
-	fence_info.flags = 0;
-
-	VkResult vk_result = vkCreateFence(
-		_device->getDevice(),
-		&fence_info,
-		nullptr,
-		&_fence
-	);
-	if (vk_result != VK_SUCCESS) {
-		throw std::runtime_error("Error: failed creating fence!");
-	}
 }
 
 CommandPool& Queue::getCommandPool() const {
@@ -99,7 +84,7 @@ std::vector<VkCommandBuffer>& Queue::getPendingCommandBuffers() {
 	return _pending_command_buffers[&getCommandPool()];
 }
 
-void Queue::addCommandPool() {
+void Queue::addCommandPool(VkFenceCreateFlags flags) {
 	CommandPool cmd_pool{};
 	cmd_pool.setDevice(_device);
 	cmd_pool.setQueueFamilyIndex(getFamilyIndex());
@@ -108,6 +93,22 @@ void Queue::addCommandPool() {
 
 	_cmd_pools[_queue].push_back(cmd_pool);
 	_cmd_pool_i = _cmd_pools[_queue].size() - 1;
+
+	VkFenceCreateInfo fence_info{};
+	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fence_info.pNext = nullptr;
+	fence_info.flags = flags;
+
+	_fence = nullptr;
+	VkResult vk_result = vkCreateFence(
+		_device->getDevice(),
+		&fence_info,
+		nullptr,
+		&_fence
+	);
+	if (vk_result != VK_SUCCESS) {
+		throw std::runtime_error("Error: failed creating fence!");
+	}
 }
 
 CommandBuffer Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
@@ -205,7 +206,7 @@ void Queue::flush() {
 	getNbPendingCommandBuffers() = 0;
 }
 
-const void Queue::submitSync(
+const void Queue::submit(
 	uint32_t waitSemaphorecount,
 	const VkSemaphore* pWaitSemaphores,
 	const VkPipelineStageFlags* pWaitDstStageMask,
@@ -223,29 +224,8 @@ const void Queue::submitSync(
 		_fence
 	);
 
-	VkResult result = vkWaitForFences(
-		_device->getDevice(),
-		1, &_fence,
-		VK_TRUE,
-		UINT64_MAX
-	);
-
-	if (result != VK_SUCCESS) {
-		throw std::runtime_error("Queue::submitSync: Error while waiting for the fence to finish.");
-	}
-
-	vkResetFences(
-		_device->getDevice(),
-		1,
-		&_fence
-	);
-
-	getCommandPool().reset();
-
-	getStartIndexPendingCommendBuffers() = 0;
+	getStartIndexPendingCommendBuffers() += getNbPendingCommandBuffers();
 	getNbPendingCommandBuffers() = 0;
-
-	getPendingCommandBuffers().clear();
 }
 
 const void Queue::submit(
@@ -275,6 +255,32 @@ const void Queue::submit(
 		std::cerr << "Queue submit failed: " << vk_result << std::endl;
 		throw std::runtime_error("Error: failed submitting queue!");
 	}
+}
+
+const void Queue::wait() {
+	VkResult result = vkWaitForFences(
+		_device->getDevice(),
+		1, &_fence,
+		VK_TRUE,
+		UINT64_MAX
+	);
+
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Queue::submitSync: Error while waiting for the fence to finish.");
+	}
+
+	vkResetFences(
+		_device->getDevice(),
+		1,
+		&_fence
+	);
+
+	getCommandPool().reset();
+
+	getStartIndexPendingCommendBuffers() = 0;
+	getNbPendingCommandBuffers() = 0;
+
+	getPendingCommandBuffers().clear();
 }
 
 const void Queue::present(

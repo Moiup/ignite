@@ -20,11 +20,10 @@ private:
 	static std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> _pending_command_buffers;
 	static std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> _command_pool_indices;
 
-	VkFence _sync_fence;
 	VkQueue _queue{ nullptr };
 	Device* _device{ nullptr };
 	VkFence _fence{ nullptr };
-	PhysicalDevice* _gpu;
+	PhysicalDevice* _gpu{ nullptr };
 	uint32_t _cmd_pool_i{ 0 };
 
 	uint32_t _family_index{};
@@ -54,7 +53,7 @@ public:
 	
 	
 
-	void addCommandPool();
+	void addCommandPool(VkFenceCreateFlags flags = 0);
 
 	CommandBuffer allocateCommandBuffer(VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
@@ -65,13 +64,12 @@ public:
 
 	void flush();
 
-	const void submitSync(
+	const void submit(
 		uint32_t waitSemaphorecount = 0,
 		const VkSemaphore* pWaitSemaphores = nullptr,
 		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
 		uint32_t signalSemaphoreCount = 0,
 		const VkSemaphore* pSignalSemaphores = nullptr
-
 	);
 
 	const void submit(
@@ -85,13 +83,15 @@ public:
 		VkFence fence
 	) const;
 
+	const void wait();
+
 	const void present(
 		uint32_t waitSemaphoreCount,
 		const VkSemaphore* pWaitSemaphores,
 		uint32_t swapchainCount,
 		const VkSwapchainKHR* pSwapchains,
 		const uint32_t* pImageIndices,
-		VkResult* pResults
+		VkResult* pResults = nullptr
 	) const;
 	
 	void waitIdle();

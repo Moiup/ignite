@@ -183,8 +183,8 @@ void Texture::update(Pixels& pixels) {
 
 	copy_cmd.end();
 
-	_queue->submit();
-	_queue->wait();
+	//_queue->submit();
+	//_queue->wait();
 }
 
 void Texture::destroy() {

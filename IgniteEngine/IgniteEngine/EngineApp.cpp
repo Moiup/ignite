@@ -95,6 +95,9 @@ void EngineApp::init() {
 	_white_texture.setDimensions(pixels.getWidth(), pixels.getHeight());
 	_white_texture.create();
 	_white_texture.update(pixels);
+
+	DefaultConf::graphics_queue->submit();
+	DefaultConf::graphics_queue->wait();
 	
 	initEngineEntities();
 

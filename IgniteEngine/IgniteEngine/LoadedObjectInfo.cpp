@@ -36,6 +36,9 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];
 	}
 
+	DefaultConf::graphics_queue->submit();
+	DefaultConf::graphics_queue->wait();
+
 	_meshes.push_back(Mesh());
 	std::vector<uint32_t> mat_id{};
 

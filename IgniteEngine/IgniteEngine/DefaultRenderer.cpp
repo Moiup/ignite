@@ -53,7 +53,7 @@ void DefaultRenderer::render() {
 		throw std::runtime_error("Error: failed acquiring next image!");
 	}
 
-	CommandBuffer cmd_buf = (*_graphics_queues)[0].allocateCommandBuffer();
+	CommandBuffer cmd_buf = _graphics_queues_in_flight[_current_frame].allocateCommandBuffer();
 
 	cmd_buf.reset();
 	cmd_buf.begin();

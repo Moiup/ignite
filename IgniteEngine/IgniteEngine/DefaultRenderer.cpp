@@ -300,7 +300,7 @@ void DefaultRenderer::render() {
 void DefaultRenderer::configureQueues() {
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		Queue gq = (*_graphics_queues)[0];
-		gq.addCommandPool(VK_FENCE_CREATE_SIGNALED_BIT);
+		gq.addCommandPool();
 		_graphics_queues_in_flight.push_back(
 			gq
 		);

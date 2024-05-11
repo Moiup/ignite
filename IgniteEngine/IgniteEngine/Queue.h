@@ -3,7 +3,7 @@
 #include "PhysicalDevice.h"
 #include "CommandPool.h"
 #include "CommandBuffer.h"
-//#include "Buffer.h"
+#include "Buffer.h"
 //#include "Image.h"
 #include <vector>
 #include <unordered_map>
@@ -53,11 +53,20 @@ public:
 	
 	
 
-	void addCommandPool(VkFenceCreateFlags flags = 0);
+	void addCommandPool(VkFenceCreateFlags flags = VK_FENCE_CREATE_SIGNALED_BIT);
 
 	CommandBuffer allocateCommandBuffer(VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-	//void copy(Buffer src, Buffer dst, VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+	void copy(Buffer src, Buffer dst,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	void copySync(Buffer src, Buffer dst,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
 	//void changeLayout(Image img, VkImageLayout layout);
 	//void changeToTexture(Image img);
 	//void changeToSurface(Image img);
@@ -65,6 +74,14 @@ public:
 	void flush();
 
 	const void submit(
+		uint32_t waitSemaphorecount = 0,
+		const VkSemaphore* pWaitSemaphores = nullptr,
+		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
+		uint32_t signalSemaphoreCount = 0,
+		const VkSemaphore* pSignalSemaphores = nullptr
+	);
+
+	const void submitNoFence(
 		uint32_t waitSemaphorecount = 0,
 		const VkSemaphore* pWaitSemaphores = nullptr,
 		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,

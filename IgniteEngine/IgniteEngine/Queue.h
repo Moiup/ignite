@@ -3,7 +3,7 @@
 #include "PhysicalDevice.h"
 #include "CommandPool.h"
 #include "CommandBuffer.h"
-#include "Buffer.h"
+//#include "Buffer.h"
 //#include "Image.h"
 #include <vector>
 #include <unordered_map>
@@ -57,17 +57,20 @@ public:
 
 	CommandBuffer allocateCommandBuffer(VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-	void copy(Buffer src, Buffer dst,
-		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
+	//void copy(Buffer& src, Buffer& dst,
+	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	//);
 
-	void copySync(Buffer src, Buffer dst,
-		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
+	//void copySync(Buffer& src, Buffer& dst,
+	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	//);
 
-	//void changeLayout(Image img, VkImageLayout layout);
+	//void changeLayout(Image img, VkImageLayout layout,
+	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	//);
 	//void changeToTexture(Image img);
 	//void changeToSurface(Image img);
 

@@ -126,63 +126,80 @@ CommandBuffer Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
 	return cmd_buf;
 }
 
-void Queue::copy(Buffer& src, Buffer& dst,
-	VkPipelineStageFlags src_stage_mask,
-	VkPipelineStageFlags dst_stage_mask
-) {
-	CommandBuffer cmd_buf = allocateCommandBuffer();
-
-	VkBufferCopy2 region{};
-	region.sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
-	region.pNext = nullptr;
-	region.srcOffset = 0;
-	region.dstOffset = 0;
-	region.size = src.getSize();
-
-	VkCopyBufferInfo2 info{};
-	info.sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
-	info.pNext = nullptr;
-	info.srcBuffer = src.getBuffer();
-	info.dstBuffer = dst.getBuffer();
-	info.regionCount = 1;
-	info.pRegions = &region;
-
-	cmd_buf.reset();
-	cmd_buf.begin();
-
-	vkCmdCopyBuffer2(
-		cmd_buf.getCommandBuffer(),
-		&info
-	);
-
-	cmd_buf.pipelineBarrier(
-		src_stage_mask,
-		dst_stage_mask,
-		0,
-		0,
-		nullptr,
-		0,
-		nullptr,
-		0,
-		nullptr
-	);
-
-	cmd_buf.end();
-}
-
-void Queue::copySync(Buffer& src, Buffer& dst,
-	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-) {
-	copy(src, dst);
-	wait();
-}
-
+//void Queue::copy(Buffer& src, Buffer& dst,
+//	VkPipelineStageFlags src_stage_mask,
+//	VkPipelineStageFlags dst_stage_mask
+//) {
+//	CommandBuffer cmd_buf = allocateCommandBuffer();
 //
-//void Queue::changeLayout(Image img, VkImageLayout) {
+//	VkBufferCopy2 region{};
+//	region.sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
+//	region.pNext = nullptr;
+//	region.srcOffset = 0;
+//	region.dstOffset = 0;
+//	region.size = src.getSize();
 //
+//	VkCopyBufferInfo2 info{};
+//	info.sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
+//	info.pNext = nullptr;
+//	info.srcBuffer = src.getBuffer();
+//	info.dstBuffer = dst.getBuffer();
+//	info.regionCount = 1;
+//	info.pRegions = &region;
+//
+//	cmd_buf.reset();
+//	cmd_buf.begin();
+//
+//	vkCmdCopyBuffer2(
+//		cmd_buf.getCommandBuffer(),
+//		&info
+//	);
+//
+//	cmd_buf.pipelineBarrier(
+//		src_stage_mask,
+//		dst_stage_mask,
+//		0,
+//		0,
+//		nullptr,
+//		0,
+//		nullptr,
+//		0,
+//		nullptr
+//	);
+//
+//	cmd_buf.end();
 //}
+
+//void Queue::copySync(Buffer& src, Buffer& dst,
+//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+//) {
+//	copy(src, dst);
+//	submit(); 
+//	wait();
+//}
+
+
+//void Queue::changeLayout(Image img, VkImageLayout layout,
+//	VkPipelineStageFlags src_stage_mask,
+//	VkPipelineStageFlags dst_stage_mask
+//) {
+//	CommandBuffer cmd_buf = allocateCommandBuffer();
 //
+//	cmd_buf.pipelineBarrier(
+//		src_stage_mask,
+//		dst_stage_mask,
+//		0,
+//		0, nullptr,
+//		0, nullptr,
+//		0, nullptr
+//	);
+//
+//	//img.setLayout
+//
+//	cmd_buf.end();
+//}
+
 //void Queue::changeToTexture(Image img) {
 //
 //}
@@ -251,11 +268,11 @@ const void Queue::submit(
 }
 
 const void Queue::submitNoFence(
-	uint32_t waitSemaphorecount = 0,
-	const VkSemaphore* pWaitSemaphores = nullptr,
-	const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
-	uint32_t signalSemaphoreCount = 0,
-	const VkSemaphore* pSignalSemaphores = nullptr
+	uint32_t waitSemaphorecount,
+	const VkSemaphore* pWaitSemaphores,
+	const VkPipelineStageFlags* pWaitDstStageMask,
+	uint32_t signalSemaphoreCount,
+	const VkSemaphore* pSignalSemaphores
 ) {
 	submit(
 		waitSemaphorecount,

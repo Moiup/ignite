@@ -139,7 +139,7 @@ void Texture::update(Pixels& pixels) {
 	image_memory_barrier.subresourceRange = subresource_range;
 	image_memory_barrier.srcAccessMask = 0;
 	image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	image_memory_barrier.oldLayout = _image_layout;
 	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
 	// Creating the command buffer
@@ -168,7 +168,7 @@ void Texture::update(Pixels& pixels) {
 	image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	image_memory_barrier.newLayout = _image_layout;
 
 	copy_cmd.pipelineBarrier(
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -178,8 +178,6 @@ void Texture::update(Pixels& pixels) {
 		0, nullptr,
 		1, &image_memory_barrier
 	);
-
-	_image_layout = image_memory_barrier.newLayout;
 
 	copy_cmd.end();
 

@@ -26,7 +26,7 @@ private:
 	Queue* _queue;
 
 	Image _image;
-	VkImageLayout _image_layout;
+	VkImageLayout _image_layout{ VK_IMAGE_LAYOUT_UNDEFINED };
 
 	VkFormat _format;
 

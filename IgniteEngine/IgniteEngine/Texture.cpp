@@ -10,7 +10,6 @@ Texture::Texture() :
 	_width{ 0 },
 	_height{ 0 },
 	_image{},
-	_image_layout{},
 	_format{ VK_FORMAT_R8G8B8A8_UNORM }
 {
 	;
@@ -125,6 +124,51 @@ void Texture::update(Pixels& pixels) {
 	image_copy.imageExtent.height = _height;
 	image_copy.imageExtent.depth = 1;
 
+	changeLayout(
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		0,
+		VK_ACCESS_TRANSFER_WRITE_BIT,
+		VK_PIPELINE_STAGE_HOST_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	// Copying the data from the buffer to the image
+	CommandBuffer copy_cmd = _queue->allocateCommandBuffer();
+	copy_cmd.begin();
+
+	copy_cmd.copyBufferToImage(
+		_staging_buffer.getBuffer(),
+		_image.getImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		&image_copy
+	);
+
+	copy_cmd.end();
+
+	changeLayout(
+		_image_layout,
+		VK_ACCESS_TRANSFER_WRITE_BIT,
+		VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
+	);
+
+	//copy_cmd.end();
+
+	//_queue->submit();
+	//_queue->wait();
+}
+
+void Texture::changeLayout(VkImageLayout new_layout,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
+	cmd_buf.begin();
+
 	// Preparing the transfer with the image memory barrier
 	VkImageSubresourceRange subresource_range{};
 	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -137,52 +181,23 @@ void Texture::update(Pixels& pixels) {
 	image_memory_barrier.pNext = nullptr;
 	image_memory_barrier.image = _image.getImage();
 	image_memory_barrier.subresourceRange = subresource_range;
-	image_memory_barrier.srcAccessMask = 0;
-	image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	image_memory_barrier.srcAccessMask = src_access_mask;
+	image_memory_barrier.dstAccessMask = dst_access_mask;
 	image_memory_barrier.oldLayout = _image_layout;
-	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	image_memory_barrier.newLayout = new_layout;
 
-	// Creating the command buffer
-	CommandBuffer copy_cmd = _queue->allocateCommandBuffer();
-	copy_cmd.begin();
-
-	copy_cmd.pipelineBarrier(
-		VK_PIPELINE_STAGE_HOST_BIT,
-		VK_PIPELINE_STAGE_TRANSFER_BIT,
+	cmd_buf.pipelineBarrier(
+		src_stage_mask,
+		dst_stage_mask,
 		0,
 		0, nullptr,
 		0, nullptr,
 		1, &image_memory_barrier
 	);
+	
+	cmd_buf.end();
 
-	// Copying the data from the buffer to the image
-	copy_cmd.copyBufferToImage(
-		_staging_buffer.getBuffer(),
-		_image.getImage(),
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&image_copy
-	);
-
-	// transfering the image to the shader read layout so it can be sampled from
-	image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-	image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	image_memory_barrier.newLayout = _image_layout;
-
-	copy_cmd.pipelineBarrier(
-		VK_PIPELINE_STAGE_TRANSFER_BIT,
-		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, &image_memory_barrier
-	);
-
-	copy_cmd.end();
-
-	//_queue->submit();
-	//_queue->wait();
+	_image_layout = new_layout;
 }
 
 void Texture::destroy() {

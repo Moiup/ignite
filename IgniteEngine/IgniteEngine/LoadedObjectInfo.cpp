@@ -31,6 +31,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 			_textures[0][t_id].setDimensions(pixels.getWidth(), pixels.getHeight());
 			_textures[0][t_id].create();
 			_textures[0][t_id].update(pixels);
+			_textures[0][t_id].changeLayout(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL);
 			t_id++;
 		}
 		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];

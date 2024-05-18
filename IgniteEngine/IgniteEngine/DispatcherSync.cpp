@@ -105,5 +105,5 @@ void DispatcherSync::dispatch(
 	cmd_buf.end();
 
 	_queue->submit();
-	//_queue->wait();
+	_queue->wait();
 }

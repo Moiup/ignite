@@ -20,3 +20,6 @@ IgniteEngine/assets
 IgniteEngine/assets/*
 
 ignite-bench.json
+
+IgniteEngine/x64
+IgniteEngine/x64/*

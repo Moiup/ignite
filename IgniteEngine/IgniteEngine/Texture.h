@@ -6,6 +6,7 @@
 #include "Image.h"
 #include "PhysicalDevice.h"
 #include "Pixels.h"
+#include "Sampler.h"
 
 #include <cstdint>
 #include <iostream>
@@ -32,6 +33,8 @@ private:
 
 	StagingBuffer _staging_buffer{};
 
+	Sampler* _sampler;
+
 
 public:
 	Texture();
@@ -45,6 +48,9 @@ public:
 	void setQueue(Queue* queue);
 	void setFormat(VkFormat format);
 	void setDimensions(uint32_t width, uint32_t height);
+	void setSampler(Sampler* sampler);
+
+	Sampler* getSampler();
 
 	void create();
 	void update(Pixels& pixels);

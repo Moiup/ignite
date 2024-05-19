@@ -58,6 +58,14 @@ void Texture::setDimensions(uint32_t width, uint32_t height) {
 	_height = height;
 }
 
+void Texture::setSampler(Sampler* sampler) {
+	_sampler = sampler;
+}
+
+Sampler* Texture::getSampler() {
+	return _sampler;
+}
+
 //glm::vec4& Texture::pixel(uint64_t row, uint64_t col) {
 //	return _pixels[row * _width + col];
 //}
@@ -121,19 +129,6 @@ void Texture::update(Pixels& pixels) {
 
 	// Copying the data from the buffer to the image
 	copy(_staging_buffer);
-
-	//changeLayout(
-	//	_image_info.initialLayout,
-	//	VK_ACCESS_TRANSFER_WRITE_BIT,
-	//	VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-	//	VK_PIPELINE_STAGE_TRANSFER_BIT,
-	//	VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	//);
-
-	//copy_cmd.end();
-
-	//_queue->submit();
-	//_queue->wait();
 }
 
 void Texture::changeLayout(VkImageLayout new_layout,

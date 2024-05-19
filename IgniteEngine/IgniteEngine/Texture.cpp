@@ -9,7 +9,6 @@
 Texture::Texture() : 
 	_width{ 0 },
 	_height{ 0 },
-	_image{},
 	_format{ VK_FORMAT_R8G8B8A8_UNORM }
 {
 	;
@@ -74,33 +73,33 @@ void Texture::setDimensions(uint32_t width, uint32_t height) {
 
 void Texture::create() {
 	// Create the image to copy the buffer to
-	_image.setQueue(_queue);
-	_image.setImageImageType(VK_IMAGE_TYPE_2D);
-	_image.setImageFormat(_format);
-	_image.setImageMipLevels(1);
-	_image.setImageArrayLayers(1);
-	_image.setImageSamples(VK_SAMPLE_COUNT_1_BIT);
-	_image.setImageTiling(VK_IMAGE_TILING_OPTIMAL);
-	_image.setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
-	_image.setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
-	_image.setImageExtent(_width, _height, 1);
-	_image.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-	_image.setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	Image::setQueue(_queue);
+	Image::setImageImageType(VK_IMAGE_TYPE_2D);
+	Image::setImageFormat(_format);
+	Image::setImageMipLevels(1);
+	Image::setImageArrayLayers(1);
+	Image::setImageSamples(VK_SAMPLE_COUNT_1_BIT);
+	Image::setImageTiling(VK_IMAGE_TILING_OPTIMAL);
+	Image::setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+	Image::setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+	Image::setImageExtent(_width, _height, 1);
+	Image::setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+	Image::setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	_image.createImage();
-	_image.allocateMemory();
-	_image.bind();
+	Image::createImage();
+	Image::allocateMemory();
+	Image::bind();
 
-	_image.setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
-	_image.setImageViewFormat(_format);
-	_image.setImageViewSurbresourceRange(
+	Image::setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
+	Image::setImageViewFormat(_format);
+	Image::setImageViewSurbresourceRange(
 		VK_IMAGE_ASPECT_COLOR_BIT,
 		0, // base mip level
 		1, // level count
 		0, // base array layer
 		1  // layer count
 	);
-	_image.createImageView();
+	Image::createImageView();
 
 	// Creating the staging buffer
 	_staging_buffer.setQueue(_queue);
@@ -112,18 +111,6 @@ void Texture::update(Pixels& pixels) {
 	// Copying the actual texture data into the staging buffer
 	_staging_buffer.setValues(pixels.getPixels().data());
 
-	// To do for each mip level
-	// (To start, we consider only the original level -> 0)
-	VkBufferImageCopy image_copy{};
-	image_copy.bufferOffset = 0;
-	image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_copy.imageSubresource.mipLevel = 0;
-	image_copy.imageSubresource.baseArrayLayer = 0;
-	image_copy.imageSubresource.layerCount = 1;
-	image_copy.imageExtent.width = _width;
-	image_copy.imageExtent.height = _height;
-	image_copy.imageExtent.depth = 1;
-
 	changeLayout(
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		0,
@@ -133,26 +120,15 @@ void Texture::update(Pixels& pixels) {
 	);
 
 	// Copying the data from the buffer to the image
-	CommandBuffer copy_cmd = _queue->allocateCommandBuffer();
-	copy_cmd.begin();
+	copy(_staging_buffer);
 
-	copy_cmd.copyBufferToImage(
-		_staging_buffer.getBuffer(),
-		_image.getImage(),
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&image_copy
-	);
-
-	copy_cmd.end();
-
-	changeLayout(
-		_image_layout,
-		VK_ACCESS_TRANSFER_WRITE_BIT,
-		VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VK_PIPELINE_STAGE_TRANSFER_BIT,
-		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
-	);
+	//changeLayout(
+	//	_image_info.initialLayout,
+	//	VK_ACCESS_TRANSFER_WRITE_BIT,
+	//	VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+	//	VK_PIPELINE_STAGE_TRANSFER_BIT,
+	//	VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	//);
 
 	//copy_cmd.end();
 
@@ -179,11 +155,11 @@ void Texture::changeLayout(VkImageLayout new_layout,
 	VkImageMemoryBarrier image_memory_barrier{};
 	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	image_memory_barrier.pNext = nullptr;
-	image_memory_barrier.image = _image.getImage();
+	image_memory_barrier.image = Image::getImage();
 	image_memory_barrier.subresourceRange = subresource_range;
 	image_memory_barrier.srcAccessMask = src_access_mask;
 	image_memory_barrier.dstAccessMask = dst_access_mask;
-	image_memory_barrier.oldLayout = _image_layout;
+	image_memory_barrier.oldLayout = _image_info.initialLayout;
 	image_memory_barrier.newLayout = new_layout;
 
 	cmd_buf.pipelineBarrier(
@@ -197,13 +173,72 @@ void Texture::changeLayout(VkImageLayout new_layout,
 	
 	cmd_buf.end();
 
-	_image_layout = new_layout;
+	_stage_access_info.access_mask = dst_access_mask;
+	_stage_access_info.stage_mask = dst_stage_mask;
+
+	_image_info.initialLayout = new_layout;
+}
+
+void Texture::copy(Buffer& buffer) {
+	// To do for each mip level
+	// (To start, we consider only the original level -> 0)
+	VkBufferImageCopy image_copy{};
+	image_copy.bufferOffset = 0;
+	image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.imageSubresource.mipLevel = 0;
+	image_copy.imageSubresource.baseArrayLayer = 0;
+	image_copy.imageSubresource.layerCount = 1;
+	image_copy.imageExtent.width = _width;
+	image_copy.imageExtent.height = _height;
+	image_copy.imageExtent.depth = 1;
+
+	CommandBuffer cmd_buff = _queue->allocateCommandBuffer();
+	cmd_buff.begin();
+
+	cmd_buff.copyBufferToImage(
+		_staging_buffer.getBuffer(),
+		Image::getImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		&image_copy
+	);
+
+	VkImageSubresourceRange image_barrier_sub_range{};
+	image_barrier_sub_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_barrier_sub_range.baseMipLevel = 0;
+	image_barrier_sub_range.levelCount = 1;
+	image_barrier_sub_range.layerCount = 0;
+	image_barrier_sub_range.layerCount = 1;
+
+	VkImageMemoryBarrier image_barrier{};
+	image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	image_barrier.pNext = nullptr;
+	image_barrier.srcAccessMask = _stage_access_info.access_mask;
+	image_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	image_barrier.oldLayout = _image_info.initialLayout;
+	image_barrier.newLayout = _image_info.initialLayout;
+	image_barrier.image = Image::getImage();
+	image_barrier.subresourceRange = image_barrier_sub_range;
+
+	cmd_buff.pipelineBarrier(
+		_stage_access_info.stage_mask,
+		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &image_barrier
+	);
+
+	_stage_access_info.access_mask = image_barrier.dstAccessMask;
+	_stage_access_info.stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+	cmd_buff.end();
 }
 
 void Texture::destroy() {
-	_image.freeMemory();
-	_image.destroyImage();
-	_image.destroyImageView();
+	Image::freeMemory();
+	Image::destroyImage();
+	Image::destroyImageView();
 }
 
 /**
@@ -337,17 +372,17 @@ void Texture::destroy() {
 //}
 
 const uint32_t Texture::getWidth() const {
-	return _image.getImageExtentWidth();
+	return Image::getImageExtentWidth();
 }
 
 const uint64_t Texture::getHeight() const {
-	return _image.getImageExtentHeight();
+	return Image::getImageExtentHeight();
 }
 
 const uint8_t Texture::getNbComponents() const {
 	return _n;
 }
 
-const Image& Texture::getImage() const {
-	return _image;
-}
+//const Image& Texture::getImage() const {
+//	return _image;
+//}

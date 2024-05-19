@@ -15,7 +15,7 @@
 #include <glm/glm.hpp>
 
 
-class Texture
+class Texture : public Image
 {
 private:
 	uint64_t _width;
@@ -25,12 +25,13 @@ private:
 
 	Queue* _queue;
 
-	Image _image;
-	VkImageLayout _image_layout{ VK_IMAGE_LAYOUT_UNDEFINED };
+	//Image _image;
+	//VkImageLayout _image_layout{ VK_IMAGE_LAYOUT_UNDEFINED };
 
 	VkFormat _format;
 
 	StagingBuffer _staging_buffer{};
+
 
 public:
 	Texture();
@@ -56,6 +57,8 @@ public:
 		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 	);
 
+	void copy(Buffer& buffer);
+
 	//glm::vec4& pixel(uint64_t row, uint64_t col);
 	//const std::vector<glm::vec4>& pixels() const;
 
@@ -74,6 +77,6 @@ public:
 	const uint32_t getWidth() const;
 	const uint64_t getHeight() const;
 	const uint8_t getNbComponents() const;
-	const Image& getImage() const;
+	//const Image& getImage() const;
 };
 

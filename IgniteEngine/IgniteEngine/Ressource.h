@@ -7,6 +7,11 @@
 
 class DefaultConf;
 
+struct PipelineStageAndAccessMaskInfo {
+	VkPipelineStageFlags stage_mask;
+	VkAccessFlags access_mask;
+};
+
 class Ressource
 {
 protected:
@@ -14,6 +19,8 @@ protected:
 	VkMemoryRequirements _memory_req{};
 	VkDeviceMemory _memory{};
 	VkMemoryPropertyFlags _memory_property_flags{};
+
+	PipelineStageAndAccessMaskInfo _stage_access_info;
 
 public:
 	Ressource();
@@ -23,6 +30,8 @@ public:
 	void setMemoryPropertyFlags(VkMemoryPropertyFlags memory_property_flags);
 	void allocateMemory();
 	virtual void bind();
+
+	PipelineStageAndAccessMaskInfo getStageAccessInfo();
 
 	// Copy the ressource data in parameter into the calling ressource
 	//virtual void copy() = 0;

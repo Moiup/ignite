@@ -9,6 +9,7 @@ private:
 	VkImage _image;
 	VkImageView _image_view;
 
+protected:
 	VkImageCreateInfo _image_info;
 	VkImageViewCreateInfo _image_view_info;
 

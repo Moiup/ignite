@@ -54,6 +54,10 @@ void Ressource::bind() {
 	;
 }
 
+PipelineStageAndAccessMaskInfo Ressource::getStageAccessInfo() {
+	return _stage_access_info;
+}
+
 void Ressource::freeMemory() {
 	vkFreeMemory(_queue->getDevice()->getDevice(), _memory, nullptr);
 }

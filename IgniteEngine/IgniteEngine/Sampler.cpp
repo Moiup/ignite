@@ -43,8 +43,8 @@ void Sampler::destroy() {
 	);
 }
 
-const VkSampler* Sampler::getSampler() const {
-	return &_sampler;
+const VkSampler Sampler::getSampler() const {
+	return _sampler;
 }
 
 void Sampler::setDevice(Device* device) {

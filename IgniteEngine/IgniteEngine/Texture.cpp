@@ -58,11 +58,11 @@ void Texture::setDimensions(uint32_t width, uint32_t height) {
 	_height = height;
 }
 
-void Texture::setSampler(Sampler* sampler) {
-	_sampler = sampler;
+void Texture::setSampler(Sampler& sampler) {
+	_sampler = sampler.getSampler();
 }
 
-Sampler* Texture::getSampler() {
+VkSampler Texture::getSampler() {
 	return _sampler;
 }
 

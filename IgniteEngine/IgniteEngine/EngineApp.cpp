@@ -95,7 +95,7 @@ void EngineApp::init() {
 	_white_texture.setDimensions(pixels.getWidth(), pixels.getHeight());
 	_white_texture.create();
 	_white_texture.update(pixels);
-	_white_texture.changeLayout(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL);
+	_white_texture.changeLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	DefaultConf::graphics_queue->submit();
 	DefaultConf::graphics_queue->wait();

@@ -194,8 +194,7 @@ void Pipeline::setWriteDescriptorSet(
 		VkDescriptorImageInfo* image_info = new VkDescriptorImageInfo[samplers.size()];
 		uint32_t i = 0;
 		for (auto& s : samplers) {
-			VkSampler* samp = (VkSampler*)s->getSampler();
-			image_info[i].sampler = *samp;
+			image_info[i].sampler = s->getSampler();
 			//image_info[i].imageLayout = 0;
 			image_info[i].imageView = nullptr;
 		}
@@ -229,7 +228,7 @@ void Pipeline::setWriteDescriptorSet(
 		VkDescriptorImageInfo* image_info = new VkDescriptorImageInfo[textures.size()];
 		uint32_t i = 0;
 		for (auto& tex : textures) {
-			image_info[i].sampler = nullptr;
+			image_info[i].sampler = textures[i]->getSampler();
 			image_info[i].imageLayout = textures[i]->getImageLayout();
 			image_info[i].imageView = (VkImageView)textures[i]->getImageView();
 			i++;

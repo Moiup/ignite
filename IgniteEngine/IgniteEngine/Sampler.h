@@ -18,7 +18,7 @@ public:
 	void create();
 	void destroy();
 
-	const VkSampler* getSampler() const;
+	const VkSampler getSampler() const;
 
 	void setDevice(Device* device);
 

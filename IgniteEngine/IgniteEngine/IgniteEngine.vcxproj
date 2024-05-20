@@ -214,6 +214,7 @@
     <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RayTracerCPU.cpp" />
+    <ClCompile Include="ReadWriteImageMod.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Ressource.cpp" />
     <ClCompile Include="Sampler.cpp" />
@@ -305,6 +306,7 @@
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTracerCPU.h" />
+    <ClInclude Include="ReadWriteImageMod.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Ressource.h" />

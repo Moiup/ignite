@@ -10,6 +10,7 @@
 
 #include "Bistro.h"
 #include "ComputeShaderTest.h"
+#include "ReadWriteImageMod.h"
 #include "Hand2D.h"
 
 class Modules
@@ -20,7 +21,7 @@ private:
 	//TestModule _test_module;
 	//MediapipeModule _mediapipe_module;
 	Bistro _bistro;
-	//ComputeShaderTest _compute_shader_test;
+	ComputeShaderTest _compute_shader_test;
 	//Hand2D _hand2d;
 
 public:

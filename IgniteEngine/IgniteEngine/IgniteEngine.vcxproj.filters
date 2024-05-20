@@ -324,6 +324,9 @@
     <ClCompile Include="Device.cpp">
       <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
+    <ClCompile Include="ReadWriteImageMod.cpp">
+      <Filter>Ignite\Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -604,6 +607,9 @@
     </ClInclude>
     <ClInclude Include="Device.h">
       <Filter>Ignite\Engine\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadWriteImageMod.h">
+      <Filter>Ignite\Module</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

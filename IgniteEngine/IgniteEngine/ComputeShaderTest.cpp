@@ -1,6 +1,6 @@
 #include "ComputeShaderTest.h"
 
-ComputeShaderTest::ComputeShaderTest() {
+ComputeShaderTest::ComputeShaderTest() : Module::Module() {
 	;
 }
 

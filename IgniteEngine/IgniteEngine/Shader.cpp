@@ -155,6 +155,21 @@ void Shader::addTextureInfo(std::string name, uint32_t binding, VkShaderStageFla
 	addTextureInfo(name, binding, stage_flags, 1);
 }
 
+void Shader::addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count) {
+	if (_texture_info.count(name)) {
+		std::string error = "Error: there already is a texture info named " + name + "!";
+		throw std::runtime_error(error);
+	}
+
+	TextureInfo info{};
+	info.setBinding(binding);
+	info.setDescriptorType(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
+	info.setStageFlags(stage_flags);
+	info.setDescriptorCount(descriptor_count);
+
+	_texture_info[name] = info;
+}
+
 void Shader::addTexture(std::string name, Texture* texture) {
 	_textures[name].push_back(texture);
 }

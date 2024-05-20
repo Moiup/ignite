@@ -230,7 +230,7 @@ void Pipeline::setWriteDescriptorSet(
 		uint32_t i = 0;
 		for (auto& tex : textures) {
 			image_info[i].sampler = nullptr;
-			image_info[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			image_info[i].imageLayout = textures[i]->getImageLayout();
 			image_info[i].imageView = (VkImageView)textures[i]->getImageView();
 			i++;
 		}

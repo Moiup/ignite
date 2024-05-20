@@ -171,6 +171,10 @@ uint32_t Image::getImageExtentHeight() const {
 	return _image_info.extent.height;
 }
 
+VkImageLayout Image::getImageLayout() const {
+	return _image_info.initialLayout;
+}
+
 const VkImage& Image::getImage() const {
 	return _image;
 }

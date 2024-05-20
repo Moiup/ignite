@@ -50,6 +50,7 @@ public:
 	VkFormat getImageFormat();
 	uint32_t getImageExtentWidth() const;
 	uint32_t getImageExtentHeight() const;
+	VkImageLayout getImageLayout() const;
 
 	const VkImage& getImage() const;
 	void setImage(VkImage image);

@@ -90,7 +90,7 @@ void EngineApp::init() {
 
 
 	// White Texture
-	;	Pixels pixels("../assets/textures/white.png");
+	Pixels pixels("../assets/textures/white.png");
 	_white_texture.setQueue(DefaultConf::graphics_queue);
 	_white_texture.setDimensions(pixels.getWidth(), pixels.getHeight());
 	_white_texture.create();

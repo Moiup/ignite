@@ -3,17 +3,22 @@
 #include "Module.h"
 #include "DispatcherSync.h"
 
+struct CRWSPushConstant {
+	uint32_t width;
+	uint32_t height;
+};
+
 class ReadWriteImageMod : public Module
 {
 
 private:
-	ComputeShader _comp_read_write_shader;
+	ComputeShader _comp_read_write_shader{};
 
-	Texture _src_texture;
-	Texture _dst_texture;
+	Texture _src_texture{};
+	Texture _dst_texture{};
 
-	ComputePipeline _compute_pipeline;
-	DispatcherSync _dispatcher_sync;
+	ComputePipeline _compute_pipeline{};
+	DispatcherSync _dispatcher_sync{};
 
 public:
 	ReadWriteImageMod();
@@ -24,4 +29,3 @@ public:
 	void close();
 
 };
-

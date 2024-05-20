@@ -1,2 +1,2 @@
-C:/VulkanSDK/1.3.204.0/Bin/glslangValidator.exe --target-env vulkan1.2 -e main -o compute_sum.comp.spv compute_sum.comp
+.\..\IgniteEngine\vulkan_sdk\Bin\glslc.exe img_blue.comp -o img_blue.spv
 pause

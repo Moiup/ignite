@@ -25,7 +25,7 @@ public:
 
 	bool readFile(std::string file_path);
 	//void setPixels(uint32_t width, uint32_t height);
-	//void setPixels(Pointer<glm::vec4>& pixels, uint32_t width, uint32_t height);
+	void setPixels(Pointer<uint8_t>& pixels, uint32_t width, uint32_t height);
 
 	uint32_t getWidth();
 	uint32_t getHeight();

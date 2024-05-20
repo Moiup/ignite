@@ -1,23 +1,15 @@
 #version 450
 
-layout (std430, binding = 0) readonly buffer inputData
-{
-    int input_data[];
+layout(push_constant, std430) uniform pc {
+    uint img_width;
+    uint img_height;
 };
 
-layout (std430, binding = 1) writeonly buffer outputData
-{
-    int output_data[];
-};
+layout (binding = 0, rgba8ui) uniform readonly uimage2D src_image;
 
-layout(local_size_x = 8) in;
+layout (binding = 1, rgba8ui) uniform writeonly uimage2D dst_image;
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 void main(){
     const uint id = gl_GlobalInvocationID.x;
-    const uint data_length = input_data.length();
-
-    if(id > data_length){
-        return;
-    }
-
-    output_data[id] = input_data[id] + int(id);
 }

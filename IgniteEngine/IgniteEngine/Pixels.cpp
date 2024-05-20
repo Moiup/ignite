@@ -62,13 +62,13 @@ bool Pixels::readFile(std::string file_path) {
 //	_pixels = new glm::vec4[width * height];
 //}
 
-//void Pixels::setPixels(Pointer<glm::vec4>& pixels, uint32_t width, uint32_t height) {
-//	_width = width;
-//	_height = height;
-//	//delete[] _pixels;
-//	_pixels = new glm::uint8_t[width * height * _n];
-//	std::memcpy(&_pixels[0], &pixels[0], width * height * sizeof(glm::vec4));
-//}
+void Pixels::setPixels(Pointer<uint8_t>& pixels, uint32_t width, uint32_t height) {
+	_width = width;
+	_height = height;
+	//delete[] _pixels;
+	_pixels = pixels;
+	//std::memcpy(&_pixels[0], &pixels[0], width * height * sizeof(glm::vec4));
+}
 
 uint32_t Pixels::getWidth() {
 	return _width;

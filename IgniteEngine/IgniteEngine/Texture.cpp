@@ -91,7 +91,7 @@ void Texture::create() {
 	Image::setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
 	Image::setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
 	Image::setImageExtent(_width, _height, 1);
-	Image::setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+	Image::setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT);
 	Image::setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	Image::createImage();

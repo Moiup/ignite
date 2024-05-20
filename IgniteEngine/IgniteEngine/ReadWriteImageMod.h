@@ -3,11 +3,6 @@
 #include "Module.h"
 #include "DispatcherSync.h"
 
-struct CRWSPushConstant {
-	uint32_t width;
-	uint32_t height;
-};
-
 class ReadWriteImageMod : public Module
 {
 

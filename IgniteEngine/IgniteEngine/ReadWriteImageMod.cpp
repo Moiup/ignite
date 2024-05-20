@@ -54,19 +54,26 @@ void ReadWriteImageMod::start() {
 		&_dst_texture
 	);
 
+	uint32_t width = src_pixels.getWidth();
+	uint32_t height = src_pixels.getHeight();
+	_comp_read_write_shader.addPushConstant("width", &width);
+	_comp_read_write_shader.addPushConstant("height", &height);
 
-	CRWSPushConstant pc{};
-	pc.width = dst_pixels.getWidth();
-	pc.height = dst_pixels.getHeight();
+	// The compute pipeline
+	_compute_pipeline.setShader(&_comp_read_write_shader);
+	_compute_pipeline.create();
 
-	_comp_read_write_shader.addPushConstant("pc", &pc);
-
-
+	// Dispatcher
+	_dispatcher_sync.setQueue(&DefaultConf::logical_device->getQueues("compute_queues")[0]);
+	_dispatcher_sync.setComputePipeline(&_compute_pipeline);
+	_dispatcher_sync.create();
 }
 
 void ReadWriteImageMod::update() {
 	Module::update();
 
+	std::cout << "Dispatch" << std::endl;
+	_dispatcher_sync.dispatch(100, 1, 1);
 }
 
 void ReadWriteImageMod::close() {

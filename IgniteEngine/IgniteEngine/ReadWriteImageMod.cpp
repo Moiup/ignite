@@ -14,6 +14,7 @@ void ReadWriteImageMod::start() {
 	Pixels src_pixels("../assets/textures/scarecrow.png");
 	_src_texture.setQueue(DefaultConf::compute_queue);
 	_src_texture.setDimensions(src_pixels.getWidth(), src_pixels.getHeight());
+	_src_texture.setFormat(VK_FORMAT_R8G8B8A8_UNORM);
 	_src_texture.create();
 	_src_texture.update(src_pixels);
 	_src_texture.changeLayout(VK_IMAGE_LAYOUT_GENERAL);
@@ -21,10 +22,12 @@ void ReadWriteImageMod::start() {
 	Pixels dst_pixels("../assets/textures/scarecrow.png");
 	_dst_texture.setQueue(DefaultConf::compute_queue);
 	_dst_texture.setDimensions(dst_pixels.getWidth(), dst_pixels.getHeight());
+	_dst_texture.setFormat(VK_FORMAT_R8G8B8A8_UNORM);
 	_dst_texture.create();
 	_dst_texture.update(dst_pixels);
 	_dst_texture.changeLayout(VK_IMAGE_LAYOUT_GENERAL);
-
+	DefaultConf::compute_queue->submit();
+	DefaultConf::compute_queue->wait();
 
 	// Setting the shader up
 	_comp_read_write_shader.setLogicalDevice(DefaultConf::logical_device);
@@ -36,6 +39,10 @@ void ReadWriteImageMod::start() {
 		VK_SHADER_STAGE_COMPUTE_BIT,
 		1
 	);
+	_comp_read_write_shader.addTexture(
+		"src_image",
+		&_src_texture
+	);
 
 	_comp_read_write_shader.addStorageTextureInfo(
 		"dst_image",
@@ -43,21 +50,23 @@ void ReadWriteImageMod::start() {
 		VK_SHADER_STAGE_COMPUTE_BIT,
 		1
 	);
-
-	_comp_read_write_shader.addTexture(
-		"src_image",
-		&_src_texture
-	);
-
 	_comp_read_write_shader.addTexture(
 		"dst_image",
 		&_dst_texture
 	);
 
-	uint32_t width = src_pixels.getWidth();
-	uint32_t height = src_pixels.getHeight();
-	_comp_read_write_shader.addPushConstant("width", &width);
-	_comp_read_write_shader.addPushConstant("height", &height);
+	
+	_crws_pc.width = src_pixels.getWidth();
+	_crws_pc.height = src_pixels.getHeight();
+	//uint32_t width = dst_pixels.getWidth();
+
+	_comp_read_write_shader.addPushConstantInfo(
+		"pc",
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		0,
+		sizeof(_crws_pc)
+	);
+	_comp_read_write_shader.addPushConstant("pc", &_crws_pc);
 
 	// The compute pipeline
 	_compute_pipeline.setShader(&_comp_read_write_shader);
@@ -73,7 +82,7 @@ void ReadWriteImageMod::update() {
 	Module::update();
 
 	std::cout << "Dispatch" << std::endl;
-	_dispatcher_sync.dispatch(100, 1, 1);
+	_dispatcher_sync.dispatch(_crws_pc.width/16, _crws_pc.height/16, 1);
 }
 
 void ReadWriteImageMod::close() {

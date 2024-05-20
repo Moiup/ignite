@@ -15,7 +15,7 @@ void main(){
     const uint id = gl_GlobalInvocationID.x;
     const uint data_length = input_data.length();
 
-    if(id > data_length){
+    if(id >= data_length){
         return;
     }
 

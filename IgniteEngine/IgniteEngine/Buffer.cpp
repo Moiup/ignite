@@ -137,9 +137,7 @@ void Buffer::unmap() {
 }
 
 void Buffer::copy(Image& img) {
-	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
 
-	cmd_buf.begin();
 
 	// Change image layout to transfer
 	VkImageLayout initial_layout = img.getImageLayout();
@@ -148,6 +146,8 @@ void Buffer::copy(Image& img) {
 	);
 
 	// copy
+	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
+	cmd_buf.begin();
 	VkImageSubresourceLayers img_subresource{};
 	img_subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	img_subresource.mipLevel = 0;
@@ -182,10 +182,11 @@ void Buffer::copy(Image& img) {
 		0, nullptr
 	);
 
+	cmd_buf.end();
+
 	// Changing image layout back
 	img.changeLayout(initial_layout);
 
-	cmd_buf.end();
 
 	//_stage_access_info.access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
 	_stage_access_info.stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;

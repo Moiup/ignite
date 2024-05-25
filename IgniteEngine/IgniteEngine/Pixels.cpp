@@ -82,22 +82,54 @@ glm::vec4 Pixels::getPixel(uint32_t l, uint32_t c) {
 	);
 }
 
+void Pixels::setPixel(uint32_t l, uint32_t c, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	_pixels[pixR(l, c)] = r;
+	_pixels[pixG(l, c)] = g;
+	_pixels[pixB(l, c)] = b;
+	_pixels[pixA(l, c)] = a;
+}
+
+void Pixels::setPixel(uint32_t l, uint32_t c, uint8_t col) {
+	setPixel(l, c, col, col, col, col);
+}
+
+void Pixels::setPixel(uint32_t l, uint32_t c, glm::vec4 pix) {
+	setPixel(
+		l, c,
+		static_cast<uint8_t>(pix.r),
+		static_cast<uint8_t>(pix.g),
+		static_cast<uint8_t>(pix.b),
+		static_cast<uint8_t>(pix.a)
+	);
+}
+
+void Pixels::setPixel(uint32_t l, uint32_t c, float r, float g, float b, float a) {
+	setPixel(
+		l, c,
+		glm::vec4(r, g, b, a)
+	);
+}
+
+void Pixels::setPixel(uint32_t l, uint32_t c, float col) {
+	setPixel(l, c, static_cast<uint8_t>(col));
+}
+
 Pointer<uint8_t>& Pixels::getPixels() {
 	return _pixels;
 }
 
-uint32_t Pixels::pixIndex(uint32_t l, uint32_t c) {
+uint32_t Pixels::pixR(uint32_t l, uint32_t c) {
 	return (l * _width + c) * _nb_channels;
 }
 
-uint32_t Pixels::pixR(uint32_t l, uint32_t c) {
-	return pixIndex(l, c) + 1;
-}
-
 uint32_t Pixels::pixG(uint32_t l, uint32_t c) {
-	return pixIndex(l, c) + 2;
+	return pixR(l, c) + 1;
 }
 
 uint32_t Pixels::pixB(uint32_t l, uint32_t c) {
-	return pixIndex(l, c) + 3;
+	return pixR(l, c) + 2;
+}
+
+uint32_t Pixels::pixA(uint32_t l, uint32_t c) {
+	return pixR(l, c) + 3;
 }

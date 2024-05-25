@@ -10,6 +10,14 @@ void ReadWriteImageMod::start() {
 	Module::start();
 	std::cout << "read-write start" << std::endl;
 
+	// Loading the plan
+	std::vector<Texture*> textures{ &_dst_texture };
+	_plan_info.loadWavefont("../assets/3d_objects/plan_textured/plan_tex.obj");
+	_plan.createFromObjectInfo(_plan_info);
+	_plan.setRenderer(DefaultConf::renderer);
+	_plan.addShader(DefaultConf::graphic_shader);
+	_plan.setTexture(textures);
+
 	// Setting the textures
 	Pixels src_pixels("../assets/textures/scarecrow.png");
 	_src_texture.setQueue(DefaultConf::compute_queue);
@@ -58,7 +66,7 @@ void ReadWriteImageMod::start() {
 	
 	_crws_pc.width = src_pixels.getWidth();
 	_crws_pc.height = src_pixels.getHeight();
-	//uint32_t width = dst_pixels.getWidth();
+	_crws_pc.color_sum = 0;
 
 	_comp_read_write_shader.addPushConstantInfo(
 		"pc",
@@ -81,8 +89,15 @@ void ReadWriteImageMod::start() {
 void ReadWriteImageMod::update() {
 	Module::update();
 
-	std::cout << "Dispatch" << std::endl;
+	//std::cout << "Dispatch" << std::endl;
 	_dispatcher_sync.dispatch(_crws_pc.width/16, _crws_pc.height/16, 1);
+
+	//if (DefaultConf::event->type == SDL_KEYDOWN) {
+	//	if (DefaultConf::event->key.keysym.sym == SDLK_y) {
+	//		_crws_pc.color_sum += 10;
+	//	}
+	//}
+	_crws_pc.color_sum += 1;
 }
 
 void ReadWriteImageMod::close() {

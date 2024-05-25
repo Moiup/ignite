@@ -3,6 +3,7 @@
 layout(push_constant, std430) uniform pc {
     uint img_width;
     uint img_height;
+    uint color_sum;
 };
 
 layout (binding = 0, rgba8) uniform readonly image2D src_image;
@@ -21,7 +22,14 @@ void main(){
 
     vec4 src_col = imageLoad(src_image, ivec2(idx, idy));
 
-    vec4 dst_col = vec4(src_col.r, src_col.g, 255, src_col.a);
+    vec4 dst_col = vec4(
+        src_col.r,
+        src_col.g,
+        float((int(src_col.b * 255.0) + color_sum) % 255) / 255.0,
+        src_col.a
+    );
+
+    // vec4 dst_col = vec4(src_col.r, src_col.g, src_col.b, src_col.a);
 
     imageStore(dst_image, ivec2(idx, idy), dst_col);
 }

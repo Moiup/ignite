@@ -27,7 +27,8 @@ void ReadWriteImageMod::start() {
 	_src_texture.update(src_pixels);
 	_src_texture.changeLayout(VK_IMAGE_LAYOUT_GENERAL);
 
-	Pixels dst_pixels("../assets/textures/scarecrow.png");
+	Pixels dst_pixels{};
+	dst_pixels.setPixels(src_pixels.getWidth(), src_pixels.getHeight());
 	_dst_texture.setQueue(DefaultConf::compute_queue);
 	_dst_texture.setDimensions(dst_pixels.getWidth(), dst_pixels.getHeight());
 	_dst_texture.setFormat(VK_FORMAT_R8G8B8A8_UNORM);

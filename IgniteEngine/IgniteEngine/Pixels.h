@@ -31,17 +31,16 @@ public:
 	uint32_t getWidth();
 	uint32_t getHeight();
 	glm::vec4 getPixel(uint32_t l, uint32_t c);
+	void setPixel(uint32_t l, uint32_t c, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+	void setPixel(uint32_t l, uint32_t c, uint8_t col);
 	void setPixel(uint32_t l, uint32_t c, glm::vec4 pix);
 	void setPixel(uint32_t l, uint32_t c, float r, float g, float b, float a);
-	void setPixel(uint32_t l, uint32_t c, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 	void setPixel(uint32_t l, uint32_t c, float col);
-	void setPixel(uint32_t l, uint32_t c, uint8_t col);
 
 
 	Pointer<uint8_t>& getPixels();
 
 private:
-	uint32_t pixIndex(uint32_t l, uint32_t c);
 	uint32_t pixR(uint32_t l, uint32_t c);
 	uint32_t pixG(uint32_t l, uint32_t c);
 	uint32_t pixB(uint32_t l, uint32_t c);

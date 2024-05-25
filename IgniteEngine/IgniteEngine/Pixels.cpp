@@ -6,10 +6,7 @@
 #include "stb_image/stb_image.h"
 #include "stb_image/stb_image_write.h"
 
-Pixels::Pixels() :
-	_width{0},
-	_height{0},
-	_pixels{}
+Pixels::Pixels()
 {
 	;
 }
@@ -30,14 +27,14 @@ bool Pixels::readFile(std::string file_path) {
 	uint8_t* data;
 	int width, height, n;
 
-	data = stbi_load(file_path.c_str(), &width, &height, &n, _n);
+	data = stbi_load(file_path.c_str(), &width, &height, &n, _nb_channels);
 
 	if (!data) {
 		std::cerr << "Error: failed opening the texture '" << file_path << "'" << std::endl;
 		return false;
 	}
 
-	_pixels = new uint8_t[width * height * _n];
+	_pixels = new uint8_t[width * height * _nb_channels];
 	_width = width;
 	_height = height;
 
@@ -48,26 +45,24 @@ bool Pixels::readFile(std::string file_path) {
 	//	_pixels[i].a = data[i * n + 3];
 	//}
 
-	std::memcpy(_pixels.data(), data, width * height * _n * sizeof(uint8_t));
+	std::memcpy(_pixels.data(), data, width * height * _nb_channels * sizeof(uint8_t));
 
 	stbi_image_free(data);
 
 	return true;
 }
 
-//void Pixels::setPixels(uint32_t width, uint32_t height) {
-//	_width = width;
-//	_height = _height;
-//	//delete[] _pixels;
-//	_pixels = new glm::vec4[width * height];
-//}
+void Pixels::setPixels(uint32_t width, uint32_t height) {
+	_width = width;
+	_height = height;
+	_pixels = new uint8_t[_width * _height * _nb_channels];
+	memset(_pixels.data(), 0, _width * _height * _nb_channels * sizeof(uint8_t));
+}
 
 void Pixels::setPixels(Pointer<uint8_t>& pixels, uint32_t width, uint32_t height) {
 	_width = width;
 	_height = height;
-	//delete[] _pixels;
 	_pixels = pixels;
-	//std::memcpy(&_pixels[0], &pixels[0], width * height * sizeof(glm::vec4));
 }
 
 uint32_t Pixels::getWidth() {
@@ -78,15 +73,31 @@ uint32_t Pixels::getHeight() {
 	return _height;
 }
 
-glm::vec4 Pixels::getPixel(uint32_t r, uint32_t c) {
+glm::vec4 Pixels::getPixel(uint32_t l, uint32_t c) {
 	return glm::vec4(
-		_pixels[(r * _width + c) * _n],
-		_pixels[(r * _width + c) * _n + 1],
-		_pixels[(r * _width + c) * _n + 2],
-		_pixels[(r * _width + c) * _n + 3]
+		_pixels[pixR(l, c)],
+		_pixels[pixG(l, c)],
+		_pixels[pixB(l, c)],
+		_pixels[pixA(l, c)]
 	);
 }
 
 Pointer<uint8_t>& Pixels::getPixels() {
 	return _pixels;
+}
+
+uint32_t Pixels::pixIndex(uint32_t l, uint32_t c) {
+	return (l * _width + c) * _nb_channels;
+}
+
+uint32_t Pixels::pixR(uint32_t l, uint32_t c) {
+	return pixIndex(l, c) + 1;
+}
+
+uint32_t Pixels::pixG(uint32_t l, uint32_t c) {
+	return pixIndex(l, c) + 2;
+}
+
+uint32_t Pixels::pixB(uint32_t l, uint32_t c) {
+	return pixIndex(l, c) + 3;
 }

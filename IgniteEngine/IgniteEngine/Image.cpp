@@ -194,3 +194,46 @@ void Image::getMemoryRequirements() {
 		&_memory_req
 	);
 }
+
+void Image::changeLayout(VkImageLayout new_layout,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
+	cmd_buf.begin();
+
+	// Preparing the transfer with the image memory barrier
+	VkImageSubresourceRange subresource_range{};
+	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range.baseMipLevel = 0;
+	subresource_range.levelCount = 1;
+	subresource_range.layerCount = 1;
+
+	VkImageMemoryBarrier image_memory_barrier{};
+	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	image_memory_barrier.pNext = nullptr;
+	image_memory_barrier.image = Image::getImage();
+	image_memory_barrier.subresourceRange = subresource_range;
+	image_memory_barrier.srcAccessMask = src_access_mask;
+	image_memory_barrier.dstAccessMask = dst_access_mask;
+	image_memory_barrier.oldLayout = _image_info.initialLayout;
+	image_memory_barrier.newLayout = new_layout;
+
+	cmd_buf.pipelineBarrier(
+		src_stage_mask,
+		dst_stage_mask,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &image_memory_barrier
+	);
+
+	cmd_buf.end();
+
+	_stage_access_info.access_mask = dst_access_mask;
+	_stage_access_info.stage_mask = dst_stage_mask;
+
+	_image_info.initialLayout = new_layout;
+}

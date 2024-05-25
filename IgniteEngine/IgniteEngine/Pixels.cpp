@@ -52,6 +52,17 @@ bool Pixels::readFile(std::string file_path) {
 	return true;
 }
 
+bool Pixels::saveFile(std::string file_path) {
+	return stbi_write_png(
+		file_path.c_str(),
+		_width,
+		_height,
+		_nb_channels,
+		_pixels.data(),
+		0
+	);
+}
+
 void Pixels::setPixels(uint32_t width, uint32_t height) {
 	_width = width;
 	_height = height;

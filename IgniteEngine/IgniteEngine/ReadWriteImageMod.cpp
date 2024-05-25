@@ -93,11 +93,17 @@ void ReadWriteImageMod::update() {
 	//std::cout << "Dispatch" << std::endl;
 	_dispatcher_sync.dispatch(_crws_pc.width/16, _crws_pc.height/16, 1);
 
-	//if (DefaultConf::event->type == SDL_KEYDOWN) {
-	//	if (DefaultConf::event->key.keysym.sym == SDLK_y) {
-	//		_crws_pc.color_sum += 10;
-	//	}
-	//}
+	if (DefaultConf::event->type == SDL_KEYDOWN) {
+		if (DefaultConf::event->key.keysym.sym == SDLK_s && !_is_pressed_s) {
+			_dst_texture.flushToStaging();
+			_is_pressed_s = true;
+			//_crws_pc.color_sum += 10;
+		}
+	}
+	if (DefaultConf::event->type == SDL_KEYUP) {
+		_is_pressed_s = false;
+	}
+	
 	_crws_pc.color_sum += 1;
 }
 

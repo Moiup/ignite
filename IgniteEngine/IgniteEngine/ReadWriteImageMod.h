@@ -28,6 +28,8 @@ private:
 	ComputePipeline _compute_pipeline{};
 	DispatcherSync _dispatcher_sync{};
 
+	bool _is_pressed_s{false};
+
 public:
 	ReadWriteImageMod();
 

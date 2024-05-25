@@ -25,6 +25,7 @@ public:
 	~Pixels();
 
 	bool readFile(std::string file_path);
+	bool saveFile(std::string file_path);
 	void setPixels(uint32_t width, uint32_t height);
 	void setPixels(Pointer<uint8_t>& pixels, uint32_t width, uint32_t height);
 

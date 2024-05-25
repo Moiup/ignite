@@ -56,14 +56,10 @@ public:
 	void update(Pixels& pixels);
 	void destroy();
 
-	void changeLayout(VkImageLayout new_layout,
-		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
-
+	// Copy buffer to image
 	void copy(Buffer& buffer);
+
+	void flushToStaging();
 
 	//glm::vec4& pixel(uint64_t row, uint64_t col);
 	//const std::vector<glm::vec4>& pixels() const;

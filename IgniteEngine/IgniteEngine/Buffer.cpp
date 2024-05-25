@@ -136,6 +136,61 @@ void Buffer::unmap() {
 	);
 }
 
+void Buffer::copy(Image& img) {
+	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
+
+	cmd_buf.begin();
+
+	// Change image layout to transfer
+	VkImageLayout initial_layout = img.getImageLayout();
+	img.changeLayout(
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+	);
+
+	// copy
+	VkImageSubresourceLayers img_subresource{};
+	img_subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	img_subresource.mipLevel = 0;
+	img_subresource.baseArrayLayer = 0;
+	img_subresource.layerCount = 1;
+
+	VkBufferImageCopy img_copy{};
+	img_copy.bufferOffset = 0;
+	img_copy.bufferRowLength = 0;
+	img_copy.bufferImageHeight = 0;
+	img_copy.imageSubresource = img_subresource;
+	img_copy.imageOffset = { 0, 0, 0 };
+	img_copy.imageExtent.width = img.getImageExtentWidth();
+	img_copy.imageExtent.height = img.getImageExtentHeight();
+	img_copy.imageExtent.depth = 1;
+
+	cmd_buf.copyImageToBuffer(
+		img.getImage(),
+		img.getImageLayout(),
+		_buffer,
+		1,
+		&img_copy
+	);
+
+	// pipeline barrier
+	cmd_buf.pipelineBarrier(
+		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		0, nullptr
+	);
+
+	// Changing image layout back
+	img.changeLayout(initial_layout);
+
+	cmd_buf.end();
+
+	//_stage_access_info.access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	_stage_access_info.stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+}
+
 void Buffer::createBuffer() {
 	VkResult vk_result = vkCreateBuffer(
 		_queue->getDevice()->getDevice(),

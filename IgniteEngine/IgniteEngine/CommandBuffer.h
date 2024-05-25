@@ -72,5 +72,13 @@ public:
 		uint32_t regionCount,
 		const VkBufferImageCopy* pRegions
 	);
+
+	void copyImageToBuffer(
+		VkImage src_image,
+		VkImageLayout src_image_layout,
+		VkBuffer dst_buffer,
+		uint32_t region_count,
+		const VkBufferImageCopy* p_regions
+	);
 };
 

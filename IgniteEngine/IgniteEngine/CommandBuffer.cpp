@@ -260,3 +260,20 @@ void CommandBuffer::copyBufferToImage(
 		pRegions
 	);
 }
+
+void CommandBuffer::copyImageToBuffer(
+	VkImage src_image,
+	VkImageLayout src_image_layout,
+	VkBuffer dst_buffer,
+	uint32_t region_count,
+	const VkBufferImageCopy* p_regions
+) {
+	vkCmdCopyImageToBuffer(
+		_command_buffer,
+		src_image,
+		src_image_layout,
+		dst_buffer,
+		region_count,
+		p_regions
+	);
+}

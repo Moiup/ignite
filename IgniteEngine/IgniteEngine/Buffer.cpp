@@ -103,6 +103,17 @@ Pointer<uint8_t> Buffer::getValues() {
 	return Pointer<uint8_t>(v);
 }
 
+void Buffer::getValues(Pointer<uint8_t> data) {
+	if (_size == 0) {
+		return;
+	}
+
+	void* copy{};
+	copy = map();
+	memcpy(data.data(), copy, _size);
+	unmap();
+}
+
 uint32_t Buffer::getSize() {
 	return _size;
 }

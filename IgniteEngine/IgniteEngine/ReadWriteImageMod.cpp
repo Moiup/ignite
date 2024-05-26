@@ -95,9 +95,13 @@ void ReadWriteImageMod::update() {
 
 	if (DefaultConf::event->type == SDL_KEYDOWN) {
 		if (DefaultConf::event->key.keysym.sym == SDLK_s && !_is_pressed_s) {
-			_dst_texture.flushToStaging();
-			DefaultConf::compute_queue->submit();
-			DefaultConf::compute_queue->wait();
+			//_dst_texture.flushToStaging();
+			//DefaultConf::compute_queue->submit();
+			//DefaultConf::compute_queue->wait();
+			Pixels pixels{};
+			pixels.setPixels(_dst_texture.getImageExtentWidth(), _dst_texture.getImageExtentHeight());
+			_dst_texture.flushPixels(pixels);
+			pixels.saveFile("../assets/textures/out_scarecrow.png");
 			_is_pressed_s = true;
 			//_crws_pc.color_sum += 10;
 		}

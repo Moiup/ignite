@@ -32,6 +32,7 @@ public:
 
 	VkBuffer& getBuffer();
 	Pointer<uint8_t> getValues();
+	void getValues(Pointer<uint8_t> data);
 
 	uint32_t getSize();
 	uint32_t getCapacity();

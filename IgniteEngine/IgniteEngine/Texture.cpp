@@ -206,6 +206,13 @@ void Texture::flushToStaging() {
 	_staging_buffer.copy(*this);
 }
 
+void Texture::flushPixels(Pixels& pixels) {
+	flushToStaging();
+	_queue->submit();
+	_queue->wait();
+	_staging_buffer.getValues(pixels.getPixels().data());
+}
+
 void Texture::destroy() {
 	Image::freeMemory();
 	Image::destroyImage();

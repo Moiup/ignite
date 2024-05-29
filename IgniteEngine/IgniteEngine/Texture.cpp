@@ -95,7 +95,8 @@ void Texture::create() {
 		VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 		VK_IMAGE_USAGE_SAMPLED_BIT |
-		VK_IMAGE_USAGE_STORAGE_BIT
+		VK_IMAGE_USAGE_STORAGE_BIT |
+		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
 	);
 	Image::setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -114,6 +115,8 @@ void Texture::create() {
 	);
 	Image::createImageView();
 
+	changeLayout(VK_IMAGE_LAYOUT_GENERAL);
+
 	// Creating the staging buffer
 	_staging_buffer.setQueue(_queue);
 	_staging_buffer.setSize(_width * _height * _n * sizeof(uint8_t));
@@ -124,19 +127,41 @@ void Texture::update(Pixels& pixels) {
 	// Copying the actual texture data into the staging buffer
 	_staging_buffer.setValues(pixels.getPixels().data());
 
+	//changeLayout(
+	//	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+	//	0,
+	//	VK_ACCESS_TRANSFER_WRITE_BIT,
+	//	VK_PIPELINE_STAGE_HOST_BIT,
+	//	VK_PIPELINE_STAGE_TRANSFER_BIT
+	//);
+
+	// Copying the data from the buffer to the image
+	copy(
+		_staging_buffer,
+		0,
+		VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VK_PIPELINE_STAGE_HOST_BIT,
+		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+}
+
+void Texture::copy(
+	Buffer& buffer,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	VkImageLayout image_layout = _image_info.initialLayout;
+
 	changeLayout(
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		0,
+		src_access_mask,
 		VK_ACCESS_TRANSFER_WRITE_BIT,
-		VK_PIPELINE_STAGE_HOST_BIT,
+		src_stage_mask,
 		VK_PIPELINE_STAGE_TRANSFER_BIT
 	);
 
-	// Copying the data from the buffer to the image
-	copy(_staging_buffer);
-}
-
-void Texture::copy(Buffer& buffer) {
 	// To do for each mip level
 	// (To start, we consider only the original level -> 0)
 	VkBufferImageCopy image_copy{};
@@ -163,11 +188,11 @@ void Texture::copy(Buffer& buffer) {
 	cmd_buff.end();
 
 	changeLayout(
-		_image_info.initialLayout,
+		image_layout,
 		_stage_access_info.access_mask,
-		VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		dst_access_mask,
 		_stage_access_info.stage_mask,
-		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+		dst_stage_mask
 	);
 
 	//VkImageSubresourceRange image_barrier_sub_range{};

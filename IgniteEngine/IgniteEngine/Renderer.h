@@ -26,6 +26,9 @@ protected:
 
 	std::vector<VkPipelineStageFlags> _pipeline_stage_flags;
 
+	VkOffset2D _offset{};
+	VkExtent2D _extent{};
+
 public:
 	Renderer();
 
@@ -42,6 +45,8 @@ public:
 	void setPhysicalDevice(PhysicalDevice* gpu);
 	void setWindow(WindowSurface* _window);
 	void setClearColorValue(VkClearColorValue clear_color_value);
+	void setOffset(uint32_t x, uint32_t y);
+	void setExtent(uint32_t width, uint32_t height);
 
 protected:
 	virtual void createFencesAndSemaphores();

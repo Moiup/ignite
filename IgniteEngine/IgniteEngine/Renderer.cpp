@@ -54,6 +54,16 @@ void Renderer::setClearColorValue(VkClearColorValue clear_color_value) {
 	_clear_color_value = clear_color_value;
 }
 
+void Renderer::setOffset(uint32_t x, uint32_t y) {
+	_offset.x = x;
+	_offset.y = y;
+}
+
+void Renderer::setExtent(uint32_t width, uint32_t height) {
+	_extent.width = width;
+	_extent.height = height; 
+}
+
 void Renderer::createFencesAndSemaphores() {
 	;
 }

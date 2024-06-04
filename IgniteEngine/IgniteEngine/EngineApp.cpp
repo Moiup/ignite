@@ -276,6 +276,11 @@ void EngineApp::start() {
 	DefaultConf::renderer->setNbFrame(NB_FRAME);
 	DefaultConf::renderer->setPhysicalDevice(DefaultConf::gpu);
 	DefaultConf::renderer->setWindow(DefaultConf::render_window);
+	DefaultConf::renderer->setOffset(200, 0);
+	DefaultConf::renderer->setExtent(
+		DefaultConf::render_window->getWidth() - 200,
+		DefaultConf::render_window->getHeight()
+		);
 	DefaultConf::renderer->create();
 }
 

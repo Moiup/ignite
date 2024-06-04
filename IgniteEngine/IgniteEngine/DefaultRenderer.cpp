@@ -521,8 +521,8 @@ void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
 	rendering_info_khr.pNext = nullptr;
 	rendering_info_khr.flags = 0;
 	//rendering_info_khr.renderArea = graphics_pipeline.getScissors()[0];
-	rendering_info_khr.renderArea.offset = { 0, 0 };
-	rendering_info_khr.renderArea.extent = { _window->getWidth(), _window->getHeight()};
+	rendering_info_khr.renderArea.offset = _offset;
+	rendering_info_khr.renderArea.extent = _extent;
 	rendering_info_khr.layerCount = 1;
 	rendering_info_khr.viewMask = 0;
 	rendering_info_khr.colorAttachmentCount = 1;

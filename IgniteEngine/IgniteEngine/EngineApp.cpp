@@ -303,6 +303,14 @@ void EngineApp::update() {
 		//	)[0][0]
 		//);
 
+		//{
+		//	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+		//	float delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
+		//	DefaultConf::delta_time = delta_time;
+
+		//	std::cout << delta_time << std::endl;
+		//}
+
 		_cam_mvp = DefaultConf::camera->getMVP();
 
 		////_camera_buffer.setValues(
@@ -316,6 +324,7 @@ void EngineApp::update() {
 		std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
 		uint64_t delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
 		DefaultConf::delta_time = delta_time;
+
 	}
 
 	DefaultConf::logical_device->waitIdle();

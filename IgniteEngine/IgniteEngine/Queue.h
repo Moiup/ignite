@@ -122,6 +122,9 @@ private:
 	VkCommandBuffer* getPendingCommandBufferStartPointer() const;
 	uint32_t& getStartIndexPendingCommendBuffers();
 	uint32_t& getNbPendingCommandBuffers();
+
+	void freeCommandBuffers();
+
 	//void flush(VkFence* fences);
 };
 

@@ -336,7 +336,7 @@ const void Queue::wait() {
 		&_fence
 	);
 
-	getCommandPool().reset();
+	freeCommandBuffers();
 
 	getStartIndexPendingCommendBuffers() = 0;
 	getNbPendingCommandBuffers() = 0;
@@ -395,4 +395,13 @@ uint32_t& Queue::getStartIndexPendingCommendBuffers() {
 
 uint32_t& Queue::getNbPendingCommandBuffers() {
 	return _command_pool_indices[&getCommandPool()].nb_cmd_buf;
+}
+
+void Queue::freeCommandBuffers() {
+	vkFreeCommandBuffers(
+		_device->getDevice(),
+		getCommandPool().getPool(),
+		getPendingCommandBuffers().size(),
+		getPendingCommandBuffers().data()
+	);
 }

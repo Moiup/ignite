@@ -39,6 +39,8 @@ void DefaultRenderer::render() {
 	VkResult vk_result{};
 	uint32_t available_img{ 0 };
 
+	std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+	
 	_graphics_queues_in_flight[_current_frame].wait();
 
 	vk_result = vkAcquireNextImageKHR(
@@ -149,7 +151,7 @@ void DefaultRenderer::render() {
 	dynamicRenderingPipelineBarrierBack(cmd_buf);
 	cmd_buf.end();
 
-	VkCommandBuffer vk_cmd_buf = cmd_buf.getCommandBuffer();
+	//VkCommandBuffer vk_cmd_buf = cmd_buf.getCommandBuffer();
 	// Submit and present
 	_graphics_queues_in_flight[_current_frame].submit(
 		1,

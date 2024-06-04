@@ -319,6 +319,10 @@ const void Queue::submit(
 }
 
 const void Queue::wait() {
+	if (getPendingCommandBuffers().empty()) {
+		return;
+	}
+
 	VkResult result = vkWaitForFences(
 		_device->getDevice(),
 		1, &_fence,

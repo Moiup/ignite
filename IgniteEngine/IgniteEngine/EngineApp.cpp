@@ -41,6 +41,8 @@ void EngineApp::init() {
 	});
 	_instance.create();
 
+	
+
 	// Setting window
 	//const VkInstance& insta = _instance.getInstance();
 	//_render_window.setInstance(const_cast<VkInstance*>(&insta));
@@ -99,10 +101,9 @@ void EngineApp::init() {
 
 	DefaultConf::graphics_queue->submit();
 	DefaultConf::graphics_queue->wait();
-	
-	initEngineEntities();
 
-	_modules.init();
+	//_modules.init();
+	initEngineEntities();
 }
 
 void EngineApp::start() {

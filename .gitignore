@@ -23,3 +23,6 @@ ignite-bench.json
 
 IgniteEngine/x64
 IgniteEngine/x64/*
+
+IgniteEngine/IgniteEngine/*.vcxproj
+IgniteEngine/IgniteEngine/*.vcxproj.filters

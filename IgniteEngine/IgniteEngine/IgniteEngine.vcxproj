@@ -166,7 +166,7 @@
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="DeviceBuffer.cpp" />
     <ClCompile Include="Dispatcher.cpp" />
-    <ClCompile Include="DispatcherSync.cpp" />
+    <ClCompile Include="DefaultDispatcher.cpp" />
     <ClCompile Include="EngineApp.cpp" />
     <ClCompile Include="EngineEntity.cpp" />
     <ClCompile Include="Entity3D.cpp" />
@@ -255,7 +255,7 @@
     <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceBuffer.h" />
     <ClInclude Include="Dispatcher.h" />
-    <ClInclude Include="DispatcherSync.h" />
+    <ClInclude Include="DefaultDispatcher.h" />
     <ClInclude Include="EngineApp.h" />
     <ClInclude Include="EngineEntity.h" />
     <ClInclude Include="Entity3D.h" />

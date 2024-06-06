@@ -48,16 +48,16 @@ void ComputeShaderTest::start() {
 	_compute_pipeline.create();
 
 	// The dispatcher
-	_dispatcher_sync.setQueue(&DefaultConf::logical_device->getQueues("compute_queues")[0]);
-	_dispatcher_sync.setComputePipeline(&_compute_pipeline);
-	_dispatcher_sync.create();
+	_dispatcher.setQueue(&DefaultConf::logical_device->getQueues("compute_queues")[0]);
+	_dispatcher.setComputePipeline(&_compute_pipeline);
+	_dispatcher.create();
 }
 
 void ComputeShaderTest::update() {
 	Module::update();
 
 	std::cout << "DISPATCH" << std::endl;
-	_dispatcher_sync.dispatch(10, 1, 1);
+	_dispatcher.dispatch(10, 1, 1);
 
 	Pointer<uint8_t> tmp = _output_data.getValues();
 	int* output = reinterpret_cast<int*>(&tmp[0]);
@@ -73,6 +73,6 @@ void ComputeShaderTest::close() {
 	_output_data.destroy();
 
 	_compute_pipeline.destroy();
-	_dispatcher_sync.destroy();
+	_dispatcher.destroy();
 	_compute_shader.destroy();
 }

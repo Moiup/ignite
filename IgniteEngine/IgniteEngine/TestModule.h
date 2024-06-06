@@ -1,6 +1,6 @@
 #pragma once
 #include "Module.h"
-#include "DispatcherSync.h"
+#include "DefaultDispatcher.h"
 
 class TestModule : public Module
 {
@@ -37,7 +37,7 @@ private:
     std::vector<int32_t> write_arr;
     ComputeShader _sum_shader;
     ComputePipeline _sum_pipeline;
-    DispatcherSync _dispatcher;
+    DefaultDispatcher _dispatcher;
 
     StorageBuffer _read_buffer;
     StorageBuffer _write_buffer;

@@ -279,7 +279,7 @@
     <ClCompile Include="Dispatcher.cpp">
       <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
-    <ClCompile Include="DispatcherSync.cpp">
+    <ClCompile Include="DefaultDispatcher.cpp">
       <Filter>Ignite\Engine\src</Filter>
     </ClCompile>
     <ClCompile Include="WindowUI.cpp">
@@ -548,7 +548,7 @@
     <ClInclude Include="MediapipeModule.h">
       <Filter>Ignite\Module</Filter>
     </ClInclude>
-    <ClInclude Include="DispatcherSync.h">
+    <ClInclude Include="DefaultDispatcher.h">
       <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
     <ClInclude Include="Dispatcher.h">

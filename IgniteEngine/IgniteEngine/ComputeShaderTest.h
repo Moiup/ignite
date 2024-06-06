@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Module.h"
-#include "DispatcherSync.h"
+#include "DefaultDispatcher.h"
 
 class ComputeShaderTest : public Module
 {
@@ -11,7 +11,7 @@ private:
 	StorageBuffer _input_data;
 	StorageBuffer _output_data;
 	ComputePipeline _compute_pipeline;
-	DispatcherSync _dispatcher_sync;
+	DefaultDispatcher _dispatcher;
 
 public:
 	ComputeShaderTest();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Module.h"
-#include "DispatcherSync.h"
+#include "DefaultDispatcher.h"
 
 struct CRWSPushConstant {
 	uint32_t width;
@@ -26,7 +26,7 @@ private:
 	Texture _dst_texture{};
 
 	ComputePipeline _compute_pipeline{};
-	DispatcherSync _dispatcher_sync{};
+	DefaultDispatcher _dispatcher{};
 
 	bool _is_pressed_s{false};
 

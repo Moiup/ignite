@@ -82,17 +82,17 @@ void ReadWriteImageMod::start() {
 	_compute_pipeline.create();
 
 	// Dispatcher
-	_dispatcher_sync.setQueue(&DefaultConf::logical_device->getQueues("compute_queues")[0]);
-	_dispatcher_sync.setComputePipeline(&_compute_pipeline);
-	_dispatcher_sync.create();
+	_dispatcher.setQueue(&DefaultConf::logical_device->getQueues("compute_queues")[0]);
+	_dispatcher.setComputePipeline(&_compute_pipeline);
+	_dispatcher.create();
 }
 
 void ReadWriteImageMod::update() {
 	Module::update();
 
 	//std::cout << "Dispatch" << std::endl;
-	_dispatcher_sync.dispatch(_crws_pc.width/16, _crws_pc.height/16, 1);
-	_dispatcher_sync.wait();
+	_dispatcher.dispatch(_crws_pc.width/16, _crws_pc.height/16, 1);
+	_dispatcher.submitAndWait();
 
 
 	if (DefaultConf::event->type == SDL_KEYDOWN) {

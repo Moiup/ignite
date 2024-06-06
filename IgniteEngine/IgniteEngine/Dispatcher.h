@@ -16,13 +16,19 @@ public:
 
 	void setQueue(Queue* queue);
 
-	void create();
-	void destroy();
+	virtual void create() = 0;
+	virtual void destroy() = 0;
 
 	virtual void dispatch(
 		uint32_t group_count_x,
 		uint32_t group_count_y,
 		uint32_t group_count_z
 	) = 0;
+
+
+	void submit();
+	void wait();
+
+	void submitAndWait();
 };
 

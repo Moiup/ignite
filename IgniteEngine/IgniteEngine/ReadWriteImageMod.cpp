@@ -92,6 +92,8 @@ void ReadWriteImageMod::update() {
 
 	//std::cout << "Dispatch" << std::endl;
 	_dispatcher_sync.dispatch(_crws_pc.width/16, _crws_pc.height/16, 1);
+	_dispatcher_sync.wait();
+
 
 	if (DefaultConf::event->type == SDL_KEYDOWN) {
 		if (DefaultConf::event->key.keysym.sym == SDLK_s && !_is_pressed_s) {

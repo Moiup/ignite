@@ -103,7 +103,9 @@ void DispatcherSync::dispatch(
 
 	// End recording
 	cmd_buf.end();
+}
 
+void DispatcherSync::wait() {
 	_queue->submit();
 	_queue->wait();
 }

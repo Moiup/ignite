@@ -23,5 +23,7 @@ public:
 		uint32_t group_count_y,
 		uint32_t group_count_z
 	);
+
+	void wait();
 };
 

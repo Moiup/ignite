@@ -11,8 +11,7 @@
 class Instance
 {
 private:
-	VkInstance _instance;
-	bool _created;
+	VkInstance _instance{ nullptr };
 	VkApplicationInfo _application_info;
 	std::vector<char*> _available_layers;
 	uint32_t _extension_count{};

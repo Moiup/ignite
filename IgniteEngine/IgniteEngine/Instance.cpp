@@ -1,6 +1,6 @@
 #include "Instance.h"
 
-Instance::Instance() : _created{ false } {
+Instance::Instance() {
 	setApplicationInfo(
 		"Ingnite",
 		VK_MAKE_VERSION(1, 0, 0),
@@ -16,7 +16,7 @@ Instance::Instance(
 	std::string engine_name,
 	uint32_t engine_version,
 	uint32_t api_version
-) : _created{false} {
+) {
 	setApplicationInfo(
 		application_name,
 		application_version,
@@ -99,11 +99,10 @@ void Instance::create() {
 	}
 
 	std::cout << "Instance created." << std::endl;
-	_created = {true};
 }
 
 void Instance::destroy() {
-	if (_created) {
+	if (_instance) {
 		vkDestroyInstance(_instance, nullptr);
 
 		for (auto layer : _available_layers) {

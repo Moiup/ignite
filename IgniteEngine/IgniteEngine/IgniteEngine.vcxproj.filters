@@ -327,6 +327,9 @@
     <ClCompile Include="ReadWriteImageMod.cpp">
       <Filter>Ignite\Module</Filter>
     </ClCompile>
+    <ClCompile Include="DefaultConfModule.cpp">
+      <Filter>Ignite\Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -609,6 +612,9 @@
       <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
     <ClInclude Include="ReadWriteImageMod.h">
+      <Filter>Ignite\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultConfModule.h">
       <Filter>Ignite\Module</Filter>
     </ClInclude>
   </ItemGroup>

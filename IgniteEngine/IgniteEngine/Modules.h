@@ -8,6 +8,7 @@
 #include "MenuModule.h"
 #include "Camera.h"
 
+#include "DefaultConfModule.h"
 #include "Bistro.h"
 #include "ComputeShaderTest.h"
 #include "ReadWriteImageMod.h"
@@ -16,6 +17,7 @@
 class Modules
 {
 private:
+	DefaultConfModule _default_module;
 	//MenuModule _menu_module;
 
 	//TestModule _test_module;

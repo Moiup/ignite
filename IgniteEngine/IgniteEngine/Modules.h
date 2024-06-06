@@ -8,7 +8,7 @@
 #include "MenuModule.h"
 #include "Camera.h"
 
-#include "DefaultConfModule.h"
+#include "DefaultModule.h"
 #include "Bistro.h"
 #include "ComputeShaderTest.h"
 #include "ReadWriteImageMod.h"
@@ -17,7 +17,6 @@
 class Modules
 {
 private:
-	DefaultConfModule _default_module;
 	//MenuModule _menu_module;
 
 	//TestModule _test_module;
@@ -26,6 +25,9 @@ private:
 	//ComputeShaderTest _compute_shader_test;
 	ReadWriteImageMod _read_write_image_mod;
 	//Hand2D _hand2d;
+
+
+	DefaultModule _default_module; // Must be the last module of the list
 
 public:
 	Modules();

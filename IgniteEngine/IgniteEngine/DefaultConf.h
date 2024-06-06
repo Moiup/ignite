@@ -14,6 +14,7 @@ class CameraScene;
 class DefaultConf
 {
 public:
+	static uint32_t NB_FRAME;
 	static DefaultGPU* gpu;
 	static LogicalDevice* logical_device;
 	static GraphicShader* graphic_shader;

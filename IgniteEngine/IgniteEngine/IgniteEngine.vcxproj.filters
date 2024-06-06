@@ -327,7 +327,7 @@
     <ClCompile Include="ReadWriteImageMod.cpp">
       <Filter>Ignite\Module</Filter>
     </ClCompile>
-    <ClCompile Include="DefaultConfModule.cpp">
+    <ClCompile Include="DefaultModule.cpp">
       <Filter>Ignite\Module</Filter>
     </ClCompile>
   </ItemGroup>
@@ -614,7 +614,7 @@
     <ClInclude Include="ReadWriteImageMod.h">
       <Filter>Ignite\Module</Filter>
     </ClInclude>
-    <ClInclude Include="DefaultConfModule.h">
+    <ClInclude Include="DefaultModule.h">
       <Filter>Ignite\Module</Filter>
     </ClInclude>
   </ItemGroup>

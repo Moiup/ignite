@@ -30,34 +30,31 @@
 
 class EngineApp: public App
 {
-public:
-	static const uint32_t NB_FRAME{ 2 };
-
 private:
 	Instance _instance;
-	DefaultGPU _gpu;
-	WindowSurface _render_window;
-	LogicalDevice _logical_device;
-	GraphicShader _graphic_shader;
-	DefaultRenderer _renderer;
+	//DefaultGPU _gpu;
+	//WindowSurface _render_window;
+	//LogicalDevice _logical_device;
+	//GraphicShader _graphic_shader;
+	//DefaultRenderer _renderer;
 
-	Texture _white_texture;
+	//Texture _white_texture;
 
-	// Buffers
-	VertexBuffer _coord_buffer;
-	VertexBuffer _object_id_buffer;
-	VertexBuffer _material_indices_buffer;
-	VertexBuffer _uv_buffer;
-	IndexBuffer _index_buffer;
-	//UniformBuffer _camera_buffer;
-	StorageBuffer _obj_tr_buffer;
-	StorageBuffer _materials_buffer;
-	Sampler _sampler;
+	//// Buffers
+	//VertexBuffer _coord_buffer;
+	//VertexBuffer _object_id_buffer;
+	//VertexBuffer _material_indices_buffer;
+	//VertexBuffer _uv_buffer;
+	//IndexBuffer _index_buffer;
+	////UniformBuffer _camera_buffer;
+	//StorageBuffer _obj_tr_buffer;
+	//StorageBuffer _materials_buffer;
+	//Sampler _sampler;
 
 	Modules _modules;
 
-	CameraScene _camera;
-	glm::mat4 _cam_mvp;
+	//CameraScene _camera;
+	//glm::mat4 _cam_mvp;
 
 public:
 	EngineApp();

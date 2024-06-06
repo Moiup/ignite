@@ -3,6 +3,7 @@
 #include "CameraScene.h"
 //#include "PerspectiveCamera.h"
 
+uint32_t DefaultConf::NB_FRAME = 2;
 DefaultGPU* DefaultConf::gpu;
 LogicalDevice* DefaultConf::logical_device;
 GraphicShader* DefaultConf::graphic_shader;

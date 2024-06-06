@@ -92,8 +92,13 @@ void ReadWriteImageMod::update() {
 
 	//std::cout << "Dispatch" << std::endl;
 	_dispatcher.dispatch(_crws_pc.width/16, _crws_pc.height/16, 1);
-	_dispatcher.submitAndWait();
 
+	std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+	_dispatcher.submitAndWait();
+	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+	float delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
+
+	std::cout << "compute time: " << delta_time << std::endl;
 
 	if (DefaultConf::event->type == SDL_KEYDOWN) {
 		if (DefaultConf::event->key.keysym.sym == SDLK_s && !_is_pressed_s) {

@@ -10,36 +10,7 @@ void DefaultModule::init() {
 	_render_window.setInstance(DefaultConf::instance);
 	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
-	// Initialising
-	_gpu.configure(*DefaultConf::instance);
-
-	// Initialising logical device and queues
-	_logical_device.setGPU(&_gpu);
-	_logical_device.configure();
-	_logical_device.defineQueue(
-		"graphics_queues",
-		{ VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT },
-		1
-	);
-	_logical_device.defineQueue(
-		"present_queues",
-		{ VK_QUEUE_GRAPHICS_BIT },
-		1
-	);
-	_logical_device.defineQueue(
-		"compute_queues",
-		{ VK_QUEUE_COMPUTE_BIT },
-		1
-	);
-	//_logical_device.setGPU(&_gpu);
-	_logical_device.create();
-
-	DefaultConf::gpu = &_gpu;
-	DefaultConf::logical_device = &_logical_device;
 	DefaultConf::render_window = &_render_window;
-	DefaultConf::graphics_queue = &_logical_device.getQueues("graphics_queues")[0];
-	DefaultConf::present_queue = &_logical_device.getQueues("present_queues")[0];
-	DefaultConf::compute_queue = &_logical_device.getQueues("compute_queues")[0];
 	DefaultConf::graphic_shader = &_graphic_shader;
 
 	DefaultConf::renderer = &_renderer;
@@ -227,8 +198,8 @@ void DefaultModule::start() {
 
 	// Renderer
 
-	DefaultConf::renderer->setGraphicsQueues(&_logical_device.getQueues("graphics_queues"));
-	DefaultConf::renderer->setPresentQueues(&_logical_device.getQueues("present_queues"));
+	DefaultConf::renderer->setGraphicsQueues(&DefaultConf::logical_device->getQueues("graphics_queues"));
+	DefaultConf::renderer->setPresentQueues(&DefaultConf::logical_device->getQueues("present_queues"));
 	DefaultConf::renderer->setNbFrame(DefaultConf::NB_FRAME);
 	DefaultConf::renderer->setPhysicalDevice(DefaultConf::gpu);
 	DefaultConf::renderer->setWindow(DefaultConf::render_window);

@@ -7,9 +7,9 @@
 class DefaultModule : public Module
 {
 private:
-	DefaultGPU _gpu{};
+	//DefaultGPU _gpu{};
+	//LogicalDevice _logical_device{};
 	WindowSurface _render_window{};
-	LogicalDevice _logical_device{};
 	GraphicShader _graphic_shader{};
 	DefaultRenderer _renderer{};
 

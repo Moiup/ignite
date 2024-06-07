@@ -35,39 +35,39 @@ void EngineApp::init() {
 	//// Setting window
 	////const VkInstance& insta = _instance.getInstance();
 	////_render_window.setInstance(const_cast<VkInstance*>(&insta));
-	//_render_window.setInstance(&_instance);
-	//_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
+	////_render_window.setInstance(&_instance);
+	////_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
-	//// Initialising
-	//_gpu.configure(_instance);
-	//
-	//// Initialising logical device and queues
+	// Initialising
+	_gpu.configure(_instance);
+	
+	// Initialising logical device and queues
+	_logical_device.setGPU(&_gpu);
+	_logical_device.configure();
+	_logical_device.defineQueue(
+		"graphics_queues",
+		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
+		1
+	);
+	_logical_device.defineQueue(
+		"present_queues",
+		{ VK_QUEUE_GRAPHICS_BIT },
+		1
+	);
+	_logical_device.defineQueue(
+		"compute_queues",
+		{ VK_QUEUE_COMPUTE_BIT },
+		1
+	);
 	//_logical_device.setGPU(&_gpu);
-	//_logical_device.configure();
-	//_logical_device.defineQueue(
-	//	"graphics_queues",
-	//	{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
-	//	1
-	//);
-	//_logical_device.defineQueue(
-	//	"present_queues",
-	//	{ VK_QUEUE_GRAPHICS_BIT },
-	//	1
-	//);
-	//_logical_device.defineQueue(
-	//	"compute_queues",
-	//	{ VK_QUEUE_COMPUTE_BIT },
-	//	1
-	//);
-	////_logical_device.setGPU(&_gpu);
-	//_logical_device.create();
+	_logical_device.create();
 
-	//DefaultConf::gpu = &_gpu;
-	//DefaultConf::logical_device = &_logical_device;
+	DefaultConf::gpu = &_gpu;
+	DefaultConf::logical_device = &_logical_device;
 	//DefaultConf::render_window = &_render_window;
-	//DefaultConf::graphics_queue = &_logical_device.getQueues("graphics_queues")[0];
-	//DefaultConf::present_queue = &_logical_device.getQueues("present_queues")[0];
-	//DefaultConf::compute_queue = &_logical_device.getQueues("compute_queues")[0];
+	DefaultConf::graphics_queue = &_logical_device.getQueues("graphics_queues")[0];
+	DefaultConf::present_queue = &_logical_device.getQueues("present_queues")[0];
+	DefaultConf::compute_queue = &_logical_device.getQueues("compute_queues")[0];
 	//DefaultConf::graphic_shader = &_graphic_shader;
 
 	DefaultConf::instance = &_instance;

@@ -29,7 +29,7 @@ public:
 	void setQueue(Queue* queue);
 	void setMemoryPropertyFlags(VkMemoryPropertyFlags memory_property_flags);
 	void allocateMemory();
-	virtual void bind();
+	virtual void bind() = 0;
 
 	PipelineStageAndAccessMaskInfo getStageAccessInfo();
 

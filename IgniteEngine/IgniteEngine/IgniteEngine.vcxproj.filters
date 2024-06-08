@@ -330,6 +330,9 @@
     <ClCompile Include="DefaultModule.cpp">
       <Filter>Ignite\Module</Filter>
     </ClCompile>
+    <ClCompile Include="ImageRessource.cpp">
+      <Filter>Ignite\Engine\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ressource.h">
@@ -616,6 +619,9 @@
     </ClInclude>
     <ClInclude Include="DefaultModule.h">
       <Filter>Ignite\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageRessource.h">
+      <Filter>Ignite\Engine\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

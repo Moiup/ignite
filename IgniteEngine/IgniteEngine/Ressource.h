@@ -15,7 +15,7 @@ struct PipelineStageAndAccessMaskInfo {
 class Ressource
 {
 protected:
-	Queue* _queue;
+	Queue* _queue{ nullptr };
 	VkMemoryRequirements _memory_req{};
 	VkDeviceMemory _memory{};
 	VkMemoryPropertyFlags _memory_property_flags{};

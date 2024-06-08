@@ -33,13 +33,7 @@ private:
 
 public:
 	Texture();
-	//Texture(std::string file_name);
-	//Texture(std::vector<glm::vec4>& pixels, uint64_t width, uint64_t height);
-	//Texture(uint64_t width, uint64_t height);
 
-	//void setDevice(Device* _device);
-	//void setGPU(PhysicalDevice* gpu);
-	//void setCommandPool(CommandPool* command_pool);
 	void setQueue(Queue* queue);
 	void setFormat(VkFormat format);
 	void setDimensions(uint32_t width, uint32_t height);

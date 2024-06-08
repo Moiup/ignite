@@ -127,50 +127,11 @@ void Image::copy(
 		_stage_access_info.stage_mask,
 		dst_stage_mask
 	);
-
-	//VkImageSubresourceRange image_barrier_sub_range{};
-	//image_barrier_sub_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	//image_barrier_sub_range.baseMipLevel = 0;
-	//image_barrier_sub_range.levelCount = 1;
-	//image_barrier_sub_range.layerCount = 0;
-	//image_barrier_sub_range.layerCount = 1;
-
-	//VkImageMemoryBarrier image_barrier{};
-	//image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	//image_barrier.pNext = nullptr;
-	//image_barrier.srcAccessMask = _stage_access_info.access_mask;
-	//image_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-	//image_barrier.oldLayout = _image_info.initialLayout;
-	//image_barrier.newLayout = _image_info.initialLayout;
-	//image_barrier.image = Image::getImage();
-	//image_barrier.subresourceRange = image_barrier_sub_range;
-
-	//cmd_buff.pipelineBarrier(
-	//	_stage_access_info.stage_mask,
-	//	VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-	//	0,
-	//	0, nullptr,
-	//	0, nullptr,
-	//	1, &image_barrier
-	//);
-
-	//cmd_buff.end();
-
-	//_stage_access_info.access_mask = image_barrier.dstAccessMask;
-	//_stage_access_info.stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 }
 
 void Image::update(Pixels& pixels) {
 	// Copying the actual texture data into the staging buffer
 	_staging_buffer.setValues(pixels.getPixels().data());
-
-	//changeLayout(
-	//	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-	//	0,
-	//	VK_ACCESS_TRANSFER_WRITE_BIT,
-	//	VK_PIPELINE_STAGE_HOST_BIT,
-	//	VK_PIPELINE_STAGE_TRANSFER_BIT
-	//);
 
 	// Copying the data from the buffer to the image
 	copy(

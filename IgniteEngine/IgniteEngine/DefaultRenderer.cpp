@@ -169,6 +169,15 @@ void DefaultRenderer::render() {
 		&available_img
 	);
 
+	if (DefaultConf::event->type == SDL_KEYDOWN) {
+		if (DefaultConf::event->key.keysym.sym == SDLK_d) {
+			Pixels pix{};
+			pix.setPixels(_extent.width, _extent.height);
+			pix.saveFile("../assets/ouioui.png");
+		}
+	}
+
+
 	//// Copying depth image to a buffer
 	//// Staging buffer
 	//Buffer staging_buffer{};

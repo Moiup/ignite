@@ -24,6 +24,7 @@ public:
 	
 	void destroyImage();
 	void destroyImageView();
+	void destroy();
 
 	void setImagePNext(const void * p_next);
 	void setImageFlags(VkImageCreateFlags flags);

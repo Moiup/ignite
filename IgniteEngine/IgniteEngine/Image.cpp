@@ -69,6 +69,12 @@ void Image::destroyImageView() {
 	);
 }
 
+void Image::destroy() {
+	freeMemory();
+	destroyImage();
+	destroyImageView();
+}
+
 void Image::setImagePNext(const void* p_next) {
 	_image_info.pNext = p_next;
 }

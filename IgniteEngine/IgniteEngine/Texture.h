@@ -2,7 +2,6 @@
 
 #include "Device.h"
 #include "Queue.h"
-#include "StagingBuffer.h"
 #include "Image.h"
 #include "PhysicalDevice.h"
 #include "Pixels.h"
@@ -19,8 +18,6 @@
 class Texture : public Image
 {
 private:
-	uint64_t _width;
-	uint64_t _height;
 
 	static const uint8_t _n{4};
 
@@ -30,8 +27,6 @@ private:
 	//VkImageLayout _image_layout{ VK_IMAGE_LAYOUT_UNDEFINED };
 
 	VkFormat _format;
-
-	StagingBuffer _staging_buffer{};
 
 	VkSampler _sampler;
 
@@ -54,21 +49,6 @@ public:
 
 	void create();
 	void update(Pixels& pixels);
-	//void destroy();
-
-	// Copy buffer to image
-	void copy(
-		Buffer& buffer,
-		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
-
-	void flushToStaging();
-
-	// It submit the queue and synchronize the CPU
-	void flushPixels(Pixels& pixels);
 
 	//glm::vec4& pixel(uint64_t row, uint64_t col);
 	//const std::vector<glm::vec4>& pixels() const;

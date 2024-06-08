@@ -6,9 +6,7 @@
 //#include "stb_image/stb_image.h"
 //#include "stb_image/stb_image_write.h"
 
-Texture::Texture() : 
-	_width{ 0 },
-	_height{ 0 },
+Texture::Texture() :
 	_format{ VK_FORMAT_R8G8B8A8_UNORM }
 {
 	;
@@ -54,8 +52,8 @@ void Texture::setFormat(VkFormat format) {
 }
 
 void Texture::setDimensions(uint32_t width, uint32_t height) {
-	_width = width;
-	_height = height;
+	_image_info.extent.width = width;
+	_image_info.extent.height = height;
 }
 
 void Texture::setSampler(Sampler& sampler) {
@@ -90,7 +88,7 @@ void Texture::create() {
 	Image::setImageTiling(VK_IMAGE_TILING_OPTIMAL);
 	Image::setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
 	Image::setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
-	Image::setImageExtent(_width, _height, 1);
+	Image::setImageExtent(getWidth(), getHeight(), 1);
 	Image::setImageUsage(
 		VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
@@ -115,7 +113,7 @@ void Texture::create() {
 
 	// Creating the staging buffer
 	_staging_buffer.setQueue(_queue);
-	_staging_buffer.setSize(_width * _height * _n * sizeof(uint8_t));
+	_staging_buffer.setSize(getWidth() * getHeight() * _n * sizeof(uint8_t));
 	_staging_buffer.create();
 }
 
@@ -141,104 +139,6 @@ void Texture::update(Pixels& pixels) {
 	);
 }
 
-void Texture::copy(
-	Buffer& buffer,
-	VkAccessFlags src_access_mask,
-	VkAccessFlags dst_access_mask,
-	VkPipelineStageFlags src_stage_mask,
-	VkPipelineStageFlags dst_stage_mask
-) {
-	VkImageLayout image_layout = _image_info.initialLayout;
-
-	changeLayout(
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		src_access_mask,
-		VK_ACCESS_TRANSFER_WRITE_BIT,
-		src_stage_mask,
-		VK_PIPELINE_STAGE_TRANSFER_BIT
-	);
-
-	// To do for each mip level
-	// (To start, we consider only the original level -> 0)
-	VkBufferImageCopy image_copy{};
-	image_copy.bufferOffset = 0;
-	image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_copy.imageSubresource.mipLevel = 0;
-	image_copy.imageSubresource.baseArrayLayer = 0;
-	image_copy.imageSubresource.layerCount = 1;
-	image_copy.imageExtent.width = _width;
-	image_copy.imageExtent.height = _height;
-	image_copy.imageExtent.depth = 1;
-
-	CommandBuffer cmd_buff = _queue->allocateCommandBuffer();
-	cmd_buff.begin();
-
-	cmd_buff.copyBufferToImage(
-		_staging_buffer.getBuffer(),
-		Image::getImage(),
-		Image::getImageLayout(),
-		1,
-		&image_copy
-	);
-
-	cmd_buff.end();
-
-	changeLayout(
-		image_layout,
-		_stage_access_info.access_mask,
-		dst_access_mask,
-		_stage_access_info.stage_mask,
-		dst_stage_mask
-	);
-
-	//VkImageSubresourceRange image_barrier_sub_range{};
-	//image_barrier_sub_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	//image_barrier_sub_range.baseMipLevel = 0;
-	//image_barrier_sub_range.levelCount = 1;
-	//image_barrier_sub_range.layerCount = 0;
-	//image_barrier_sub_range.layerCount = 1;
-
-	//VkImageMemoryBarrier image_barrier{};
-	//image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	//image_barrier.pNext = nullptr;
-	//image_barrier.srcAccessMask = _stage_access_info.access_mask;
-	//image_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-	//image_barrier.oldLayout = _image_info.initialLayout;
-	//image_barrier.newLayout = _image_info.initialLayout;
-	//image_barrier.image = Image::getImage();
-	//image_barrier.subresourceRange = image_barrier_sub_range;
-
-	//cmd_buff.pipelineBarrier(
-	//	_stage_access_info.stage_mask,
-	//	VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-	//	0,
-	//	0, nullptr,
-	//	0, nullptr,
-	//	1, &image_barrier
-	//);
-
-	//cmd_buff.end();
-
-	//_stage_access_info.access_mask = image_barrier.dstAccessMask;
-	//_stage_access_info.stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-}
-
-void Texture::flushToStaging() {
-	_staging_buffer.copy(*this);
-}
-
-void Texture::flushPixels(Pixels& pixels) {
-	flushToStaging();
-	_queue->submit();
-	_queue->wait();
-	_staging_buffer.getValues(pixels.getPixels().data());
-}
-
-//void Texture::destroy() {
-//	Image::freeMemory();
-//	Image::destroyImage();
-//	Image::destroyImageView();
-//}
 
 /**
 * Bilinear interpolation to get the corresponding color.

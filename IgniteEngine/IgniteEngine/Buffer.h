@@ -2,7 +2,7 @@
 
 #include "Ressource.h"
 #include "Pointer.h"
-#include "Image.h"
+#include "ImageRessource.h"
 #include <unordered_map>
 
 class Buffer : public Ressource
@@ -41,7 +41,7 @@ public:
 	void unmap();
 
 	// Copy image to buffer
-	void copy(Image& img);
+	void copy(ImageRessource& img);
 
 protected:
 	void createBuffer();

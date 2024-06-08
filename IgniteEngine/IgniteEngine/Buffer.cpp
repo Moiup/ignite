@@ -147,7 +147,7 @@ void Buffer::unmap() {
 	);
 }
 
-void Buffer::copy(Image& img) {
+void Buffer::copy(ImageRessource& img) {
 
 
 	// Change image layout to transfer

@@ -12,7 +12,7 @@ Swapchain::Swapchain() :
 	_info.flags = 0;
 	// surface must be set
 	// min image count must be set
-	_info.imageFormat = VK_FORMAT_B8G8R8A8_SRGB;
+	_info.imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
 	_info.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 	// Image extent (width and height) must be set
 	_info.imageArrayLayers = 1;

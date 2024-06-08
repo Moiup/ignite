@@ -99,9 +99,9 @@ void Texture::create() {
 	);
 	Image::setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	Image::createImage();
-	Image::allocateMemory();
-	Image::bind();
+	//Image::createImage();
+	//Image::allocateMemory();
+	//Image::bind();
 
 	Image::setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
 	Image::setImageViewFormat(_format);
@@ -112,7 +112,9 @@ void Texture::create() {
 		0, // base array layer
 		1  // layer count
 	);
-	Image::createImageView();
+	//Image::createImageView();
+
+	Image::create();
 
 	changeLayout(VK_IMAGE_LAYOUT_GENERAL);
 

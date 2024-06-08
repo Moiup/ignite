@@ -46,6 +46,13 @@ void Image::createImageView() {
 	}
 }
 
+void Image::create() {
+	createImage();
+	allocateMemory();
+	bind();
+	createImageView();
+}
+
 void Image::destroyImage() {
 	vkDestroyImage(
 		_queue->getDevice()->getDevice(),

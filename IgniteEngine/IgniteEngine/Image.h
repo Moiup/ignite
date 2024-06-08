@@ -19,6 +19,8 @@ public:
 	void createImage();
 	void bind();
 	void createImageView();
+
+	void create();
 	
 	void destroyImage();
 	void destroyImageView();

@@ -55,6 +55,8 @@ public:
 	//void setImage(VkImage image);
 	//const VkImageView& getImageView() const;
 
+	void update(Pixels& pixels);
+
 	// Copy buffer to image
 	void copy(
 		Buffer& buffer,

@@ -48,7 +48,6 @@ public:
 	VkSampler getSampler();
 
 	void create();
-	void update(Pixels& pixels);
 
 	//glm::vec4& pixel(uint64_t row, uint64_t col);
 	//const std::vector<glm::vec4>& pixels() const;

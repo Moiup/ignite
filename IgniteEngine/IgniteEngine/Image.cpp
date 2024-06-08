@@ -160,6 +160,28 @@ void Image::copy(
 	//_stage_access_info.stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 }
 
+void Image::update(Pixels& pixels) {
+	// Copying the actual texture data into the staging buffer
+	_staging_buffer.setValues(pixels.getPixels().data());
+
+	//changeLayout(
+	//	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+	//	0,
+	//	VK_ACCESS_TRANSFER_WRITE_BIT,
+	//	VK_PIPELINE_STAGE_HOST_BIT,
+	//	VK_PIPELINE_STAGE_TRANSFER_BIT
+	//);
+
+	// Copying the data from the buffer to the image
+	copy(
+		_staging_buffer,
+		0,
+		VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VK_PIPELINE_STAGE_HOST_BIT,
+		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+}
+
 void Image::flushToStaging() {
 	_staging_buffer.copy(*this);
 }

@@ -98,7 +98,7 @@ void ReadWriteImageMod::update() {
 	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
 	float delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
 
-	std::cout << "compute time: " << delta_time << std::endl;
+	//std::cout << "compute time: " << delta_time << std::endl;
 
 	if (DefaultConf::event->type == SDL_KEYDOWN) {
 		if (DefaultConf::event->key.keysym.sym == SDLK_s && !_is_pressed_s) {

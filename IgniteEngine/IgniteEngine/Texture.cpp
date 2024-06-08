@@ -99,10 +99,6 @@ void Texture::create() {
 	);
 	Image::setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	//Image::createImage();
-	//Image::allocateMemory();
-	//Image::bind();
-
 	Image::setImageViewViewType(VK_IMAGE_VIEW_TYPE_2D);
 	Image::setImageViewFormat(_format);
 	Image::setImageViewSurbresourceRange(
@@ -112,7 +108,6 @@ void Texture::create() {
 		0, // base array layer
 		1  // layer count
 	);
-	//Image::createImageView();
 
 	Image::create();
 
@@ -239,11 +234,11 @@ void Texture::flushPixels(Pixels& pixels) {
 	_staging_buffer.getValues(pixels.getPixels().data());
 }
 
-void Texture::destroy() {
-	Image::freeMemory();
-	Image::destroyImage();
-	Image::destroyImageView();
-}
+//void Texture::destroy() {
+//	Image::freeMemory();
+//	Image::destroyImage();
+//	Image::destroyImageView();
+//}
 
 /**
 * Bilinear interpolation to get the corresponding color.

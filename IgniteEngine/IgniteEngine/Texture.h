@@ -54,7 +54,7 @@ public:
 
 	void create();
 	void update(Pixels& pixels);
-	void destroy();
+	//void destroy();
 
 	// Copy buffer to image
 	void copy(

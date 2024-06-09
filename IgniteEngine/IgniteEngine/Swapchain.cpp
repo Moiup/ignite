@@ -207,6 +207,12 @@ void Swapchain::gettingImages(){
 	for (uint32_t i = 0; i < _image_count; i++) {
 		_images[i].setQueue(_queue);
 		_images[i].setImage(imgs[i]);
+		_images[i].setImageExtent(
+			_info.imageExtent.width,
+			_info.imageExtent.height,
+			1
+		);
+		_images[i].createStagingBuffer();
 	}
 }
 

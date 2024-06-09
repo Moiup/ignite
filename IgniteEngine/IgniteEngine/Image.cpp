@@ -41,11 +41,21 @@ void Image::createImageView() {
 	}
 }
 
+void Image::createStagingBuffer() {
+	// Creating the staging buffer
+	_staging_buffer.setQueue(_queue);
+	_staging_buffer.setSize(
+		_image_info.extent.width * _image_info.extent.height * _n * sizeof(uint8_t)
+	);
+	_staging_buffer.create();
+}
+
 void Image::create() {
 	createImage();
 	allocateMemory();
 	bind();
 	createImageView();
+	createStagingBuffer();
 }
 
 void Image::destroyImage() {

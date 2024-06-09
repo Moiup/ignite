@@ -19,8 +19,6 @@ class Texture : public Image
 {
 private:
 
-	static const uint8_t _n{4};
-
 	Queue* _queue;
 
 	//Image _image;

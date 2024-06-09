@@ -7,6 +7,8 @@
 class Image: public ImageRessource
 {
 protected:
+	static const uint8_t _n{ 4 };
+
 	StagingBuffer _staging_buffer{};
 
 public:
@@ -15,6 +17,7 @@ public:
 	void createImage();
 	void bind();
 	void createImageView();
+	void createStagingBuffer();
 
 	void create();
 	

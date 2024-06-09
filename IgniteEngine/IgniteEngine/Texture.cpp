@@ -110,11 +110,6 @@ void Texture::create() {
 	Image::create();
 
 	changeLayout(VK_IMAGE_LAYOUT_GENERAL);
-
-	// Creating the staging buffer
-	_staging_buffer.setQueue(_queue);
-	_staging_buffer.setSize(getWidth() * getHeight() * _n * sizeof(uint8_t));
-	_staging_buffer.create();
 }
 
 

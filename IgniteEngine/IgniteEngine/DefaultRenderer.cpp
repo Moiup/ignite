@@ -172,7 +172,13 @@ void DefaultRenderer::render() {
 	if (DefaultConf::event->type == SDL_KEYDOWN) {
 		if (DefaultConf::event->key.keysym.sym == SDLK_d) {
 			Pixels pix{};
-			pix.setPixels(_extent.width, _extent.height);
+			pix.setPixels(
+				_swapchain.getImages()[available_img].getImageExtentWidth(),
+				_swapchain.getImages()[available_img].getImageExtentHeight());
+			
+			Image& img = _swapchain.getImages()[available_img];
+			img.flushPixels(pix);
+
 			pix.saveFile("../assets/ouioui.png");
 		}
 	}

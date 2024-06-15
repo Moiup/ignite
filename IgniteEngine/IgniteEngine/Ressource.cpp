@@ -54,6 +54,10 @@ void Ressource::bind() {
 	;
 }
 
+Queue* Ressource::getQueue() {
+	return _queue;
+}
+
 PipelineStageAndAccessMaskInfo Ressource::getStageAccessInfo() {
 	return _stage_access_info;
 }

@@ -16,7 +16,9 @@ Swapchain::Swapchain() :
 	_info.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 	// Image extent (width and height) must be set
 	_info.imageArrayLayers = 1;
-	_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+		| VK_IMAGE_USAGE_TRANSFER_DST_BIT
+		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	// queue family index count must be set
 	// queue family indices must be set
 	_info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
@@ -212,6 +214,7 @@ void Swapchain::gettingImages(){
 			_info.imageExtent.height,
 			1
 		);
+		_images[i].changeLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		_images[i].createStagingBuffer();
 	}
 }
@@ -220,7 +223,7 @@ void Swapchain::createImagesViews(){
 	_image_view_info.format = _info.imageFormat;
 
 	for (uint32_t i = 0; i < _image_count; i++) {
-		_image_view_info.image = _images[i].getImage();
+		//_image_view_info.image = _images[i].getImage();
 
 		_images[i].setImageViewInfo(_image_view_info);
 		_images[i].createImageView();

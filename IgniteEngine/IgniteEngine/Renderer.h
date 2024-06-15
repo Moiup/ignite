@@ -22,7 +22,12 @@ protected:
 	std::vector<Queue>* _present_queues;
 	std::vector<Queue>* _compute_queues;
 
-	uint32_t _current_frame;
+
+	uint32_t _present_frame{ 0 };
+	uint32_t _current_frame{ 0 };
+	uint32_t _available_img{ 0 };
+
+	bool _is_not_first_frame{ false };
 
 	std::vector<VkPipelineStageFlags> _pipeline_stage_flags;
 
@@ -32,9 +37,9 @@ protected:
 public:
 	Renderer();
 
-	virtual void create();
-	virtual void destroy();
-	virtual void render();
+	virtual void create() = 0;
+	virtual void destroy() = 0;
+	virtual void render() = 0;
 
 	void setDevice(Device* device);
 	void setGraphicsQueues(std::vector<Queue>* graphics_queues);
@@ -47,6 +52,7 @@ public:
 	void setClearColorValue(VkClearColorValue clear_color_value);
 	void setOffset(uint32_t x, uint32_t y);
 	void setExtent(uint32_t width, uint32_t height);
+	virtual Image& getCurrentFrame() = 0;
 
 protected:
 	virtual void createFencesAndSemaphores();

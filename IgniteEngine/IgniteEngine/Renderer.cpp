@@ -6,21 +6,8 @@ Renderer::Renderer() :
 	_gpu{ nullptr },
 	_window{nullptr},
 	_clear_color_value{0.2f, 0.2f, 0.2f, 1.0f},
-	_current_frame{0},
 	_pipeline_stage_flags{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}
 { ; }
-
-void Renderer::create() {
-	;
-}
-
-void Renderer::destroy() {
-	;
-}
-
-void Renderer::render() {
-	;
-}
 
 void Renderer::setDevice(Device* device) {
 	_device = device;

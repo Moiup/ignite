@@ -25,6 +25,8 @@ public:
 	void destroyImageView();
 	void destroy();
 
+	void setQueue(Queue* queue);
+
 	void update(Pixels& pixels);
 
 	// Copy buffer to image

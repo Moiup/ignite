@@ -6,6 +6,11 @@ Image::Image()
 	_image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 }
 
+void Image::setQueue(Queue* queue) {
+	Ressource::setQueue(queue);
+	_staging_buffer.setQueue(queue);
+}
+
 void Image::createImage() {
 	VkResult vk_result = vkCreateImage(
 		_queue->getDevice()->getDevice(),
@@ -151,6 +156,9 @@ void Image::update(Pixels& pixels) {
 		VK_PIPELINE_STAGE_HOST_BIT,
 		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 	);
+
+	//_queue->submit();
+	//_queue->wait();
 }
 
 void Image::flushToStaging() {

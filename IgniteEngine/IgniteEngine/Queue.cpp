@@ -252,6 +252,10 @@ const void Queue::submit(
 		throw std::runtime_error("Error: resetting fence failed!");
 	}
 
+	if (!getNbPendingCommandBuffers()) {
+		return;
+	}
+
 	submit(
 		waitSemaphorecount,
 		pWaitSemaphores,

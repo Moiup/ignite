@@ -25,6 +25,8 @@ public:
 
 	void render();
 
+	Image& getCurrentFrame();
+
 protected:
 	void createSemaphores();
 

@@ -114,12 +114,12 @@ void Pixels::setPixel(uint32_t l, uint32_t c, glm::vec4 pix) {
 	);
 }
 
-void Pixels::setPixel(uint32_t l, uint32_t c, float r, float g, float b, float a) {
-	setPixel(
-		l, c,
-		glm::vec4(r, g, b, a)
-	);
-}
+//void Pixels::setPixel(uint32_t l, uint32_t c, float r, float g, float b, float a) {
+//	setPixel(
+//		l, c,
+//		glm::vec4(r, g, b, a)
+//	);
+//}
 
 void Pixels::setPixel(uint32_t l, uint32_t c, float col) {
 	setPixel(l, c, static_cast<uint8_t>(col));

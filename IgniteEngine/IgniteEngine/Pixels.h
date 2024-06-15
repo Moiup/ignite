@@ -35,7 +35,7 @@ public:
 	void setPixel(uint32_t l, uint32_t c, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 	void setPixel(uint32_t l, uint32_t c, uint8_t col);
 	void setPixel(uint32_t l, uint32_t c, glm::vec4 pix);
-	void setPixel(uint32_t l, uint32_t c, float r, float g, float b, float a);
+	//void setPixel(uint32_t l, uint32_t c, float r, float g, float b, float a);
 	void setPixel(uint32_t l, uint32_t c, float col);
 
 

@@ -37,9 +37,22 @@ void DefaultRenderer::destroy() {
 
 void DefaultRenderer::render() {
 	VkResult vk_result{};
-	uint32_t available_img{ 0 };
+	//uint32_t _available_img{ 0 };
 
 	std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+
+	if (_is_not_first_frame) {
+		_present_queues_in_flight[_present_frame].present(
+			1,
+			&_sem_render_ends[_present_frame],
+			1,
+			&_swapchain.getSwapchain(),
+			&_available_img
+		);
+	}
+	else {
+		_is_not_first_frame = true;
+	}
 	
 	_graphics_queues_in_flight[_current_frame].wait();
 
@@ -49,7 +62,7 @@ void DefaultRenderer::render() {
 		UINT64_MAX,
 		_sem_render_starts[_current_frame],
 		VK_NULL_HANDLE,
-		&available_img
+		&_available_img
 	);
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed acquiring next image!");
@@ -151,8 +164,7 @@ void DefaultRenderer::render() {
 	dynamicRenderingPipelineBarrierBack(cmd_buf);
 	cmd_buf.end();
 
-	//VkCommandBuffer vk_cmd_buf = cmd_buf.getCommandBuffer();
-	// Submit and present
+	// Submit
 	_graphics_queues_in_flight[_current_frame].submit(
 		1,
 		&_sem_render_starts[_current_frame],
@@ -161,27 +173,21 @@ void DefaultRenderer::render() {
 		&_sem_render_ends[_current_frame]
 	);
 
-	_present_queues_in_flight[_current_frame].present(
-		1,
-		&_sem_render_ends[_current_frame],
-		1,
-		&_swapchain.getSwapchain(),
-		&available_img
-	);
+	_swapchain.getImages()[_available_img].setQueue(&_graphics_queues_in_flight[_current_frame]);
 
-	if (DefaultConf::event->type == SDL_KEYDOWN) {
-		if (DefaultConf::event->key.keysym.sym == SDLK_d) {
-			Pixels pix{};
-			pix.setPixels(
-				_swapchain.getImages()[available_img].getImageExtentWidth(),
-				_swapchain.getImages()[available_img].getImageExtentHeight());
-			
-			Image& img = _swapchain.getImages()[available_img];
-			img.flushPixels(pix);
+	//if (_current_frame == 1) {
+	//	
+	//	Pixels pix{};
+	//	pix.setPixels(
+	//		_swapchain.getImages()[_available_img].getImageExtentWidth(),
+	//		_swapchain.getImages()[_available_img].getImageExtentHeight());
 
-			pix.saveFile("../assets/ouioui.png");
-		}
-	}
+	//	Image& img = _swapchain.getImages()[_available_img];
+	//	img.flushPixels(pix);
+
+	//	pix.saveFile("../assets/ouioui.png");
+
+	//}
 
 
 	//// Copying depth image to a buffer
@@ -311,7 +317,12 @@ void DefaultRenderer::render() {
 
 	//staging_buffer.destroy();
 
+	_present_frame = _current_frame;
 	_current_frame = (_current_frame + 1) % _nb_frame;
+}
+
+Image& DefaultRenderer::getCurrentFrame() {
+	return _swapchain.getImages()[_present_frame];
 }
 
 void DefaultRenderer::configureQueues() {
@@ -336,11 +347,6 @@ void DefaultRenderer::createSemaphores() {
 	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 	semaphore_info.pNext = nullptr;
 	semaphore_info.flags = 0;
-
-	VkFenceCreateInfo fence_info{};
-	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fence_info.pNext = nullptr;
-	fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 	_sem_render_starts.resize(_nb_frame);
 	_sem_render_ends.resize(_nb_frame);
@@ -496,7 +502,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf
 	image_memory_barrier_frame_bk.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	image_memory_barrier_frame_bk.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame_bk.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.image = _swapchain.getImages()[_current_frame].getImage();
+	image_memory_barrier_frame_bk.image = _swapchain.getImages()[_available_img].getImage();
 	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
 
 	cmd_buf.pipelineBarrier(
@@ -512,7 +518,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf
 void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	color_attachment.imageView = _swapchain.getImages()[_current_frame].getImageView();
+	color_attachment.imageView = _swapchain.getImages()[_available_img].getImageView();
 	color_attachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
 	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

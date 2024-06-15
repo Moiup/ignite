@@ -26,6 +26,8 @@ private:
 	StorageBuffer _materials_buffer{};
 	Sampler _sampler{};
 
+	bool _is_first{ true };
+
 	CameraScene _camera{};
 	glm::mat4 _cam_mvp{};
 

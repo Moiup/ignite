@@ -217,6 +217,34 @@ void DefaultModule::update() {
 
 	_cam_mvp = DefaultConf::camera->getMVP();
 
+	Image& img2 = DefaultConf::renderer->getCurrentFrame();
+	Pixels pix2{};
+	pix2.setPixels(
+		img2.getImageExtentWidth(),
+		img2.getImageExtentHeight()
+	);
+
+	if (_is_first) {
+		_is_first = false;
+	}
+	else {
+		img2.getQueue()->wait();
+
+	}
+	img2.flushPixels(pix2);
+
+	for (uint32_t i = 0; i < 10; i++) {
+		for (uint32_t j = 0; j < 20; j++) {
+			pix2.setPixel(10 + i, 195 + j, 255, 0, 0, 255);
+		}
+	}
+	
+	img2.update(pix2);
+
+	img2.getQueue()->submit();
+	//img2.getQueue()->wait();
+
+
 	DefaultConf::renderer->render();
 
 }

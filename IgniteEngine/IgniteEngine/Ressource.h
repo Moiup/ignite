@@ -31,7 +31,9 @@ public:
 	void allocateMemory();
 	virtual void bind() = 0;
 
+	Queue* getQueue();
 	PipelineStageAndAccessMaskInfo getStageAccessInfo();
+
 
 	// Copy the ressource data in parameter into the calling ressource
 	//virtual void copy() = 0;

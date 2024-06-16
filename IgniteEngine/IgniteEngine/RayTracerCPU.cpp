@@ -25,16 +25,18 @@ void RayTracerCPU::setIsFinished(bool is_finished) {
 
 void RayTracerCPU::render() {
 	buildAssets();
-	buildImage();
+
+	std::cout << _scene.string() << std::endl;
+
+	//buildImage();
 
 	_is_finished = true;
 }
 
 void RayTracerCPU::buildAssets() {
 	Camera* camera = (Camera*)DefaultConf::camera->camera();
-	std::pair<std::vector<Triangle>, std::vector<Material>> assets = Triangle::buildTriangles(camera->getTranslate() * camera->getRotate());
-	_triangles = assets.first;
-	_materials = assets.second;
+	
+	Triangle::buildTriangles(camera->getTranslate() * camera->getRotate(), _scene);
 }
 
 void RayTracerCPU::buildImage() {
@@ -77,7 +79,7 @@ void RayTracerCPU::computePixel(uint64_t x, uint64_t y, glm::mat4 inv) {
 	Hit hit;
 
 	// Going through the triangles
-	for (Triangle& triangle : _triangles) {
+	for (Triangle& triangle : _scene._triangles) {
 		Hit hit_tmp = triangle.intersect(ray);
 
 		if (hit_tmp < hit) {
@@ -105,7 +107,7 @@ void RayTracerCPU::computePixel(float x, float y, uint64_t p_x, uint64_t p_y) {
 	Hit hit;
 
 	// Going through the triangles
-	for (Triangle& triangle : _triangles) {
+	for (Triangle& triangle : _scene._triangles) {
 		Hit hit_tmp = triangle.intersectSimple(ray);
 
 		if (hit_tmp < hit) {

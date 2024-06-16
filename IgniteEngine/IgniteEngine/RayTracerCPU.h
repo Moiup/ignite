@@ -10,8 +10,7 @@ private:
 	int _nb_cores;
 	bool _is_finished;
 
-	std::vector<Triangle> _triangles;
-	std::vector<Material> _materials;
+	RTScene _scene{};
 
 	Texture _image;
 

@@ -17,7 +17,7 @@
 class Modules
 {
 private:
-	//MenuModule _menu_module;
+	MenuModule _menu_module;
 
 	//TestModule _test_module;
 	//MediapipeModule _mediapipe_module;

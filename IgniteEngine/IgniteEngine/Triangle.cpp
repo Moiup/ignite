@@ -1,5 +1,13 @@
 #include "Triangle.h"
 
+std::string RTScene::string() {
+	std::string str = "RTScene:\n";
+	str += "\ttriangles: " + std::to_string(_triangles.size()) + "\n";
+	str += "\tmaterials: " + std::to_string(_materials.size()) + "\n";
+
+	return str;
+}
+
 Triangle::Triangle() :
 	Hittable::Hittable(),
 	_A{},
@@ -100,9 +108,7 @@ const uint32_t Triangle::mat_id() const {
 }
 
 
-std::pair<std::vector<Triangle>, std::vector<Material>> Triangle::buildTriangles(glm::mat4 model) {
-	std::vector<Triangle> triangles{};
-	std::vector<Material> materials{};
+void Triangle::buildTriangles(glm::mat4 model, RTScene& scene) {
 
 	//materials.push_back(Material());
 
@@ -151,7 +157,7 @@ std::pair<std::vector<Triangle>, std::vector<Material>> Triangle::buildTriangles
 						//if (mesh_materials.size()) {
 						//	mat_id = mat_indices[indices[ind]] + materials.size();
 						//}
-						triangles.push_back(
+						scene._triangles.push_back(
 							Triangle(A, B, C, 0)
 						);
 					}
@@ -160,7 +166,5 @@ std::pair<std::vector<Triangle>, std::vector<Material>> Triangle::buildTriangles
 			}
 		}
 	}
-
-	return {triangles, materials};
 }
 

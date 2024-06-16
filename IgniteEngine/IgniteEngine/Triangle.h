@@ -3,6 +3,17 @@
 #include "Object3D.h"
 #include "Hittable.h"
 
+#include <iostream>
+
+class Triangle;
+
+struct RTScene {
+	std::vector<Triangle> _triangles;
+	std::vector<Material> _materials;
+
+	std::string string();
+};
+
 class Triangle : public Hittable
 {
 private:
@@ -26,7 +37,7 @@ public:
 	const glm::vec3& C() const;
 	const uint32_t mat_id() const;
 
-	static std::pair<std::vector<Triangle>, std::vector<Material>> buildTriangles(glm::mat4 model);
+	static void buildTriangles(glm::mat4 model, RTScene& scene);
 	//static std::vector<Triangle> buildTriangles(Renderer* renderer, GraphicShader* graphic_shader);
 };
 

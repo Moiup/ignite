@@ -106,50 +106,61 @@ std::pair<std::vector<Triangle>, std::vector<Material>> Triangle::buildTriangles
 
 	//materials.push_back(Material());
 
-	//std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& mesh_objects = Object3D::getMeshObjects();
+	std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& mesh_objects = Object3D::getMeshObjects();
 
-	//// For each renderer
-	//for (auto& r_gs : mesh_objects) {
-	//	auto& gs_arr = r_gs.second;
-	//	// For each graphic shader
-	//	for (auto& gs_mesh : gs_arr) {
-	//		auto& mesh_arr = gs_mesh.second;
-	//		// For each mesh
-	//		for (auto& m_o : mesh_arr) {
-	//			Mesh* mesh = m_o.first;
-	//			const std::vector<glm::vec3>& coords = mesh->getCoords();
-	//			const std::vector<uint32_t>& indices = mesh->getIndices();
-	//			const std::vector<uint32_t>& mat_indices = mesh->getIndicesToMaterial();
-	//			const std::vector<Material>& mesh_materials = mesh->getMaterials();
-	//			
-	//			std::vector<Object3D*>& objects = m_o.second;
-	//			
-	//			// For each objects of the same mesh
-	//			if (!objects.size()) {
-	//				continue;
-	//			}
-	//			for (Object3D* obj : objects) {
-	//				
-	//				glm::mat4 tr = obj->getTransform();
-	//				
-	//				for (uint32_t ind = 0; ind < indices.size(); ind += 3) {
-	//					glm::vec3 A = tr * glm::vec4(coords[indices[ind]], 1.0);
-	//					glm::vec3 B = tr * glm::vec4(coords[indices[ind + 1]], 1.0);
-	//					glm::vec3 C = tr * glm::vec4(coords[indices[ind + 2]], 1.0);
-	//					uint32_t mat_id = 0;
-	//					
-	//					if (mesh_materials.size()) {
-	//						mat_id = mat_indices[indices[ind]] + materials.size();
-	//					}
-	//					triangles.push_back(
-	//						Triangle(A, B, C, mat_id)
-	//					);
-	//				}
-	//			}
-	//			materials.insert(materials.end(), mesh_materials.begin(), mesh_materials.end());
-	//		}
-	//	}
-	//}
+	// For each renderer
+	for (auto& r_gs : mesh_objects) {
+		Renderer* renderer = r_gs.first;
+		if (!renderer) {
+			continue;
+		}
+
+		auto& gs_arr = r_gs.second;
+		// For each graphic shader
+		for (auto& gs_mesh : gs_arr) {
+			GraphicShader* gs = gs_mesh.first;
+			if (!gs) {
+				continue;
+			}
+
+			auto& mesh_arr = gs_mesh.second;
+			// For each mesh
+			for (auto& m_o : mesh_arr) {
+				Mesh* mesh = m_o.first;
+				const std::vector<glm::vec3>& coords = mesh->getCoords();
+				const std::vector<uint32_t>& indices = mesh->getIndices();
+				//const std::vector<uint32_t>& mat_indices = mesh->getIndicesToMaterial();
+				//const std::vector<Material>& mesh_materials = mesh->getMaterials();
+				
+				std::vector<Object3D*>& objects = m_o.second;
+				
+				// For each objects of the same mesh
+				if (!objects.size()) {
+					continue;
+				}
+				for (Object3D* obj : objects) {
+					
+					glm::mat4 tr = obj->getTransform();
+					
+					for (uint32_t ind = 0; ind < indices.size(); ind += 3) {
+						glm::vec3 A = tr * glm::vec4(coords[indices[ind]], 1.0);
+						glm::vec3 B = tr * glm::vec4(coords[indices[ind + 1]], 1.0);
+						glm::vec3 C = tr * glm::vec4(coords[indices[ind + 2]], 1.0);
+						uint32_t mat_id = 0;
+						
+						//if (mesh_materials.size()) {
+						//	mat_id = mat_indices[indices[ind]] + materials.size();
+						//}
+						triangles.push_back(
+							Triangle(A, B, C, 0)
+						);
+					}
+				}
+				//materials.insert(materials.end(), mesh_materials.begin(), mesh_materials.end());
+			}
+		}
+	}
+
 	return {triangles, materials};
 }
 

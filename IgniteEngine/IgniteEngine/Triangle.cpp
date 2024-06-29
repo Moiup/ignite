@@ -1,5 +1,10 @@
 #include "Triangle.h"
 
+void RTScene::clear() {
+	_triangles.clear();
+	_materials.clear();
+}
+
 std::string RTScene::string() {
 	std::string str = "RTScene:\n";
 	str += "\ttriangles: " + std::to_string(_triangles.size()) + "\n";
@@ -71,7 +76,7 @@ Hit Triangle::intersect(const Ray& ray) {
 
 	glm::vec3 p_vec = glm::cross(ray.d(), ac);
 	float det = glm::dot(ab, p_vec);
-	float inv_det = 1 / det;
+	float inv_det = 1.0f / det;
 
 	glm::vec3 t_vec = ray.o() - _A;
 
@@ -108,11 +113,15 @@ const uint32_t Triangle::mat_id() const {
 }
 
 
-void Triangle::buildTriangles(glm::mat4 model, RTScene& scene) {
+void Triangle::buildTriangles(RTScene& scene) {
 
 	//materials.push_back(Material());
 
 	std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& mesh_objects = Object3D::getMeshObjects();
+
+	std::unordered_map<Material*, uint32_t> is_mat{};
+
+	uint32_t nb_mat{ 0 };
 
 	// For each renderer
 	for (auto& r_gs : mesh_objects) {
@@ -135,6 +144,7 @@ void Triangle::buildTriangles(glm::mat4 model, RTScene& scene) {
 				Mesh* mesh = m_o.first;
 				const std::vector<glm::vec3>& coords = mesh->getCoords();
 				const std::vector<uint32_t>& indices = mesh->getIndices();
+				
 				//const std::vector<uint32_t>& mat_indices = mesh->getIndicesToMaterial();
 				//const std::vector<Material>& mesh_materials = mesh->getMaterials();
 				
@@ -147,22 +157,32 @@ void Triangle::buildTriangles(glm::mat4 model, RTScene& scene) {
 				for (Object3D* obj : objects) {
 					
 					glm::mat4 tr = obj->getTransform();
+					std::vector<Material*> materials = obj->getMaterial();
+					std::vector<uint32_t>* mat_indices = obj->getMaterialIndices();
+
+					std::cout << indices.size() << std::endl;
+					std::cout << mat_indices->size() << std::endl;
+					std::cout << coords.size() << std::endl;
 					
 					for (uint32_t ind = 0; ind < indices.size(); ind += 3) {
 						glm::vec3 A = tr * glm::vec4(coords[indices[ind]], 1.0);
 						glm::vec3 B = tr * glm::vec4(coords[indices[ind + 1]], 1.0);
 						glm::vec3 C = tr * glm::vec4(coords[indices[ind + 2]], 1.0);
-						uint32_t mat_id = 0;
-						
-						//if (mesh_materials.size()) {
-						//	mat_id = mat_indices[indices[ind]] + materials.size();
-						//}
+
+						Material* mat = materials[(*mat_indices)[indices[ind]]];
+						if (!is_mat.count(mat)) {
+							is_mat[mat] = nb_mat;
+							scene._materials.push_back(*mat);
+							nb_mat++;
+						}
+
+						uint32_t mat_id = is_mat[mat];
+
 						scene._triangles.push_back(
-							Triangle(A, B, C, 0)
+							Triangle(A, B, C, mat_id)
 						);
 					}
 				}
-				//materials.insert(materials.end(), mesh_materials.begin(), mesh_materials.end());
 			}
 		}
 	}

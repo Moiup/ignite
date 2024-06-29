@@ -53,6 +53,7 @@ public:
 
 	void setMaterial(Material* material);
 	const std::vector<Material*>& getMaterial() const;
+	std::vector<uint32_t>* getMaterialIndices();
 
 	void setTexture(std::vector<Texture*>& texture);
 	const std::vector<Texture*>& getTexture() const;
@@ -69,7 +70,6 @@ private:
 		const std::vector<Material>& material,
 		std::vector<uint32_t>* indices
 	);
-	std::vector<uint32_t>* getMaterialIndices();
 	void setTextures(const std::vector<Texture>& texture);
 
 public:

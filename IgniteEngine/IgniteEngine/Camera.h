@@ -32,6 +32,7 @@ public:
 	glm::mat4 getClip();
 
 	glm::mat4 getMVP();
+	glm::mat4 getMVPC();
 
 	static glm::mat4 getViewport(uint32_t width, uint32_t height);
 };

@@ -36,7 +36,21 @@ void MenuModule::close() {
 void MenuModule::menu() {	
 	ImGui::Begin("Menu");
 
-	if (ImGui::Button("Open Ray Tracer") && !_is_ray_tracer) {
+	ImGui::Text("Performances");
+
+	_update_fps += DefaultConf::delta_time;
+
+	if (_update_fps > 250) {
+		_fps = static_cast<uint32_t>(1000.0f / DefaultConf::delta_time);
+		_update_fps = 0;
+	}
+	_fps_str = "FPS: " + std::to_string(_fps);
+	ImGui::Text(_fps_str.c_str());
+
+	//ImGui::Text(std::to_string(1 / DefaultConf::delta_time).c_str());
+
+	if (ImGui::Button("Open Ray Tracer")) {
+		std::cout << "Open" << std::endl;
 		_is_ray_tracer = true;
 	}
 	

@@ -14,6 +14,10 @@ private:
 	WindowUI _menu_window;
 	SDL_Renderer* _renderer;
 
+	float _update_fps{ 0 };
+	uint32_t _fps;
+	std::string _fps_str{};
+
 	bool _is_ray_tracer;
 	RayTracerCPU _rt_cpu;
 

@@ -11,6 +11,7 @@ struct RTScene {
 	std::vector<Triangle> _triangles;
 	std::vector<Material> _materials;
 
+	void clear();
 	std::string string();
 };
 
@@ -37,7 +38,7 @@ public:
 	const glm::vec3& C() const;
 	const uint32_t mat_id() const;
 
-	static void buildTriangles(glm::mat4 model, RTScene& scene);
+	static void buildTriangles(RTScene& scene);
 	//static std::vector<Triangle> buildTriangles(Renderer* renderer, GraphicShader* graphic_shader);
 };
 

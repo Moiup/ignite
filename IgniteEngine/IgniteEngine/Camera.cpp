@@ -2,8 +2,8 @@
 
 Camera::Camera() :
 	Entity3D::Entity3D(),
-	_eye{ 0, 0, 0.0 },
-	_center{ 0, 0, 1.0f },
+	_eye{ 0, 0, 0 }, // Camera position
+	_center{ 0, 0, 1.0f }, // Where to look at
 	_up{ 0, 1, 0 }
 {
 	_clip = glm::mat4(
@@ -65,20 +65,23 @@ glm::mat4 Camera::getClip() {
 }
 
 glm::mat4 Camera::getMVP() {
-	glm::mat4 mvp = getClip() * getProjection() * getView() * getTranslate() * getRotate() * getScale();
+	glm::mat4 mvp = getProjection() * getView() * getTranslate() * getRotate() * getScale();
 	return mvp;
 }
 
+glm::mat4 Camera::getMVPC() {
+	return getClip() * getMVP();
+}
+
 glm::mat4 Camera::getViewport(uint32_t width, uint32_t height) {
-	float w = width 
-		/ 2.f;
+	float w = width / 2.f;
 	float h = height / 2.f;
 
 	glm::mat4 viewport = glm::mat4(
-		w, 0, 0,    w,
-		0, h, 0,    h,
-		0, 0, 0.5f, 0.5f,
-		0, 0, 0,    1
+		w, 0, 0,    0,
+		0, h, 0,    0,
+		0, 0, 0.5f, 0,
+		w, h, 0.5f, 1
 		);
 	return viewport;
 }

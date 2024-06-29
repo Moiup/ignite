@@ -26,6 +26,7 @@ public:
 	
 	const Camera* camera() const;
 	glm::mat4 getProjection();
+	glm::mat4 getMVPC();
 	glm::mat4 getMVP();
 };
 

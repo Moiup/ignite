@@ -12,7 +12,7 @@ private:
 
 	RTScene _scene{};
 
-	Texture _image;
+	Pixels _image;
 
 public:
 	RayTracerCPU();

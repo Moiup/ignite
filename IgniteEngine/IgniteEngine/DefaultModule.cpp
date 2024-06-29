@@ -215,7 +215,8 @@ void DefaultModule::start() {
 void DefaultModule::update() {
 	Module::update();
 
-	_cam_mvp = DefaultConf::camera->getMVP();
+	_cam_mvp = DefaultConf::camera->getMVPC();
+	//_cam_mvp = glm::mat4(1.0f);
 
 	//Image& img2 = DefaultConf::renderer->getCurrentFrame();
 	//Pixels pix2{};
@@ -246,7 +247,6 @@ void DefaultModule::update() {
 
 
 	DefaultConf::renderer->render();
-
 }
 
 void DefaultModule::close() {

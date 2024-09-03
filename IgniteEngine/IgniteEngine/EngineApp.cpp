@@ -25,7 +25,6 @@ void EngineApp::init() {
 
 	ImGui::StyleColorsDark();
 
-
 	// Instance
 	_instance.setExtensionsAndLayers({
 		"VK_LAYER_KHRONOS_validation",
@@ -59,6 +58,11 @@ void EngineApp::init() {
 		{ VK_QUEUE_COMPUTE_BIT },
 		1
 	);
+	//_logical_device.defineQueue(
+	//	"video_decode_queues",
+	//	{ VK_QUEUE_VIDEO_DECODE_BIT_KHR },
+	//	1
+	//);
 	//_logical_device.setGPU(&_gpu);
 	_logical_device.create();
 
@@ -282,7 +286,7 @@ void EngineApp::update() {
 		std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 		SDL_Event event{};
 		if (SDL_PollEvent(&event)) {
-			//ImGui_ImplSDL2_ProcessEvent(&event);
+			ImGui_ImplSDL2_ProcessEvent(&event);
 			if (event.type == SDL_QUIT 
 				|| event.window.event == SDL_WINDOWEVENT_CLOSE
 				 && event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())) {

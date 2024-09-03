@@ -23,7 +23,8 @@ Swapchain::Swapchain() :
 	// queue family indices must be set
 	_info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 	_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-	_info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+	//_info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+	_info.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 	_info.clipped = VK_TRUE;
 	_info.oldSwapchain = VK_NULL_HANDLE;
 

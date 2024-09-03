@@ -27,7 +27,7 @@ public:
 	static Queue* present_queue;
 	static Queue* compute_queue;
 	static Texture* white_texture;
-	static uint64_t delta_time; // ms
+	static float delta_time; // ms
 	static SDL_Event* event;
 
 	static VertexBuffer* coord_buffer;

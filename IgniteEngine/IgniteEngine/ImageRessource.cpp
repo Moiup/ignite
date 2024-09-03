@@ -80,9 +80,9 @@ void ImageRessource::setImageViewFormat(VkFormat format) {
 
 void ImageRessource::setImageViewComponents(VkComponentSwizzle r, VkComponentSwizzle b, VkComponentSwizzle g, VkComponentSwizzle a) {
 	_image_view_info.components.r = r;
-	_image_view_info.components.r = g;
-	_image_view_info.components.r = b;
-	_image_view_info.components.r = a;
+	_image_view_info.components.g = g;
+	_image_view_info.components.b = b;
+	_image_view_info.components.a = a;
 }
 
 void ImageRessource::setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count) {

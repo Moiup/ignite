@@ -7,6 +7,8 @@ IgniteEngine/x64/Release/*
 !IgniteEngine/x64/Release/SDL2.dll
 
 */.vs/*
+IgniteEngine/IgniteEngine/libs
+IgniteEngine/IgniteEngine/libs/*
 IgniteEngine/IgniteEngine/glfw
 IgniteEngine/IgniteEngine/glfw/*
 IgniteEngine/IgniteEngine/glm
@@ -15,6 +17,9 @@ IgniteEngine/IgniteEngine/sdl2
 IgniteEngine/IgniteEngine/sdl2*
 IgniteEngine/IgniteEngine/vulkan_sdk
 IgniteEngine/IgniteEngine/vulkan_sdk/*
+
+IgniteEngine/IgniteEngine/build
+IgniteEngine/IgniteEngine/build*
 
 IgniteEngine/assets
 IgniteEngine/assets/*

@@ -55,4 +55,5 @@ void main(){
     );
 
     out_color = mat_color * tex_color;
+    // out_color = vec4(1.0, 0, 0, 1.0);
 }

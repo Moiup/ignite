@@ -50,6 +50,10 @@ private:
 public:
 	Object3D();
 
+	Entity3D* clone() const;
+	Object3D& operator=(const Object3D& o);
+	void copyAttributes(const Object3D& o);
+
 	void setMesh(Mesh* mesh);
 	const Mesh* getMesh() const;
 

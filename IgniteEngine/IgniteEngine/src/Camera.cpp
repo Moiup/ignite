@@ -14,6 +14,18 @@ Camera::Camera() :
 	);
 }
 
+
+void Camera::copyAttributes(const Camera& c) {
+	Entity3D::copyAttributes(c);
+
+	_eye = c._eye;
+	_center = c._center;
+	_up = c._up;
+	_width = c._width;
+	_height = c._height;
+	_clip = c._clip;
+}
+
 void Camera::setEye(glm::vec3 eye) {
 	_eye = eye;
 }

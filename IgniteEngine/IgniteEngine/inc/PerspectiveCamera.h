@@ -13,6 +13,10 @@ private:
 public:
 	PerspectiveCamera();
 
+	Entity3D* clone() const;
+	PerspectiveCamera& operator=(const PerspectiveCamera& pc);
+	void copyAttributes(const PerspectiveCamera& pc);
+
 	glm::mat4 getProjection();
 
 	void setFOVY(float fovy);

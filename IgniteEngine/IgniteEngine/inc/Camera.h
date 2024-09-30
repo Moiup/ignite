@@ -16,6 +16,10 @@ private:
 public:
 	Camera();
 
+	virtual Entity3D* clone() const = 0;
+	virtual Camera& operator=(const Camera& c) { return *this; };
+	void copyAttributes(const Camera& c);
+
 	void setEye(glm::vec3 eye);
 	void setEye(float x, float y, float z);
 	void setCenter(glm::vec3 center);

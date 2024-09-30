@@ -10,7 +10,7 @@
 
 class Entity3D
 {
-private:
+protected:
 	glm::vec3 _lp;
 	glm::vec3 _ap;
 
@@ -25,6 +25,11 @@ private:
 
 public:
 	Entity3D();
+	~Entity3D();
+
+	virtual Entity3D* clone() const = 0;
+	virtual Entity3D& operator=(const Entity3D& e);
+	virtual void copyAttributes(const Entity3D& e);
 
 	Entity3D* getParent();
 	std::vector<Entity3D*>& getChildren();

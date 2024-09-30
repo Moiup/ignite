@@ -44,6 +44,42 @@ Object3D::Object3D() :
 	;
 }
 
+Entity3D* Object3D::clone() const {
+	Object3D* o = new Object3D;
+
+	o->copyAttributes(*this);
+
+	for (Entity3D* child : this->_children) {
+		Joint* child_o = reinterpret_cast<Joint*>(child);
+		o->addChild(child_o->clone());
+	}
+
+	return o;
+}
+
+Object3D& Object3D::operator=(const Object3D& o) {
+	copyAttributes(o);
+
+	for (Entity3D* child : this->_children) {
+		Object3D* child_o = reinterpret_cast<Object3D*>(child);
+		this->addChild(child_o->clone());
+	}
+
+	return *this;
+}
+
+void Object3D::copyAttributes(const Object3D& o) {
+	Entity3D::copyAttributes(o);
+
+	this->_mesh = o._mesh;
+	this->_skeleton = o._skeleton;
+	this->_renderer = o._renderer;
+	this->_material_indices = o._material_indices;
+	this->_materials = o._materials;
+	this->_texture = o._texture;
+	this->_shaders = o._shaders;
+}
+
 void Object3D::setMesh(Mesh* mesh) {
 	uint32_t i = 0;
 	// For the previous mesh

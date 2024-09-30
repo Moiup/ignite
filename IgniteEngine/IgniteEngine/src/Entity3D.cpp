@@ -11,6 +11,32 @@ Entity3D::Entity3D() :
 	_children{}
 { ; }
 
+Entity3D::~Entity3D() {
+	for (Entity3D* child : _children) {
+		delete child;
+	}
+}
+
+Entity3D& Entity3D::operator=(const Entity3D& e) {
+	copyAttributes(e);
+
+	for (Entity3D* child : e._children) {
+		this->addChild(child->clone());
+	}
+
+	return *this;
+}
+
+void Entity3D::copyAttributes(const Entity3D& e) {
+	this->_parent = e._parent;
+	this->_lp = e._lp;
+	this->_ap = e._ap;
+	this->_lr = e._lr;
+	this->_ar = e._ar;
+	this->_ls = e._ls;
+	this->_as = e._as;
+}
+
 Entity3D* Entity3D::getParent() {
 	return _parent;
 }

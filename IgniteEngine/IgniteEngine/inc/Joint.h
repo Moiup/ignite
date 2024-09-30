@@ -11,6 +11,10 @@ private:
 public:
 	Joint();
 
+	Entity3D* clone() const;
+	Joint& operator=(const Joint& j);
+	void copyAttributes(const Joint& j);
+
 	glm::mat4& inverseBindMatrices();
 	const glm::mat4& inverseBindMatrices() const;
 

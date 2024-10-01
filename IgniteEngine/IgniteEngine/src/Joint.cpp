@@ -42,6 +42,14 @@ const glm::mat4& Joint::inverseBindMatrices() const {
 	return _inverse_bind_matrices;
 }
 
+glm::mat4& Joint::initialTransform() {
+	return _initial_transform;
+}
+
+const glm::mat4& Joint::initialTransform() const {
+	return _initial_transform;
+}
+
 void Joint::setId(uint32_t id) {
 	_id = id;
 }

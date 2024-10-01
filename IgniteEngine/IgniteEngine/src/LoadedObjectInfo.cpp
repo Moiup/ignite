@@ -205,40 +205,9 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 				tinygltf::Node& child = nodes[child_i];
 				joints[joint_i].addChild(&joints[child_i]);
 			}
-			//Joint* jj = reinterpret_cast<Joint*>(joints[joint_i].getChildren()[0]->getParent());
-			//std::cout << jj->id() << std::endl;
 
-			//std::cout << joint_i << std::endl;
-			//if (!nodes[joint_i].translation.empty()) {
-			//	joints[joint_i].joint().setPositionAbsolute(
-			//		nodes[joint_i].translation[0],
-			//		nodes[joint_i].translation[1],
-			//		nodes[joint_i].translation[2]
-			//	);
-			//}
-
-			//std::cout << nodes[joint_i].translation[0] << " " <<
-			//	nodes[joint_i].translation[1] << "  " <<
-			//	nodes[joint_i].translation[2] << std::endl;
-
-			//if (!nodes[joint_i].scale.empty()) {
-			//	joints[joint_i].joint().setScaleAbsolute(
-			//		nodes[joint_i].scale[0],
-			//		nodes[joint_i].scale[1],
-			//		nodes[joint_i].scale[2]
-			//	);
-			//}
-
-			//if (!nodes[joint_i].rotation.empty()) {
-			//	glm::quat q = glm::quat(
-			//		nodes[joint_i].rotation[3],
-			//		nodes[joint_i].rotation[0],
-			//		nodes[joint_i].rotation[1],
-			//		nodes[joint_i].rotation[2]
-			//	);
-			//	joints[joint_i].joint().setRotationAbsolute(glm::eulerAngles(q));
-			//}
 			joints[joint_i].inverseBindMatrices() = inverse_bind_matrices[joint_i];
+			joints[joint_i].initialTransform() = glm::inverse(inverse_bind_matrices[joint_i]);
 		}
 		// Adding the father node as the skeleton start
 		skeleton.setSkeleton(&skeleton.joints()[skin.joints[0]]);

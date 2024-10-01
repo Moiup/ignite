@@ -11,35 +11,36 @@ void GltfAndSkinningModule::init() {
 void GltfAndSkinningModule::start() {
 
 	//_cylinder_info.loadGLTF("../../assets/3d_objects/gltf/cube/cube.gltf");
-	//_object_info.loadGLTF("../../assets/3d_objects/gltf/CylinderRigged/cylinder.gltf");
+	_object_info.loadGLTF("../../assets/3d_objects/gltf/CylinderRigged/cylinder.gltf");
 	//_object_info.loadGLTF("../../assets/3d_objects/gltf/RectangleRigged/rectangle.gltf");
-	_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane2bones.gltf");
+	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane2bones.gltf");
+	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane3bones.gltf");
 	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane1bone.gltf");
 	_object.createFromObjectInfo(_object_info);
 	_object.setRenderer(DefaultConf::renderer);
 	_object.addShader(&_lbs_shader);
 	//_object.addShader(DefaultConf::graphic_shader);
 	
-	Skeleton* skeleton = &_object_info._skeletons[0];
+	//Skeleton* skeleton = &_object_info._skeletons[0];
 	//skeleton->skeleton()->joint().getChildren()[0]->setRotationAbsolute(0.0f, 15.0, 0.0);
 
-	glm::mat4 tr = skeleton->skeleton()->getChildren()[0]->getTransform();
+	//glm::mat4 tr = skeleton->skeleton()->getChildren()[0]->getTransform();
 
 	shaderCreation();
 }
 
 void GltfAndSkinningModule::update() {
 	Module::update();
-
 	_cam_mvp = DefaultConf::camera->getMVPC();
+
 	float add_angle = 1 * (DefaultConf::delta_time * 0.001) * (1 - (_step < 0) * 2);
 	std::cout << _step << " " << add_angle << std::endl;
 	_angle += add_angle;
 
 	Skeleton* skeleton = &_object_info._skeletons[0];
 	skeleton->skeleton()->getChildren()[0]->setRotationAbsolute(
-		_angle,
 		0.0f,
+		_angle,
 		0.0
 	);
 
@@ -49,7 +50,7 @@ void GltfAndSkinningModule::update() {
 		_step = -limit;
 	}
 
-	_joint_tr_buffer.setValues(&Object3D::updateJointsTransform(DefaultConf::renderer, &_lbs_shader)[0][0]);
+	_joint_tr_buffer.setValues(Object3D::updateJointsTransform(DefaultConf::renderer, &_lbs_shader).data());
 }
 
 void GltfAndSkinningModule::close() {

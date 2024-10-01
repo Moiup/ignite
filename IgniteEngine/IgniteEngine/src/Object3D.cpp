@@ -462,7 +462,7 @@ std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer* renderer, Grap
 			for (const Joint& joint : joints) {
 				const Joint* j = &joint;
 				Object3D::joints_transform[renderer][shader][joint_i + j->id()] =
-					j->getTransform() * j->inverseBindMatrices();
+					j->initialTransform() * j->getTransform() * j->inverseBindMatrices();
 			}
 			joint_i += joints.size();
 		}
@@ -581,9 +581,11 @@ void Object3D::buildJoints(Renderer* renderer, GraphicShader* shader) {
 	if (Object3D::joints_ids[renderer][shader].size()) {
 		return;
 	}
+
 	uint32_t max_i = 0;
 	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
 		const Mesh* mesh = m_o.first;
+
 		uint32_t tmp_i = 0;
 		for (glm::uvec4 j_id : mesh->getJoints()) {
 			tmp_i = std::max(std::max(j_id.x, j_id.y), std::max(j_id.z, j_id.w));
@@ -824,7 +826,7 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 				}
 
 				Object3D::joints_transform[renderer][shader].push_back(
-					j->getTransform() * j->inverseBindMatrices()
+					j->initialTransform() * j->getTransform() * j->inverseBindMatrices()
 				);
 				is_joint[j] = true;
 			}

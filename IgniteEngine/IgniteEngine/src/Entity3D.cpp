@@ -59,7 +59,6 @@ void Entity3D::setPositionAbsolute(float x, float y, float z) {
 }
 
 void Entity3D::setPositionAbsolute(glm::vec3 pos) {
-	_lp = _lp + pos - _ap;
 	_ap = pos;
 }
 
@@ -68,10 +67,10 @@ void Entity3D::setPositionAbsoluteUpdateChildren(float x, float y, float z) {
 }
 
 void Entity3D::setPositionAbsoluteUpdateChildren(glm::vec3 pos) {
-	glm::vec3 delta = pos - _ap;
+	//glm::vec3 delta = pos - _ap;
 
 	for (Entity3D* child : _children) {
-		glm::vec3 n_child_ap = child->getPositionAbsolute() + delta;
+		glm::vec3 n_child_ap = child->getPositionLocale() + pos;
 		child->setPositionAbsoluteUpdateChildren(n_child_ap);
 	}
 

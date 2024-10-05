@@ -10,6 +10,7 @@
 #include "Camera.h"
 
 #include "DefaultModule.h"
+#include "DebugScene.h"
 #include "Bistro.h"
 #include "ComputeShaderTest.h"
 #include "ReadWriteImageMod.h"
@@ -28,7 +29,7 @@ private:
 	//Hand2D _hand2d;
 	GltfAndSkinningModule _gltf_and_skinning_module;
 
-
+	DebugScene _debug_scene;
 	DefaultModule _default_module; // Must be the last module of the list
 
 public:

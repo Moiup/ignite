@@ -7,6 +7,7 @@ uint32_t DefaultConf::NB_FRAME = 2;
 DefaultGPU* DefaultConf::gpu;
 LogicalDevice* DefaultConf::logical_device;
 GraphicShader* DefaultConf::graphic_shader;
+GraphicShader* DefaultConf::debug_shader;
 CommandBuffer* DefaultConf::copy_cmd_buf;
 WindowSurface* DefaultConf::render_window;
 Instance* DefaultConf::instance;

@@ -15,6 +15,8 @@ private:
 	std::unordered_map<std::string, std::vector<IndexBuffer*>> _index_buffers;
 
 	uint32_t _nb_frame;
+	VkPolygonMode _polygon_mode{ VK_POLYGON_MODE_FILL };
+	VkPrimitiveTopology _topology{ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
 
 public:
 	GraphicShader();
@@ -32,6 +34,12 @@ public:
 	void addIndexBufferInfo(std::string name, uint32_t nb_elem);
 	void addIndexBuffer(std::string name, IndexBuffer* buffer);
 	std::unordered_map<std::string, std::vector<IndexBuffer*>>& getIndexBuffers();
+
+	void setPolygonMode(VkPolygonMode polygonMode);
+	VkPolygonMode polygonMode();
+
+	void setTopology(VkPrimitiveTopology topology);
+	VkPrimitiveTopology topology();
 
 	void read(std::string vertex_shader, std::string fragment_shader);
 };

@@ -69,6 +69,22 @@ std::unordered_map<std::string, std::vector<IndexBuffer*>>& GraphicShader::getIn
 	return _index_buffers;
 }
 
+void GraphicShader::setPolygonMode(VkPolygonMode polygon_mode) {
+	_polygon_mode = polygon_mode;
+}
+
+VkPolygonMode GraphicShader::polygonMode() {
+	return _polygon_mode;
+}
+
+void GraphicShader::setTopology(VkPrimitiveTopology topology) {
+	_topology = topology;
+}
+
+VkPrimitiveTopology GraphicShader::topology() {
+	return _topology;
+}
+
 void GraphicShader::read(std::string vertex_shader, std::string fragment_shader) {
 	createShaderModuleAndStage(
 		vertex_shader, VK_SHADER_STAGE_VERTEX_BIT, shaderc_glsl_vertex_shader

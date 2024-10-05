@@ -6,7 +6,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <vector>
+#include <iostream>
+
+std::string makeString(const glm::mat4 m);
+std::string makeString(const glm::mat4 m, const std::string& tabs);
 
 class Entity3D
 {
@@ -32,34 +37,32 @@ public:
 	virtual void copyAttributes(const Entity3D& e);
 
 	Entity3D* getParent();
+	const Entity3D* getParent() const;
 	std::vector<Entity3D*>& getChildren();
 	const std::vector<Entity3D*>& getChildren() const;
 
 	void addChild(Entity3D* child);
 
 	// Position Absolute
-	void setPositionAbsolute(float x, float y, float z);
-	void setPositionAbsolute(glm::vec3 pos);
 	void setPositionAbsoluteUpdateChildren(float x, float y, float z);
 	void setPositionAbsoluteUpdateChildren(glm::vec3 pos);
 	// Position Locale
-	void setPositionLocale(float x, float y, float z);
-	void setPositionLocale(glm::vec3 pos);
 	void setPositionLocaleUpdateChildren(float x, float y, float z);
 	void setPositionLocaleUpdateChildren(glm::vec3 pos);
 
-	// Rotate Absolute
-	void setRotationAbsolute(float rx, float ry, float rz);
-	void setRotationAbsolute(glm::vec3 rot);
+	// Rotation Absolute
+	void setRotationAbsoluteUpdateChildren(float rx, float ry, float rz);
+	void setRotationAbsoluteUpdateChildren(glm::vec3 rot);
+	
+	// Rotation Locale
+	void setRotationLocaleUpdateChildren(float rx, float ry, float rz);
+	void setRotationLocaleUpdateChildren(glm::vec3 rot);
 
 	// Scale Absolute
-	void setScaleAbsolute(float sx, float sy, float sz);
-	void setScaleAbsolute(glm::vec3 scale);
 	void setScaleAbsoluteUpdateChildren(float sx, float sy, float sz);
 	void setScaleAbsoluteUpdateChildren(glm::vec3 scale);
+
 	// Scale Locale
-	void setScaleLocale(float sx, float sy, float sz);
-	void setScaleLocale(glm::vec3 scale);
 	void setScaleLocaleUpdateChildren(float sx, float sy, float sz);
 	void setScaleLocaleUpdateChildren(glm::vec3 scale);	
 
@@ -73,12 +76,41 @@ public:
 	glm::vec3 getScaleLocale() const;
 
 	glm::mat4 getTranslate() const;
+	glm::mat4 getTranslateLocale() const;
 	glm::mat4 getRotate() const;
+	glm::mat4 getRotateLocale() const;
 	glm::mat4 getScale() const;
 
 	glm::mat4 getTransform() const;
+	glm::mat4 getTransformLocale() const;
 
 private:
 	void setParent(Entity3D* parent);
+
+public:
+	// Position Absolute
+	void setPositionAbsolute(float x, float y, float z);
+	void setPositionAbsolute(glm::vec3 pos);
+
+	// Position Locale
+	void setPositionLocale(float x, float y, float z);
+	void setPositionLocale(glm::vec3 pos);
+
+	// Rotation Absolute
+	void setRotationAbsolute(float rx, float ry, float rz);
+	void setRotationAbsolute(glm::vec3 rot);
+
+	// Rotation Locale
+	void setRotationLocale(float rx, float ry, float rz);
+	void setRotationLocale(glm::vec3 rot);
+
+
+	// Scale Absolute
+	void setScaleAbsolute(float sx, float sy, float sz);
+	void setScaleAbsolute(glm::vec3 scale);
+
+	// Scale Locale
+	void setScaleLocale(float sx, float sy, float sz);
+	void setScaleLocale(glm::vec3 scale);
 };
 

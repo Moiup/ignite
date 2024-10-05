@@ -1,5 +1,24 @@
 #include "Entity3D.h"
 
+std::string makeString(const glm::mat4 m) {
+	std::string s = "";
+	s = makeString(m, "");
+	return s;
+}
+
+std::string makeString(const glm::mat4 m, const std::string& tabs) {
+	std::string s = "";
+	for (int8_t i = 0; i < 4; ++i) {
+		s = s + tabs;
+		for (int8_t j = 0; j < 4; ++j) {
+			s = s + std::to_string(m[j][i]);
+			s = s + " ";
+		}
+		s = s + "\n";
+	}
+	return s;
+}
+
 Entity3D::Entity3D() :
 	_lp{},
 	_ap{},
@@ -41,6 +60,10 @@ Entity3D* Entity3D::getParent() {
 	return _parent;
 }
 
+const Entity3D* Entity3D::getParent() const {
+	return _parent;
+}
+
 std::vector<Entity3D*>& Entity3D::getChildren() {
 	return _children;
 }
@@ -67,10 +90,8 @@ void Entity3D::setPositionAbsoluteUpdateChildren(float x, float y, float z) {
 }
 
 void Entity3D::setPositionAbsoluteUpdateChildren(glm::vec3 pos) {
-	//glm::vec3 delta = pos - _ap;
-
 	for (Entity3D* child : _children) {
-		glm::vec3 n_child_ap = child->getPositionLocale() + pos;
+		glm::vec3 n_child_ap = pos;
 		child->setPositionAbsoluteUpdateChildren(n_child_ap);
 	}
 
@@ -82,14 +103,11 @@ void Entity3D::setPositionLocaleUpdateChildren(float x, float y, float z) {
 }
 
 void Entity3D::setPositionLocaleUpdateChildren(glm::vec3 pos) {
-	glm::vec3 delta = pos - _lp;
-
-	for (Entity3D* child : _children) {
-		glm::vec3 n_child_lp = child->getPositionLocale() + delta;
-		child->setPositionLocaleUpdateChildren(n_child_lp);
-	}
-
 	setPositionLocale(pos);
+	for (Entity3D* child : _children) {
+		glm::vec3 n_child_lp = getPositionAbsolute() + pos;
+		child->setPositionAbsoluteUpdateChildren(n_child_lp);
+	}
 }
 
 void Entity3D::setPositionLocale(float x, float y, float z) {
@@ -97,7 +115,7 @@ void Entity3D::setPositionLocale(float x, float y, float z) {
 }
 
 void Entity3D::setPositionLocale(glm::vec3 pos) {
-	_ap = _ap + pos - _lp;
+	//_ap = _ap + pos - _lp;
 	_lp = pos;
 }
 
@@ -106,8 +124,41 @@ void Entity3D::setRotationAbsolute(float rx, float ry, float rz) {
 }
 
 void Entity3D::setRotationAbsolute(glm::vec3 rot) {
-	_lr = _lr + rot - _ar;
 	_ar = rot;
+}
+
+void Entity3D::setRotationAbsoluteUpdateChildren(float rx, float ry, float rz) {
+	setRotationAbsoluteUpdateChildren(glm::vec3(rx, ry, rz));
+}
+
+void Entity3D::setRotationAbsoluteUpdateChildren(glm::vec3 rot) {
+	for (Entity3D* child : _children) {
+		child->setRotationAbsoluteUpdateChildren(
+			rot
+		);
+	}
+	setRotationAbsolute(rot);
+}
+
+void Entity3D::setRotationLocale(float rx, float ry, float rz) {
+	setRotationLocale(glm::vec3(rx, ry, rz));
+}
+
+void Entity3D::setRotationLocale(glm::vec3 rot) {
+	_lr = rot;
+}
+
+void Entity3D::setRotationLocaleUpdateChildren(float rx, float ry, float rz) {
+	setRotationLocaleUpdateChildren(glm::vec3(rx, ry, rz));
+}
+
+void Entity3D::setRotationLocaleUpdateChildren(glm::vec3 rot) {
+	setRotationLocale(rot);
+	for (Entity3D* child : _children) {
+		child->setRotationAbsoluteUpdateChildren(
+			getRotationAbsolute() + rot
+		);
+	}
 }
 
 void Entity3D::setScaleAbsolute(float sx, float sy, float sz) {
@@ -189,6 +240,13 @@ glm::mat4 Entity3D::getTranslate() const {
 	);
 }
 
+glm::mat4 Entity3D::getTranslateLocale() const {
+	return glm::translate(
+		glm::mat4(1.0f),
+		_lp
+	);
+}
+
 glm::mat4 Entity3D::getRotate() const {
 	glm::mat4 r_x = glm::rotate(
 		glm::mat4(1.0f),
@@ -211,19 +269,51 @@ glm::mat4 Entity3D::getRotate() const {
 	return r_x * r_y * r_z;
 }
 
+
+glm::mat4 Entity3D::getRotateLocale() const {
+	glm::mat4 r_x = glm::rotate(
+		glm::mat4(1.0f),
+		_lr.x,
+		glm::vec3(1.0f, 0, 0)
+	);
+
+	glm::mat4 r_y = glm::rotate(
+		glm::mat4(1.0f),
+		_lr.y,
+		glm::vec3(0, 1.0f, 0)
+	);
+
+	glm::mat4 r_z = glm::rotate(
+		glm::mat4(1.0f),
+		_lr.z,
+		glm::vec3(0, 0, 1.0f)
+	);
+
+	return r_x * r_y * r_z;
+}
+
 glm::mat4 Entity3D::getScale() const {
 	return glm::scale(
 		glm::mat4(1.0f),
-		_as
+		_ls
 	);
 }
 
+glm::mat4 Entity3D::getTransformLocale() const {
+	return getTranslateLocale() * getRotateLocale();
+}
+
 glm::mat4 Entity3D::getTransform() const {
-	return getTranslate() * getRotate() * getScale();
+	glm::mat4 par = glm::mat4(1.0);
+	if (_parent) {
+		par = _parent->getTransform();
+	}
+
+	return par * getTranslateLocale() * getRotateLocale() * getScale();
 }
 
 void Entity3D::setParent(Entity3D* parent) {
 	_parent = parent;
-	glm::vec3 locale = _ap - parent->getPositionAbsolute();
-	setPositionLocaleUpdateChildren(locale);
+	//glm::vec3 locale = _ap - parent->getPositionAbsolute();
+	//setPositionLocaleUpdateChildren(locale);
 }

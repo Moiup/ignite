@@ -56,7 +56,7 @@ void CameraScene::update() {
 				dir = glm::normalize(dir);
 				//dir = _perspective_camera.getRotate() * glm::vec4(dir, 1);
 
-				_camera->setPositionAbsolute(
+				_camera->setPositionAbsoluteUpdateChildren(
 					cam_pos - dir * 0.1f
 				);
 			}
@@ -85,7 +85,7 @@ void CameraScene::update() {
 
 			if (dir.x != 0 && dir.y != 0) {
 				dir = glm::normalize(dir);
-				_camera->setRotationAbsolute(cam_rot.x + dir.y * 0.05, cam_rot.y - dir.x * 0.05, 0);
+				_camera->setRotationAbsoluteUpdateChildren(cam_rot.x + dir.y * 0.05, cam_rot.y - dir.x * 0.05, 0);
 			}
 		}
 	}
@@ -100,10 +100,10 @@ void CameraScene::update() {
 		glm::vec3 dir = glm::normalize(center - eye);
 
 		if (event->wheel.y > 0) {
-			_camera->setPositionAbsolute(cam_pos - dir);
+			_camera->setPositionAbsoluteUpdateChildren(cam_pos - dir);
 		}
 		else if (event->wheel.y < 0) {
-			_camera->setPositionAbsolute(cam_pos + dir);
+			_camera->setPositionAbsoluteUpdateChildren(cam_pos + dir);
 		}
 	}
 }

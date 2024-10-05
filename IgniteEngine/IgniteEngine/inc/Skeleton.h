@@ -14,11 +14,12 @@ public:
 
 	void setSkeleton(Joint* skeleton);
 	const Joint* skeleton() const;
+	Joint* skeleton();
 
 	std::vector<Joint>& joints();
-	//const std::vector<Joint>& joints() const;
+	const std::vector<Joint>& joints() const;
 
-	void duplicate(const Skeleton& skeleton);
+	friend std::ostream& operator<<(std::ostream& os, const Skeleton& s);
 };
 
 #endif

@@ -34,7 +34,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 			_textures[0][t_id].setDimensions(pixels.getWidth(), pixels.getHeight());
 			_textures[0][t_id].create();
 			_textures[0][t_id].update(pixels);
-			_textures[0][t_id].changeLayout(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL);
+			_textures[0][t_id].changeLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			t_id++;
 		}
 		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];
@@ -110,6 +110,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 		reinterpret_cast<float*>(pos_buf_info._data),
 		pos_buf_info._byte_length / (sizeof(glm::vec3))
 	);
+
 	// Normals
 	GLTFBuffInfo normal_buf_info = retreiveBufferDataGltf(model, attributes["NORMAL"]);
 	_meshes[0].setNormals(
@@ -120,7 +121,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 	GLTFBuffInfo uv_buf_info = retreiveBufferDataGltf(model, attributes["TEXCOORD_0"]);
 	_meshes[0].setUV(
 		reinterpret_cast<float*>(uv_buf_info._data),
-		uv_buf_info._byte_length / (sizeof(glm::vec3))
+		uv_buf_info._byte_length / (sizeof(glm::vec2))
 	);
 	// Indices (vertex)
 	GLTFBuffInfo indices_buf_info = retreiveBufferDataGltf(model, mesh.primitives[0].indices);
@@ -168,8 +169,8 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 		std::cout << "Building skeleton" << std::endl;
 		// ---- Vertex Attributes ----
 		GLTFBuffInfo joints_buf_info = retreiveBufferDataGltf(model, attributes["JOINTS_0"]);
-		std::vector<uint32_t> joints_data(joints_buf_info._count * 4);
 
+		std::vector<uint32_t> joints_data(joints_buf_info._count * 4);
 		// Must be adapted regarding the component_type of the buffer
 		for (uint32_t i = 0; i < joints_data.size(); ++i) {
 			joints_data[i] = joints_buf_info._data[i];
@@ -199,18 +200,35 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 		joints.resize(skin.joints.size());
 
 		std::vector<tinygltf::Node>& nodes = model.nodes;
-		for (int32_t joint_i : skin.joints) {
-			joints[joint_i].setId(joint_i);
-			for (int32_t child_i : nodes[joint_i].children) {
-				tinygltf::Node& child = nodes[child_i];
-				joints[joint_i].addChild(&joints[child_i]);
+		std::unordered_map<int32_t, int32_t> node_to_joint;
+		for (int32_t i = 0; i < skin.joints.size(); i++) {
+			node_to_joint[skin.joints[i]] = i;
+			std::cout << "node_to_joint: " << skin.joints[i] << " - " << i << std::endl;
+		}
+
+		for (int32_t joint_i = 0; joint_i < joints.size(); ++joint_i) {
+			Joint& joint = joints[joint_i];
+			tinygltf::Node& node = nodes[skin.joints[joint_i]];
+			for (int32_t child_i : node.children) {
+				joint.addChild(&joints[node_to_joint[child_i]]);
+			}
+			joint.setId(joint_i);
+			joint.name() = node.name;
+
+			if (!node.translation.empty()) {
+				joint.setPositionLocale(
+					node.translation[0],
+					node.translation[1],
+					node.translation[2]
+				);
 			}
 
-			joints[joint_i].inverseBindMatrices() = inverse_bind_matrices[joint_i];
-			joints[joint_i].initialTransform() = glm::inverse(inverse_bind_matrices[joint_i]);
+			if (inv_bind_mat_buf_info._count) {
+				joint.inverseBindMatrices() = inverse_bind_matrices[joint_i];
+			}
 		}
 		// Adding the father node as the skeleton start
-		skeleton.setSkeleton(&skeleton.joints()[skin.joints[0]]);
+		skeleton.setSkeleton(&skeleton.joints()[0]);
 	}
 	std::cout << "loaded." << std::endl;
 }

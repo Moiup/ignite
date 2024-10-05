@@ -25,6 +25,10 @@ void GraphicsPipeline::setPolygonMode(VkPolygonMode polygon_mode) {
 	_polygon_mode = polygon_mode;
 }
 
+void GraphicsPipeline::setTopology(VkPrimitiveTopology topology) {
+	_topology = topology;
+}
+
 void GraphicsPipeline::setCullMode(VkCullModeFlags cull_mode) {
 	_cull_mode = cull_mode;
 }
@@ -89,7 +93,7 @@ void GraphicsPipeline::createPipeline() {
 	input_assembly_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	input_assembly_state_info.pNext = nullptr;
 	input_assembly_state_info.flags = 0;
-	input_assembly_state_info.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	input_assembly_state_info.topology = _topology;
 	input_assembly_state_info.primitiveRestartEnable = VK_FALSE;
 
 	//---- Viewport State (26.9.)----//

@@ -459,12 +459,15 @@ std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer* renderer, Grap
 		for (Object3D* obj : objs) {
 			Skeleton* skeleton = const_cast<Skeleton*>(obj->getSkeleton());
 			const std::vector<Joint>& joints = skeleton->joints();
+
 			for (const Joint& joint : joints) {
 				const Joint* j = &joint;
-				Object3D::joints_transform[renderer][shader][joint_i + j->id()] =
-					j->initialTransform() * j->getTransform() * j->inverseBindMatrices();
+				Object3D::joints_transform[renderer][shader][joint_i++] =
+					j->getTransform() * j->inverseBindMatrices()
+					/*j->initialTransform() * j->getTransformLocale() * j->inverseBindMatrices()*/;
 			}
-			joint_i += joints.size();
+			//i--;
+			//joint_i += joints.size();
 		}
 	}
 
@@ -531,10 +534,8 @@ void Object3D::buildObjectId(Renderer* renderer, GraphicShader* shader) {
 		Mesh* mesh = m_o.first;
 		std::vector<Object3D*>& objects = m_o.second;
 		uint32_t nb_coords = mesh->getCoords().size();
-		for (Object3D* obj : objects) {
-			for (uint32_t i = 0; i < nb_coords; i++) {
-				Object3D::object_id[renderer][shader].push_back(obj_i);
-			}
+		for (uint32_t i = 0; i < nb_coords; i++) {
+			Object3D::object_id[renderer][shader].push_back(obj_i);
 		}
 		obj_i += objects.size();
 	}
@@ -729,6 +730,7 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 
 			// When there are more than one material
 			std::vector<uint32_t>* ids = obj->getMaterialIndices();
+			uint32_t nb_new = 0;
 			for (uint32_t id : *ids) {
 				Material* mat = mats[id];
 				uint32_t index = start_i + id;
@@ -737,10 +739,12 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 				}
 				else {
 					is_mat[mat] = index;
+					nb_new++;
 				}
 				Object3D::material_indices[renderer][shader].push_back(index);
 			}
-			start_i += mats.size();
+			start_i += nb_new;
+			break;
 		}
 	}
 }
@@ -826,7 +830,7 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 				}
 
 				Object3D::joints_transform[renderer][shader].push_back(
-					j->initialTransform() * j->getTransform() * j->inverseBindMatrices()
+					j->getTransform() * j->inverseBindMatrices()
 				);
 				is_joint[j] = true;
 			}

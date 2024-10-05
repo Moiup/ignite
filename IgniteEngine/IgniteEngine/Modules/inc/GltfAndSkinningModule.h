@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Module.h"
+#include "DebugScene.h"
 
 class GltfAndSkinningModule : public Module
 {
@@ -28,6 +29,12 @@ private:
 	PerspectiveCamera _perspective_camera{};
 	CameraScene _camera{};
 	glm::mat4 _cam_mvp{};
+
+	// Joint cross
+	Mesh _cross_mesh;
+	std::vector<Material> _cross_material;
+	std::vector<uint32_t> _cross_material_indices;
+	std::vector<Object3D> _cross_objs;
 
 	float _angle{ 0 };
 	int32_t _step{ 0 };

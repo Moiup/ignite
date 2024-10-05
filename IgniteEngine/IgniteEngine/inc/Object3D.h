@@ -76,12 +76,12 @@ public:
 
 	void createFromObjectInfo(const LoadedObjectInfo& loi);
 
-private:
-	void createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj);
 	void setMaterial(
 		const std::vector<Material>& material,
 		std::vector<uint32_t>* indices
 	);
+private:
+	void createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj);
 	void setTextures(const std::vector<Texture>& texture);
 
 public:

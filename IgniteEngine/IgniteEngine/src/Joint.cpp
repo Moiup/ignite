@@ -57,3 +57,50 @@ void Joint::setId(uint32_t id) {
 int32_t Joint::id() const {
 	return _id;
 }
+
+std::string& Joint::name() {
+	return _name;
+}
+
+const std::string& Joint::name() const {
+	return _name;
+}
+
+std::string Joint::toString(bool is_matrix) const {
+	std::string s = "";
+	std::string tabs = "";
+
+	toStringChild(s, tabs, 4, is_matrix);
+
+	return s;
+}
+
+std::ostream& operator<<(std::ostream& os, const Joint& j) {
+	os << j._id << " " << j._name;
+	return os;
+}
+
+void Joint::toStringChild(std::string& s, std::string& tabs, int nb_tab, bool is_matrix) const {
+	for (int32_t i = 0; i < nb_tab; ++i) {
+		tabs = tabs + " ";
+	}
+	s = s + tabs + "==== joint: " + std::to_string(_id) + " - " + _name + " ====\n";
+	s = s + tabs + "children [ ";
+	for (Entity3D* c : _children) {
+		Joint* j = reinterpret_cast<Joint*>(c);
+		s = s + std::to_string(j->id()) + " ";
+	}
+	s = s + "]\n";
+
+	if (is_matrix) {
+		s = s + tabs + "  transform locale:\n";
+		s = s + makeString(getTransformLocale(), tabs);
+		s = s + tabs + "  inverse bind matrix:\n";
+		s = s + makeString(inverseBindMatrices(), tabs);
+	}
+
+	for (Entity3D* c : _children) {
+		Joint* j = reinterpret_cast<Joint*>(c);
+		j->toStringChild(s, tabs, 4, is_matrix);
+	}
+}

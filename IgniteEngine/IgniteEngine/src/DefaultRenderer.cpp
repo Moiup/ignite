@@ -446,11 +446,15 @@ void DefaultRenderer::createGraphicsPipeline() {
 		if (!shader) {
 			continue;
 		}
+		
+
 		GraphicsPipeline gp{};
 		gp.setShader(shader);
 		gp.setNbFrame(_nb_frame);
 		gp.setSwapchain(&_swapchain);
 		gp.setDepthBuffer(&_depth_buffer);
+		gp.setPolygonMode(shader->polygonMode());
+		gp.setTopology(shader->topology());
 		//gp.setCullMode(VK_CULL_MODE_BACK_BIT);
 		gp.create();
 		_graphics_pipelines.push_back(gp);

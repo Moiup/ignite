@@ -459,11 +459,11 @@ std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer* renderer, Grap
 		for (Object3D* obj : objs) {
 			Skeleton* skeleton = const_cast<Skeleton*>(obj->getSkeleton());
 			const std::vector<Joint>& joints = skeleton->joints();
-
+			skeleton->skeleton()->buildTransformWorld();
 			for (const Joint& joint : joints) {
 				const Joint* j = &joint;
 				Object3D::joints_transform[renderer][shader][joint_i++] =
-					j->getTransform() * j->inverseBindMatrices()
+					j->getTransformWorld() * j->inverseBindMatrices()
 					/*j->initialTransform() * j->getTransformLocale() * j->inverseBindMatrices()*/;
 			}
 			//i--;
@@ -822,6 +822,7 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 		
 		for (Object3D* obj : objs) {
 			Skeleton* skeleton = const_cast<Skeleton*>(obj->getSkeleton());
+			skeleton->skeleton()->buildTransformWorld();
 			const std::vector<Joint>& joints = skeleton->joints();
 			for (const Joint& joint : joints) {
 				const Joint* j = &joint;

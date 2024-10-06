@@ -220,7 +220,6 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 		std::unordered_map<int32_t, int32_t> node_to_joint;
 		for (int32_t i = 0; i < skin.joints.size(); i++) {
 			node_to_joint[skin.joints[i]] = i;
-			std::cout << "node_to_joint: " << skin.joints[i] << " - " << i << std::endl;
 		}
 
 		for (int32_t joint_i = 0; joint_i < joints.size(); ++joint_i) {
@@ -238,6 +237,17 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 					node.translation[1],
 					node.translation[2]
 				);
+			}
+
+			if (!node.rotation.empty()) {
+				glm::quat q = glm::quat(
+					node.rotation[3],
+					node.rotation[2],
+					node.rotation[1],
+					node.rotation[0]
+				);
+				glm::vec3 rot = glm::eulerAngles(q);
+				joint.setRotationLocale(rot);
 			}
 
 			if (inv_bind_mat_buf_info._count) {

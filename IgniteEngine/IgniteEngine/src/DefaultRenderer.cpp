@@ -443,11 +443,11 @@ void DefaultRenderer::createGraphicsPipeline() {
 	
 	for (auto& mo: mesh_objects) {
 		GraphicShader* shader = mo.first;
-		if (!shader) {
+		std::unordered_map<Mesh*, std::vector<Object3D*>>& meshes = mo.second;
+		if ((!shader) || (meshes.empty())) {
 			continue;
 		}
 		
-
 		GraphicsPipeline gp{};
 		gp.setShader(shader);
 		gp.setNbFrame(_nb_frame);

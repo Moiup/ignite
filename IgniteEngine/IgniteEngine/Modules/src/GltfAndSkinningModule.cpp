@@ -72,7 +72,7 @@ void GltfAndSkinningModule::update() {
 	Skeleton* skeleton = &_object_info._skeletons[0];
 	Joint* joint = const_cast<Joint*>(skeleton->skeleton());
 	Joint* j = reinterpret_cast<Joint*>(joint);
-	j->getChildren()[0]->getChildren()[0]->setRotationLocaleUpdateChildren(
+	j->getChildren()[0]->setRotationLocaleUpdateChildren(
 		0.0f,
 		0.0,
 		_angle

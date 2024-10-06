@@ -25,6 +25,8 @@ protected:
 	glm::vec3 _ls;
 	glm::vec3 _as;
 
+	glm::mat4 _transform_world;
+
 	Entity3D* _parent;
 	std::vector<Entity3D*> _children;
 
@@ -83,9 +85,16 @@ public:
 
 	glm::mat4 getTransform() const;
 	glm::mat4 getTransformLocale() const;
+	/**
+	* Must call buildTransformWorld() from the father node before 
+	*/
+	glm::mat4 getTransformWorld() const;
+
+	void buildTransformWorld();
 
 private:
 	void setParent(Entity3D* parent);
+	void buildTransformWorld(glm::mat4& father_mat);
 
 public:
 	// Position Absolute

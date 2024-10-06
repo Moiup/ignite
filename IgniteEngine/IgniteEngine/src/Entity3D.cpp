@@ -300,7 +300,7 @@ glm::mat4 Entity3D::getScale() const {
 }
 
 glm::mat4 Entity3D::getTransformLocale() const {
-	return getTranslateLocale() * getRotateLocale();
+	return getTranslateLocale() * getRotateLocale() * getScale();
 }
 
 glm::mat4 Entity3D::getTransform() const {
@@ -310,6 +310,21 @@ glm::mat4 Entity3D::getTransform() const {
 	}
 
 	return par * getTranslateLocale() * getRotateLocale() * getScale();
+}
+
+glm::mat4 Entity3D::getTransformWorld() const {
+	return _transform_world;
+}
+
+void Entity3D::buildTransformWorld() {
+	buildTransformWorld(glm::mat4(1.0));
+}
+
+void Entity3D::buildTransformWorld(glm::mat4& father_mat) {
+	_transform_world = father_mat * getTransformLocale();
+	for (Entity3D* child : _children) {
+		child->buildTransformWorld(_transform_world);
+	}
 }
 
 void Entity3D::setParent(Entity3D* parent) {

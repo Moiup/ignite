@@ -172,8 +172,25 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 
 		std::vector<uint32_t> joints_data(joints_buf_info._count * 4);
 		// Must be adapted regarding the component_type of the buffer
-		for (uint32_t i = 0; i < joints_data.size(); ++i) {
-			joints_data[i] = joints_buf_info._data[i];
+		
+		switch (joints_buf_info._component_type) {
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
+			for (uint32_t i = 0; i < joints_data.size(); ++i) {
+				joints_data[i] = joints_buf_info._data[i];
+			}
+			break;
+		}
+		case TINYGLTF_COMPONENT_TYPE_SHORT: {
+			uint16_t* tmp = reinterpret_cast<uint16_t*>(joints_buf_info._data);
+			for (uint32_t i = 0; i < joints_data.size(); ++i) {
+				joints_data[i] = tmp[i];
+			}
+			break;
+		}
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: {
+			joints_data.assign(joints_buf_info._data, joints_buf_info._data + joints_data.size());
+			break;
+		}
 		}
 
 		_meshes[0].setJoints(

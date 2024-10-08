@@ -170,6 +170,10 @@ void Shader::addStorageTextureInfo(std::string name, uint32_t binding, VkShaderS
 	_texture_info[name] = info;
 }
 
+void Shader::addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
+	addStorageTextureInfo(name, binding, stage_flags, 1);
+}
+
 void Shader::addTexture(std::string name, Texture* texture) {
 	_textures[name].push_back(texture);
 }

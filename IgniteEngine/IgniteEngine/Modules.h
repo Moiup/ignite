@@ -15,6 +15,7 @@
 #include "ComputeShaderTest.h"
 #include "ReadWriteImageMod.h"
 #include "Hand2D.h"
+#include "GreenScreen.h"
 
 class Modules
 {
@@ -23,13 +24,15 @@ private:
 
 	//TestModule _test_module;
 	//MediapipeModule _mediapipe_module;
-	Bistro _bistro;
+	//Bistro _bistro;
 	//ComputeShaderTest _compute_shader_test;
 	//ReadWriteImageMod _read_write_image_mod;
 	//Hand2D _hand2d;
-	GltfAndSkinningModule _gltf_and_skinning_module;
+	//GltfAndSkinningModule _gltf_and_skinning_module;
 
-	DebugScene _debug_scene;
+	GreenScreen _green_screen;
+
+	//DebugScene _debug_scene;
 	DefaultModule _default_module; // Must be the last module of the list
 
 public:

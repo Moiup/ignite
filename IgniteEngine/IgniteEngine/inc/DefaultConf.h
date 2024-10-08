@@ -6,6 +6,7 @@
 #include "GraphicShader.h"
 #include "WindowSurface.h"
 #include "Renderer.h"
+#include "WindowUI.h"
 
 #include <chrono>
 
@@ -21,6 +22,7 @@ public:
 	static GraphicShader* debug_shader;
 	static CommandBuffer* copy_cmd_buf;
 	static WindowSurface* render_window;
+	static WindowUI* menu_window;
 	static Instance* instance;
 	static Renderer* renderer;
 	static CameraScene* camera;

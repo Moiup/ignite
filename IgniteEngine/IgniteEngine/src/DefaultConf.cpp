@@ -10,6 +10,7 @@ GraphicShader* DefaultConf::graphic_shader;
 GraphicShader* DefaultConf::debug_shader;
 CommandBuffer* DefaultConf::copy_cmd_buf;
 WindowSurface* DefaultConf::render_window;
+WindowUI* DefaultConf::menu_window;
 Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;
 CameraScene* DefaultConf::camera;

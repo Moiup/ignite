@@ -17,16 +17,17 @@ void MenuModule::start() {
 
 	_menu_window.setName("Menu");
 	_menu_window.create();
+	_menu_window.newFrame();
 };
 
 void MenuModule::update() {
 	Module::update();
 
-	_menu_window.newFrame();
 
 	menu();
 
 	_menu_window.present();
+	_menu_window.newFrame();
 };
 
 void MenuModule::close() { 

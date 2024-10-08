@@ -54,7 +54,7 @@ void DefaultDispatcher::dispatch(
 		nullptr
 	);
 
-	_compute_pipeline->getShader()->getPushConstants();
+	//_compute_pipeline->getShader()->getPushConstants();
 
 	for (auto& pc_info : _compute_pipeline->getShader()->getPushConstantInfo()) {
 		std::string name = pc_info.first;

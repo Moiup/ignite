@@ -90,6 +90,7 @@ set(HEADERS
     # inc/SecondaryMocapHeaderNetwork.h
     inc/Shader.h
     inc/Skeleton.h
+    inc/SkeletonDebug.h
     inc/StagingBuffer.h
     inc/StorageBuffer.h
     inc/Swapchain.h
@@ -162,6 +163,7 @@ set(SRC
     # src/SecondaryMocapHeaderNetwork.cpp
     src/Shader.cpp
     src/Skeleton.cpp
+    src/SkeletonDebug.cpp
     src/StagingBuffer.cpp
     src/StorageBuffer.cpp
     src/Swapchain.cpp

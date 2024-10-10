@@ -277,3 +277,22 @@ void CommandBuffer::copyImageToBuffer(
 		p_regions
 	);
 }
+
+void CommandBuffer::copyImageToImage(
+	VkImage src_image,
+	VkImageLayout src_image_layout,
+	VkImage dst_image,
+	VkImageLayout dst_image_layout,
+	uint32_t region_count,
+	const VkImageCopy* p_regions
+) {
+	vkCmdCopyImage(
+		_command_buffer,
+		src_image,
+		src_image_layout,
+		dst_image,
+		dst_image_layout,
+		region_count,
+		p_regions
+	);
+}

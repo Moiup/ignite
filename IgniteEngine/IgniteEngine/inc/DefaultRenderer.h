@@ -6,7 +6,7 @@
 
 class DefaultRenderer : public Renderer
 {
-private:
+protected:
 	Swapchain _swapchain;
 	DepthBuffer _depth_buffer;
 

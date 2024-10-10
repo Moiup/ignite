@@ -82,6 +82,7 @@ set(HEADERS
     inc/Queue.h
     inc/ReadWriteImageMod.h
     inc/Renderer.h
+    inc/RendererDisplayImage.h
     inc/resource.h
     inc/Ressource.h
     inc/Sampler.h
@@ -154,6 +155,7 @@ set(SRC
     src/Queue.cpp
     src/ReadWriteImageMod.cpp
     src/Renderer.cpp
+    src/RendererDisplayImage.cpp
     src/Ressource.cpp
     src/Sampler.cpp
     src/SamplerInfo.cpp

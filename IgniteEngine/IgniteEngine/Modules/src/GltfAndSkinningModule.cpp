@@ -43,37 +43,9 @@ void GltfAndSkinningModule::start() {
 		std::cout << *skeleton << std::endl;
 	}
 
-	DebugScene::createCrossMesh(_cross_mesh, 1/0.05);
-	DebugScene::createCrossMaterial(_cross_material, _cross_material_indices);
-
-	_cross_objs.resize(skeleton->joints().size() + 1);
-	for (int i = 0; i < skeleton->joints().size(); ++i) {
-		_cross_objs[i].setMesh(&_cross_mesh);
-		_cross_objs[i].setMaterial(_cross_material, &_cross_material_indices);
-		_cross_objs[i].addShader(DefaultConf::debug_shader);
-		_cross_objs[i].setRenderer(DefaultConf::renderer);
-		_cross_objs[i].setPositionLocale(skeleton->joints()[i].getPositionLocale());
-		_cross_objs[i].setRotationLocale(skeleton->joints()[i].getRotationLocale());
-		std::cout << i << "  ";
-		for (int ii = 0; ii < skeleton->joints()[i].getChildren().size(); ++ii) {
-			Joint* child = reinterpret_cast<Joint*>(skeleton->joints()[i].getChildren()[ii]);
-			_cross_objs[i].addChild(&_cross_objs[child->id()]);
-			std::cout << child->id() << "  ";
-		}
-		std::cout << std::endl;
-	}
-	//Object3D master_obj;
-	//_cross_objs.push_back(master_obj);
-	_cross_objs[_cross_objs.size() - 1].addChild(&_cross_objs[0]);
-	_cross_objs[_cross_objs.size() - 1].setMesh(&_cross_mesh);
-	_cross_objs[_cross_objs.size() - 1].setMaterial(_cross_material, &_cross_material_indices);
-	_cross_objs[_cross_objs.size() - 1].addShader(DefaultConf::debug_shader);
-	_cross_objs[_cross_objs.size() - 1].setRenderer(DefaultConf::renderer);
-	_cross_objs[_cross_objs.size() - 1].setPositionLocale(_object.getPositionLocale());
-	_cross_objs[_cross_objs.size() - 1].setRotationLocale(_object.getRotationLocale());
-	_cross_objs[_cross_objs.size() - 1].setScaleLocale(_object.getScaleLocale());
-
-	//_cross_objs[_cross_objs.size() - 1].setScaleLocale(glm::vec3(0.025));
+	_hand_skeleton_debug.setObject3D(_object);
+	_hand_skeleton_debug.setSize(4.0f);
+	_hand_skeleton_debug.create();
 
 	shaderCreation();
 }
@@ -115,11 +87,7 @@ void GltfAndSkinningModule::update() {
 		_step = -limit;
 	} 
 
-	for (int i = 0; i < skeleton->joints().size(); ++i) {
-		_cross_objs[i].setPositionLocale(skeleton->joints()[i].getPositionLocale());
-		_cross_objs[i].setRotationLocale(skeleton->joints()[i].getRotationLocale());
-	}
-
+	_hand_skeleton_debug.update();
 	_joint_tr_buffer.setValues(Object3D::updateJointsTransform(DefaultConf::renderer, &_lbs_shader).data());
 }
 

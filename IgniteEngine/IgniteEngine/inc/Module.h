@@ -10,6 +10,7 @@
 #include "Mesh.h"
 #include "Object3D.h"
 #include "LoadedObjectInfo.h"
+#include "SkeletonDebug.h"
 
 class Module : public EngineEntity
 {

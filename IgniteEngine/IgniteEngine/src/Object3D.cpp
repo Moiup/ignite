@@ -831,7 +831,7 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 				}
 
 				Object3D::joints_transform[renderer][shader].push_back(
-					j->getTransform() * j->inverseBindMatrices()
+					j->getTransformWorld() * j->inverseBindMatrices()
 				);
 				is_joint[j] = true;
 			}

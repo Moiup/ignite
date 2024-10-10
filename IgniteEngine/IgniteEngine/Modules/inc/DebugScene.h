@@ -34,7 +34,7 @@ public:
     void update();
     void close();
 
-	static void createCrossMesh(Mesh& cross_mesh);
+	static void createCrossMesh(Mesh& cross_mesh, float size);
 	static void createCrossMaterial(std::vector<Material>& cross_material, std::vector<uint32_t>& cross_material_indices);
 
 private:

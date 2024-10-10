@@ -16,7 +16,7 @@ void DebugScene::init() {
 void DebugScene::start() {
     Module::start();
 
-	createCrossMesh(_cross_mesh);
+	createCrossMesh(_cross_mesh, 1.0);
 	createCrossMaterial(_cross_material, _cross_material_indices);
 
 	_cross_obj.setMesh(&_cross_mesh);
@@ -151,14 +151,14 @@ void DebugScene::createShader() {
 	_debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
 }
 
-void DebugScene::createCrossMesh(Mesh& cross_mesh) {
+void DebugScene::createCrossMesh(Mesh& cross_mesh, float size) {
 	std::vector<glm::vec3> coord{
 		glm::vec3(0, 0, 0),
-		glm::vec3(1, 0, 0),
+		glm::vec3(size, 0, 0),
 		glm::vec3(0, 0, 0),
-		glm::vec3(0, 1, 0),
+		glm::vec3(0, size, 0),
 		glm::vec3(0, 0, 0),
-		glm::vec3(0, 0, 1)
+		glm::vec3(0, 0, size)
 	};
 
 	std::vector<uint32_t> indices{

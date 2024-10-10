@@ -413,8 +413,8 @@ void DefaultRenderer::createSwapchain() {
 	_swapchain.setImageColorSpace(color_space);
 	_swapchain.setMinImageCount(_nb_frame);
 	_swapchain.setWidthHeight(
-		_window->getWidthInPixel(),
-		_window->getHeightInPixel()
+		_extent.width,
+		_extent.height
 	);
 	_swapchain.setImageFormat(found_format);
 	_swapchain.setQueueFamilyIndices(

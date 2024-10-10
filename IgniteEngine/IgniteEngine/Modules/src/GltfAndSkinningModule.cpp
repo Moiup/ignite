@@ -14,12 +14,17 @@ void GltfAndSkinningModule::start() {
 	//_object_info.loadGLTF("../../assets/3d_objects/gltf/CylinderRigged/cylinder.gltf");
 	//_object_info.loadGLTF("../../assets/3d_objects/gltf/RectangleRigged/rectangle.gltf");
 	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane2bones.gltf");
-	_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane3bones.gltf");
+	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane3bones.gltf");
+	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane3bones_rotated.gltf");
+	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane3fingers.gltf");
+	_object_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand.gltf");
 	//_object_info.loadGLTF("../../assets/3d_objects/gltf/PlaneRigged/plane1bone.gltf");
 	_object.createFromObjectInfo(_object_info);
 	_object.setRenderer(DefaultConf::renderer);
 	_object.addShader(&_lbs_shader);
 	//_object.addShader(DefaultConf::graphic_shader);
+
+	_object.setScaleLocale(glm::vec3(0.025));
 
 	_lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 
@@ -28,21 +33,21 @@ void GltfAndSkinningModule::start() {
 		Joint* joint = skeleton->skeleton();
 		Joint* j = joint;
 		std::cout << "Le j: " << j->id() << " " << j->name() << std::endl;
-		//j->getChildren()[0]->setRotationLocale(
+		//j->getChildren()[0]->getChildren()[0]->getChildren()[0]->setRotationLocale(
 		//	0.0f,
 		//	0.0,
-		//	3.14 / 2
+		//	0.1
 		//);
 
 		std::cout << std::endl;
 		std::cout << *skeleton << std::endl;
 	}
 
-	DebugScene::createCrossMesh(_cross_mesh);
+	DebugScene::createCrossMesh(_cross_mesh, 1/0.05);
 	DebugScene::createCrossMaterial(_cross_material, _cross_material_indices);
 
-	_cross_objs.resize(skeleton->joints().size());
-	for (int i = 0; i < _cross_objs.size(); ++i) {
+	_cross_objs.resize(skeleton->joints().size() + 1);
+	for (int i = 0; i < skeleton->joints().size(); ++i) {
 		_cross_objs[i].setMesh(&_cross_mesh);
 		_cross_objs[i].setMaterial(_cross_material, &_cross_material_indices);
 		_cross_objs[i].addShader(DefaultConf::debug_shader);
@@ -57,6 +62,18 @@ void GltfAndSkinningModule::start() {
 		}
 		std::cout << std::endl;
 	}
+	//Object3D master_obj;
+	//_cross_objs.push_back(master_obj);
+	_cross_objs[_cross_objs.size() - 1].addChild(&_cross_objs[0]);
+	_cross_objs[_cross_objs.size() - 1].setMesh(&_cross_mesh);
+	_cross_objs[_cross_objs.size() - 1].setMaterial(_cross_material, &_cross_material_indices);
+	_cross_objs[_cross_objs.size() - 1].addShader(DefaultConf::debug_shader);
+	_cross_objs[_cross_objs.size() - 1].setRenderer(DefaultConf::renderer);
+	_cross_objs[_cross_objs.size() - 1].setPositionLocale(_object.getPositionLocale());
+	_cross_objs[_cross_objs.size() - 1].setRotationLocale(_object.getRotationLocale());
+	_cross_objs[_cross_objs.size() - 1].setScaleLocale(_object.getScaleLocale());
+
+	//_cross_objs[_cross_objs.size() - 1].setScaleLocale(glm::vec3(0.025));
 
 	shaderCreation();
 }
@@ -72,21 +89,33 @@ void GltfAndSkinningModule::update() {
 	Skeleton* skeleton = &_object_info._skeletons[0];
 	Joint* joint = const_cast<Joint*>(skeleton->skeleton());
 	Joint* j = reinterpret_cast<Joint*>(joint);
-	j->getChildren()[0]->setRotationLocaleUpdateChildren(
+	j->getChildren()[0]->getChildren()[0]->getChildren()[0]->setRotationLocale(
+		-_angle,
+		0.0f, 
+		0.0
+	);
+
+	j->getChildren()[1]->getChildren()[0]->getChildren()[0]->setRotationLocale(
 		0.0f,
 		0.0,
 		_angle
 	);
 
+	//j->getChildren()[0]->getChildren()[0]->getChildren()[1]->setRotationLocaleUpdateChildren(
+	//	0.0f,
+	//	0.0,
+	//	_angle
+	//);
+
 	glm::mat4 m = j->getTransform();
 
 	_step++;
-	const int32_t limit = 500;
+	const int32_t limit = 300;
 	if (_step > limit) {
 		_step = -limit;
 	} 
 
-	for (int i = 0; i < _cross_objs.size(); ++i) {
+	for (int i = 0; i < skeleton->joints().size(); ++i) {
 		_cross_objs[i].setPositionLocale(skeleton->joints()[i].getPositionLocale());
 		_cross_objs[i].setRotationLocale(skeleton->joints()[i].getRotationLocale());
 	}

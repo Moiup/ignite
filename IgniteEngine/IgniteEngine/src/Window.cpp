@@ -130,7 +130,7 @@ void Window::create() {
 	//_window = glfwCreateWindow(_width, _height, _name.c_str(), nullptr, nullptr);
 	_window = SDL_CreateWindow(_name.c_str(), 100, 100, _width, _height, _flags);
 	if (!_window) {
-		throw std::runtime_error("Error: failed creating the glfw window.");
+		throw std::runtime_error("Error: failed creating the sdl window.");
 	}
 }
 

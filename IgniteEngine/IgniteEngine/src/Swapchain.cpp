@@ -179,7 +179,9 @@ void Swapchain::createSwapchain() {
 		nullptr,
 		&_swapchain
 	);
+
 	if (vk_result != VK_SUCCESS) {
+		std::cout << vk_result << " " << string_VkResult(vk_result) << std::endl;
 		throw std::runtime_error("Error: failed to create swapchain!");
 	}
 }
@@ -218,6 +220,8 @@ void Swapchain::gettingImages(){
 		_images[i].changeLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		_images[i].createStagingBuffer();
 	}
+	_queue->submit();
+	_queue->wait();
 }
 
 void Swapchain::createImagesViews(){	

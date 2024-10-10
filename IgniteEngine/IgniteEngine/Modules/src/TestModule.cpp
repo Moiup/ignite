@@ -14,45 +14,48 @@ void TestModule::init() {
 void TestModule::start() {
     Module::start();
 
-    _obj_info.loadWavefont("../../assets/3d_objects/cube_textured/cube_tex.obj");
+    //_obj_info.loadWavefont("../../assets/3d_objects/cube_textured/cube_tex.obj");
+    _obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand.gltf");
 
     _obj1.createFromObjectInfo(_obj_info);
     _obj1.setRenderer(DefaultConf::renderer);
     _obj1.addShader(DefaultConf::graphic_shader);
 
-    _obj2.createFromObjectInfo(_obj_info);
-    _obj2.setRenderer(DefaultConf::renderer);
-    _obj2.addShader(DefaultConf::graphic_shader);
+    _obj1.setScaleLocale(0.05, 0.05, 0.05);
 
-    _obj3.createFromObjectInfo(_obj_info);
-    _obj3.setRenderer(DefaultConf::renderer);
-    _obj3.addShader(DefaultConf::graphic_shader);
+    //_obj2.createFromObjectInfo(_obj_info);
+    //_obj2.setRenderer(DefaultConf::renderer);
+    //_obj2.addShader(DefaultConf::graphic_shader);
 
-    _obj4.createFromObjectInfo(_obj_info);
-    _obj4.setRenderer(DefaultConf::renderer);
-    _obj4.addShader(DefaultConf::graphic_shader);
+    //_obj3.createFromObjectInfo(_obj_info);
+    //_obj3.setRenderer(DefaultConf::renderer);
+    //_obj3.addShader(DefaultConf::graphic_shader);
 
-    //_obj2.setPositionAbsoluteUpdateChildren(0, 2.5, 0);
-    _obj1.addChild(&_obj2);
-    _obj2.addChild(&_obj3);
-    _obj3.addChild(&_obj4);
+    //_obj4.createFromObjectInfo(_obj_info);
+    //_obj4.setRenderer(DefaultConf::renderer);
+    //_obj4.addShader(DefaultConf::graphic_shader);
+
+    ////_obj2.setPositionAbsoluteUpdateChildren(0, 2.5, 0);
+    //_obj1.addChild(&_obj2);
+    //_obj2.addChild(&_obj3);
+    //_obj3.addChild(&_obj4);
 
 
-    displayGlmVec(_obj4.getPositionAbsolute());
-    _obj2.setPositionLocaleUpdateChildren(0, 2.5, 0);
-    displayGlmVec(_obj4.getPositionAbsolute());
-    _obj3.setPositionLocaleUpdateChildren(0, 2.5, 0);
-    displayGlmVec(_obj4.getPositionAbsolute());
-    _obj4.setPositionLocaleUpdateChildren(0, 2.5, 0);
-    
-    _obj2.setRotationLocaleUpdateChildren(1, 0, 0);
-    _obj3.setRotationLocaleUpdateChildren(1, 0, 0);
-    std::cout << "obj 2: ";
-    displayGlmVec(_obj2.getRotationAbsolute());
-    std::cout << "obj 3: ";
-    displayGlmVec(_obj3.getRotationAbsolute());
-    std::cout << "obj 4: ";
-    displayGlmVec(_obj4.getRotationAbsolute());
+    //displayGlmVec(_obj4.getPositionAbsolute());
+    //_obj2.setPositionLocaleUpdateChildren(0, 2.5, 0);
+    //displayGlmVec(_obj4.getPositionAbsolute());
+    //_obj3.setPositionLocaleUpdateChildren(0, 2.5, 0);
+    //displayGlmVec(_obj4.getPositionAbsolute());
+    //_obj4.setPositionLocaleUpdateChildren(0, 2.5, 0);
+    //
+    //_obj2.setRotationLocaleUpdateChildren(1, 0, 0);
+    //_obj3.setRotationLocaleUpdateChildren(1, 0, 0);
+    //std::cout << "obj 2: ";
+    //displayGlmVec(_obj2.getRotationAbsolute());
+    //std::cout << "obj 3: ";
+    //displayGlmVec(_obj3.getRotationAbsolute());
+    //std::cout << "obj 4: ";
+    //displayGlmVec(_obj4.getRotationAbsolute());
     //_obj3.setRotationLocaleUpdateChildren(1, 0, 0);
 }
 

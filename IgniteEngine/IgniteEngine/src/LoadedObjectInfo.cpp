@@ -18,7 +18,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	_materials.push_back(std::vector<Material>());
 	_textures.push_back(std::vector<Texture>());
 	std::unordered_map<char*, uint32_t> mat_to_tex;
-	uint32_t t_id{0};
+	uint32_t t_id{ 0 };
 	for (uint32_t i = 0; i < fom->material_count; i++) {
 		_materials[0].push_back(Material(fom->materials[i]));
 		if (!fom->materials[i].map_Kd.path) {
@@ -69,7 +69,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 
 	_material_indices.push_back(std::vector<uint32_t>());
 	_material_indices[0].assign(mat_id.data(), mat_id.data() + mat_id.size());
-	
+
 	fast_obj_destroy(fom);
 	std::cout << " loaded!" << std::endl;
 }
@@ -99,7 +99,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 
 	// For now, we consider only one mesh
 	_meshes.push_back(Mesh());
-	
+
 	tinygltf::Mesh& mesh = model.meshes[0];
 	std::map<std::string, int>& attributes = mesh.primitives[0].attributes;
 
@@ -129,33 +129,33 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 	std::vector<uint32_t> indices_tmp;
 
 	switch (indices_buf_info._component_type) {
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-		{
-			indices = reinterpret_cast<uint32_t*>(indices_buf_info._data);
-			break;
+	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+	{
+		indices = reinterpret_cast<uint32_t*>(indices_buf_info._data);
+		break;
+	}
+	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+	{
+		uint8_t* indices_ptr = reinterpret_cast<uint8_t*>(indices_buf_info._data);
+		indices_tmp.resize(indices_buf_info._count);
+		for (uint32_t i = 0; i < indices_buf_info._count; ++i) {
+			indices_tmp[i] = indices_ptr[i];
 		}
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-		{
-			uint8_t* indices_ptr = reinterpret_cast<uint8_t*>(indices_buf_info._data);
-			indices_tmp.resize(indices_buf_info._count);
-			for (uint32_t i = 0; i < indices_buf_info._count; ++i) {
-				indices_tmp[i] = indices_ptr[i];
-			}
-			indices = indices_tmp.data();
+		indices = indices_tmp.data();
 
-			break;
+		break;
+	}
+	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+	{
+		uint16_t* indices_ptr = reinterpret_cast<uint16_t*>(indices_buf_info._data);
+		indices_tmp.resize(indices_buf_info._count);
+		for (uint32_t i = 0; i < indices_buf_info._count; ++i) {
+			indices_tmp[i] = indices_ptr[i];
 		}
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: 
-		{
-			uint16_t* indices_ptr = reinterpret_cast<uint16_t*>(indices_buf_info._data);
-			indices_tmp.resize(indices_buf_info._count);
-			for (uint32_t i = 0; i < indices_buf_info._count; ++i) {
-				indices_tmp[i] = indices_ptr[i];
-			}
-			indices = indices_tmp.data();
+		indices = indices_tmp.data();
 
-			break;
-		}
+		break;
+	}
 	}
 	if (indices) {
 		_meshes[0].setIndices(
@@ -163,7 +163,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 			indices_buf_info._count
 		);
 	}
-	
+
 	// ---- Skinning ----
 	if (attributes["JOINTS_0"]) {
 		std::cout << "Building skeleton" << std::endl;
@@ -172,7 +172,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 
 		std::vector<uint32_t> joints_data(joints_buf_info._count * 4);
 		// Must be adapted regarding the component_type of the buffer
-		
+
 		switch (joints_buf_info._component_type) {
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
 			for (uint32_t i = 0; i < joints_data.size(); ++i) {
@@ -205,7 +205,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 		);
 
 		tinygltf::Skin& skin = model.skins[0];
-		
+
 		// Retreiving the buffer of inverse Bind Matrices
 		GLTFBuffInfo inv_bind_mat_buf_info = retreiveBufferDataGltf(model, skin.inverseBindMatrices);
 		glm::mat4* inverse_bind_matrices = reinterpret_cast<glm::mat4*>(inv_bind_mat_buf_info._data);
@@ -215,6 +215,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 		Skeleton& skeleton = _skeletons[0];
 		std::vector<Joint>& joints = skeleton.joints();
 		joints.resize(skin.joints.size());
+		//Joint& master_joint = joints[joints.size() - 1];
 
 		std::vector<tinygltf::Node>& nodes = model.nodes;
 		std::unordered_map<int32_t, int32_t> node_to_joint;
@@ -222,12 +223,47 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 			node_to_joint[skin.joints[i]] = i;
 		}
 
-		for (int32_t joint_i = 0; joint_i < joints.size(); ++joint_i) {
+		//tinygltf::Node master_node;
+		//for (tinygltf::Node n : nodes) {
+		//	if (n.name == skin.name) {
+		//		master_node = n;
+		//		break;
+		//	}
+		//}
+		//if (!master_node.translation.empty()) {
+		//	master_joint.setPositionLocale(
+		//		master_node.translation[0],
+		//		master_node.translation[1],
+		//		master_node.translation[2]
+		//	);
+		//}
+		//if (!master_node.rotation.empty()) {
+		//	glm::quat q = glm::quat(
+		//		master_node.rotation[3],
+		//		master_node.rotation[0],
+		//		master_node.rotation[1],
+		//		master_node.rotation[2]
+		//	);
+		//	glm::vec3 rot = glm::eulerAngles(q);
+		//	master_joint.setRotationLocale(rot);
+		//}
+		//if (!master_node.scale.empty()) {
+		//	master_joint.setScaleLocale(
+		//		master_node.scale[0],
+		//		master_node.scale[1],
+		//		master_node.scale[2]
+		//	);
+		//}
+		//master_joint.setId(skin.joints.size());
+		//master_joint.inverseBindMatrices() = glm::inverse(master_joint.getTransform());
+
+		for (int32_t joint_i = 0; joint_i < skin.joints.size(); ++joint_i) {
 			Joint& joint = joints[joint_i];
 			tinygltf::Node& node = nodes[skin.joints[joint_i]];
 			for (int32_t child_i : node.children) {
 				joint.addChild(&joints[node_to_joint[child_i]]);
 			}
+
 			joint.setId(joint_i);
 			joint.name() = node.name;
 
@@ -242,19 +278,30 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 			if (!node.rotation.empty()) {
 				glm::quat q = glm::quat(
 					node.rotation[3],
-					node.rotation[2],
+					node.rotation[0],
 					node.rotation[1],
-					node.rotation[0]
+					node.rotation[2]
 				);
 				glm::vec3 rot = glm::eulerAngles(q);
 				joint.setRotationLocale(rot);
 			}
 
+			if (!node.scale.empty()) {
+				joint.setScaleLocale(
+					node.scale[0],
+					node.scale[1],
+					node.scale[2]
+				);
+			}
+
 			if (inv_bind_mat_buf_info._count) {
 				joint.inverseBindMatrices() = inverse_bind_matrices[joint_i];
+				//joint.inverseBindMatrices() = glm::inverse(joint.getTransform());
 			}
 		}
-		// Adding the father node as the skeleton start
+		// Adding the Master node as the skeleton start
+		//master_joint.addChild(&skeleton.joints()[0]);
+		//skeleton.setSkeleton(&master_joint);
 		skeleton.setSkeleton(&skeleton.joints()[0]);
 	}
 	std::cout << "loaded." << std::endl;

@@ -35,7 +35,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Joint& j);
 
 private:
-	void toStringChild(std::string& s, std::string& tabs, int nb_tab, bool is_matrix) const;
+	void toStringChild(std::string& s, std::string tabs, int nb_tab, bool is_matrix) const;
 };
 
 #endif

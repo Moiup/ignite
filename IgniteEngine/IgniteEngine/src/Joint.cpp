@@ -80,7 +80,7 @@ std::ostream& operator<<(std::ostream& os, const Joint& j) {
 	return os;
 }
 
-void Joint::toStringChild(std::string& s, std::string& tabs, int nb_tab, bool is_matrix) const {
+void Joint::toStringChild(std::string& s, std::string tabs, int nb_tab, bool is_matrix) const {
 	for (int32_t i = 0; i < nb_tab; ++i) {
 		tabs = tabs + " ";
 	}
@@ -97,6 +97,8 @@ void Joint::toStringChild(std::string& s, std::string& tabs, int nb_tab, bool is
 		s = s + makeString(getTransformLocale(), tabs);
 		s = s + tabs + "  inverse bind matrix:\n";
 		s = s + makeString(inverseBindMatrices(), tabs);
+		s = s + tabs + "  T * IBM:\n";
+		s = s + makeString(getTransform() * inverseBindMatrices(), tabs);
 	}
 
 	for (Entity3D* c : _children) {

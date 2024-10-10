@@ -5,6 +5,7 @@
 
 #include "Module.h"
 #include "DefaultDispatcher.h"
+#include "RendererDisplayImage.h"
 
 struct GreenScreenPC {
     glm::vec4 _color;
@@ -24,6 +25,11 @@ private:
     ComputeShader _green_screen_comp;
     ComputePipeline _compute_pipeline;
     DefaultDispatcher _dispatcher;
+
+    Pixels _img;
+
+    WindowSurface _display_window{};
+    RendererDisplayImage _rdi;
 
 public:
     GreenScreen() = default;

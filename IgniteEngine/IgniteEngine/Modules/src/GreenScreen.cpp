@@ -1,31 +1,38 @@
 #include "GreenScreen.h"
 
 void GreenScreen::init() {
+	Module::init();
 
+	_img.readFile("../../assets/textures/la_boeuf_green.png");
+
+	_display_window.setName("Green Screen Removal");
+	_display_window.setInstance(DefaultConf::instance);
+	_display_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
+	_display_window.setWidth(_img.getWidth());
+	_display_window.setHeight(_img.getHeight());
 }
 
 void GreenScreen::start() {
-	Pixels img("../../assets/textures/la_boeuf_green.png");
-
 	//img.saveFile("../../assets/textures/la_boeuf_green2.png");
 
 	_input.setQueue(DefaultConf::compute_queue);
-	_input.setDimensions(img.getWidth(), img.getHeight());
+	_input.setDimensions(_img.getWidth(), _img.getHeight());
 	_input.setFormat(VK_FORMAT_R8G8B8A8_UINT);
 	_input.create();
-	_input.update(img);
+	_input.update(_img);
 	_input.changeLayout(VK_IMAGE_LAYOUT_GENERAL);
 
 	_output.setQueue(DefaultConf::compute_queue);
-	_output.setDimensions(img.getWidth(), img.getHeight());
+	_output.setDimensions(_img.getWidth(), _img.getHeight());
 	_output.setFormat(VK_FORMAT_R8G8B8A8_UINT);
 	_output.create();
 	_output.changeLayout(VK_IMAGE_LAYOUT_GENERAL);
 
-	DefaultConf::compute_queue->flush();
+	DefaultConf::compute_queue->submit();
+	DefaultConf::compute_queue->wait();
 
-	_push_constant._width = img.getWidth();
-	_push_constant._height = img.getHeight();
+	_push_constant._width = _img.getWidth();
+	_push_constant._height = _img.getHeight();
 	_push_constant._color = glm::vec4(0, 255, 0, 255);
 	_push_constant._hardness = 0.5;
 	std::cout << sizeof(_push_constant) << std::endl;
@@ -39,14 +46,18 @@ void GreenScreen::start() {
 	_dispatcher.setComputePipeline(&_compute_pipeline);
 	_dispatcher.create();
 
-	//glm::vec4 original_color = img.getPixel(580, 420);
-	//original_color = glm::normalize(original_color);
-	//std::cout << makeString(original_color) << std::endl;
-	//glm::vec4 color = glm::normalize(_push_constant._color);
-	//glm::vec4 diff_vec = original_color - color;
-	//std::cout << makeString(diff_vec) << std::endl;
-	//float dist = glm::(diff_vec);
 
+	_rdi.setGraphicsQueues(&DefaultConf::logical_device->getQueues("graphics_queues"));
+	_rdi.setPresentQueues(& DefaultConf::logical_device->getQueues("present_queues"));
+	_rdi.setNbFrame(DefaultConf::NB_FRAME);
+	_rdi.setPhysicalDevice(DefaultConf::gpu);
+	_rdi.setWindow(&_display_window);
+	_rdi.setOffset(0, 0);
+	_rdi.setExtent(
+		_output.getWidth(),
+		_output.getHeight()
+	);
+	_rdi.create();
 }
 
 void GreenScreen::update() {
@@ -58,33 +69,29 @@ void GreenScreen::update() {
 		0,
 		1.0F
 		);
+	glm::vec4 picked_color = glm::vec4(glm::vec3(_push_constant._color) / 255.0f, _push_constant._color.a);
 	ImGui::ColorPicker4(
 		"Color",
-		&_push_constant._color.x
+		&picked_color.x
 	);
+	_push_constant._color = glm::vec4(
+		glm::vec3(picked_color) * 255.0f,
+		picked_color.a
+		);
 
 	ImGui::End();
 
-	_push_constant._color = glm::vec4(0, 255, 0, 255);
+	_dispatcher.dispatch(
+		((_input.getWidth() - 1) / 16) + 1,
+		((_input.getHeight() - 1) / 16) + 1,
+		1);
+	_dispatcher.submit();
+	_dispatcher.wait(); // Must get rid of this wait and have a semaphore between the dispatcher and the renderer.
 
-	if (DefaultConf::event->type == SDL_KEYDOWN) {
-		if (DefaultConf::event->key.keysym.sym == SDLK_a) {
-			std::cout << "oui" << std::endl;
-			_dispatcher.dispatch(
-				((_input.getWidth() - 1) / 16) + 1,
-				((_input.getHeight() - 1) / 16) + 1,
-				1);
-			_dispatcher.submit();
-			_dispatcher.wait();
-			Pixels res;
-			res.setPixels(_output.getWidth(), _output.getHeight());
-			_output.flushPixels(res);
-			res.saveFile("../../assets/textures/la_boeuf_green2.png");
-		}
+	_rdi.setImage(&_output);
+	_rdi.render();
 
-	}
-
-
+	//exit(0);
 }
 
 void GreenScreen::close(){

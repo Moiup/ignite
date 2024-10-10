@@ -1,0 +1,39 @@
+#version 450
+#extension GL_EXT_scalar_block_layout : enable
+
+layout (binding = 0, rgba8ui) readonly uniform uimage2D original;
+layout (binding = 1, rgba8ui) writeonly uniform uimage2D res;
+
+layout(push_constant, std430) uniform pc {
+    vec4 color;
+    uint width;
+    uint height;
+    float hardness;
+};
+
+
+layout(local_size_x = 16, local_size_y = 16) in;
+void main() {
+    const uint idx = gl_GlobalInvocationID.x;
+    const uint idy = gl_GlobalInvocationID.y;
+
+
+
+    if((idx >= width) || (idy >= height)){
+        return;
+    }
+
+    uvec4 original_color = imageLoad(original, ivec2(idx, idy));
+    vec4 original_color_f = normalize(vec4(original_color));
+    vec4 target_color = normalize(color);
+    vec4 diff_vec = original_color_f - target_color;
+    float diff_dist = length(diff_vec);
+
+    if(diff_dist < hardness){
+        imageStore(res, ivec2(idx, idy), uvec4(0, 0, 0, 255));
+    }
+    else {
+        imageStore(res, ivec2(idx, idy), uvec4(original_color.b, original_color.g, original_color.r, original_color.a));
+    }
+    // imageStore(res, ivec2(idx, idy), uvec4(color));
+}

@@ -9,8 +9,8 @@ void DefaultModule::init() {
 	//_render_window.setInstance(const_cast<VkInstance*>(&insta));
 	_render_window.setInstance(DefaultConf::instance);
 	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
-	_render_window.setWidth(1024);
-	_render_window.setHeight(768);
+	_render_window.setWidth(1440);
+	_render_window.setHeight(1440);
 	
 	DefaultConf::render_window = &_render_window;
 	DefaultConf::graphic_shader = &_graphic_shader;

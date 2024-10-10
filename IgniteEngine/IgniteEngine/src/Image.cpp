@@ -144,6 +144,84 @@ void Image::copy(
 	);
 }
 
+void Image::copy(
+	Image& src_img,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	VkImageLayout image_layout = _image_info.initialLayout;
+
+	VkImageLayout src_image_layout_initial = src_img.getImageLayout();
+	Queue* src_img_queue = src_img.getQueue();
+	src_img.setQueue(_queue);
+	src_img.changeLayout(
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		src_access_mask,
+		VK_ACCESS_TRANSFER_READ_BIT,
+		src_stage_mask,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	changeLayout(
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		src_access_mask,
+		VK_ACCESS_TRANSFER_WRITE_BIT,
+		src_stage_mask,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	// To do for each mip level
+	// (To start, we consider only the original level -> 0)
+	VkImageCopy image_copy{};
+	image_copy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.srcSubresource.mipLevel = 0;
+	image_copy.srcSubresource.baseArrayLayer = 0;
+	image_copy.srcSubresource.layerCount = 1;
+	image_copy.srcOffset = { 0 , 0 , 0 };
+	image_copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.dstSubresource.mipLevel = 0;
+	image_copy.dstSubresource.baseArrayLayer = 0;
+	image_copy.dstSubresource.layerCount = 1;
+	image_copy.dstOffset = { 0, 0, 0 };
+	image_copy.extent.width = getImageExtentWidth();
+	image_copy.extent.height = getImageExtentHeight();
+	image_copy.extent.depth = 1;
+
+	CommandBuffer cmd_buff = _queue->allocateCommandBuffer();
+	cmd_buff.begin();
+
+	cmd_buff.copyImageToImage(
+		src_img.getImage(),
+		src_img.getImageLayout(),
+		Image::getImage(),
+		Image::getImageLayout(),
+		1,
+		&image_copy
+	);
+
+	cmd_buff.end();
+
+	src_img.changeLayout(
+		src_image_layout_initial,
+		src_img._stage_access_info.access_mask,
+		dst_access_mask,
+		src_img._stage_access_info.stage_mask,
+		dst_stage_mask
+	);
+
+	changeLayout(
+		image_layout,
+		_stage_access_info.access_mask,
+		dst_access_mask,
+		_stage_access_info.stage_mask,
+		dst_stage_mask
+	);
+
+	src_img.setQueue(src_img_queue);
+}
+
 void Image::update(Pixels& pixels) {
 	// Copying the actual texture data into the staging buffer
 	_staging_buffer.setValues(pixels.getPixels().data());

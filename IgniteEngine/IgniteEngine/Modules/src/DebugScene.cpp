@@ -16,8 +16,8 @@ void DebugScene::init() {
 void DebugScene::start() {
     Module::start();
 
-	createCrossMesh(_cross_mesh, 1.0);
-	createCrossMaterial(_cross_material, _cross_material_indices);
+	SkeletonDebug::createCrossMesh(_cross_mesh, 1.0);
+	SkeletonDebug::createCrossMaterial(_cross_material, _cross_material_indices);
 
 	_cross_obj.setMesh(&_cross_mesh);
 	_cross_obj.setMaterial(_cross_material, &_cross_material_indices);
@@ -32,7 +32,9 @@ void DebugScene::update() {
 	_camera = DefaultConf::camera->getMVPC();
 
 
-	_obj_tr_buffer.setValues(Object3D::updateTransformMatrices(DefaultConf::renderer, &_debug_shader).data());
+	_obj_tr_buffer.setValues(
+		Object3D::updateTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
+	);
 }
 
 void DebugScene::close() {
@@ -149,46 +151,4 @@ void DebugScene::createShader() {
 	_materials_buffer.create();
 	_materials_buffer.setValues(Object3D::getMaterials(DefaultConf::renderer, &_debug_shader).data());
 	_debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
-}
-
-void DebugScene::createCrossMesh(Mesh& cross_mesh, float size) {
-	std::vector<glm::vec3> coord{
-		glm::vec3(0, 0, 0),
-		glm::vec3(size, 0, 0),
-		glm::vec3(0, 0, 0),
-		glm::vec3(0, size, 0),
-		glm::vec3(0, 0, 0),
-		glm::vec3(0, 0, size)
-	};
-
-	std::vector<uint32_t> indices{
-		0, 1,
-		2, 3,
-		4, 5
-	};
-
-	cross_mesh.setCoords(&coord[0].x, coord.size());
-	cross_mesh.setIndices(indices.data(), indices.size());
-}
-
-void DebugScene::createCrossMaterial(std::vector<Material>& cross_material, std::vector<uint32_t>& cross_material_indices) {
-	Material red;
-	red.Kd = glm::vec3(1, 0, 0);
-
-	Material green;
-	green.Kd = glm::vec3(0, 1, 0);
-
-	Material blue;
-	blue.Kd = glm::vec3(0, 0, 1);
-
-	cross_material.push_back(red);
-	cross_material.push_back(green);
-	cross_material.push_back(blue);
-
-	cross_material_indices.push_back(0);
-	cross_material_indices.push_back(0);
-	cross_material_indices.push_back(1);
-	cross_material_indices.push_back(1);
-	cross_material_indices.push_back(2);
-	cross_material_indices.push_back(2);
 }

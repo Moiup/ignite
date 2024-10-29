@@ -465,6 +465,7 @@ std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer* renderer, Grap
 				Object3D::joints_transform[renderer][shader][joint_i++] =
 					j->getTransformWorld() * j->inverseBindMatrices()
 					/*j->initialTransform() * j->getTransformLocale() * j->inverseBindMatrices()*/;
+				//j->getTransformDeTousLesPeres() * j->matriceRotationTrouve() * j->inverseBindMatrices()
 			}
 			//i--;
 			//joint_i += joints.size();

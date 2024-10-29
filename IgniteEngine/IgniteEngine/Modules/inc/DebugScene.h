@@ -11,10 +11,8 @@ private:
 	VertexBuffer _material_indices_buffer{};
 	VertexBuffer _uv_buffer{};
 	IndexBuffer _index_buffer{};
-	//UniformBuffer _camera_buffer;
 	StorageBuffer _obj_tr_buffer{};
 	StorageBuffer _materials_buffer{};
-	Sampler _sampler{};
 
 	glm::mat4 _camera;
 
@@ -33,9 +31,6 @@ public:
     void start();
     void update();
     void close();
-
-	static void createCrossMesh(Mesh& cross_mesh, float size);
-	static void createCrossMaterial(std::vector<Material>& cross_material, std::vector<uint32_t>& cross_material_indices);
 
 private:
 	void createShader();

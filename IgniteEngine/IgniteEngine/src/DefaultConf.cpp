@@ -10,6 +10,8 @@ GraphicShader* DefaultConf::graphic_shader;
 GraphicShader* DefaultConf::debug_shader;
 CommandBuffer* DefaultConf::copy_cmd_buf;
 WindowSurface* DefaultConf::render_window;
+uint32_t DefaultConf::render_window_width;
+uint32_t DefaultConf::render_window_height;
 WindowUI* DefaultConf::menu_window;
 Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;

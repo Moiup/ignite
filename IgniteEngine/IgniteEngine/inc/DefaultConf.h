@@ -22,6 +22,8 @@ public:
 	static GraphicShader* debug_shader;
 	static CommandBuffer* copy_cmd_buf;
 	static WindowSurface* render_window;
+	static uint32_t render_window_width;
+	static uint32_t render_window_height;
 	static WindowUI* menu_window;
 	static Instance* instance;
 	static Renderer* renderer;

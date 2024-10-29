@@ -8,7 +8,7 @@ set(CMAKE_PREFIX_PATH $ENV{VULKAN_SDK})
 
 add_subdirectory(libs/fast_obj)
 add_subdirectory(libs/imgui)
-# add_subdirectory(libs/)
+add_subdirectory(libs/ESocket)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -16,15 +16,16 @@ include_directories(
     .
     inc
     src
-    RayTracingCPU/inc
-    RayTracingCPU/src
     Modules/inc
     Modules/src
+    RayTracingCPU/inc
+    RayTracingCPU/src
     libs
     libs/imgui
     libs/stb_image
     libs/json
     libs/tiny_gltf
+    libs/ESocket
     ${Vulkan_INCLUDE_DIR}/SDL2
 )
 
@@ -183,6 +184,7 @@ set(IG_MAIN_FILES
     Modules.h
 )
 
+
 file(GLOB_RECURSE IG_MODULES_INC 
     Modules/inc/*.h
 )
@@ -190,6 +192,7 @@ file(GLOB_RECURSE IG_MODULES_INC
 file(GLOB_RECURSE IG_MODULES_SRC 
     Modules/src/*.cpp
 )
+
 
 file(GLOB_RECURSE RAY_TRACING_CPU_INC
     RayTracingCPU/inc/*.h
@@ -199,9 +202,12 @@ file(GLOB_RECURSE RAY_TRACING_CPU_SRC
     RayTracingCPU/src/*.cpp
 )
 
+
 add_executable(Ignite
     ${SRC}
     ${HEADERS}
+    ${IG_SHADER_CONFS_INC}
+    ${IG_SHADER_CONFS_SRC}
     ${IG_MAIN_FILES}
     ${IG_MODULES_INC}
     ${IG_MODULES_SRC}
@@ -225,6 +231,7 @@ if(MSVC)
         SDL2::SDL2main
         fastObj
         imgui
+        ESocket
     )
 
 else()
@@ -235,6 +242,7 @@ else()
         SDL2::SDL2
         fastObj
         imgui
+        ESocket
     )
 endif()
 

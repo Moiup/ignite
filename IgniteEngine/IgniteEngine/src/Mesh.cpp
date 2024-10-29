@@ -82,6 +82,10 @@ const std::vector<glm::vec3>& Mesh::getCoords() const {
 	return _coords;
 }
 
+std::vector<glm::vec3>& Mesh::getCoords() {
+	return _coords;
+}
+
 const std::vector<uint32_t>& Mesh::getIndices() const {
 	return _indices;
 }

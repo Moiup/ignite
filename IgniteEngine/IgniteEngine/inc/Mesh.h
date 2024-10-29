@@ -47,6 +47,7 @@ public:
 	const void setWeights(float* weights, const uint32_t len);
 
 	const std::vector<glm::vec3>& getCoords() const;
+	std::vector<glm::vec3>& getCoords();
 	const std::vector<uint32_t>& getIndices() const;
 	const std::vector<glm::vec2>& getUV() const;
 	const std::vector<glm::vec3>& getNormals() const;

@@ -1,2 +1,2 @@
-.\..\IgniteEngine\vulkan_sdk\Bin\glslc.exe img_blue.comp -o img_blue.spv
+.\..\IgniteEngine\vulkan_sdk\Bin\glslc.exe shaders/green_screen/green_screen.comp -o shaders/green_screen/green_screen.spv
 pause

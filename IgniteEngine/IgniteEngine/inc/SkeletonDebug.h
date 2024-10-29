@@ -20,8 +20,8 @@ public:
 	void create();
 	void update();
 
-	void createCrossMesh(Mesh& cross_mesh, float size = 1.0f);
-	void createCrossMaterial(
+	static void createCrossMesh(Mesh& cross_mesh, float size = 1.0f);
+	static void createCrossMaterial(
 		std::vector<Material>& cross_material,
 		std::vector<uint32_t>& cross_material_indices
 	);

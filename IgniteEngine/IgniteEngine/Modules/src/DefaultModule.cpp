@@ -9,8 +9,8 @@ void DefaultModule::init() {
 	//_render_window.setInstance(const_cast<VkInstance*>(&insta));
 	_render_window.setInstance(DefaultConf::instance);
 	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
-	_render_window.setWidth(1440);
-	_render_window.setHeight(1440);
+	_render_window.setWidth(DefaultConf::render_window_width);
+	_render_window.setHeight(DefaultConf::render_window_height);
 	
 	DefaultConf::render_window = &_render_window;
 	DefaultConf::graphic_shader = &_graphic_shader;
@@ -259,6 +259,7 @@ void DefaultModule::update() {
 	//img2.getQueue()->submit();
 	//img2.getQueue()->wait();
 
+	_obj_tr_buffer.setValues(Object3D::updateTransformMatrices(DefaultConf::renderer, DefaultConf::graphic_shader).data());
 
 	DefaultConf::renderer->render();
 }

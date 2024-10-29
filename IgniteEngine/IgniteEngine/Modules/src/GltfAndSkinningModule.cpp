@@ -40,7 +40,7 @@ void GltfAndSkinningModule::start() {
 		//);
 
 		std::cout << std::endl;
-		std::cout << *skeleton << std::endl;
+		//std::cout << *skeleton << std::endl;
 	}
 
 	_hand_skeleton_debug.setObject3D(_object);

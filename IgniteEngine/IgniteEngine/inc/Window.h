@@ -22,8 +22,8 @@ private:
 	const uint32_t DEFAULT_WIDTH{1280};
 	const uint32_t DEFAULT_HEIGHT{720};
 	const std::string DEFAULT_NAME{ "Ignite" };
-	uint32_t _width;
-	uint32_t _height;
+	uint32_t _width{1600};
+	uint32_t _height{900};
 	uint32_t _flags;  
 
 	//GLFWwindow* _window;

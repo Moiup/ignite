@@ -206,8 +206,6 @@ file(GLOB_RECURSE RAY_TRACING_CPU_SRC
 add_executable(Ignite
     ${SRC}
     ${HEADERS}
-    ${IG_SHADER_CONFS_INC}
-    ${IG_SHADER_CONFS_SRC}
     ${IG_MAIN_FILES}
     ${IG_MODULES_INC}
     ${IG_MODULES_SRC}

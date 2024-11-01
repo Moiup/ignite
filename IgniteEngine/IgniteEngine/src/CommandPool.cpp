@@ -1,12 +1,24 @@
 #include "CommandPool.h"
 
 CommandPool::CommandPool() :
-	_pool{},
+	_pool{nullptr},
 	_flags{},
-	_family_index{},
-	_created{false}
+	_family_index{}
 {
 	;
+}
+
+CommandPool::CommandPool(const CommandPool& cp) :
+	_pool{ cp._pool },
+	_device{ cp._device },
+	_flags{ cp._flags },
+	_family_index{ cp._family_index }
+{
+
+}
+
+CommandPool::~CommandPool() {
+	destroy();
 }
 
 void CommandPool::setDevice(Device* device) {
@@ -38,7 +50,6 @@ void CommandPool::create() {
 		throw std::runtime_error("Error: failed creating command pool!");
 	}
 
-	_created = true;
 }
 
 void CommandPool::reset() {
@@ -50,7 +61,7 @@ void CommandPool::reset() {
 }
 
 void CommandPool::destroy() {
-	if (!_created) {
+	if (!_pool) {
 		return;
 	}
 

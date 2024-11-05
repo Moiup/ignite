@@ -33,7 +33,7 @@ void DefaultDispatcher::dispatch(
 ) {
 
 	std::vector<VkCommandBuffer>& buffs = _queue->getPendingCommandBuffers();
-	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
+	CommandBuffer cmd_buf = _queue->newCommandBuffer();
 
 	cmd_buf.reset();
 	// Start recording

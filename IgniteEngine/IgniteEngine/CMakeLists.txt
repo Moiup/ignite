@@ -4,7 +4,7 @@ project(Ignite)
 
 find_package(Vulkan REQUIRED)
 set(CMAKE_PREFIX_PATH $ENV{VULKAN_SDK})
-
+set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(libs/fast_obj)
 add_subdirectory(libs/imgui)
@@ -31,22 +31,22 @@ include_directories(
 
 set(HEADERS    
     inc/App.h
-    inc/ArrayBuffer.h
     inc/ArrayBufferInfo.h
     inc/Buffer.h
+    inc/Buffer.hpp
     inc/Camera.h
     inc/CameraScene.h
     inc/CommandBuffer.h
     inc/CommandPool.h
     inc/ComputePipeline.h
     inc/ComputeShader.h
-    inc/ComputeShaderTest.h
     inc/DefaultConf.h
     inc/DefaultDispatcher.h
     inc/DefaultGPU.h
     inc/DefaultRenderer.h
     inc/DepthBuffer.h
     inc/DeviceBuffer.h
+    inc/DeviceBuffer.hpp
     inc/Device.h
     inc/Dispatcher.h
     inc/EngineApp.h
@@ -56,9 +56,8 @@ set(HEADERS
     inc/GraphicsPipeline.h
     inc/Hand2D.h
     # inc/HeaderMessageProtocoleNetwork.h
+    inc/IGETypes.h
     inc/Image.h
-    inc/ImageRessource.h
-    inc/IndexBuffer.h
     inc/IndexBufferInfo.h
     inc/InitChildPoint.h
     inc/InitHeader.h
@@ -76,6 +75,7 @@ set(HEADERS
     inc/PerspectiveCamera.h
     inc/PhysicalDevice.h
     inc/Pipeline.h
+    inc/Pipeline.hpp
     inc/Pixels.h
     inc/Pointer.h
     inc/Pointer.hpp
@@ -93,12 +93,10 @@ set(HEADERS
     inc/Skeleton.h
     inc/SkeletonDebug.h
     inc/StagingBuffer.h
-    inc/StorageBuffer.h
+    inc/StagingBuffer.hpp
     inc/Swapchain.h
-    inc/Texture.h
+    inc/Texture2D.h
     inc/TextureInfo.h
-    inc/UniformBuffer.h
-    inc/VertexBuffer.h
     inc/VertexBufferInfo.h
     inc/Window.h
     inc/WindowSurface.h
@@ -107,22 +105,18 @@ set(HEADERS
 
 set(SRC
     src/App.cpp
-    src/ArrayBuffer.cpp
     src/ArrayBufferInfo.cpp
-    src/Buffer.cpp
     src/Camera.cpp
     src/CameraScene.cpp
     src/CommandBuffer.cpp
     src/CommandPool.cpp
     src/ComputePipeline.cpp
     src/ComputeShader.cpp
-    src/ComputeShaderTest.cpp
     src/DefaultConf.cpp
     src/DefaultDispatcher.cpp
     src/DefaultGPU.cpp
     src/DefaultRenderer.cpp
     src/DepthBuffer.cpp
-    src/DeviceBuffer.cpp
     src/Device.cpp
     src/Dispatcher.cpp
     src/EngineApp.cpp
@@ -133,8 +127,6 @@ set(SRC
     src/Hand2D.cpp
     # src/HeaderMessageProtocoleNetwork.cpp
     src/Image.cpp
-    src/ImageRessource.cpp
-    src/IndexBuffer.cpp
     src/IndexBufferInfo.cpp
     src/InitChildPoint.cpp
     src/InitHeader.cpp
@@ -165,13 +157,9 @@ set(SRC
     src/Shader.cpp
     src/Skeleton.cpp
     src/SkeletonDebug.cpp
-    src/StagingBuffer.cpp
-    src/StorageBuffer.cpp
     src/Swapchain.cpp
-    src/Texture.cpp
+    src/Texture2D.cpp
     src/TextureInfo.cpp
-    src/UniformBuffer.cpp
-    src/VertexBuffer.cpp
     src/VertexBufferInfo.cpp
     src/Window.cpp
     src/WindowSurface.cpp

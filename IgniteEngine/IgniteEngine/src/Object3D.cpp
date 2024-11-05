@@ -12,7 +12,7 @@ std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uin
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> Object3D::uv{};
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<Texture*>>> Object3D::_textures{};
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<Texture2D*>>> Object3D::_Textures2D{};
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::transform_indices{};
 
@@ -22,7 +22,7 @@ std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uin
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glsl::Mat>>> Object3D::materials;
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::texture_indices{};
+std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::Texture2D_indices{};
 
 std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::uvec4>>> Object3D::joints_ids;
 
@@ -39,7 +39,7 @@ Object3D::Object3D() :
 	_material_indices{},
 	_materials{},
 	_shaders{ nullptr },
-	_texture{}
+	_Texture2D{}
 {
 	;
 }
@@ -76,7 +76,7 @@ void Object3D::copyAttributes(const Object3D& o) {
 	this->_renderer = o._renderer;
 	this->_material_indices = o._material_indices;
 	this->_materials = o._materials;
-	this->_texture = o._texture;
+	this->_Texture2D = o._Texture2D;
 	this->_shaders = o._shaders;
 }
 
@@ -143,12 +143,12 @@ const std::vector<Material*>& Object3D::getMaterial() const {
 	return _materials;
 }
 
-void Object3D::setTexture(std::vector<Texture*>& texture) {
-	_texture = texture;
+void Object3D::setTexture2D(std::vector<Texture2D*>& Texture2D) {
+	_Texture2D = Texture2D;
 }
 
-const std::vector<Texture*>& Object3D::getTexture() const {
-	return _texture;
+const std::vector<Texture2D*>& Object3D::getTexture2D() const {
+	return _Texture2D;
 }
 
 void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi) {
@@ -166,8 +166,8 @@ void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj) 
 			);
 		}
 		if (!loi._textures.empty()) {
-			std::vector<Texture>& tex = (std::vector<Texture>&)loi._textures[0];
-			obj->setTextures(tex);
+			std::vector<Texture2D>& tex = (std::vector<Texture2D>&)loi._textures[0];
+			obj->setTextures2D(tex);
 		}
 		if (!loi._skeletons.empty()) {
 			const Skeleton& sk = loi._skeletons[0];
@@ -202,9 +202,9 @@ std::vector<uint32_t>* Object3D::getMaterialIndices() {
 	return _material_indices;
 }
 
-void Object3D::setTextures(const std::vector<Texture>& textures) {
-	for (const Texture& tex : textures) {
-		_texture.push_back((Texture*)&tex);
+void Object3D::setTextures2D(const std::vector<Texture2D>& Textures2D) {
+	for (const Texture2D& tex : Textures2D) {
+		_Texture2D.push_back((Texture2D*)&tex);
 	}
 }
 
@@ -364,18 +364,18 @@ uint32_t Object3D::getWeightsSize(Renderer* renderer, GraphicShader* shader) {
 	return getJoints(renderer, shader).size() * stride;
 }
 
-std::vector<Texture*>& Object3D::getTextures(Renderer* renderer, GraphicShader* shader) {
-	buildTextures(renderer, shader);
-	return _textures[renderer][shader];
+std::vector<Texture2D*>& Object3D::getTextures2D(Renderer* renderer, GraphicShader* shader) {
+	buildTextures2D(renderer, shader);
+	return _Textures2D[renderer][shader];
 }
 
-uint32_t Object3D::getTexturesSize(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getTextures(renderer, shader).data());
+uint32_t Object3D::getTextures2DSize(Renderer* renderer, GraphicShader* shader) {
+	return sizeof(*getTextures2D(renderer, shader).data());
 }
 
-uint32_t Object3D::getTexturesStride(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getTexturesStride(renderer, shader);
-	return getTextures(renderer, shader).size() * stride;
+uint32_t Object3D::getTextures2DStride(Renderer* renderer, GraphicShader* shader) {
+	uint32_t stride = getTextures2DStride(renderer, shader);
+	return getTextures2D(renderer, shader).size() * stride;
 }
 
 std::vector<uint32_t>& Object3D::getTransformIndices(Renderer* renderer, GraphicShader* shader) {
@@ -479,18 +479,18 @@ uint32_t Object3D::getJointsTransformSize(Renderer* renderer, GraphicShader* sha
 	return getJointsTransform(renderer, shader).size() * sizeof(*getJointsTransform(renderer, shader).data());
 }
 
-//std::vector<uint32_t>& Object3D::getTextureIndices(Renderer* renderer, GraphicShader* shader) {
-//	buildTextureIndices(renderer, shader);
-//	return Object3D::texture_indices[renderer][shader];
+//std::vector<uint32_t>& Object3D::getTexture2DIndices(Renderer* renderer, GraphicShader* shader) {
+//	buildTexture2DIndices(renderer, shader);
+//	return Object3D::Texture2D_indices[renderer][shader];
 //}
 
-//uint32_t Object3D::getTextureIndicesStride(Renderer* renderer, GraphicShader* shader) {
-//	return sizeof(*getTextureIndices(renderer, shader).data());
+//uint32_t Object3D::getTexture2DIndicesStride(Renderer* renderer, GraphicShader* shader) {
+//	return sizeof(*getTexture2DIndices(renderer, shader).data());
 //}
 //
-//uint32_t Object3D::getTextureIndicesSize(Renderer* renderer, GraphicShader* shader) {
-//	uint32_t stride = getTextureIndicesStride(renderer, shader);
-//	return getTextureIndices(renderer, shader).size() * stride;
+//uint32_t Object3D::getTexture2DIndicesSize(Renderer* renderer, GraphicShader* shader) {
+//	uint32_t stride = getTexture2DIndicesStride(renderer, shader);
+//	return getTexture2DIndices(renderer, shader).size() * stride;
 //}
 
 void Object3D::buildCoords(Renderer* renderer, GraphicShader* shader) {
@@ -622,31 +622,31 @@ void Object3D::buildWeights(Renderer* renderer, GraphicShader* shader) {
 }
 
 
-void Object3D::buildTextures(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildTextures2D(Renderer* renderer, GraphicShader* shader) {
 	buildMaterials(renderer, shader);
 	//// if not empty
-	//if (Object3D::_textures[renderer][shader].size()) {
+	//if (Object3D::_Textures2D[renderer][shader].size()) {
 	//	return;
 	//}
-	//_textures[renderer][shader].push_back(DefaultConf::white_texture);
+	//_Textures2D[renderer][shader].push_back(DefaultConf::white_Texture2D);
 
 	// For each material
 
 
-	//std::unordered_map<const Texture*, uint32_t> texes;
-	//// Finding the textures
+	//std::unordered_map<const Texture2D*, uint32_t> texes;
+	//// Finding the Textures2D
 	//for (auto& m_o : mesh_objects[renderer][shader]) {
 	//	std::vector<Object3D*> objs = m_o.second;
 
 	//	for (Object3D* obj : objs) {
-	//		if (texes.count(obj->getTexture())) {
+	//		if (texes.count(obj->getTexture2D())) {
 	//			continue;
 	//		}
-	//		if (!obj->getTexture()) {
+	//		if (!obj->getTexture2D()) {
 	//			continue;
 	//		}
-	//		_textures[renderer][shader].push_back(const_cast<Texture*>(obj->getTexture()));
-	//		texes[obj->getTexture()] = 1;
+	//		_Textures2D[renderer][shader].push_back(const_cast<Texture2D*>(obj->getTexture2D()));
+	//		texes[obj->getTexture2D()] = 1;
 	//	}
 	//}
 }
@@ -751,7 +751,7 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 }
 
 void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
-	//buildTextures(renderer, shader);
+	//buildTextures2D(renderer, shader);
 
 	// if not empty, means already done
 	if (Object3D::materials[renderer][shader].size()) {
@@ -760,18 +760,18 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 
 	std::unordered_map<Material*, bool> is_mat{};
 
-	std::unordered_map<Texture*, uint32_t> texes{};
+	std::unordered_map<Texture2D*, uint32_t> texes{};
 	uint32_t tex_id = 0;
 
 	// If an object exists, then we must add the default material
-	// And the default texture
+	// And the default Texture2D
 	if (Object3D::mesh_objects[renderer][shader].size()) {
 		Material mat{};
 		mat.Kd = glm::vec3(1.0f, 1.0f, 1.0f);
 		mat.map_Kd = 0;
 		Object3D::materials[renderer][shader].push_back(glsl::Mat(mat));
 		is_mat[(Material*)&mat] = true;
-		_textures[renderer][shader].push_back(DefaultConf::white_texture);
+		_Textures2D[renderer][shader].push_back(DefaultConf::white_texture);
 		texes[DefaultConf::white_texture] = tex_id;
 		tex_id++;
 	}
@@ -783,7 +783,7 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 
 		// For each object
 		for (auto obj : objs) {
-			const std::vector<Texture*>& textures = obj->getTexture();
+			const std::vector<Texture2D*>& Textures2D = obj->getTexture2D();
 			for (Material* mat : obj->getMaterial()) {
 				// If the material was never added
 				// We add it to the array of material
@@ -797,10 +797,10 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 						continue;
 					}
 
-					Texture* tex = textures[mat->map_Kd];
+					Texture2D* tex = Textures2D[mat->map_Kd];
 					if (!texes.count(tex)) {
 						texes[tex] = tex_id;
-						_textures[renderer][shader].push_back(tex);
+						_Textures2D[renderer][shader].push_back(tex);
 						tex_id++;
 					}
 
@@ -840,14 +840,14 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 	}
 }
 
-//void Object3D::buildTextureIndices(Renderer* renderer, GraphicShader* shader) {
+//void Object3D::buildTexture2DIndices(Renderer* renderer, GraphicShader* shader) {
 //	// if not empty
-//	if (Object3D::texture_indices[renderer][shader].size()) {
+//	if (Object3D::Texture2D_indices[renderer][shader].size()) {
 //		return;
 //	}
 //
 //	uint32_t tex_i = 0;
-//	std::unordered_map<const Texture*, uint32_t> tex_i_arr{};
+//	std::unordered_map<const Texture2D*, uint32_t> tex_i_arr{};
 //	// For each mesh, finding the associated objects
 //	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
 //		if (!m_o.first) {
@@ -855,9 +855,9 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 //		}
 //		std::vector<Object3D*> objs = m_o.second;
 //
-//		// For each object add find the texture index
+//		// For each object add find the Texture2D index
 //		for (Object3D* obj : objs) {
-//			const Texture* tex = obj->getTexture();
+//			const Texture2D* tex = obj->getTexture2D();
 //			if (!tex_i_arr.count(tex)) {
 //				tex_i = tex_i_arr.size();
 //				tex_i_arr[tex] = tex_i;
@@ -866,8 +866,8 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 //				tex_i = tex_i_arr[tex];
 //			}
 //
-//			// +1 because index 0 is the default texture
-//			texture_indices[renderer][shader].push_back(tex_i + 1);
+//			// +1 because index 0 is the default Texture2D
+//			Texture2D_indices[renderer][shader].push_back(tex_i + 1);
 //		}
 //	}
 //}

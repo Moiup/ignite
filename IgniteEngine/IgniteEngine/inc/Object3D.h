@@ -4,7 +4,7 @@
 #include "Mesh.h"
 #include "DefaultConf.h"
 #include "Sampler.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "Renderer.h"
 #include "LoadedObjectInfo.h"
 
@@ -26,13 +26,13 @@ private:
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> mesh_offsets;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> object_id;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> indices;
-	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<Texture*>>> _textures;
+	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<Texture2D*>>> _Textures2D;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> uv;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> transform_indices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> transform_matrices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> material_indices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glsl::Mat>>> materials;
-	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> texture_indices;
+	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Texture2D_indices;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::uvec4>>> joints_ids;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec4>>> weights;
 	static std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> joints_transform;
@@ -44,7 +44,7 @@ private:
 	Renderer* _renderer;
 	std::vector<uint32_t>* _material_indices;
 	std::vector<Material*> _materials;
-	std::vector<Texture*> _texture;
+	std::vector<Texture2D*> _Texture2D;
 	std::vector<GraphicShader*> _shaders;
 
 public:
@@ -67,8 +67,8 @@ public:
 	const std::vector<Material*>& getMaterial() const;
 	std::vector<uint32_t>* getMaterialIndices();
 
-	void setTexture(std::vector<Texture*>& texture);
-	const std::vector<Texture*>& getTexture() const;
+	void setTexture2D(std::vector<Texture2D*>& Texture2D);
+	const std::vector<Texture2D*>& getTexture2D() const;
 
 	void addShader(GraphicShader* shader);
 	GraphicShader* getShader(uint32_t i);
@@ -82,7 +82,7 @@ public:
 	);
 private:
 	void createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj);
-	void setTextures(const std::vector<Texture>& texture);
+	void setTextures2D(const std::vector<Texture2D>& Texture2D);
 
 public:
 	static std::unordered_map<Mesh*, std::vector<Object3D*>>& getMeshObjects(Renderer* renderer, GraphicShader* shader);
@@ -118,9 +118,9 @@ public:
 	static uint32_t getWeightsSize(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getWeightsStride(Renderer* renderer, GraphicShader* shader);
 
-	static std::vector<Texture*>& getTextures(Renderer* renderer, GraphicShader* shader);
-	static uint32_t getTexturesSize(Renderer* renderer, GraphicShader* shader);
-	static uint32_t getTexturesStride(Renderer* renderer, GraphicShader* shader);
+	static std::vector<Texture2D*>& getTextures2D(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getTextures2DSize(Renderer* renderer, GraphicShader* shader);
+	static uint32_t getTextures2DStride(Renderer* renderer, GraphicShader* shader);
 
 	static std::vector<uint32_t>& getTransformIndices(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getTransformIndicesSize(Renderer* renderer, GraphicShader* shader);
@@ -142,9 +142,9 @@ public:
 	static std::vector<glm::mat4>& updateJointsTransform(Renderer* renderer, GraphicShader* shader);
 	static uint32_t getJointsTransformSize(Renderer* renderer, GraphicShader* shader);
 
-	//static std::vector<uint32_t>& getTextureIndices(Renderer* renderer, GraphicShader* shader);
-	//static uint32_t getTextureIndicesStride(Renderer* renderer, GraphicShader* shader);
-	//static uint32_t getTextureIndicesSize(Renderer* renderer, GraphicShader* shader);
+	//static std::vector<uint32_t>& getTexture2DIndices(Renderer* renderer, GraphicShader* shader);
+	//static uint32_t getTexture2DIndicesStride(Renderer* renderer, GraphicShader* shader);
+	//static uint32_t getTexture2DIndicesSize(Renderer* renderer, GraphicShader* shader);
 
 private:
 	static void buildCoords(Renderer* renderer, GraphicShader* shader);
@@ -154,13 +154,13 @@ private:
 	static void buildUV(Renderer* renderer, GraphicShader* shader);
 	static void buildJoints(Renderer* renderer, GraphicShader* shader);
 	static void buildWeights(Renderer* renderer, GraphicShader* shader);
-	static void buildTextures(Renderer* renderer, GraphicShader* shader);
+	static void buildTextures2D(Renderer* renderer, GraphicShader* shader);
 	static void buildTransformIndices(Renderer* renderer, GraphicShader* shader);
 	static void buildTransformMatrices(Renderer* renderer, GraphicShader* shader);
 	static void buildMaterialIndices(Renderer* renderer, GraphicShader* shader);
 	static void buildMaterials(Renderer* renderer, GraphicShader* shader);
 	static void buildJointsTransform(Renderer* renderer, GraphicShader* shader);
-	//static void buildTextureIndices(Renderer* renderer, GraphicShader* shader);
+	//static void buildTexture2DIndices(Renderer* renderer, GraphicShader* shader);
 
 	static void freeAllocatedObjects();
 };

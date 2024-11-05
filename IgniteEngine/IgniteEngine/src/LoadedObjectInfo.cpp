@@ -16,7 +16,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	std::cout << file_name << std::endl;
 
 	_materials.push_back(std::vector<Material>());
-	_textures.push_back(std::vector<Texture>());
+	_textures.push_back(std::vector<Texture2D>());
 	std::unordered_map<char*, uint32_t> mat_to_tex;
 	uint32_t t_id{ 0 };
 	for (uint32_t i = 0; i < fom->material_count; i++) {
@@ -29,20 +29,33 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 		if (!mat_to_tex.count(fom->materials[i].map_Kd.path)) {
 			mat_to_tex[fom->materials[i].map_Kd.path] = t_id;
 			Pixels pixels(fom->materials[i].map_Kd.path);
-			_textures[0].push_back(Texture());
-			_textures[0][t_id].setQueue(DefaultConf::graphics_queue);
-			_textures[0][t_id].setDimensions(pixels.getWidth(), pixels.getHeight());
-			_textures[0][t_id].create();
-			_textures[0][t_id].update(pixels);
-			_textures[0][t_id].changeLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			_textures[0].push_back(
+				Texture2D(
+					DefaultConf::logical_device->getDevice(),
+					pixels.getWidth(),
+					pixels.getHeight()
+				)
+			);
+
+			DefaultConf::graphics_queue->changeLayout(_textures[0][t_id], VK_IMAGE_LAYOUT_GENERAL);
+
+			StagingBuffer<IGEBufferUsage::transfer> sb = StagingBuffer<IGEBufferUsage::transfer>(
+				DefaultConf::logical_device->getDevice(),
+				pixels.getSize(),
+				pixels.getPixels().data()
+			);
+
+			DefaultConf::graphics_queue->copy(sb, _textures[0][t_id]);
+			DefaultConf::graphics_queue->changeLayout(_textures[0][t_id], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+			DefaultConf::graphics_queue->submit();
+			DefaultConf::graphics_queue->wait();
+
 			t_id++;
 		}
 		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];
 	}
-
-	DefaultConf::graphics_queue->submit();
-	DefaultConf::graphics_queue->wait();
-
+	
 	_meshes.push_back(Mesh());
 	std::vector<uint32_t> mat_id{};
 

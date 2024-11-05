@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Mesh.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "Material.h"
 #include "Skeleton.h"
 #include "DefaultConf.h"
+#include "StagingBuffer.h"
 #include "fast_obj/fast_obj.h"
 #include <iostream>
 #include <fstream>
@@ -25,7 +26,7 @@ struct LoadedObjectInfo
 	std::vector<std::vector<Joint>> _joints;
 	std::vector<std::vector<uint32_t>> _material_indices; // array of indices for each mesh
 	std::vector<std::vector<Material>> _materials;
-	std::vector<std::vector<Texture>> _textures;
+	std::vector<std::vector<Texture2D>> _textures;
 	std::vector<LoadedObjectInfo> _children;
 
 	LoadedObjectInfo();

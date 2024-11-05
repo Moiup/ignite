@@ -31,10 +31,9 @@ void RendererDisplayImage::render() {
 	// --- We want to copy the image into the swapchain image
 	// Retreiving the available swapchain image
 	Image& swapchain_img = _swapchain.getImages()[_available_img];
-	swapchain_img.setQueue(&_graphics_queues_in_flight[_current_frame]);
 
 	Image& img = *_img;
-	swapchain_img.copy(img);
+	_graphics_queues_in_flight[_current_frame].copy(img, swapchain_img);
 
 	// Submit the copy... With a semaphore
 	_graphics_queues_in_flight[_available_img].submit(

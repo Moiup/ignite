@@ -24,6 +24,7 @@ public:
 
 	void configure(PhysicalDevice* gpu);
 	VkDevice getDevice();
+	PhysicalDevice* getGPU();
 	std::vector<VkQueueFamilyProperties2>& getFamilyProperties();
 
 	void create(std::vector<VkDeviceQueueCreateInfo>& queues_info);

@@ -6,23 +6,17 @@ DepthBuffer::DepthBuffer() :
 	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 }
 
-void DepthBuffer::create() {
+DepthBuffer::DepthBuffer(
+	Device* device,
+	uint32_t width,
+	uint32_t height,
+	const std::vector<uint32_t>& indices
+) :
+	Image(device, width, height, 1, IGEImgFormat::d32_sfloat_s8_uint)
+{
 	setImageInfo();
-	createImage();
-	allocateMemory();
-	bind();
 	setImageViewInfo();
-	createImageView();
-}
-
-void DepthBuffer::destroy() {
-	destroyImageView();
-	freeMemory();
-	destroyImage();
-}
-
-void DepthBuffer::setImageWidthHeight(uint32_t width, uint32_t height) {
-	setImageExtent({width, height, 1});
+	create();
 }
 
 void DepthBuffer::setImageQueueFamilyIndices(const std::vector<uint32_t>& indices) {
@@ -31,6 +25,8 @@ void DepthBuffer::setImageQueueFamilyIndices(const std::vector<uint32_t>& indice
 }
 
 void DepthBuffer::setImageInfo() {
+	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
 	setImagePNext(nullptr);
 	setImageFlags(0);
 	setImageImageType(VK_IMAGE_TYPE_2D);
@@ -39,9 +35,9 @@ void DepthBuffer::setImageInfo() {
 	setImageArrayLayers(1);
 	setImageSamples(VK_SAMPLE_COUNT_1_BIT);
 	setImageTiling(VK_IMAGE_TILING_OPTIMAL);
-	setImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 	setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
 	setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+	setImageUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 }
 
 void DepthBuffer::setImageViewInfo() {

@@ -1,37 +1,28 @@
 #pragma once
 
 #include "Device.h"
-#include "CommandPool.h"
 
 class CommandBuffer
 {
+	friend class CommandPool;
+
 private:
-	VkCommandBuffer _command_buffer;
-	Device* _device;
+	VkCommandBuffer _command_buffer{ nullptr };
 	VkCommandBufferLevel _level{ VK_COMMAND_BUFFER_LEVEL_PRIMARY };
-	CommandPool* _command_pool;
-	
-	bool _created;
 
 public:
 	CommandBuffer();
 
 	CommandBuffer(const CommandBuffer& cmd_buf);
-	CommandBuffer(CommandBuffer&& cmd_buf);
+	//CommandBuffer(CommandBuffer&& cmd_buf);
 
 	CommandBuffer& operator=(const CommandBuffer& cmd_buf);
 
-	void setDevice(Device* device);
-	void setCommandPool(CommandPool* command_pool);
 	void setLevel(VkCommandBufferLevel level);
 
 	VkCommandBuffer getCommandBuffer();
-	Device* getDevice();
 	VkCommandBufferLevel getLevel();
-	bool getIsCreated();
 
-	void allocate();
-	void free();
 
 	void begin();
 	void begin(VkCommandBufferUsageFlags flags);

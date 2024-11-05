@@ -1,6 +1,6 @@
 #pragma once
 #include "Triangle.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "DefaultConf.h"
 #include "CameraScene.h"
 

@@ -8,6 +8,11 @@ VkDevice Device::getDevice() {
 	return _device;
 }
 
+PhysicalDevice* Device::getGPU() {
+	return _gpu;
+}
+
+
 void Device::configure(PhysicalDevice* gpu) {
 	_gpu = gpu;
 

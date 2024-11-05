@@ -1,11 +1,10 @@
 #pragma once
 
-#include "LogicalDevice.h"
+#include "Device.h"
+#include "IGETypes.h"
 
 #include <vulkan/vulkan.h>
 #include <iostream>
-
-class DefaultConf;
 
 struct PipelineStageAndAccessMaskInfo {
 	VkPipelineStageFlags stage_mask;
@@ -15,28 +14,28 @@ struct PipelineStageAndAccessMaskInfo {
 class Ressource
 {
 protected:
-	Queue* _queue{ nullptr };
+	Device* _device;
 	VkMemoryRequirements _memory_req{};
 	VkDeviceMemory _memory{};
 	VkMemoryPropertyFlags _memory_property_flags{};
 
 	PipelineStageAndAccessMaskInfo _stage_access_info;
 
-public:
+protected:
 	Ressource();
+	Ressource(const Ressource& r);
+
+	Ressource& operator=(const Ressource& r);
 
 public:
-	void setQueue(Queue* queue);
+	void setDevice(Device* device);
 	void setMemoryPropertyFlags(VkMemoryPropertyFlags memory_property_flags);
 	void allocateMemory();
 	virtual void bind() = 0;
 
-	Queue* getQueue();
-	PipelineStageAndAccessMaskInfo getStageAccessInfo();
-
-
-	// Copy the ressource data in parameter into the calling ressource
-	//virtual void copy() = 0;
+	Device* getDevice();
+	const PipelineStageAndAccessMaskInfo& getStageAccessInfo() const;
+	PipelineStageAndAccessMaskInfo& getStageAccessInfo();
 
 	void freeMemory();
 

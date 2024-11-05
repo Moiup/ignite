@@ -5,8 +5,21 @@ Ressource::Ressource()
 	;
 }
 
-void Ressource::setQueue(Queue* queue) {
-	_queue = queue;
+Ressource::Ressource(const Ressource& r)
+{
+	*this = r;
+}
+
+Ressource& Ressource::operator=(const Ressource& r) {
+	_device = r._device;
+	_memory_req = r._memory_req;
+	_memory = r._memory;
+	_memory_property_flags = r._memory_property_flags;
+	return *this;
+}
+
+void Ressource::setDevice(Device* device) {
+	_device = device;
 }
 
 void Ressource::setMemoryPropertyFlags(VkMemoryPropertyFlags memory_property_flags) {
@@ -25,8 +38,8 @@ void Ressource::allocateMemory() {
 	allocate_info.pNext = nullptr;
 	allocate_info.allocationSize = _memory_req.size;
 	allocate_info.memoryTypeIndex = 0;
-
-	VkPhysicalDeviceMemoryProperties* mem_prop = _queue->getGPU()->getMemoryProperties();
+	
+	VkPhysicalDeviceMemoryProperties* mem_prop = _device->getGPU()->getMemoryProperties();
 
 	uint32_t memory_type_i = 0;
 	for (memory_type_i = 0; memory_type_i < mem_prop->memoryTypeCount; memory_type_i++) {
@@ -40,7 +53,7 @@ void Ressource::allocateMemory() {
 	}
 
 	VkResult vk_result = vkAllocateMemory(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		&allocate_info,
 		nullptr,
 		&_memory
@@ -54,16 +67,20 @@ void Ressource::bind() {
 	;
 }
 
-Queue* Ressource::getQueue() {
-	return _queue;
+Device* Ressource::getDevice() {
+	return _device;
 }
 
-PipelineStageAndAccessMaskInfo Ressource::getStageAccessInfo() {
+const PipelineStageAndAccessMaskInfo& Ressource::getStageAccessInfo() const {
+	return _stage_access_info;
+}
+
+PipelineStageAndAccessMaskInfo& Ressource::getStageAccessInfo() {
 	return _stage_access_info;
 }
 
 void Ressource::freeMemory() {
-	vkFreeMemory(_queue->getDevice()->getDevice(), _memory, nullptr);
+	vkFreeMemory(_device->getDevice(), _memory, nullptr);
 }
 
 void Ressource::getMemoryRequirements() {

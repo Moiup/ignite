@@ -10,8 +10,8 @@ GraphicShader* DefaultConf::graphic_shader;
 GraphicShader* DefaultConf::debug_shader;
 CommandBuffer* DefaultConf::copy_cmd_buf;
 WindowSurface* DefaultConf::render_window;
-uint32_t DefaultConf::render_window_width;
-uint32_t DefaultConf::render_window_height;
+uint32_t DefaultConf::render_window_width{ 1600 };
+uint32_t DefaultConf::render_window_height{ 900 };
 WindowUI* DefaultConf::menu_window;
 Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;
@@ -19,10 +19,10 @@ CameraScene* DefaultConf::camera;
 Queue* DefaultConf::graphics_queue;
 Queue* DefaultConf::present_queue;
 Queue* DefaultConf::compute_queue;
-Texture* DefaultConf::white_texture;
+Texture2D* DefaultConf::white_texture;
 float DefaultConf::delta_time; // ms
 SDL_Event* DefaultConf::event;
 
-VertexBuffer* DefaultConf::coord_buffer;
-VertexBuffer* DefaultConf::uv_buffer;
-IndexBuffer* DefaultConf::index_buffer;
+Buffer<IGEBufferUsage::vertex_buffer>* DefaultConf::coord_buffer;
+Buffer<IGEBufferUsage::vertex_buffer>* DefaultConf::uv_buffer;
+Buffer<IGEBufferUsage::index_buffer>* DefaultConf::index_buffer;

@@ -2,6 +2,7 @@
 
 #include "LogicalDevice.h"
 #include "DefaultGPU.h"
+#include "Buffer.h"
 //#include "CameraScene.h"
 #include "GraphicShader.h"
 #include "WindowSurface.h"
@@ -31,11 +32,11 @@ public:
 	static Queue* graphics_queue;
 	static Queue* present_queue;
 	static Queue* compute_queue;
-	static Texture* white_texture;
+	static Texture2D* white_texture;
 	static float delta_time; // ms
 	static SDL_Event* event;
 
-	static VertexBuffer* coord_buffer;
-	static VertexBuffer* uv_buffer;
-	static IndexBuffer* index_buffer;
+	static Buffer<IGEBufferUsage::vertex_buffer>* coord_buffer;
+	static Buffer<IGEBufferUsage::vertex_buffer>* uv_buffer;
+	static Buffer<IGEBufferUsage::index_buffer>* index_buffer;
 };

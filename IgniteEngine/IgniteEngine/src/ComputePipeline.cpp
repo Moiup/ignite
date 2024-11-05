@@ -22,7 +22,7 @@ void ComputePipeline::createPipeline() {
 	info.basePipelineIndex = 0;
 
 	VkResult vk_result = vkCreateComputePipelines(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		VK_NULL_HANDLE,
 		1,
 		&info,
@@ -33,12 +33,4 @@ void ComputePipeline::createPipeline() {
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Compute Pipeline error: creating the compute pipeline failed.");
 	}
-}
-
-void ComputePipeline::destroyPipeline() {
-	vkDestroyPipeline(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
-		_pipeline,
-		nullptr
-	);
 }

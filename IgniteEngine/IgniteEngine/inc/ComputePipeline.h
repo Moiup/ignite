@@ -13,6 +13,5 @@ public:
 
 protected:
 	void createPipeline();
-	void destroyPipeline();
 };
 

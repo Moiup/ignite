@@ -4,16 +4,90 @@ Image::Image()
 {
 	_image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	_image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+
+	_nb_shared = new int32_t(1);
 }
 
-void Image::setQueue(Queue* queue) {
-	Ressource::setQueue(queue);
-	_staging_buffer.setQueue(queue);
+Image::Image(
+	Device* device,
+	uint32_t width,
+	uint32_t height,
+	uint32_t depth,
+	IGEImgFormat format
+) :
+	Image()
+{
+	setDevice(device);
+	setImageFormat(static_cast<VkFormat>(format));
+	setImageMipLevels(1);
+	setImageArrayLayers(1);
+	setImageSamples(VK_SAMPLE_COUNT_1_BIT);
+	setImageTiling(VK_IMAGE_TILING_OPTIMAL);
+	setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
+	setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
+	setImageUsage(
+		VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+		VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+		VK_IMAGE_USAGE_SAMPLED_BIT |
+		VK_IMAGE_USAGE_STORAGE_BIT
+	);
+	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	setImageExtent(width, height, depth);
+
+	setImageViewFormat(static_cast<VkFormat>(format));
+	setImageViewSurbresourceRange(
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0, // base mip level
+		1, // level count
+		0, // base array layer
+		1  // layer count
+	);
 }
+
+Image::Image(
+	Device* device,
+	VkImage vk_img,
+	uint32_t width,
+	uint32_t height,
+	uint32_t depth,
+	VkImageViewCreateInfo view_info
+) :
+	Image()
+{
+	_device = device;
+	_image = vk_img;
+	setImageExtent(width, height, depth);
+	_image_view_info = view_info;
+	_image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	createImageView();
+}
+
+Image::Image(const Image& img) {
+	*this = img;
+}
+
+Image& Image::operator=(const Image& img) {
+	Ressource::operator=(img);
+	_image = img._image;
+	_image_view = img._image_view;
+	_image_info = img._image_info;
+	_image_view_info = img._image_view_info;
+
+	_nb_shared = img._nb_shared;
+	*_nb_shared += 1;
+	
+	return *this;
+}
+
+
+Image::~Image() {
+	destroy();
+}
+
 
 void Image::createImage() {
 	VkResult vk_result = vkCreateImage(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		&_image_info,
 		nullptr,
 		&_image
@@ -23,20 +97,22 @@ void Image::createImage() {
 	}
 }
 
+
 void Image::bind(){
 	vkBindImageMemory(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		_image,
 		_memory,
 		0
 	);
 }
 
+
 void Image::createImageView() {
 	_image_view_info.image = _image;
 
 	VkResult vk_result = vkCreateImageView(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		&_image_view_info,
 		nullptr,
 		&_image_view
@@ -46,249 +122,199 @@ void Image::createImageView() {
 	}
 }
 
-void Image::createStagingBuffer() {
-	// Creating the staging buffer
-	_staging_buffer.setQueue(_queue);
-	_staging_buffer.setSize(
-		_image_info.extent.width * _image_info.extent.height * _n * sizeof(uint8_t)
-	);
-	_staging_buffer.create();
-}
 
 void Image::create() {
 	createImage();
 	allocateMemory();
 	bind();
 	createImageView();
-	createStagingBuffer();
 }
+
 
 void Image::destroyImage() {
 	vkDestroyImage(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		_image,
 		nullptr
 	);
 }
 
+
 void Image::destroyImageView() {
 	vkDestroyImageView(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		_image_view,
 		nullptr
 	);
 }
 
+
 void Image::destroy() {
+	*_nb_shared -= 1;
+	if (_nb_shared) {
+		return;
+	}
+	delete _nb_shared;
+
+	if (!_image) {
+		return;
+	}
 	freeMemory();
 	destroyImage();
 	destroyImageView();
 }
 
+
 void Image::getMemoryRequirements() {
 	vkGetImageMemoryRequirements(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		_image,
 		&_memory_req
 	);
 }
 
-void Image::copy(
-	Buffer& buffer,
-	VkAccessFlags src_access_mask,
-	VkAccessFlags dst_access_mask,
-	VkPipelineStageFlags src_stage_mask,
-	VkPipelineStageFlags dst_stage_mask
-) {
-	VkImageLayout image_layout = _image_info.initialLayout;
 
-	changeLayout(
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		src_access_mask,
-		VK_ACCESS_TRANSFER_WRITE_BIT,
-		src_stage_mask,
-		VK_PIPELINE_STAGE_TRANSFER_BIT
-	);
-
-	// To do for each mip level
-	// (To start, we consider only the original level -> 0)
-	VkBufferImageCopy image_copy{};
-	image_copy.bufferOffset = 0;
-	image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_copy.imageSubresource.mipLevel = 0;
-	image_copy.imageSubresource.baseArrayLayer = 0;
-	image_copy.imageSubresource.layerCount = 1;
-	image_copy.imageExtent.width = getImageExtentWidth();
-	image_copy.imageExtent.height = getImageExtentHeight();
-	image_copy.imageExtent.depth = 1;
-
-	CommandBuffer cmd_buff = _queue->allocateCommandBuffer();
-	cmd_buff.begin();
-
-	cmd_buff.copyBufferToImage(
-		_staging_buffer.getBuffer(),
-		Image::getImage(),
-		Image::getImageLayout(),
-		1,
-		&image_copy
-	);
-
-	cmd_buff.end();
-
-	changeLayout(
-		image_layout,
-		_stage_access_info.access_mask,
-		dst_access_mask,
-		_stage_access_info.stage_mask,
-		dst_stage_mask
-	);
+void Image::setImagePNext(const void* p_next) {
+	_image_info.pNext = p_next;
 }
 
-void Image::copy(
-	Image& src_img,
-	VkAccessFlags src_access_mask,
-	VkAccessFlags dst_access_mask,
-	VkPipelineStageFlags src_stage_mask,
-	VkPipelineStageFlags dst_stage_mask
-) {
-	VkImageLayout image_layout = _image_info.initialLayout;
 
-	VkImageLayout src_image_layout_initial = src_img.getImageLayout();
-	Queue* src_img_queue = src_img.getQueue();
-	src_img.setQueue(_queue);
-	src_img.changeLayout(
-		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		src_access_mask,
-		VK_ACCESS_TRANSFER_READ_BIT,
-		src_stage_mask,
-		VK_PIPELINE_STAGE_TRANSFER_BIT
-	);
-
-	changeLayout(
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		src_access_mask,
-		VK_ACCESS_TRANSFER_WRITE_BIT,
-		src_stage_mask,
-		VK_PIPELINE_STAGE_TRANSFER_BIT
-	);
-
-	// To do for each mip level
-	// (To start, we consider only the original level -> 0)
-	VkImageCopy image_copy{};
-	image_copy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_copy.srcSubresource.mipLevel = 0;
-	image_copy.srcSubresource.baseArrayLayer = 0;
-	image_copy.srcSubresource.layerCount = 1;
-	image_copy.srcOffset = { 0 , 0 , 0 };
-	image_copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_copy.dstSubresource.mipLevel = 0;
-	image_copy.dstSubresource.baseArrayLayer = 0;
-	image_copy.dstSubresource.layerCount = 1;
-	image_copy.dstOffset = { 0, 0, 0 };
-	image_copy.extent.width = getImageExtentWidth();
-	image_copy.extent.height = getImageExtentHeight();
-	image_copy.extent.depth = 1;
-
-	CommandBuffer cmd_buff = _queue->allocateCommandBuffer();
-	cmd_buff.begin();
-
-	cmd_buff.copyImageToImage(
-		src_img.getImage(),
-		src_img.getImageLayout(),
-		Image::getImage(),
-		Image::getImageLayout(),
-		1,
-		&image_copy
-	);
-
-	cmd_buff.end();
-
-	src_img.changeLayout(
-		src_image_layout_initial,
-		src_img._stage_access_info.access_mask,
-		dst_access_mask,
-		src_img._stage_access_info.stage_mask,
-		dst_stage_mask
-	);
-
-	changeLayout(
-		image_layout,
-		_stage_access_info.access_mask,
-		dst_access_mask,
-		_stage_access_info.stage_mask,
-		dst_stage_mask
-	);
-
-	src_img.setQueue(src_img_queue);
+void Image::setImageFlags(VkImageCreateFlags flags) {
+	_image_info.flags = flags;
 }
 
-void Image::update(Pixels& pixels) {
-	// Copying the actual texture data into the staging buffer
-	_staging_buffer.setValues(pixels.getPixels().data());
 
-	// Copying the data from the buffer to the image
-	copy(
-		_staging_buffer,
-		0,
-		VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VK_PIPELINE_STAGE_HOST_BIT,
-		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
-
-	//_queue->submit();
-	//_queue->wait();
+void Image::setImageImageType(VkImageType image_type) {
+	_image_info.imageType = image_type;
 }
 
-void Image::flushToStaging() {
-	_staging_buffer.copy(*this);
+
+void Image::setImageFormat(VkFormat format) {
+	_image_info.format = format;
 }
 
-void Image::flushPixels(Pixels& pixels) {
-	flushToStaging();
-	_queue->submit();
-	_queue->wait();
-	_staging_buffer.getValues(pixels.getPixels().data());
+
+void Image::setImageExtent(VkExtent3D extent) {
+	_image_info.extent = extent;
 }
 
-void Image::changeLayout(VkImageLayout new_layout,
-	VkAccessFlags src_access_mask,
-	VkAccessFlags dst_access_mask,
-	VkPipelineStageFlags src_stage_mask,
-	VkPipelineStageFlags dst_stage_mask
-) {
-	CommandBuffer cmd_buf = _queue->allocateCommandBuffer();
-	cmd_buf.begin();
 
-	// Preparing the transfer with the image memory barrier
-	VkImageSubresourceRange subresource_range{};
-	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	subresource_range.baseMipLevel = 0;
-	subresource_range.levelCount = 1;
-	subresource_range.layerCount = 1;
+void Image::setImageExtent(uint32_t width, uint32_t height, uint32_t depth) {
+	_image_info.extent.width = width;
+	_image_info.extent.height = height;
+	_image_info.extent.depth = depth;
+}
 
-	VkImageMemoryBarrier image_memory_barrier{};
-	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	image_memory_barrier.pNext = nullptr;
-	image_memory_barrier.image = Image::getImage();
-	image_memory_barrier.subresourceRange = subresource_range;
-	image_memory_barrier.srcAccessMask = src_access_mask;
-	image_memory_barrier.dstAccessMask = dst_access_mask;
-	image_memory_barrier.oldLayout = _image_info.initialLayout;
-	image_memory_barrier.newLayout = new_layout;
 
-	cmd_buf.pipelineBarrier(
-		src_stage_mask,
-		dst_stage_mask,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, &image_memory_barrier
-	);
+void Image::setImageMipLevels(uint32_t mip_level) {
+	_image_info.mipLevels = mip_level;
+}
 
-	cmd_buf.end();
 
-	_stage_access_info.access_mask = dst_access_mask;
-	_stage_access_info.stage_mask = dst_stage_mask;
+void Image::setImageArrayLayers(uint32_t array_layers) {
+	_image_info.arrayLayers = array_layers;
+}
 
-	_image_info.initialLayout = new_layout;
+
+void Image::setImageSamples(VkSampleCountFlagBits samples) {
+	_image_info.samples = samples;
+}
+
+
+void Image::setImageTiling(VkImageTiling tiling) {
+	_image_info.tiling = tiling;
+}
+
+
+void Image::setImageUsage(VkImageUsageFlags usage) {
+	_image_info.usage = usage;
+}
+
+
+void Image::setImageSharingMode(VkSharingMode sharing_mode) {
+	_image_info.sharingMode = sharing_mode;
+}
+
+
+void Image::setImageQueueFamilyIndexCount(uint32_t queue_family_index_count) {
+	_image_info.queueFamilyIndexCount = queue_family_index_count;
+}
+
+
+void Image::setImagePQeueueFamilyIndices(const uint32_t* p_queue_family_indices) {
+	_image_info.pQueueFamilyIndices = p_queue_family_indices;
+}
+
+
+void Image::setImageInitialLayout(VkImageLayout initial_layout) {
+	_image_info.initialLayout = initial_layout;
+}
+
+
+void Image::setImageViewPNext(const void* p_next) {
+	_image_view_info.pNext = p_next;
+}
+
+
+void Image::setImageViewFlags(VkImageViewCreateFlags flags) {
+	_image_view_info.flags = flags;
+}
+
+
+void Image::setImageViewViewType(VkImageViewType view_type) {
+	_image_view_info.viewType = view_type;
+}
+
+
+void Image::setImageViewFormat(VkFormat format) {
+	_image_view_info.format = format;
+}
+
+
+void Image::setImageViewComponents(VkComponentSwizzle r, VkComponentSwizzle b, VkComponentSwizzle g, VkComponentSwizzle a) {
+	_image_view_info.components.r = r;
+	_image_view_info.components.g = g;
+	_image_view_info.components.b = b;
+	_image_view_info.components.a = a;
+}
+
+
+void Image::setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count) {
+	_image_view_info.subresourceRange.aspectMask = aspect_mask;
+	_image_view_info.subresourceRange.baseMipLevel = base_mip_level;
+	_image_view_info.subresourceRange.levelCount = level_count;
+	_image_view_info.subresourceRange.baseArrayLayer = base_array_layer;
+	_image_view_info.subresourceRange.layerCount = layer_count;
+}
+
+
+void Image::setImageViewInfo(VkImageViewCreateInfo info) {
+	_image_view_info = info;
+}
+
+
+VkFormat Image::getImageFormat() {
+	return _image_info.format;
+}
+
+VkImageLayout Image::getImageLayout() const {
+	return _image_info.initialLayout;
+}
+
+const VkImage& Image::getImage() const {
+	return _image;
+}
+
+
+const VkImageView& Image::getImageView() const {
+	return _image_view;
+}
+
+const uint32_t Image::getWidth() const {
+	return _image_info.extent.width;
+}
+
+
+const uint64_t Image::getHeight() const {
+	return _image_info.extent.height;
 }

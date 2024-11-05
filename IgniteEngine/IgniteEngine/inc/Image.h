@@ -1,23 +1,53 @@
 #pragma once
 
-#include "ImageRessource.h"
-#include "StagingBuffer.h"
+#include "Ressource.h"
 #include <vector>
 
-class Image: public ImageRessource
+class Queue;
+
+class Image: public Ressource
 {
+	friend Queue;
 protected:
 	static const uint8_t _n{ 4 };
 
-	StagingBuffer _staging_buffer{};
+	VkImage _image{ nullptr };
+	VkImageView _image_view{ nullptr };
+
+	VkImageCreateInfo _image_info{};
+	VkImageViewCreateInfo _image_view_info{};
+
+	int32_t* _nb_shared;
+
+protected:
+	Image(
+		Device* device,
+		uint32_t width,
+		uint32_t height,
+		uint32_t depth,
+		IGEImgFormat format
+	);
 
 public:
 	Image();
+	Image(
+		Device* device,
+		VkImage vk_img,
+		uint32_t width,
+		uint32_t height,
+		uint32_t depth,
+		VkImageViewCreateInfo view_info
+	);
+	Image(const Image& img);
 
+	~Image();
+
+	Image& operator=(const Image& img);
+
+protected:
 	void createImage();
 	void bind();
 	void createImageView();
-	void createStagingBuffer();
 
 	void create();
 	
@@ -25,38 +55,39 @@ public:
 	void destroyImageView();
 	void destroy();
 
-	void setQueue(Queue* queue);
+	void setImagePNext(const void* p_next);
+	void setImageFlags(VkImageCreateFlags flags);
+	void setImageImageType(VkImageType image_type);
+	void setImageFormat(VkFormat format);
+	void setImageExtent(VkExtent3D extent);
+	void setImageExtent(uint32_t width, uint32_t height, uint32_t depth);
+	void setImageMipLevels(uint32_t mip_level);
+	void setImageArrayLayers(uint32_t array_layers);
+	void setImageSamples(VkSampleCountFlagBits samples);
+	void setImageTiling(VkImageTiling tiling);
+	void setImageUsage(VkImageUsageFlags usage);
+	void setImageSharingMode(VkSharingMode sharing_mode);
+	void setImageQueueFamilyIndexCount(uint32_t queue_family_index_count);
+	void setImagePQeueueFamilyIndices(const uint32_t* p_queue_family_indices);
+	void setImageInitialLayout(VkImageLayout initial_layout);
 
-	void update(Pixels& pixels);
+	void setImageViewPNext(const void* p_next);
+	void setImageViewFlags(VkImageViewCreateFlags flags);
+	void setImageViewViewType(VkImageViewType view_type);
+	void setImageViewFormat(VkFormat format);
+	void setImageViewComponents(VkComponentSwizzle r, VkComponentSwizzle b, VkComponentSwizzle g, VkComponentSwizzle a);
+	void setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count);
+	void setImageViewInfo(VkImageViewCreateInfo info);
 
-	// Copy buffer to image
-	void copy(
-		Buffer& buffer,
-		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
+public:
+	VkFormat getImageFormat();
+	VkImageLayout getImageLayout() const;
 
-	void copy(
-		Image& src_img,
-		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
+	const VkImage& getImage() const;
+	const VkImageView& getImageView() const;
 
-	void flushToStaging();
-
-	// It submit the queue and synchronize the CPU
-	void flushPixels(Pixels& pixels);
-
-	void changeLayout(VkImageLayout new_layout,
-		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	);
+	const uint32_t getWidth() const;
+	const uint64_t getHeight() const;
 
 
 protected:

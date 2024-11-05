@@ -4,11 +4,13 @@
 #include <vector>
 #include "DefaultConf.h"
 #include "Camera.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "CameraScene.h"
 #include "ComputePipeline.h"
 #include "Mesh.h"
 #include "Object3D.h"
+#include "StagingBuffer.h"
+#include "DeviceBuffer.h"
 #include "LoadedObjectInfo.h"
 #include "SkeletonDebug.h"
 

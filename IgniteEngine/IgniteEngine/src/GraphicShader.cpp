@@ -39,7 +39,7 @@ void GraphicShader::addVertexBufferInfo(std::string name, uint32_t stride, VkFor
 	_vertex_buffers_info[name] = info;
 }
 
-void GraphicShader::addVertexBuffer(std::string name, VertexBuffer* buffer) {
+void GraphicShader::addVertexBuffer(std::string name, Buffer<IGEBufferUsage::vertex_buffer>* buffer) {
 	_vertex_buffers[name].push_back(buffer);
 }
 
@@ -51,21 +51,37 @@ VertexBufferInfo& GraphicShader::getVertexBufferInfo(std::string name) {
 	return _vertex_buffers_info[name];
 }
 
-std::unordered_map<std::string, std::vector<VertexBuffer*>>& GraphicShader::getVertexBuffers() {
+std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::vertex_buffer>*>>& GraphicShader::getVertexBuffers() {
 	return _vertex_buffers;
 }
 
-void GraphicShader::addIndexBufferInfo(std::string name, uint32_t nb_elem) {
+void GraphicShader::addIndexBufferInfo(
+	std::string name,
+	uint32_t nb_elem,
+	VkIndexType index_type
+) {
 	IndexBufferInfo info{};
 	info.setNbElem(nb_elem);
+	info.setIndexType(index_type);
 	_index_buffer_info[name] = info;
 }
 
-void GraphicShader::addIndexBuffer(std::string name, IndexBuffer* buffer) {
+std::unordered_map<std::string, IndexBufferInfo>& GraphicShader::getIndexBufferInfo() {
+	return _index_buffer_info;
+}
+
+IndexBufferInfo& GraphicShader::getIndexBufferInfo(const std::string& name) {
+	return _index_buffer_info[name];
+}
+
+void GraphicShader::addIndexBuffer(
+	std::string name,
+	Buffer<IGEBufferUsage::index_buffer>* buffer
+) {
 	_index_buffers[name].push_back(buffer);
 }
 
-std::unordered_map<std::string, std::vector<IndexBuffer*>>& GraphicShader::getIndexBuffers() {
+std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::index_buffer>*>>& GraphicShader::getIndexBuffers() {
 	return _index_buffers;
 }
 

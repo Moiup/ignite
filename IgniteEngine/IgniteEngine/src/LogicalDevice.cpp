@@ -6,8 +6,6 @@ LogicalDevice::LogicalDevice()
 	;
 }
 
-
-
 bool LogicalDevice::defineQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count){
 	uint32_t family_index{0};
 	bool is_flag{false};
@@ -129,7 +127,6 @@ void LogicalDevice::gettingTheQueues() {
 	for (auto& n_q : _queues) {
 		for (Queue& q : n_q.second) {
 			q.setDevice(&_device);
-			q.setGPU(_gpu);
 			q.create();
 		}
 	}

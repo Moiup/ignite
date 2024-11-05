@@ -32,6 +32,7 @@ public:
 
 	uint32_t getWidth();
 	uint32_t getHeight();
+	uint64_t getSize();
 	glm::vec4 getPixel(uint32_t l, uint32_t c);
 	void setPixel(uint32_t l, uint32_t c, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 	void setPixel(uint32_t l, uint32_t c, uint8_t col);

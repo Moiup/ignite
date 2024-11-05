@@ -84,6 +84,10 @@ uint32_t Pixels::getHeight() {
 	return _height;
 }
 
+uint64_t Pixels::getSize() {
+	return _width * _height * _nb_channels * sizeof(uint8_t);
+}
+
 glm::vec4 Pixels::getPixel(uint32_t l, uint32_t c) {
 	return glm::vec4(
 		_pixels[pixR(l, c)],

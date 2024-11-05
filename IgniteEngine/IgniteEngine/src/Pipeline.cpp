@@ -11,6 +11,10 @@ Pipeline::Pipeline() :
 	;
 }
 
+Pipeline::~Pipeline() {
+	//destroy();
+}
+
 void Pipeline::setShader(Shader* shader) {
 	_shader = shader;
 }
@@ -38,6 +42,9 @@ void Pipeline::create() {
 }
 
 void Pipeline::destroy() {
+	if (!_pipeline) {
+		return;
+	}
 	destroyPipeline();
 	destroyDescriptorSet();
 	destroyPipelineLayout();
@@ -97,7 +104,7 @@ void Pipeline::createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBindin
 	VkDescriptorSetLayout descriptor_set_layout{};
 	_descriptor_set_layout.push_back(descriptor_set_layout);
 	VkResult vk_result = vkCreateDescriptorSetLayout(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		&descriptor_set_layout_info,
 		nullptr,
 		_descriptor_set_layout.data()
@@ -126,7 +133,7 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	descriptor_pool_info.pPoolSizes = descriptor_pool_size_arr.data();
 
 	VkResult vk_result = vkCreateDescriptorPool(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		&descriptor_pool_info,
 		nullptr,
 		&_descriptor_pool
@@ -145,39 +152,12 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	descriptor_sets_info.pSetLayouts = _descriptor_set_layout.data();
 
 	vk_result = vkAllocateDescriptorSets(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		&descriptor_sets_info,
 		_descriptor_sets.data()
 	);
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed allocating descriptor sets!");
-	}
-}
-
-void Pipeline::setWriteDescriptorSet(std::unordered_map<std::string, ArrayBuffer*>& buffer_arr, std::unordered_map<std::string, ArrayBufferInfo>& buffer_info_arr, std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr) {
-	for (std::pair<std::string, ArrayBuffer*> buff_data : buffer_arr) {
-		std::string name = buff_data.first;
-		ArrayBuffer* buff = buff_data.second;
-		ArrayBufferInfo& info = buffer_info_arr[name];
-		VkDescriptorBufferInfo* descriptor_buffer_info = new VkDescriptorBufferInfo();
-
-		descriptor_buffer_info->buffer = buff->getBuffer();
-		descriptor_buffer_info->offset = 0;
-		descriptor_buffer_info->range = VK_WHOLE_SIZE;
-
-		VkWriteDescriptorSet writes{};
-		writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writes.pNext = nullptr;
-		writes.dstSet = _descriptor_sets[0];
-		writes.dstBinding = info.getBinding();
-		writes.dstArrayElement = 0;
-		writes.descriptorCount = 1;
-		writes.descriptorType = info.getDescriptorType();
-		writes.pImageInfo = nullptr;
-		writes.pBufferInfo = descriptor_buffer_info;
-		writes.pTexelBufferView = nullptr;
-
-		write_descriptor_set_arr.push_back(writes);
 	}
 }
 
@@ -216,13 +196,13 @@ void Pipeline::setWriteDescriptorSet(
 }
 
 void Pipeline::setWriteDescriptorSet(
-	std::unordered_map<std::string, std::vector<Texture*>>& texture_arr,
+	std::unordered_map<std::string, std::vector<Texture2D*>>& texture_arr,
 	std::unordered_map<std::string, TextureInfo>& texture_info_arr,
 	std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
 ) {
 	for (auto& texture_data : texture_arr) {
 		std::string name = texture_data.first;
-		std::vector<Texture*>& textures = texture_data.second;
+		std::vector<Texture2D*>& textures = texture_data.second;
 		TextureInfo& info = texture_info_arr[name];
 
 		VkDescriptorImageInfo* image_info = new VkDescriptorImageInfo[textures.size()];
@@ -253,13 +233,13 @@ void Pipeline::setWriteDescriptorSet(
 void Pipeline::updateDescriptorSets() {
 	std::vector<VkWriteDescriptorSet> write_descriptor_set_arr;
 	setWriteDescriptorSet(
-		(std::unordered_map<std::string, ArrayBuffer*>&)_shader->getUniformBuffers(),
+		(std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*>&)_shader->getUniformBuffers(),
 		_shader->getUniformBuffersInfo(),
 		write_descriptor_set_arr
 	);
 
 	setWriteDescriptorSet(
-		(std::unordered_map<std::string, ArrayBuffer*>&)_shader->getStorageBuffers(),
+		(std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*>&)_shader->getStorageBuffers(),
 		_shader->getStorageBuffersInfo(),
 		write_descriptor_set_arr
 	);
@@ -271,13 +251,13 @@ void Pipeline::updateDescriptorSets() {
 	);
 
 	setWriteDescriptorSet(
-		_shader->getTexture(),
+		_shader->getTextures2D(),
 		_shader->getTextureInfo(),
 		write_descriptor_set_arr
 	);
 
 	vkUpdateDescriptorSets(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		write_descriptor_set_arr.size(),
 		write_descriptor_set_arr.data(),
 		0,
@@ -310,14 +290,14 @@ void Pipeline::destroyDescriptorSet() {
 	}
 
 	vkFreeDescriptorSets(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		_descriptor_pool,
 		_descriptor_sets.size(),
 		_descriptor_sets.data()
 	);
 
 	vkDestroyDescriptorPool(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		_descriptor_pool,
 		nullptr
 	);
@@ -327,7 +307,7 @@ void Pipeline::destroyDescriptorSet() {
 void Pipeline::destroyDescriptorSetLayout() {
 	for (auto _dsl : _descriptor_set_layout) {
 		vkDestroyDescriptorSetLayout(
-			_shader->getLogicalDevice()->getDevice()->getDevice(),
+			_shader->getDevice()->getDevice(),
 			_dsl,
 			nullptr
 		);
@@ -353,7 +333,7 @@ void Pipeline::createPipelineLayout() {
 	pipeline_layout_info.pPushConstantRanges = push_constant_ranges.data();
 
 	VkResult vk_result = vkCreatePipelineLayout(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		&pipeline_layout_info,
 		nullptr,
 		&_pipeline_layout
@@ -365,8 +345,16 @@ void Pipeline::createPipelineLayout() {
 
 void Pipeline::destroyPipelineLayout() {
 	vkDestroyPipelineLayout(
-		_shader->getLogicalDevice()->getDevice()->getDevice(),
+		_shader->getDevice()->getDevice(),
 		_pipeline_layout,
+		nullptr
+	);
+}
+
+void Pipeline::destroyPipeline() {
+	vkDestroyPipeline(
+		_shader->getDevice()->getDevice(),
+		_pipeline,
 		nullptr
 	);
 }

@@ -1,68 +1,35 @@
 #pragma once
 
-#include "Swapchain.h"
-#include "Shader.h"
-#include "ArrayBuffer.h"
+#include "Pipeline.hpp"
 
-class Pipeline
-{
-protected:
-	Shader* _shader;
+template<IGEBufferUsage U>
+void Pipeline::setWriteDescriptorSet(
+	std::unordered_map<std::string, Buffer<U>*>& buffer_arr,
+	std::unordered_map<std::string, ArrayBufferInfo>& buffer_info_arr,
+	std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
+) {
+	for (std::pair<std::string, Buffer<U>*> buff_data : buffer_arr) {
+		std::string name = buff_data.first;
+		Buffer<U>* buff = buff_data.second;
+		ArrayBufferInfo& info = buffer_info_arr[name];
+		VkDescriptorBufferInfo* descriptor_buffer_info = new VkDescriptorBufferInfo();
 
-	std::vector<VkDescriptorSetLayout> _descriptor_set_layout;
-	VkDescriptorPool _descriptor_pool;
-	std::vector<VkDescriptorSet> _descriptor_sets;
-	VkPipelineLayout _pipeline_layout;
-	VkPipeline _pipeline;
+		descriptor_buffer_info->buffer = buff->getBuffer();
+		descriptor_buffer_info->offset = 0;
+		descriptor_buffer_info->range = VK_WHOLE_SIZE;
 
-public:
-	Pipeline();
+		VkWriteDescriptorSet writes{};
+		writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writes.pNext = nullptr;
+		writes.dstSet = _descriptor_sets[0];
+		writes.dstBinding = info.getBinding();
+		writes.dstArrayElement = 0;
+		writes.descriptorCount = 1;
+		writes.descriptorType = info.getDescriptorType();
+		writes.pImageInfo = nullptr;
+		writes.pBufferInfo = descriptor_buffer_info;
+		writes.pTexelBufferView = nullptr;
 
-	void setShader(Shader* shader);
-
-	const VkPipeline& getPipeline() const;
-	const VkPipelineLayout& getPipelineLayout() const;
-	const std::vector<VkDescriptorSet>& getDescriptorSets() const;
-	Shader* getShader();
-
-	void create();
-	void destroy();
-
-private:
-	void setDescriptorSetLayoutBinding(
-		std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_binding_arr,
-		std::unordered_map<std::string, ArrayBufferInfo>& buffer_arr
-	);
-	std::vector<VkDescriptorSetLayoutBinding> setDescriptorSetLayoutBindingArray();
-	void createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
-	void createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
-	void setWriteDescriptorSet(
-		std::unordered_map<std::string, ArrayBuffer*>& buffer_arr,
-		std::unordered_map<std::string, ArrayBufferInfo>& buffer_info_arr,
-		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-	);
-	void setWriteDescriptorSet(
-		std::unordered_map<std::string, std::vector<Sampler*>>& sampler_arr,
-		std::unordered_map<std::string, SamplerInfo>& sampler_info_arr,
-		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-	);
-	void setWriteDescriptorSet(
-		std::unordered_map<std::string, std::vector<Texture*>>& texture_arr,
-		std::unordered_map<std::string, TextureInfo>& texture_info_arr,
-		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-	);
-	void updateDescriptorSets();
-
-	void destroyDescriptorSetLayout();
-
-	void createDescriptorSet();
-	void destroyDescriptorSet();
-
-	void createPipelineLayout();
-	void destroyPipelineLayout();
-
-protected:
-	virtual void createPipeline() = 0;
-	virtual void destroyPipeline() = 0;
-};
-
+		write_descriptor_set_arr.push_back(writes);
+	}
+}

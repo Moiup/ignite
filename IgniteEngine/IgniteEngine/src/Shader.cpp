@@ -8,17 +8,17 @@ Shader::Shader() :
 	_sampler_info{},
 	_sampler{},
 	_texture_info{},
-	_logical_device{nullptr}
+	_device{nullptr}
 {
 	;
 }
 
-void Shader::setLogicalDevice(LogicalDevice* logical_device) {
-	_logical_device = logical_device;
+void Shader::setDevice(Device* device) {
+	_device = device;
 }
 
-LogicalDevice* Shader::getLogicalDevice() {
-	return _logical_device;
+Device* Shader::getDevice() {
+	return _device;
 }
 
 void Shader::addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size) {
@@ -61,7 +61,10 @@ void Shader::addUniformBufferInfo(std::string name, uint32_t binding, VkShaderSt
 	_uniform_buffers_info[name] = info;
 }
 
-void Shader::addUniformBuffer(std::string name, UniformBuffer* buffer) {
+void Shader::addUniformBuffer(
+	std::string name,
+	Buffer<IGEBufferUsage::uniform_buffer>* buffer
+) {
 	if (_uniform_buffers.count(name)) {
 		std::string error = "Error: there already is an Uniform buffer named " + name + "!";
 		throw std::runtime_error(error);
@@ -74,7 +77,7 @@ std::unordered_map<std::string, ArrayBufferInfo>& Shader::getUniformBuffersInfo(
 	return _uniform_buffers_info;
 }
 
-std::unordered_map<std::string, UniformBuffer*>& Shader::getUniformBuffers() {
+std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*>& Shader::getUniformBuffers() {
 	return _uniform_buffers;
 }
 
@@ -92,7 +95,10 @@ void Shader::addStorageBufferInfo(std::string name, uint32_t binding, VkShaderSt
 	_storage_buffers_info[name] = info;
 }
 
-void Shader::addStorageBuffer(std::string name, StorageBuffer* buffer) {
+void Shader::addStorageBuffer(
+	std::string name,
+	Buffer<IGEBufferUsage::storage_buffer>* buffer
+) {
 	if (_storage_buffers.count(name)) {
 		std::string error = "Error: there already is a Storage buffer named " + name + "!";
 		throw std::runtime_error(error);
@@ -105,7 +111,7 @@ std::unordered_map<std::string, ArrayBufferInfo>& Shader::getStorageBuffersInfo(
 	return _storage_buffers_info;
 }
 
-std::unordered_map<std::string, StorageBuffer*>& Shader::getStorageBuffers() {
+std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*>& Shader::getStorageBuffers() {
 	return _storage_buffers;
 }
 
@@ -174,12 +180,12 @@ void Shader::addStorageTextureInfo(std::string name, uint32_t binding, VkShaderS
 	addStorageTextureInfo(name, binding, stage_flags, 1);
 }
 
-void Shader::addTexture(std::string name, Texture* texture) {
+void Shader::addTexture2D(std::string name, Texture2D* texture) {
 	_textures[name].push_back(texture);
 }
 
 
-void Shader::addTexture(std::string name, std::vector<Texture*>& textures) {
+void Shader::addTexture2D(std::string name, std::vector<Texture2D*>& textures) {
 	_textures[name].insert(
 		_textures[name].end(),
 		textures.begin(),
@@ -191,14 +197,14 @@ std::unordered_map<std::string, TextureInfo>& Shader::getTextureInfo() {
 	return _texture_info;
 }
 
-std::unordered_map<std::string, std::vector<Texture*>>& Shader::getTexture() {
+std::unordered_map<std::string, std::vector<Texture2D*>>& Shader::getTextures2D() {
 	return _textures;
 }
 
 void Shader::destroy() {
 	for (auto& stage : _shader_stages) {
 		vkDestroyShaderModule(
-			_logical_device->getDevice()->getDevice(),
+			_device->getDevice(),
 			stage.module,
 			nullptr
 		);
@@ -273,7 +279,7 @@ void Shader::createShaderModuleAndStage(const std::string& path, VkShaderStageFl
 	shader_module_info.pCode = shader_text.data();
 
 	VkResult vk_result = vkCreateShaderModule(
-		_logical_device->getDevice()->getDevice(),
+		_device->getDevice(),
 		&shader_module_info,
 		nullptr,
 		&shader_module

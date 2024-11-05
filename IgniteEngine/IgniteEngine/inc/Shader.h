@@ -1,18 +1,16 @@
 #pragma once
 
 #include "PhysicalDevice.h"
+#include "Device.h"
+#include "Buffer.h"
 #include "PushConstantInfo.h"
 #include "VertexBufferInfo.h"
-#include "VertexBuffer.h"
 #include "IndexBufferInfo.h"
-#include "IndexBuffer.h"
 #include "ArrayBufferInfo.h"
-#include "StorageBuffer.h"
-#include "UniformBuffer.h"
 #include "Sampler.h"
 #include "SamplerInfo.h"
 #include "TextureInfo.h"
-#include "Texture.h"
+#include "Texture2D.h"
 
 #include <unordered_map>
 #include <fstream>
@@ -34,22 +32,22 @@ protected:
 
 	std::unordered_map<std::string, void*> _push_constants;
 
-	std::unordered_map<std::string, UniformBuffer*> _uniform_buffers;
-	std::unordered_map<std::string, StorageBuffer*> _storage_buffers;
+	std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*> _uniform_buffers;
+	std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*> _storage_buffers;
 
 	std::unordered_map<std::string, SamplerInfo> _sampler_info;
 	std::unordered_map<std::string, std::vector<Sampler*>> _sampler; 
 
 	std::unordered_map<std::string, TextureInfo> _texture_info;
-	std::unordered_map<std::string, std::vector<Texture*>> _textures;
+	std::unordered_map<std::string, std::vector<Texture2D*>> _textures;
 
-	LogicalDevice* _logical_device;
+	Device* _device;
 
 public:
 	Shader();
 
-	void setLogicalDevice(LogicalDevice* logical_device);
-	LogicalDevice* getLogicalDevice();
+	void setDevice(Device* device);
+	Device* getDevice();
 
 	void addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size);
 	void addPushConstant(std::string name, void* push_constant);
@@ -57,14 +55,14 @@ public:
 	std::unordered_map<std::string, void*>& getPushConstants();
 
 	void addUniformBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addUniformBuffer(std::string name, UniformBuffer* buffer);
+	void addUniformBuffer(std::string name, Buffer<IGEBufferUsage::uniform_buffer>* buffer);
 	std::unordered_map<std::string, ArrayBufferInfo>& getUniformBuffersInfo();
-	std::unordered_map<std::string, UniformBuffer*>& getUniformBuffers();
+	std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*>& getUniformBuffers();
 
 	void addStorageBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addStorageBuffer(std::string name, StorageBuffer* buffer);
+	void addStorageBuffer(std::string name, Buffer<IGEBufferUsage::storage_buffer>* buffer);
 	std::unordered_map<std::string, ArrayBufferInfo>& getStorageBuffersInfo();
-	std::unordered_map<std::string, StorageBuffer*>& getStorageBuffers();
+	std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*>& getStorageBuffers();
 
 	void addSamplerInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
 	void addSampler(std::string name, Sampler* sampler);
@@ -76,10 +74,10 @@ public:
 	void addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count);
 	void addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
 	//void addStorageTexture(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addTexture(std::string name, Texture* texture);
-	void addTexture(std::string name, std::vector<Texture*>& textures);
+	void addTexture2D(std::string name, Texture2D* texture);
+	void addTexture2D(std::string name, std::vector<Texture2D*>& textures);
 	std::unordered_map<std::string, TextureInfo>& getTextureInfo();
-	std::unordered_map<std::string, std::vector<Texture*>>& getTexture();
+	std::unordered_map<std::string, std::vector<Texture2D*>>& getTextures2D();
 
 	void destroy();
 

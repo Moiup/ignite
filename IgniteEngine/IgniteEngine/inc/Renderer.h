@@ -4,8 +4,6 @@
 #include "CommandPool.h"
 #include "CommandBuffer.h"
 #include "Queue.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
 #include "GraphicShader.h"
 #include "GraphicsPipeline.h"
 
@@ -14,7 +12,7 @@ class Renderer
 protected:
 	uint32_t _nb_frame;
 	Device* _device;
-	PhysicalDevice* _gpu;
+
 	WindowSurface* _window;
 	VkClearColorValue _clear_color_value;
 
@@ -47,7 +45,6 @@ public:
 	void setComputeQueues(std::vector<Queue>* compute_queues);
 
 	void setNbFrame(uint32_t nb_frame);
-	void setPhysicalDevice(PhysicalDevice* gpu);
 	void setWindow(WindowSurface* _window);
 	void setClearColorValue(VkClearColorValue clear_color_value);
 	void setOffset(uint32_t x, uint32_t y);

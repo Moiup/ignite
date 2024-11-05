@@ -3,7 +3,6 @@
 Renderer::Renderer() :
 	_nb_frame{ 2 },
 	_device{},
-	_gpu{ nullptr },
 	_window{nullptr},
 	_clear_color_value{0.2f, 0.2f, 0.2f, 1.0f},
 	_pipeline_stage_flags{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}
@@ -27,10 +26,6 @@ void Renderer::setComputeQueues(std::vector<Queue>* compute_queues) {
 
 void Renderer::setNbFrame(uint32_t nb_frame) {
 	_nb_frame = nb_frame;
-}
-
-void Renderer::setPhysicalDevice(PhysicalDevice* gpu) {
-	_gpu = gpu;
 }
 
 void Renderer::setWindow(WindowSurface* window) {

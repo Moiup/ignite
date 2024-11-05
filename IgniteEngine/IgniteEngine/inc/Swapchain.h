@@ -6,8 +6,8 @@
 class Swapchain
 {
 private:
-	Queue* _queue;
-	VkSwapchainKHR _swapchain;
+	Device* _device;
+	VkSwapchainKHR _swapchain{ nullptr };
 	VkSwapchainCreateInfoKHR _info;
 	bool _created;
 
@@ -20,8 +20,9 @@ private:
 
 public:
 	Swapchain();
+	~Swapchain();
 
-	void setQueue(Queue* queue);
+	void setDevice(Device* _device);
 
 	void setPNext(void *p_next);
 	void setFlags(VkSwapchainCreateFlagsKHR flags);

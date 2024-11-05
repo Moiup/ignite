@@ -44,8 +44,12 @@ Swapchain::Swapchain() :
 	_image_view_info.subresourceRange.layerCount = 1;
 }
 
-void Swapchain::setQueue(Queue* queue) {
-	_queue = queue;
+Swapchain::~Swapchain() {
+	destroy();
+}
+
+void Swapchain::setDevice(Device* device) {
+	_device = device;
 }
 
 void Swapchain::setPNext(void* p_next) {
@@ -158,7 +162,7 @@ void Swapchain::create() {
 }
 
 void Swapchain::destroy() {
-	if (!_created) {
+	if (!_swapchain) {
 		return;
 	}
 	destroySwapchain();
@@ -174,7 +178,7 @@ void Swapchain::createSwapchain() {
 	}
 
 	VkResult vk_result = vkCreateSwapchainKHR(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		&_info,
 		nullptr,
 		&_swapchain
@@ -188,7 +192,7 @@ void Swapchain::createSwapchain() {
 
 void Swapchain::gettingImages(){
 	VkResult vk_result = vkGetSwapchainImagesKHR(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		_swapchain,
 		&_image_count,
 		nullptr
@@ -200,7 +204,7 @@ void Swapchain::gettingImages(){
 	_images.resize(_image_count);
 	std::vector<VkImage> imgs(_image_count);
 	vk_result = vkGetSwapchainImagesKHR(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		_swapchain,
 		&_image_count,
 		imgs.data()
@@ -209,42 +213,48 @@ void Swapchain::gettingImages(){
 		throw std::runtime_error("Error: failed getting the images!");
 	}
 
+	_image_view_info.format = _info.imageFormat;
 	for (uint32_t i = 0; i < _image_count; i++) {
-		_images[i].setQueue(_queue);
-		_images[i].setImage(imgs[i]);
-		_images[i].setImageExtent(
+		_images[i] = Image(
+			_device,
+			imgs[i],
 			_info.imageExtent.width,
 			_info.imageExtent.height,
-			1
+			1,
+			_image_view_info
 		);
-		_images[i].changeLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		_images[i].createStagingBuffer();
+
+		//_images[i].setDevice(_device);
+		//_images[i].setImage(imgs[i]);
+		//_images[i].setImageExtent(
+		//	_info.imageExtent.width,
+		//	_info.imageExtent.height,
+		//	1
+		//);
 	}
-	_queue->submit();
-	_queue->wait();
 }
 
 void Swapchain::createImagesViews(){	
-	_image_view_info.format = _info.imageFormat;
+	//_image_view_info.format = _info.imageFormat;
 
-	for (uint32_t i = 0; i < _image_count; i++) {
-		//_image_view_info.image = _images[i].getImage();
+	//for (uint32_t i = 0; i < _image_count; i++) {
+	//	//_image_view_info.image = _images[i].getImage();
 
-		_images[i].setImageViewInfo(_image_view_info);
-		_images[i].createImageView();
-	}
+	//	_images[i].setImageViewInfo(_image_view_info);
+	//	_images[i].createImageView();
+	//}
 }
 
 void Swapchain::destroySwapchain() {
 	vkDestroySwapchainKHR(
-		_queue->getDevice()->getDevice(),
+		_device->getDevice(),
 		_swapchain,
 		nullptr
 	);
 }
 
 void Swapchain::destroyImageViews() {
-	for (uint32_t i = 0; i < _image_count; i++) {
-		_images[i].destroyImageView();
-	}
+	//for (uint32_t i = 0; i < _image_count; i++) {
+	//	_images[i].destroyImageView();
+	//}
 }

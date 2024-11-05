@@ -1,10 +1,13 @@
 #pragma once
 
-#include "Buffer.h"
+#include "DeviceBuffer.hpp"
 
-class DeviceBuffer : public Buffer
+template<IGEBufferUsage U>
+DeviceBuffer<U>::DeviceBuffer(Device* device, VkDeviceSize size) :
+	Buffer<U>(device, size)
 {
-public:
-	DeviceBuffer();
-};
-
+	setMemoryPropertyFlags(
+		IGEMemoryType::device
+	);
+	create();
+}

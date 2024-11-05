@@ -3,76 +3,92 @@
 #include "PhysicalDevice.h"
 #include "CommandPool.h"
 #include "CommandBuffer.h"
-//#include "Buffer.h"
-//#include "Image.h"
+#include "Buffer.h"
+#include "Image.h"
 #include <vector>
+#include <list>
 #include <unordered_map>
 
 struct CommandPoolSubmitBuffersIndices {
-	uint32_t start_i;
-	uint32_t nb_cmd_buf;
+	uint32_t start_i{0};
+	uint32_t nb_cmd_buf{0};
 };
 
 class Queue
 {
 private:
-	static std::unordered_map<VkQueue, std::vector<CommandPool>> _cmd_pools;
-	static std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> _pending_command_buffers;
-	static std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> _command_pool_indices;
+	//static std::unordered_map<VkQueue, std::vector<CommandPool>> _cmd_pools;
+	//static std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> _pending_command_buffers;
+	//static std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> _command_pool_indices;
 
 	VkQueue _queue{ nullptr };
 	Device* _device{ nullptr };
 	VkFence _fence{ nullptr };
-	PhysicalDevice* _gpu{ nullptr };
-	uint32_t _cmd_pool_i{ 0 };
 
 	uint32_t _family_index{};
 
+	CommandPool _command_pool;
+	CommandPoolSubmitBuffersIndices _command_pool_indices;
+
+	std::list<CommandPool>* _command_pools{nullptr};
+	std::vector<VkCommandBuffer>* _pending_command_buffers{nullptr};
+	int32_t* _shared_count{nullptr};
+
 public:
 	Queue();
-	Queue(Queue& q);
 	Queue(const Queue& q);
 	//Queue(Queue&& q);
+
+	~Queue();
 
 	Queue& operator=(const Queue& q);
 
 	void setDevice(Device* device);
 	void setFamilyIndex(uint32_t family_index);
-	//void setCommandPoolIndex(uint32_t cmd_pool_i);
-	void setGPU(PhysicalDevice* gpu);
 	void create();
 
-	std::vector<CommandPool>& getCommandPools();
-	CommandPool& getCommandPool() const;
+	const CommandPool& getCommandPool() const;
+	CommandPool& getCommandPool();
 	VkQueue getQueue();
 	Device* getDevice();
 	uint32_t getFamilyIndex();
-	uint32_t getCommandPoolIndex();
-	PhysicalDevice* getGPU();
 	std::vector<VkCommandBuffer>& getPendingCommandBuffers();
-	
-	
-
-	void addCommandPool(VkFenceCreateFlags flags = VK_FENCE_CREATE_SIGNALED_BIT);
-
-	CommandBuffer allocateCommandBuffer(VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	CommandBuffer& newCommandBuffer();
 
 	//void copy(Buffer& src, Buffer& dst,
+	//	VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+	//	VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 	//);
+	template<IGEBufferUsage U>
+	void copy(Buffer<U>& src, Image& dst,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+	//void copy(Image& src, Buffer& dst,
+	//	VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+	//	VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	//);
+	void copy(Image& src, Image& dst,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
 
-	//void copySync(Buffer& src, Buffer& dst,
-	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	//);
-
-	//void changeLayout(Image img, VkImageLayout layout,
-	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	//);
-	//void changeToTexture(Image img);
-	//void changeToSurface(Image img);
+	void changeLayout(
+		Image& img,
+		VkImageLayout new_layout,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
 
 	void flush();
 
@@ -84,6 +100,9 @@ public:
 		const VkSemaphore* pSignalSemaphores = nullptr
 	);
 
+	/**
+	* Flush but with parameters
+	*/
 	const void submitNoFence(
 		uint32_t waitSemaphorecount = 0,
 		const VkSemaphore* pWaitSemaphores = nullptr,
@@ -118,13 +137,81 @@ public:
 
 private:
 	void createFence();
+	void addCommandPool(VkFenceCreateFlags flags = VK_FENCE_CREATE_SIGNALED_BIT);
+	void removeCommandPool();
 
-	VkCommandBuffer* getPendingCommandBufferStartPointer() const;
-	uint32_t& getStartIndexPendingCommendBuffers();
-	uint32_t& getNbPendingCommandBuffers();
+	// Methods that does not create command buffer
+	void changeLayout(
+		CommandBuffer& cmd_buf,
+		Image& img,
+		VkImageLayout new_layout,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
 
-	void freeCommandBuffers();
 
-	//void flush(VkFence* fences);
+	// Command buffers managing methods
+	VkCommandBuffer* Queue::getPendingCommandBufferStartPointer();
+	const uint32_t Queue::getStartIndexPendingCommandBuffers() const;
+	uint32_t& Queue::getStartIndexPendingCommandBuffers();
+	const uint32_t Queue::getNbPendingCommandBuffers() const;
+	uint32_t& Queue::getNbPendingCommandBuffers();
+
 };
 
+template<IGEBufferUsage U>
+void Queue::copy(Buffer<U>& src, Image& dst,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	CommandBuffer cmd_buf = newCommandBuffer();
+
+	VkImageLayout image_layout = dst.getImageLayout();
+
+	cmd_buf.begin();
+	changeLayout(
+		cmd_buf,
+		dst,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		src_access_mask,
+		VK_ACCESS_TRANSFER_WRITE_BIT,
+		src_stage_mask,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	// To do for each mip level
+	// (To start, we consider only the original level -> 0)
+	VkBufferImageCopy image_copy{};
+	image_copy.bufferOffset = 0;
+	image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.imageSubresource.mipLevel = 0;
+	image_copy.imageSubresource.baseArrayLayer = 0;
+	image_copy.imageSubresource.layerCount = 1;
+	image_copy.imageExtent.width = dst.getWidth();
+	image_copy.imageExtent.height = dst.getHeight();
+	image_copy.imageExtent.depth = 1;
+
+	cmd_buf.copyBufferToImage(
+		src.getBuffer(),
+		dst.getImage(),
+		dst.getImageLayout(),
+		1,
+		&image_copy
+	);
+
+	changeLayout(
+		cmd_buf,
+		dst,
+		image_layout,
+		dst.getStageAccessInfo().access_mask,
+		dst_access_mask,
+		dst.getStageAccessInfo().stage_mask,
+		dst_stage_mask
+	);
+
+	cmd_buf.end();
+}

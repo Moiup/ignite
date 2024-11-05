@@ -1,34 +1,47 @@
 #include "Queue.h"
 
-std::unordered_map<VkQueue, std::vector<CommandPool>> Queue::_cmd_pools;
-std::unordered_map<CommandPool*, std::vector<VkCommandBuffer>> Queue::_pending_command_buffers;
-std::unordered_map<CommandPool*, CommandPoolSubmitBuffersIndices> Queue::_command_pool_indices;
-
 Queue::Queue()
 {
-
+	_command_pools = new std::list<CommandPool>{};
+	_pending_command_buffers = new std::vector<VkCommandBuffer>;
+	_shared_count = new int32_t(1);
 }
 
-Queue::Queue(Queue& q) {
+Queue::Queue(const Queue& q)
+{
 	*this = q;
 }
 
+Queue::~Queue() {
+	removeCommandPool();
 
-Queue::Queue(const Queue& q) {
-	*this = q;
+	*_shared_count -= 1;
+	if (!*_shared_count) {
+		delete _shared_count;
+	}
+
+	if (!_command_pools) {
+		delete _command_pools;
+		delete _pending_command_buffers;
+		_command_pools = nullptr;
+		_pending_command_buffers = nullptr;
+	}
 }
-
-//
-//Queue::Queue(Queue&& q) {
-//	*this = q;
-//}
 
 Queue& Queue::operator=(const Queue& q) {
 	_queue = q._queue;
 	_device = q._device;
 	_fence = q._fence;
-	_cmd_pool_i = q._cmd_pool_i;
 	_family_index = q._family_index;
+	_command_pool_indices = q._command_pool_indices;
+
+	_command_pools = q._command_pools;
+	_pending_command_buffers = q._pending_command_buffers;
+	_shared_count = q._shared_count;
+	*_shared_count += 1;
+
+	removeCommandPool();
+	addCommandPool();
 
 	return *this;
 }
@@ -39,10 +52,6 @@ void Queue::setDevice(Device* device) {
 
 void Queue::setFamilyIndex(uint32_t family_index) {
 	_family_index = family_index;
-}
-
-void Queue::setGPU(PhysicalDevice* gpu) {
-	_gpu = gpu;
 }
 
 void Queue::create() {
@@ -56,8 +65,12 @@ void Queue::create() {
 	addCommandPool();
 }
 
-CommandPool& Queue::getCommandPool() const {
-	return _cmd_pools[_queue][_cmd_pool_i];
+const CommandPool& Queue::getCommandPool() const {
+	return _command_pool;
+}
+
+CommandPool& Queue::getCommandPool() {
+	return _command_pool;
 }
 
 VkQueue Queue::getQueue() {
@@ -72,27 +85,30 @@ uint32_t Queue::getFamilyIndex() {
 	return _family_index;
 }
 
-uint32_t Queue::getCommandPoolIndex() {
-	return _cmd_pool_i;
-}
-
-PhysicalDevice* Queue::getGPU() {
-	return _gpu;
-}
-
 std::vector<VkCommandBuffer>& Queue::getPendingCommandBuffers() {
-	return _pending_command_buffers[&getCommandPool()];
+	return *_pending_command_buffers;
+}
+
+CommandBuffer& Queue::newCommandBuffer() {
+	CommandBuffer cmd_buf = _command_pool.newCommandBuffer();
+	_pending_command_buffers->push_back(cmd_buf.getCommandBuffer());
+	getNbPendingCommandBuffers() += 1;
+	return cmd_buf;
 }
 
 void Queue::addCommandPool(VkFenceCreateFlags flags) {
+	if (_command_pool.getPool()) {
+		return;
+	}
+
 	CommandPool cmd_pool{};
 	cmd_pool.setDevice(_device);
 	cmd_pool.setQueueFamilyIndex(getFamilyIndex());
 	cmd_pool.setFlags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	cmd_pool.create();
 
-	_cmd_pools[_queue].push_back(cmd_pool);
-	_cmd_pool_i = _cmd_pools[_queue].size() - 1;
+	_command_pool = cmd_pool;
+	_command_pools->push_front(_command_pool);
 
 	VkFenceCreateInfo fence_info{};
 	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -111,102 +127,39 @@ void Queue::addCommandPool(VkFenceCreateFlags flags) {
 	}
 }
 
-CommandBuffer Queue::allocateCommandBuffer(VkCommandBufferLevel level) {
-	CommandBuffer cmd_buf;
-
-	cmd_buf.setDevice(getDevice());
-	cmd_buf.setCommandPool(&getCommandPool());
-	cmd_buf.setLevel(level);
-	cmd_buf.allocate();
-
-	
-	_pending_command_buffers[&getCommandPool()].push_back(cmd_buf.getCommandBuffer());
-	_command_pool_indices[&getCommandPool()].nb_cmd_buf++;
-
-	return cmd_buf;
+void Queue::removeCommandPool() {
+	if (_command_pool.getPool()) {
+		std::list<CommandPool>::iterator it = _command_pools->begin();
+		for (; it != _command_pools->end(); ++it) {
+			if (*it == _command_pool) {
+				_command_pools->erase(it);
+				break;
+			}
+		}
+	}
 }
 
-//void Queue::copy(Buffer& src, Buffer& dst,
-//	VkPipelineStageFlags src_stage_mask,
-//	VkPipelineStageFlags dst_stage_mask
-//) {
-//	CommandBuffer cmd_buf = allocateCommandBuffer();
-//
-//	VkBufferCopy2 region{};
-//	region.sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
-//	region.pNext = nullptr;
-//	region.srcOffset = 0;
-//	region.dstOffset = 0;
-//	region.size = src.getSize();
-//
-//	VkCopyBufferInfo2 info{};
-//	info.sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
-//	info.pNext = nullptr;
-//	info.srcBuffer = src.getBuffer();
-//	info.dstBuffer = dst.getBuffer();
-//	info.regionCount = 1;
-//	info.pRegions = &region;
-//
-//	cmd_buf.reset();
-//	cmd_buf.begin();
-//
-//	vkCmdCopyBuffer2(
-//		cmd_buf.getCommandBuffer(),
-//		&info
-//	);
-//
-//	cmd_buf.pipelineBarrier(
-//		src_stage_mask,
-//		dst_stage_mask,
-//		0,
-//		0,
-//		nullptr,
-//		0,
-//		nullptr,
-//		0,
-//		nullptr
-//	);
-//
-//	cmd_buf.end();
-//}
-
-//void Queue::copySync(Buffer& src, Buffer& dst,
-//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-//) {
-//	copy(src, dst);
-//	submit(); 
-//	wait();
-//}
-
-
-//void Queue::changeLayout(Image img, VkImageLayout layout,
-//	VkPipelineStageFlags src_stage_mask,
-//	VkPipelineStageFlags dst_stage_mask
-//) {
-//	CommandBuffer cmd_buf = allocateCommandBuffer();
-//
-//	cmd_buf.pipelineBarrier(
-//		src_stage_mask,
-//		dst_stage_mask,
-//		0,
-//		0, nullptr,
-//		0, nullptr,
-//		0, nullptr
-//	);
-//
-//	//img.setLayout
-//
-//	cmd_buf.end();
-//}
-
-//void Queue::changeToTexture(Image img) {
-//
-//}
-//
-//void Queue::changeToSurface(Image img) {
-//
-//}
+void Queue::changeLayout(
+	Image& img,
+	VkImageLayout new_layout,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	CommandBuffer cmd = newCommandBuffer();
+	cmd.begin();
+	changeLayout(
+		cmd,
+		img,
+		new_layout,
+		src_access_mask,
+		dst_access_mask,
+		src_stage_mask,
+		dst_stage_mask
+	);
+	cmd.end();
+}
 
 void Queue::flush() {
 	VkSubmitInfo info{};
@@ -231,7 +184,7 @@ void Queue::flush() {
 		throw "Error flushing!";
 	}
 
-	getStartIndexPendingCommendBuffers() += getNbPendingCommandBuffers();
+	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
 	getNbPendingCommandBuffers() = 0;
 }
 
@@ -267,7 +220,7 @@ const void Queue::submit(
 		_fence
 	);
 
-	getStartIndexPendingCommendBuffers() += getNbPendingCommandBuffers();
+	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
 	getNbPendingCommandBuffers() = 0;
 }
 
@@ -289,7 +242,7 @@ const void Queue::submitNoFence(
 		nullptr
 	);
 
-	getStartIndexPendingCommendBuffers() += getNbPendingCommandBuffers();
+	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
 	getNbPendingCommandBuffers() = 0;
 }
 
@@ -344,12 +297,14 @@ const void Queue::wait() {
 		&_fence
 	);
 
-	freeCommandBuffers();
-
-	getStartIndexPendingCommendBuffers() = 0;
+	getStartIndexPendingCommandBuffers() = 0;
 	getNbPendingCommandBuffers() = 0;
 
 	getPendingCommandBuffers().clear();
+	for (CommandPool& cp : *_command_pools) {
+		cp.reset();
+	}
+	//_command_pool.reset();
 }
 
 const void Queue::present(
@@ -393,23 +348,144 @@ void Queue::createFence() {
 	info.flags = 0;
 }
 
-VkCommandBuffer* Queue::getPendingCommandBufferStartPointer() const {
-	return &_pending_command_buffers[&getCommandPool()][_command_pool_indices[&getCommandPool()].start_i];
+void Queue::copy(Image& src, Image& dst,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	CommandBuffer cmd_buf = newCommandBuffer();
+	cmd_buf.begin();
+
+	VkImageLayout image_layout = dst.getImageLayout();
+
+	VkImageLayout src_image_layout_initial = src.getImageLayout();
+	changeLayout(
+		cmd_buf,
+		src,
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		src_access_mask,
+		VK_ACCESS_TRANSFER_READ_BIT,
+		src_stage_mask,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	changeLayout(
+		cmd_buf,
+		dst,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		src_access_mask,
+		VK_ACCESS_TRANSFER_WRITE_BIT,
+		src_stage_mask,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	// To do for each mip level
+	// (To start, we consider only the original level -> 0)
+	VkImageCopy image_copy{};
+	image_copy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.srcSubresource.mipLevel = 0;
+	image_copy.srcSubresource.baseArrayLayer = 0;
+	image_copy.srcSubresource.layerCount = 1;
+	image_copy.srcOffset = { 0 , 0 , 0 };
+	image_copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.dstSubresource.mipLevel = 0;
+	image_copy.dstSubresource.baseArrayLayer = 0;
+	image_copy.dstSubresource.layerCount = 1;
+	image_copy.dstOffset = { 0, 0, 0 };
+	image_copy.extent.width = dst.getWidth();
+	image_copy.extent.height = dst.getHeight();
+	image_copy.extent.depth = 1;
+
+	cmd_buf.copyImageToImage(
+		src.getImage(),
+		src.getImageLayout(),
+		dst.getImage(),
+		dst.getImageLayout(),
+		1,
+		&image_copy
+	);
+
+	changeLayout(
+		cmd_buf,
+		src,
+		src_image_layout_initial,
+		src.getStageAccessInfo().access_mask,
+		dst_access_mask,
+		src.getStageAccessInfo().stage_mask,
+		dst_stage_mask
+	);
+
+	changeLayout(
+		cmd_buf,
+		dst,
+		image_layout,
+		dst.getStageAccessInfo().access_mask,
+		dst_access_mask,
+		dst.getStageAccessInfo().stage_mask,
+		dst_stage_mask
+	);
+
+	cmd_buf.end();
 }
 
-uint32_t& Queue::getStartIndexPendingCommendBuffers() {
-	return _command_pool_indices[&getCommandPool()].start_i;
+void Queue::changeLayout(
+	CommandBuffer& cmd_buf,
+	Image& img,
+	VkImageLayout new_layout,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	// Preparing the transfer with the image memory barrier
+	VkImageSubresourceRange subresource_range{};
+	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range.baseMipLevel = 0;
+	subresource_range.levelCount = 1;
+	subresource_range.layerCount = 1;
+
+	VkImageMemoryBarrier image_memory_barrier{};
+	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	image_memory_barrier.pNext = nullptr;
+	image_memory_barrier.image = img.getImage();
+	image_memory_barrier.subresourceRange = subresource_range;
+	image_memory_barrier.srcAccessMask = src_access_mask;
+	image_memory_barrier.dstAccessMask = dst_access_mask;
+	image_memory_barrier.oldLayout = img.getImageLayout();
+	image_memory_barrier.newLayout = new_layout;
+
+	cmd_buf.pipelineBarrier(
+		src_stage_mask,
+		dst_stage_mask,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &image_memory_barrier
+	);
+
+	img.getStageAccessInfo().access_mask = dst_access_mask;
+	img.getStageAccessInfo().stage_mask = dst_stage_mask;
+
+	img.setImageInitialLayout(new_layout);
+}
+
+VkCommandBuffer* Queue::getPendingCommandBufferStartPointer() {
+	return &((*_pending_command_buffers)[getStartIndexPendingCommandBuffers()]);
+}
+
+const uint32_t Queue::getStartIndexPendingCommandBuffers() const {
+	return _command_pool_indices.start_i;
+}
+
+uint32_t& Queue::getStartIndexPendingCommandBuffers() {
+	return _command_pool_indices.start_i;
+}
+
+const uint32_t Queue::getNbPendingCommandBuffers() const {
+	return _command_pool_indices.nb_cmd_buf;
 }
 
 uint32_t& Queue::getNbPendingCommandBuffers() {
-	return _command_pool_indices[&getCommandPool()].nb_cmd_buf;
-}
-
-void Queue::freeCommandBuffers() {
-	vkFreeCommandBuffers(
-		_device->getDevice(),
-		getCommandPool().getPool(),
-		getPendingCommandBuffers().size(),
-		getPendingCommandBuffers().data()
-	);
+	return _command_pool_indices.nb_cmd_buf;
 }

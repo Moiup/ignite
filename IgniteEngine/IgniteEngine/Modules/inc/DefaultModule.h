@@ -17,17 +17,17 @@ private:
 	GraphicShader _graphic_shader{};
 	DefaultRenderer _renderer{};
 
-	Texture _white_texture{};
+	Texture2D _white_texture{};
 
 	// Buffers
-	VertexBuffer _coord_buffer{};
-	VertexBuffer _object_id_buffer{};
-	VertexBuffer _material_indices_buffer{};
-	VertexBuffer _uv_buffer{};
-	IndexBuffer _index_buffer{};
+	StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer;
+	StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer;
+	StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer;
+	StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer;
+	StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer;
 	//UniformBuffer _camera_buffer;
-	StorageBuffer _obj_tr_buffer{};
-	StorageBuffer _materials_buffer{};
+	StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer;
+	StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer;
 	Sampler _sampler{};
 
 	bool _is_first{ true };

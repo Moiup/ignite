@@ -45,7 +45,7 @@ void DebugScene::close() {
 
 void DebugScene::createShader() {
 	_debug_shader.setNbFrame(DefaultConf::NB_FRAME);
-	_debug_shader.setLogicalDevice(DefaultConf::logical_device);
+	_debug_shader.setDevice(DefaultConf::logical_device->getDevice());
 	_debug_shader.read(
 		"../../shaders/debug/debug.vert",
 		"../../shaders/debug/debug.frag"
@@ -106,30 +106,34 @@ void DebugScene::createShader() {
 	//----------------------//
 	// Coord
 	// Mesh offsets
-	_coord_buffer.setQueue(DefaultConf::graphics_queue);
-	_coord_buffer.setSize(Object3D::getCoordsSize(DefaultConf::renderer, &_debug_shader));
-	_coord_buffer.create();
-	_coord_buffer.setValues(Object3D::getCoords(DefaultConf::renderer, &_debug_shader).data());
+	_coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getCoordsSize(DefaultConf::renderer, &_debug_shader),
+		Object3D::getCoords(DefaultConf::renderer, &_debug_shader).data()
+	);
 	_debug_shader.addVertexBuffer("coord", &_coord_buffer);
 
-	_object_id_buffer.setQueue(DefaultConf::graphics_queue);
-	_object_id_buffer.setSize(Object3D::getObjectIdSize(DefaultConf::renderer, &_debug_shader));
-	_object_id_buffer.create();
-	_object_id_buffer.setValues(Object3D::getObjectId(DefaultConf::renderer, &_debug_shader).data());
+	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getObjectIdSize(DefaultConf::renderer, &_debug_shader),
+		Object3D::getObjectId(DefaultConf::renderer, &_debug_shader).data()
+	);
 	_debug_shader.addVertexBuffer("object_id", &_object_id_buffer);
 
-	_material_indices_buffer.setQueue(DefaultConf::graphics_queue);
-	_material_indices_buffer.setSize(Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_debug_shader));
-	_material_indices_buffer.create();
-	_material_indices_buffer.setValues(Object3D::getMaterialIndices(DefaultConf::renderer, &_debug_shader).data());
+	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_debug_shader),
+		Object3D::getMaterialIndices(DefaultConf::renderer, &_debug_shader).data()
+	);
 	_debug_shader.addVertexBuffer("material_id", &_material_indices_buffer);
 
 
 	// Index buffer
-	_index_buffer.setQueue(DefaultConf::graphics_queue);
-	_index_buffer.setSize(Object3D::getIndicesSize(DefaultConf::renderer, &_debug_shader));
-	_index_buffer.create();
-	_index_buffer.setValues(Object3D::getIndices(DefaultConf::renderer, &_debug_shader).data());
+	_index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getIndicesSize(DefaultConf::renderer, &_debug_shader),
+		Object3D::getIndices(DefaultConf::renderer, &_debug_shader).data()
+	);
 	_debug_shader.addIndexBuffer("index", &_index_buffer);
 
 	// Push Constant
@@ -139,16 +143,18 @@ void DebugScene::createShader() {
 
 	// Storage Buffers
 	// transform
-	_obj_tr_buffer.setQueue(DefaultConf::graphics_queue);;
-	_obj_tr_buffer.setSize(Object3D::getTransformMatricesSize(DefaultConf::renderer, &_debug_shader));
-	_obj_tr_buffer.create();
-	_obj_tr_buffer.setValues(Object3D::getTransformMatrices(DefaultConf::renderer, &_debug_shader).data());
+	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getTransformMatricesSize(DefaultConf::renderer, &_debug_shader),
+		Object3D::getTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
+	);
 	_debug_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
 
 	// materials
-	_materials_buffer.setQueue(DefaultConf::graphics_queue);
-	_materials_buffer.setSize(Object3D::getMaterialsSize(DefaultConf::renderer, &_debug_shader));
-	_materials_buffer.create();
-	_materials_buffer.setValues(Object3D::getMaterials(DefaultConf::renderer, &_debug_shader).data());
+	_materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getMaterialsSize(DefaultConf::renderer, &_debug_shader),
+		Object3D::getMaterials(DefaultConf::renderer, &_debug_shader).data()
+	);
 	_debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
 }

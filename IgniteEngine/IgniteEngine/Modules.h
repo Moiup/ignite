@@ -8,7 +8,7 @@
 #include "MenuModule.h"
 
 //#include "TestModule.h"
-// #include "MediapipeModule.h"
+#include "MediapipeModule.h"
 #include "Bistro.h"
 //#include "ComputeShaderTest.h"
 //#include "ReadWriteImageMod.h"
@@ -24,7 +24,7 @@ private:
 	MenuModule _menu_module;
 
 	//TestModule _test_module;
-	//MediapipeModule _mediapipe_module;
+	MediapipeModule _mediapipe_module;
 	Bistro _bistro;
 	//ComputeShaderTest _compute_shader_test;
 	//ReadWriteImageMod _read_write_image_mod;

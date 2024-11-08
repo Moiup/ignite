@@ -62,14 +62,15 @@ private:
     uint32_t _frame_i;
     std::vector<glm::vec3> _wrist_pos;
 
+    // -- DEBUG SHADER --
     GraphicShader _debug_shader;
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer{};
-    StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer{};
-    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer{};
-    StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer_debug{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer_debug{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer_debug{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer_debug{};
+    StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer_debug{};
+    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer_debug{};
+    StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer_debug{};
 
     glm::mat4 _camera;
    
@@ -116,6 +117,6 @@ private:
     std::vector<glm::vec3> cube();
     std::vector<uint32_t> cubeIndex();
 
-    void createShader();
+    void createShaderDebug();
 };
 

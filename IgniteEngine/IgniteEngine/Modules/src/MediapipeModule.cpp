@@ -90,10 +90,10 @@ void MediapipeModule::start() {
     //}
 
     // one
-    //_right_hand[_wrist_index + 0].addChild(&_right_hand[1]);
-    //_right_hand[1].addChild(&_right_hand[2]);
-    //_right_hand[2].addChild(&_right_hand[3]);
-    //_right_hand[3].addChild(&_right_hand[4]);
+    _right_hand[_wrist_index + 0].addChild(&_right_hand[1]);
+    _right_hand[1].addChild(&_right_hand[2]);
+    _right_hand[2].addChild(&_right_hand[3]);
+    _right_hand[3].addChild(&_right_hand[4]);
     // two
     _right_hand[_wrist_index + 1].addChild(&_right_hand[5]);
     _right_hand[5].addChild(&_right_hand[6]);
@@ -123,7 +123,7 @@ void MediapipeModule::start() {
 
     //_debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
     _debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
-    createShader();
+    createShaderDebug();
 
 }
 
@@ -167,7 +167,7 @@ void MediapipeModule::update() {
     _transform_matrices[20] = _transform_matrices[19] * _right_hand[20].getTransformLocale();
 
 
-    _obj_tr_buffer.setValues(
+    _obj_tr_buffer_debug.setValues(
         _transform_matrices.data()
     );
 
@@ -725,7 +725,7 @@ std::vector<uint32_t> MediapipeModule::cubeIndex() {
     return index;
 }
 
-void MediapipeModule::createShader() {
+void MediapipeModule::createShaderDebug() {
     _debug_shader.setNbFrame(DefaultConf::NB_FRAME);
     _debug_shader.setDevice(DefaultConf::logical_device->getDevice());
     _debug_shader.read(
@@ -788,35 +788,35 @@ void MediapipeModule::createShader() {
     //----------------------//
     // Coord
     // Mesh offsets
-    _coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+    _coord_buffer_debug = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
         Object3D::getCoordsSize(DefaultConf::renderer, &_debug_shader),
         Object3D::getCoords(DefaultConf::renderer, &_debug_shader).data()
     );
-    _debug_shader.addVertexBuffer("coord", &_coord_buffer);
+    _debug_shader.addVertexBuffer("coord", &_coord_buffer_debug);
 
-    _object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+    _object_id_buffer_debug = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
         Object3D::getObjectIdSize(DefaultConf::renderer, &_debug_shader),
         Object3D::getObjectId(DefaultConf::renderer, &_debug_shader).data()
     );
-    _debug_shader.addVertexBuffer("object_id", &_object_id_buffer);
+    _debug_shader.addVertexBuffer("object_id", &_object_id_buffer_debug);
 
-    _material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+    _material_indices_buffer_debug = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
         Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_debug_shader),
         Object3D::getMaterialIndices(DefaultConf::renderer, &_debug_shader).data()
     );
-    _debug_shader.addVertexBuffer("material_id", &_material_indices_buffer);
+    _debug_shader.addVertexBuffer("material_id", &_material_indices_buffer_debug);
 
 
     // Index buffer
-    _index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
+    _index_buffer_debug = StagingBuffer<IGEBufferUsage::index_buffer>(
         DefaultConf::logical_device->getDevice(),
         Object3D::getIndicesSize(DefaultConf::renderer, &_debug_shader),
         Object3D::getIndices(DefaultConf::renderer, &_debug_shader).data()
     );
-    _debug_shader.addIndexBuffer("index", &_index_buffer);
+    _debug_shader.addIndexBuffer("index", &_index_buffer_debug);
 
     // Push Constant
     _camera = DefaultConf::camera->getMVPC();
@@ -825,18 +825,19 @@ void MediapipeModule::createShader() {
 
     // Storage Buffers
     // transform
-    _obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+    _obj_tr_buffer_debug = StagingBuffer<IGEBufferUsage::storage_buffer>(
         DefaultConf::logical_device->getDevice(),
         _transform_matrices.size() * sizeof(glm::mat4),
         _transform_matrices.data()
     );
-    _debug_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
+    _debug_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer_debug);
 
     // materials
-    _materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+    _materials_buffer_debug = StagingBuffer<IGEBufferUsage::storage_buffer>(
         DefaultConf::logical_device->getDevice(),
         Object3D::getMaterialsSize(DefaultConf::renderer, &_debug_shader),
         Object3D::getMaterials(DefaultConf::renderer, &_debug_shader).data()
     );
-    _debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
+    _debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer_debug);
 }
+

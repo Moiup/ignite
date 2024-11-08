@@ -12,6 +12,7 @@
 #include "SkeletonDebug.h"
 
 #include <string>
+#include <fstream>
 
 namespace mdph {
     struct DimMsg {
@@ -41,7 +42,8 @@ private:
     EStream _mediapipe_stream;
     std::thread _network_thread;
 
-    Mesh _cube;
+    LoadedObjectInfo _cube_info;
+    Object3D _cube;
     Mesh _cross_mesh;
     std::vector<Object3D> _cross_objs;
     std::vector<Material> _cross_material;
@@ -62,6 +64,8 @@ private:
 
     uint32_t _frame_i;
     std::vector<glm::vec3> _wrist_pos;
+
+    mdph::Landmarks _landmarks;
 
 
     // -- HAND SHADER --
@@ -90,7 +94,10 @@ public:
     void update();
     void close();
 
+    void networkInit();
     void networkProcess();
+
+    void readMediapipeFile(const std::string& path);
 
 private:
     void landmarksToLocal(const mdph::Landmarks& landmarks);

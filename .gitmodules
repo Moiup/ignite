@@ -1,3 +1,3 @@
-[submodule "fast_obj"]
-    path = IgniteEngine/IgniteEngine/libs/fast_obj
-    url = https://github.com/thisistherk/fast_obj
+[submodule "IgniteEngine/IgniteEngine/libs/fast_obj"]
+	path = IgniteEngine/IgniteEngine/libs/fast_obj
+	url = https://github.com/thisistherk/fast_obj

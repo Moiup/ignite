@@ -6,7 +6,19 @@ IgniteEngine/x64/Debug/*
 IgniteEngine/x64/Release/*
 !IgniteEngine/x64/Release/SDL2.dll
 
-*/.vs/*
+*/.vs/*$
+IgniteEngine/IgniteEngine/libs/ESocket
+IgniteEngine/IgniteEngine/libs/ESocket/*
+IgniteEngine/IgniteEngine/libs/glm
+IgniteEngine/IgniteEngine/libs/glm/*
+IgniteEngine/IgniteEngine/libs/imgui
+IgniteEngine/IgniteEngine/libs/imgui/*
+IgniteEngine/IgniteEngine/libs/json
+IgniteEngine/IgniteEngine/libs/json/*
+IgniteEngine/IgniteEngine/libs/stb_image
+IgniteEngine/IgniteEngine/libs/stb_image/*
+IgniteEngine/IgniteEngine/libs/tiny_gltf
+IgniteEngine/IgniteEngine/libs/tiny_gltf/*
 IgniteEngine/IgniteEngine/glfw
 IgniteEngine/IgniteEngine/glfw/*
 IgniteEngine/IgniteEngine/glm

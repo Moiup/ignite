@@ -5,7 +5,7 @@
 #include "Object3D.h"
 #include "Renderer.h"
 
-#include "ESocket/EServerSocket.h"
+#include "esocket/inc/EServerSocket.h"
  //#include "InitNetworkProtocole.h"
  //#include "MocapMessageProtocolNetwork.h"
 

@@ -45,3 +45,4 @@ Then, run the solution:
 ```
 $ IgniteEngine/IgniteEngine/build/Ignite.sln
 ```
+And set the project `Ignite` as the starting project.

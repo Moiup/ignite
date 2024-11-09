@@ -1,7 +1,7 @@
 #include "LoadedObjectInfo.h"
 
 #define TINYGLTF_IMPLEMENTATION
-#include "tiny_gltf.h"
+#include "tiny_gltf/tiny_gltf.h"
 
 LoadedObjectInfo::LoadedObjectInfo() { ; }
 
@@ -21,14 +21,15 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 	uint32_t t_id{ 0 };
 	for (uint32_t i = 0; i < fom->material_count; i++) {
 		_materials[0].push_back(Material(fom->materials[i]));
-		if (!fom->materials[i].map_Kd.path) {
+		char* texture_path = fom->textures[fom->materials[i].map_Kd].path;
+		if (!texture_path) {
 			continue;
 		}
 
-		std::cout << fom->materials[i].map_Kd.path << std::endl;
-		if (!mat_to_tex.count(fom->materials[i].map_Kd.path)) {
-			mat_to_tex[fom->materials[i].map_Kd.path] = t_id;
-			Pixels pixels(fom->materials[i].map_Kd.path);
+		std::cout << texture_path << std::endl;
+		if (!mat_to_tex.count(texture_path)) {
+			mat_to_tex[texture_path] = t_id;
+			Pixels pixels(texture_path);
 			_textures[0].push_back(
 				Texture2D(
 					DefaultConf::logical_device->getDevice(),
@@ -53,7 +54,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 
 			t_id++;
 		}
-		_materials[0][i].map_Kd = mat_to_tex[fom->materials[i].map_Kd.path];
+		_materials[0][i].map_Kd = mat_to_tex[texture_path];
 	}
 	
 	_meshes.push_back(Mesh());

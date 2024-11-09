@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(libs/fast_obj)
 add_subdirectory(libs/imgui)
-add_subdirectory(libs/ESocket)
+add_subdirectory(libs/esocket)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -20,12 +20,12 @@ include_directories(
     Modules/src
     RayTracingCPU/inc
     RayTracingCPU/src
-    libs
-    libs/imgui
+    libs/esocket
+    libs/fast_obj
+    libs/glm
+    libs/imgui/imgui
     libs/stb_image
-    libs/json
     libs/tiny_gltf
-    libs/ESocket
     ${Vulkan_INCLUDE_DIR}/SDL2
 )
 

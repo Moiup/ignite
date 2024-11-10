@@ -13,11 +13,16 @@ protected:
 	VkPipelineLayout _pipeline_layout;
 	VkPipeline _pipeline{ nullptr };
 
+	bool is_changed = false;
+	std::vector<VkDescriptorBufferInfo> _descriptor_buffer_infos;
+	std::vector<VkDescriptorImageInfo> _descriptor_image_infos;
+	std::vector<VkWriteDescriptorSet> _write_descriptor_sets;
+
 public:
 	Pipeline();
+	Pipeline(Shader& shader);
 	~Pipeline();
 
-	void setShader(Shader* shader);
 
 	const VkPipeline& getPipeline() const;
 	const VkPipelineLayout& getPipelineLayout() const;
@@ -27,35 +32,37 @@ public:
 	void create();
 	void destroy();
 
+	void setUniformBuffer(
+		const std::string& name,
+		const Buffer<IGEBufferUsage::uniform_buffer>& buff
+	);
+	void setStorageBuffer(
+		const std::string& name,
+		const Buffer<IGEBufferUsage::storage_buffer>& buff
+	);
+	void setSamplers(
+		const std::string& name,
+		const std::vector<Sampler&>& samp
+	);
+	void setTextures2D(
+		const std::string& name,
+		const std::vector<Texture2D&>& textures
+	);
+
 private:
+	VkWriteDescriptorSet setWriteDescriptorSet(
+		const std::string& name
+	);
+
 	void setDescriptorSetLayoutBinding(
 		std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_binding_arr,
-		std::unordered_map<std::string, ArrayBufferInfo>& buffer_arr
+		const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& buffer_arr
 	);
-	std::vector<VkDescriptorSetLayoutBinding> setDescriptorSetLayoutBindingArray();
+
 	void createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
 	void createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
 	
-	template<IGEBufferUsage U>
-	void setWriteDescriptorSet(
-		std::unordered_map<std::string, Buffer<U>*>& buffer_arr,
-		std::unordered_map<std::string, ArrayBufferInfo>& buffer_info_arr,
-		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-	);
-	
-	void setWriteDescriptorSet(
-		std::unordered_map<std::string, std::vector<Sampler*>>& sampler_arr,
-		std::unordered_map<std::string, SamplerInfo>& sampler_info_arr,
-		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-	);
-
-	void setWriteDescriptorSet(
-		std::unordered_map<std::string, std::vector<Texture2D*>>& texture_arr,
-		std::unordered_map<std::string, TextureInfo>& texture_info_arr,
-		std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-	);
-
-	void updateDescriptorSets();
+	void update();
 
 	void destroyDescriptorSetLayout();
 

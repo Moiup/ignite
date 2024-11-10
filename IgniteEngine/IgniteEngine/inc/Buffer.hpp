@@ -29,7 +29,8 @@ public:
 	void bind();
 	void destroy();
 
-	VkBuffer& getBuffer();
+	const VkBuffer& getBuffer() const;
+	//const VkBuffer& getBuffer() const;
 	Pointer<uint8_t> getValues();
 	void setValues(Pointer<uint8_t> data);
 

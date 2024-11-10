@@ -27,19 +27,9 @@ protected:
 
 	std::unordered_map<std::string, PushConstantInfo> _push_constant_info;
 
-	std::unordered_map<std::string, ArrayBufferInfo> _uniform_buffers_info;
-	std::unordered_map<std::string, ArrayBufferInfo> _storage_buffers_info;
+	std::unordered_map<std::string, VkDescriptorSetLayoutBinding> _desc_layout_bindings;
 
 	std::unordered_map<std::string, void*> _push_constants;
-
-	std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*> _uniform_buffers;
-	std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*> _storage_buffers;
-
-	std::unordered_map<std::string, SamplerInfo> _sampler_info;
-	std::unordered_map<std::string, std::vector<Sampler*>> _sampler; 
-
-	std::unordered_map<std::string, TextureInfo> _texture_info;
-	std::unordered_map<std::string, std::vector<Texture2D*>> _textures;
 
 	Device* _device;
 
@@ -49,35 +39,55 @@ public:
 	void setDevice(Device* device);
 	Device* getDevice();
 
+
 	void addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size);
 	void addPushConstant(std::string name, void* push_constant);
 	std::unordered_map<std::string, PushConstantInfo>& getPushConstantInfo();
 	std::unordered_map<std::string, void*>& getPushConstants();
 
-	void addUniformBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addUniformBuffer(std::string name, Buffer<IGEBufferUsage::uniform_buffer>* buffer);
-	std::unordered_map<std::string, ArrayBufferInfo>& getUniformBuffersInfo();
-	std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*>& getUniformBuffers();
 
-	void addStorageBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addStorageBuffer(std::string name, Buffer<IGEBufferUsage::storage_buffer>* buffer);
-	std::unordered_map<std::string, ArrayBufferInfo>& getStorageBuffersInfo();
-	std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*>& getStorageBuffers();
-
-	void addSamplerInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addSampler(std::string name, Sampler* sampler);
-	std::unordered_map<std::string, SamplerInfo>& getSamplerInfo();
-	std::unordered_map<std::string, std::vector<Sampler*>>& getSampler();
-
-	void addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count);
-	void addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count);
-	void addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	//void addStorageTexture(std::string name, uint32_t binding, VkShaderStageFlags stage_flags);
-	void addTexture2D(std::string name, Texture2D* texture);
-	void addTexture2D(std::string name, std::vector<Texture2D*>& textures);
-	std::unordered_map<std::string, TextureInfo>& getTextureInfo();
-	std::unordered_map<std::string, std::vector<Texture2D*>>& getTextures2D();
+	void addDescriptorLayout(
+		std::string name,
+		uint32_t binding,
+		VkShaderStageFlags stage_flags,
+		VkDescriptorType type,
+		uint32_t descriptor_count
+	);
+	const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& getBuffersInfo() const;
+	
+	void configureUniformBuffer(
+		const std::string& name,
+		uint32_t binding,
+		VkShaderStageFlags stage_flags
+	);
+	void configureStorageBuffer(
+		const std::string& name,
+		uint32_t binding,
+		VkShaderStageFlags stage_flags
+	);
+	void configureSampler(
+		const std::string& name,
+		uint32_t binding,
+		VkShaderStageFlags stage_flags
+	);
+	void configureTexture2D(
+		const std::string& name,
+		uint32_t binding,
+		VkShaderStageFlags stage_flags,
+		int32_t descriptor_count = 1
+	);
+	void configureTexture2DCombined(
+		const std::string& name,
+		uint32_t binding,
+		VkShaderStageFlags stage_flags,
+		int32_t descriptor_count = 1
+	);
+	void configureStorageTexture2D(
+		const std::string& name,
+		uint32_t binding,
+		VkShaderStageFlags stage_flags,
+		uint32_t descriptor_count = 1
+	);
 
 	void destroy();
 
@@ -86,6 +96,13 @@ public:
 private:
 	std::string virtual readShaderFile(const std::string& path);
 	std::vector<uint32_t> compile(const std::string& glsl, const std::string& path, shaderc_shader_kind shader_kind);
+	void configureDescLayoutBindings(
+		const std::string& name,
+		uint32_t binding,
+		VkDescriptorType descriptor_type,
+		VkShaderStageFlags stage_flags,
+		uint32_t descriptor_count
+	);
 
 protected:
 	void createShaderModuleAndStage(const std::string& path, VkShaderStageFlagBits stage, shaderc_shader_kind shader_kind);

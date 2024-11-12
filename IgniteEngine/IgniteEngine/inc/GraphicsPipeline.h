@@ -37,6 +37,10 @@ public:
 		const GraphicsPipelineConfiguration& config
 	);
 
+	GraphicsPipeline(const GraphicsPipeline& gp);
+
+	GraphicsPipeline& operator=(const GraphicsPipeline& gp);
+
 	void setVertexBuffer(
 		const std::string& name,
 		const Buffer<IGEBufferUsage::vertex_buffer>& buff

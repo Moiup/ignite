@@ -20,13 +20,15 @@ protected:
 
 	void* _push_constants;
 
+	int32_t* _shared_count;
+
 protected:
 	Pipeline();
 	Pipeline(const Pipeline& pipeline) = delete;
 	Pipeline(Shader& shader);
 	~Pipeline();
 
-	Pipeline& operator=(const Pipeline& pipeline) = delete;
+	Pipeline& operator=(const Pipeline& pipeline);
 
 	void create();
 	void destroy();

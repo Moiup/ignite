@@ -3,7 +3,31 @@
 Shader::Shader() :
 	_device{nullptr}
 {
-	;
+	_shared_count = new int32_t(1);
+}
+
+Shader::Shader(const Shader& shader) {
+	*this = shader;
+}
+
+Shader::~Shader() {
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+	destroy();
+}
+
+Shader& Shader::operator=(const Shader& shader) {
+	_shader_stages = shader._shader_stages;
+	_push_constant_range = shader._push_constant_range;
+	_desc_layout_bindings = shader._desc_layout_bindings;
+	_device = shader._device;
+	_shared_count = shader._shared_count;
+	*_shared_count += 1;
+
+	return *this;
 }
 
 void Shader::setDevice(Device* device) {

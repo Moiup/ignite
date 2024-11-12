@@ -8,7 +8,7 @@ Pipeline::Pipeline() :
 	_pipeline_layout{},
 	_pipeline{nullptr}
 {
-	;
+	_shared_count = new int32_t(1);
 }
 
 Pipeline::Pipeline(Shader& shader) :
@@ -19,23 +19,41 @@ Pipeline::Pipeline(Shader& shader) :
 	createPipelineLayout();
 }
 
-//Pipeline::Pipeline(const Pipeline& pipeline) {
-//	*this = pipeline;
-//}
+Pipeline::Pipeline(const Pipeline& pipeline) {
+	*this = pipeline;
+}
 
 Pipeline::~Pipeline() {
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
 	destroy();
 }
 
-//Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
-//	_shader = pipeline._shader;
-//	_descriptor_set_layout = pipeline._descriptor_set_layout;
-//	_descriptor_pool = pipeline._descriptor_pool;
-//	_descriptor_sets = pipeline._descriptor_sets;
-//	_pipeline_layout = pipeline._pipeline_layout;
-//	_pipeline = pipeline._pipeline;
-//
-//}
+Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
+	_shader = pipeline._shader;
+
+	_descriptor_set_layout = pipeline._descriptor_set_layout;
+	_descriptor_pool = pipeline._descriptor_pool;
+	_descriptor_sets = pipeline._descriptor_sets;
+	_pipeline_layout = pipeline._pipeline_layout;
+	_pipeline = pipeline._pipeline;
+
+	_is_changed = pipeline._is_changed;
+
+	_descriptor_buffer_infos = pipeline._descriptor_buffer_infos;
+	_descriptor_image_infos = pipeline._descriptor_image_infos;
+	_write_descriptor_sets = pipeline._write_descriptor_sets;
+
+	_push_constants = pipeline._push_constants;
+
+	_shared_count = pipeline._shared_count;
+	*_shared_count += 1;
+
+	return *this;
+}
 
 const VkPipeline Pipeline::getPipeline() const {
 	return _pipeline;

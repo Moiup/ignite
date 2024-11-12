@@ -17,6 +17,18 @@ GraphicsPipeline::GraphicsPipeline(
 	createPipeline();
 }
 
+GraphicsPipeline::GraphicsPipeline(const GraphicsPipeline& gp) {
+	*this = gp;
+}
+
+GraphicsPipeline& GraphicsPipeline::operator=(const GraphicsPipeline& gp) {
+	Pipeline::operator=(gp);
+
+	_pipeline_conf = gp._pipeline_conf;
+	_vertex_buffers = gp._vertex_buffers;
+	_index_buffer = gp._index_buffer;
+}
+
 void GraphicsPipeline::setVertexBuffer(
 	const std::string& name,
 	const Buffer<IGEBufferUsage::vertex_buffer>& buff

@@ -2,8 +2,7 @@
 
 GraphicShader::GraphicShader() :
 	Shader::Shader(),
-	_index_buffer_info{},
-	_index_buffers{}
+	_index_buffer_info{}
 { ; }
 
 GraphicShader::GraphicShader(
@@ -15,6 +14,17 @@ GraphicShader::GraphicShader(
 	read(
 		vertex_shader, fragment_shader
 	);
+}
+
+GraphicShader::GraphicShader(const GraphicShader& shader) {
+	*this = shader;
+}
+
+GraphicShader& GraphicShader::operator=(const GraphicShader& shader) {
+	_vertex_input_descs = shader._vertex_input_descs;
+	_index_buffer_info = shader._index_buffer_info;
+
+	return *this;
 }
 
 void GraphicShader::configureVertexBuffer(

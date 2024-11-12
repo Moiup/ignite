@@ -31,8 +31,14 @@ protected:
 
 	Device* _device;
 
+	int32_t* _shared_count;
+
 public:
 	Shader();
+	Shader(const Shader& shader);
+	~Shader();
+
+	Shader& operator=(const Shader& shader);
 
 	void setDevice(Device* device);
 	Device* getDevice();
@@ -81,7 +87,6 @@ public:
 		uint32_t descriptor_count = 1
 	);
 
-	void destroy();
 
 	const std::vector<VkPipelineShaderStageCreateInfo>& getShaderStages() const;
 
@@ -95,6 +100,8 @@ private:
 		VkShaderStageFlags stage_flags,
 		uint32_t descriptor_count
 	);
+
+	void destroy();
 
 protected:
 	void createShaderModuleAndStage(const std::string& path, VkShaderStageFlagBits stage, shaderc_shader_kind shader_kind);

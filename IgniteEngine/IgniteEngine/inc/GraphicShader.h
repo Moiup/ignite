@@ -21,6 +21,9 @@ private:
 public:
 	GraphicShader();
 	GraphicShader(std::string vertex_shader, std::string fragment_shader);
+	GraphicShader(const GraphicShader& shader);
+
+	GraphicShader& operator=(const GraphicShader& shader);
 
 	void configureVertexBuffer(
 		const std::string& name,

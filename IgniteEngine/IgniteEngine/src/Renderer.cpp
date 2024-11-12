@@ -58,10 +58,6 @@ void Renderer::createDepthBuffer() {
 	;
 }
 
-void Renderer::createGraphicsPipeline() {
-	;
-}
-
 void Renderer::createCommandBuffers() {
 	;
 }

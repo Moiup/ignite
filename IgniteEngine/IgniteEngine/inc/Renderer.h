@@ -55,7 +55,6 @@ protected:
 	virtual void createFencesAndSemaphores();
 	virtual void createSwapchain();
 	virtual void createDepthBuffer();
-	virtual void createGraphicsPipeline();
 	virtual void createCommandBuffers();
 };
 

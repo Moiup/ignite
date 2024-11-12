@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "tiny_gltf.h"
+#include "tiny_gltf/tiny_gltf.h"
 
 struct GLTFBuffInfo {
 	unsigned char* _data;

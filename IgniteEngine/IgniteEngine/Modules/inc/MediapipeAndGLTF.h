@@ -6,14 +6,15 @@
 #include "Renderer.h"
 
 #include "esocket/inc/EServerSocket.h"
- //#include "InitNetworkProtocole.h"
- //#include "MocapMessageProtocolNetwork.h"
+//#include "InitNetworkProtocole.h"
+//#include "MocapMessageProtocolNetwork.h"
 
 #include "SkeletonDebug.h"
 
 #include <string>
+#include <fstream>
 
-namespace mdp {
+namespace mdph {
     struct DimMsg {
         uint32_t _width;
         uint32_t _height;
@@ -30,7 +31,7 @@ namespace mdp {
     };
 }
 
-class MediapipeModule : public Module
+class MediapipeAndGLTF : public Module
 {
 public:
     const std::string SERVER_ADDRESS{ "127.0.0.1" };
@@ -41,14 +42,16 @@ private:
     EStream _mediapipe_stream;
     std::thread _network_thread;
 
-    Mesh _cube;
+    LoadedObjectInfo _cube_info;
+    Object3D _cube;
     Mesh _cross_mesh;
     std::vector<Object3D> _cross_objs;
     std::vector<Material> _cross_material;
     std::vector<uint32_t> _cross_material_indices;
     float _size;
 
-    LoadedObjectInfo _obj_info;
+    LoadedObjectInfo _hand_obj_info;
+    Object3D _hand;
 
     const uint32_t _wrist_index = 21;
 
@@ -62,32 +65,43 @@ private:
     uint32_t _frame_i;
     std::vector<glm::vec3> _wrist_pos;
 
-    // -- DEBUG SHADER --
-    GraphicShader _debug_shader;
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer_debug{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer_debug{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer_debug{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer_debug{};
-    StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer_debug{};
-    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer_debug{};
-    StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer_debug{};
+    mdph::Landmarks _landmarks;
+
+
+    // -- HAND SHADER --
+    GraphicShader _lbs_shader{};
+    // Buffers
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _joints_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _weights_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer_hand{};
+    // Uniform buffer
+    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::storage_buffer> _joint_tr_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer_hand{};
+    Sampler _sampler_hand{};
 
     glm::mat4 _camera;
-   
+
 public:
-    MediapipeModule();
+    MediapipeAndGLTF();
 
     void init();
     void start();
     void update();
     void close();
 
+    void networkInit();
     void networkProcess();
-    
+
+    void readMediapipeFile(const std::string& path);
+
 private:
-    void landmarksToLocal(const mdp::Landmarks& landmarks);
-    void landmarksToHand(const mdp::Landmarks& landmarks);
-    void landmarksRotationMatrices(const mdp::Landmarks& landmarks);
+    void landmarksToLocal(const mdph::Landmarks& landmarks);
+    void landmarksRotationMatrices(const mdph::Landmarks& landmarks);
 
     glm::mat4 findRotationMatrix(
         const glm::vec3& from,
@@ -99,24 +113,11 @@ private:
     */
     glm::mat3 alignVectorMatrix(const glm::vec3& from, const glm::vec3& to);
 
-    void wristPose(
-        Entity3D& wrist,
-        const glm::vec3& point1,
-        const glm::vec3& point2,
-        const glm::vec3& point3
-    );
-    void jointPose(
-        Entity3D& joint,
-        const glm::vec3& point1,
-        const glm::vec3& point2,
-        const glm::vec3& point3
-    );
-
     glm::vec3 vectorAngle(glm::vec3 A, glm::vec3 B);
 
     std::vector<glm::vec3> cube();
     std::vector<uint32_t> cubeIndex();
 
-    void createShaderDebug();
+    void createShaderHand();
 };
 

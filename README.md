@@ -8,20 +8,41 @@ The tested operating system where Windows 10 and Windows 11.
 
 This project works fine on Visual Studio 2022. You need a Vulkan ready GPU.
 
-## Downloads
-- Download the repository.
-- Download the requirements folder (SDL2, GLFW, VulkanSDK, glm) : [click here](https://drive.google.com/file/d/1G_dTxdZMHsAh9MIEBODRKlwur1_edhG3/view?usp=share_link).
-- Unzip the `ignite-requirements.zip` folder.
-- Inside the folder, you should find another folder also nammed ignite-requirements. Inside this folder, there are 4 other folders : `vulkan_sdk`, `sdl2`, `glfw`, and `glm`.
-- Copy these 4 folders inside the project folder in `ignite/IgniteEngine/IgniteEngine`.
+## External
+First of all, you will need to download [vulkan](https://vulkan.lunarg.com/sdk/home). When asked for external packages that come with the sdk, check the SDL library.
 
-## Shader compilation
-To compile the required shaders for the execution, go to the folder `ignite/IgniteEngine/shaders`, and run `compile.bat` and `compile_red.bat`.
+You must have [CMake](https://cmake.org/download/) installed.
 
-## Compile and run
-Launch the solution `ignite/IgniteEngine/IgniteEngine.sln`.
+## Cloning the repo
+This repo uses submodule.
 
-The compilation should be configured in `Debug` or `Release` mode, and the plateforme set to `x64`. Then you can compile and run the programme. You should see three squares going from the bottom to the top of the window. The one in the middle is green, the others are red.
+To clone the repo:
+```
+$ git clone --recurse-submodules https://github.com/Moiup/ignite.git
+```
 
-# Code
-The entry point (main file) is `IgniteEngine.cpp`.
+Or:
+```
+$ git clone https://github.com/Moiup/ignite.git
+$ git submodule update --init
+```
+
+## Asset folder
+To run properly, you must set up the assets.
+- Download the asset folder: [click here](https://drive.google.com/file/d/1ReHD4UR76QorcgzefZNy0aDsSDOQzz6U/view?usp=sharing).
+- Unzip it.
+- Once unziped, you may have an `assets` directory inside `requirements`: `requirements\assets`
+- Copy `assets` to `ingite\IgniteEngine`. The final path should be: `ingite\IgniteEngine\assets`
+
+## Generate environment
+### Windows (Visual Studio solution)
+To generate the environment, run the file:
+```
+$ IgniteEngine/IgniteEngine/maker.bat
+```
+
+Then, run the solution:
+```
+$ IgniteEngine/IgniteEngine/build/Ignite.sln
+```
+And set the project `Ignite` as the starting project.

@@ -80,6 +80,6 @@ void WindowUI::present() {
 	SDL_RenderSetScale(_renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
 	SDL_SetRenderDrawColor(_renderer, (Uint8)(0), (Uint8)(0), (Uint8)(0), (Uint8)(0));
 	SDL_RenderClear(_renderer);
-	ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+	ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), _renderer);
 	SDL_RenderPresent(_renderer);
 }

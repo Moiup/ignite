@@ -1,0 +1,18 @@
+[submodule "IgniteEngine/IgniteEngine/libs/fast_obj/fast_obj"]
+	path = IgniteEngine/IgniteEngine/libs/fast_obj/fast_obj
+	url = https://github.com/thisistherk/fast_obj
+[submodule "IgniteEngine/IgniteEngine/libs/imgui/imgui"]
+	path = IgniteEngine/IgniteEngine/libs/imgui/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "IgniteEngine/IgniteEngine/libs/stb_image/stb_image"]
+	path = IgniteEngine/IgniteEngine/libs/stb_image/stb_image
+	url = https://github.com/nothings/stb.git
+[submodule "IgniteEngine/IgniteEngine/libs/tiny_gltf/tiny_gltf"]
+	path = IgniteEngine/IgniteEngine/libs/tiny_gltf/tiny_gltf
+	url = https://github.com/syoyo/tinygltf.git
+[submodule "IgniteEngine/IgniteEngine/libs/glm/glm"]
+	path = IgniteEngine/IgniteEngine/libs/glm/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "IgniteEngine/IgniteEngine/libs/esocket/esocket"]
+	path = IgniteEngine/IgniteEngine/libs/esocket/esocket
+	url = https://github.com/Moiup/esocket.git

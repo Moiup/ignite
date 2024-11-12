@@ -10,8 +10,6 @@ protected:
 	Swapchain _swapchain;
 	DepthBuffer _depth_buffer;
 
-	std::vector<GraphicsPipeline> _graphics_pipelines;
-
 	std::vector<Queue> _graphics_queues_in_flight;
 	std::vector<Queue> _present_queues_in_flight;
 	std::vector<VkSemaphore> _sem_render_starts;
@@ -33,7 +31,6 @@ protected:
 	void configureQueues();
 	void createSwapchain();
 	void createDepthBuffer();
-	void createGraphicsPipeline();
 
 	void dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf);
 	void dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf);

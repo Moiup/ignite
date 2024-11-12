@@ -13,24 +13,26 @@ protected:
 	VkPipelineLayout _pipeline_layout;
 	VkPipeline _pipeline{ nullptr };
 
-	bool is_changed = false;
+	bool _is_changed = false;
 	std::vector<VkDescriptorBufferInfo> _descriptor_buffer_infos;
 	std::vector<VkDescriptorImageInfo> _descriptor_image_infos;
 	std::vector<VkWriteDescriptorSet> _write_descriptor_sets;
 
-public:
+	void* _push_constants;
+
+protected:
 	Pipeline();
+	Pipeline(const Pipeline& pipeline) = delete;
 	Pipeline(Shader& shader);
 	~Pipeline();
 
-
-	const VkPipeline& getPipeline() const;
-	const VkPipelineLayout& getPipelineLayout() const;
-	const std::vector<VkDescriptorSet>& getDescriptorSets() const;
-	Shader* getShader();
+	Pipeline& operator=(const Pipeline& pipeline) = delete;
 
 	void create();
 	void destroy();
+public:
+	void setPushConstants(void* push_constant);
+	const void* getPushConstants() const;
 
 	void setUniformBuffer(
 		const std::string& name,
@@ -48,6 +50,13 @@ public:
 		const std::string& name,
 		const std::vector<Texture2D&>& textures
 	);
+
+	virtual void createPipeline() = 0;
+
+	const VkPipeline getPipeline() const;
+	const VkPipelineLayout& getPipelineLayout() const;
+	const std::vector<VkDescriptorSet>& getDescriptorSets() const;
+	const Shader& getShader() const;
 
 private:
 	VkWriteDescriptorSet setWriteDescriptorSet(
@@ -74,5 +83,4 @@ private:
 	void destroyPipeline();
 
 protected:
-	virtual void createPipeline() = 0;
 };

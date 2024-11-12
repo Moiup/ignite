@@ -242,8 +242,8 @@ void GltfAndSkinningModule::shaderCreation() {
 	// Index buffer
 	_index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getIndicesSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getIndices(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getIndicesSize(*DefaultConf::renderer, &_lbs_shader),
+		Object3D::getIndices(*DefaultConf::renderer, &_lbs_shader).data()
 	);
 	_lbs_shader.addIndexBuffer("index", &_index_buffer);
 

@@ -21,7 +21,7 @@ void MediapipeAndGLTF::start() {
 
     _hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand.gltf");
     _hand.createFromObjectInfo(_hand_obj_info);
-    _hand.setRenderer(DefaultConf::renderer);
+    _hand.setRenderer(*DefaultConf::renderer);
     _hand.addShader(&_lbs_shader);
 
     _cube_info.loadWavefont("../../assets/3d_objects/cube_textured/cube_tex.obj");
@@ -55,7 +55,7 @@ void MediapipeAndGLTF::start() {
 #else
     for (uint32_t i = 0; i < _right_hand.size(); ++i) {
         _right_hand[i].createFromObjectInfo(_cube_info);
-        _right_hand[i].setRenderer(DefaultConf::renderer);
+        _right_hand[i].setRenderer(*DefaultConf::renderer);
         _right_hand[i].addShader(DefaultConf::graphic_shader);
         _right_hand[i].setScaleLocale(glm::vec3(0.25));
         _right_hand[i].setPositionLocale(
@@ -566,39 +566,39 @@ void MediapipeAndGLTF::createShaderHand() {
     );
     // -- Vertex Shader -- //
     // Configuring the Graphic Shader
-    _lbs_shader.addVertexBufferInfo(
+    _lbs_shader.configureVertexBuffer(
         "coord",
-        Object3D::getCoordsStride(DefaultConf::renderer, &_lbs_shader),
+        Object3D::getCoordsStride(*DefaultConf::renderer, &_lbs_shader),
         VK_FORMAT_R32G32B32_SFLOAT,
         0
     );
-    _lbs_shader.addVertexBufferInfo(
+    _lbs_shader.configureVertexBuffer(
         "object_id",
-        Object3D::getMeshOffsetsStride(DefaultConf::renderer, &_lbs_shader),
+        Object3D::getMeshOffsetsStride(*DefaultConf::renderer, &_lbs_shader),
         VK_FORMAT_R32_UINT,
         1
     );
-    _lbs_shader.addVertexBufferInfo(
+    _lbs_shader.configureVertexBuffer(
         "material_id",
-        Object3D::getMaterialIndicesStride(DefaultConf::renderer, &_lbs_shader),
+        Object3D::getMaterialIndicesStride(*DefaultConf::renderer, &_lbs_shader),
         VK_FORMAT_R32_UINT,
         2
     );
-    _lbs_shader.addVertexBufferInfo(
+    _lbs_shader.configureVertexBuffer(
         "uv",
-        Object3D::getUVStride(DefaultConf::renderer, &_lbs_shader),
+        Object3D::getUVStride(*DefaultConf::renderer, &_lbs_shader),
         VK_FORMAT_R32G32_SFLOAT,
         3
     );
-    _lbs_shader.addVertexBufferInfo(
+    _lbs_shader.configureVertexBuffer(
         "joints",
-        Object3D::getJointsStride(DefaultConf::renderer, &_lbs_shader),
+        Object3D::getJointsStride(*DefaultConf::renderer, &_lbs_shader),
         VK_FORMAT_R32G32B32A32_UINT,
         4
     );
-    _lbs_shader.addVertexBufferInfo(
+    _lbs_shader.configureVertexBuffer(
         "weights",
-        Object3D::getWeightsStride(DefaultConf::renderer, &_lbs_shader),
+        Object3D::getWeightsStride(*DefaultConf::renderer, &_lbs_shader),
         VK_FORMAT_R32G32B32A32_SFLOAT,
         5
     );
@@ -606,7 +606,7 @@ void MediapipeAndGLTF::createShaderHand() {
     // Index Buffer
     _lbs_shader.addIndexBufferInfo(
         "index",
-        Object3D::getIndicesNbElem(DefaultConf::renderer, &_lbs_shader)
+        Object3D::getIndicesNbElem(*DefaultConf::renderer, &_lbs_shader)
     );
 
     // Push constant
@@ -649,7 +649,7 @@ void MediapipeAndGLTF::createShaderHand() {
         "textures",
         5,
         VK_SHADER_STAGE_FRAGMENT_BIT,
-        Object3D::getTextures2D(DefaultConf::renderer, &_lbs_shader).size()
+        Object3D::getTextures2D(*DefaultConf::renderer, &_lbs_shader).size()
     );
 
 
@@ -658,51 +658,51 @@ void MediapipeAndGLTF::createShaderHand() {
     //----------------------//
     _coord_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getCoordsSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getCoords(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getCoordsSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getCoords(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addVertexBuffer("coord", &_coord_buffer_hand);
 
     _object_id_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getObjectIdSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getObjectId(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getObjectIdSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getObjectId(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addVertexBuffer("object_id", &_object_id_buffer_hand);
 
     _material_indices_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getMaterialIndices(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getMaterialIndicesSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getMaterialIndices(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addVertexBuffer("material_id", &_material_indices_buffer_hand);
 
     _uv_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getUVSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getUV(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getUVSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getUV(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addVertexBuffer("uv", &_uv_buffer_hand);
 
     _joints_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getJointsSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getJoints(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getJointsSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getJoints(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addVertexBuffer("joints", &_joints_buffer_hand);
 
     _weights_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getWeightsSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getWeights(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getWeightsSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getWeights(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addVertexBuffer("weights", &_weights_buffer_hand);
 
     // Index buffer
     _index_buffer_hand = StagingBuffer<IGEBufferUsage::index_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getIndicesSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getIndices(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getIndicesSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getIndices(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addIndexBuffer("index", &_index_buffer_hand);
 
@@ -713,24 +713,24 @@ void MediapipeAndGLTF::createShaderHand() {
     // transform
     _obj_tr_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getTransformMatricesSize(DefaultConf::renderer, &_lbs_shader),
-        &Object3D::getTransformMatrices(DefaultConf::renderer, &_lbs_shader)[0][0]
+        Object3D::getTransformMatricesSize(*DefaultConf::renderer, &_lbs_shader),
+        &Object3D::getTransformMatrices(*DefaultConf::renderer, &_lbs_shader)[0][0]
     );
     _lbs_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer_hand);
 
     // Joint transform
     _joint_tr_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getJointsTransformSize(DefaultConf::renderer, &_lbs_shader),
-        &Object3D::getJointsTransform(DefaultConf::renderer, &_lbs_shader)[0][0]
+        Object3D::getJointsTransformSize(*DefaultConf::renderer, &_lbs_shader),
+        &Object3D::getJointsTransform(*DefaultConf::renderer, &_lbs_shader)[0][0]
     );
     _lbs_shader.addStorageBuffer("joint_tr", &_joint_tr_buffer_hand);
 
     // materials
     _materials_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
         DefaultConf::logical_device->getDevice(),
-        Object3D::getMaterialsSize(DefaultConf::renderer, &_lbs_shader),
-        Object3D::getMaterials(DefaultConf::renderer, &_lbs_shader).data()
+        Object3D::getMaterialsSize(*DefaultConf::renderer, &_lbs_shader),
+        Object3D::getMaterials(*DefaultConf::renderer, &_lbs_shader).data()
     );
     _lbs_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer_hand);
 
@@ -742,6 +742,6 @@ void MediapipeAndGLTF::createShaderHand() {
     // Textures
     _lbs_shader.addTexture2D(
         "textures",
-        Object3D::getTextures2D(DefaultConf::renderer, &_lbs_shader)
+        Object3D::getTextures2D(*DefaultConf::renderer, &_lbs_shader)
     );
 }

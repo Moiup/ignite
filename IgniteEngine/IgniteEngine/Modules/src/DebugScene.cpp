@@ -86,8 +86,8 @@ void DebugScene::createShader() {
 	);
 
 	// Storage Buffers
-// transform
-	_debug_shader.addStorageBufferInfo(
+	// transform
+	_debug_shader.configureStorageBuffer(
 		"obj_tr",
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT
@@ -95,7 +95,7 @@ void DebugScene::createShader() {
 
 	// -- Fragment shader -- //
 	// materials
-	_debug_shader.addStorageBufferInfo(
+	_debug_shader.configureStorageBuffer(
 		"MaterialsBuffer",
 		2,
 		VK_SHADER_STAGE_FRAGMENT_BIT

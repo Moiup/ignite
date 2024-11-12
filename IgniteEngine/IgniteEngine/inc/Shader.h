@@ -25,11 +25,9 @@ class Shader
 protected:
 	std::vector<VkPipelineShaderStageCreateInfo> _shader_stages;
 
-	std::unordered_map<std::string, PushConstantInfo> _push_constant_info;
+	VkPushConstantRange _push_constant_range;
 
 	std::unordered_map<std::string, VkDescriptorSetLayoutBinding> _desc_layout_bindings;
-
-	std::unordered_map<std::string, void*> _push_constants;
 
 	Device* _device;
 
@@ -40,20 +38,14 @@ public:
 	Device* getDevice();
 
 
-	void addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size);
-	void addPushConstant(std::string name, void* push_constant);
-	std::unordered_map<std::string, PushConstantInfo>& getPushConstantInfo();
-	std::unordered_map<std::string, void*>& getPushConstants();
-
-
-	void addDescriptorLayout(
-		std::string name,
-		uint32_t binding,
+	void configurePushConstant(
 		VkShaderStageFlags stage_flags,
-		VkDescriptorType type,
-		uint32_t descriptor_count
+		uint32_t offset,
+		uint32_t size
 	);
-	const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& getBuffersInfo() const;
+	const VkPushConstantRange& getPushConstantRange() const;
+
+	const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& getDescLayoutBindings() const;
 	
 	void configureUniformBuffer(
 		const std::string& name,

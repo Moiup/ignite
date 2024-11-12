@@ -6,58 +6,37 @@
 #include <fstream>
 #include <string>
 
+struct VertexInputDescription {
+	VkVertexInputBindingDescription binding_desc;
+	VkVertexInputAttributeDescription attribute_desc;
+};
+
 class GraphicShader : public Shader
 {
 private:
-	std::unordered_map<std::string, VertexBufferInfo> _vertex_buffers_info;
-	std::unordered_map<std::string, IndexBufferInfo> _index_buffer_info;
+	std::unordered_map<std::string, VertexInputDescription> _vertex_input_descs;
 
-	std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::vertex_buffer>*>> _vertex_buffers;
-	std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::index_buffer>*>> _index_buffers;
-
-	uint32_t _nb_frame;
-	VkPolygonMode _polygon_mode{ VK_POLYGON_MODE_FILL };
-	VkPrimitiveTopology _topology{ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
+	IndexBufferInfo _index_buffer_info;
 
 public:
 	GraphicShader();
 	GraphicShader(std::string vertex_shader, std::string fragment_shader);
 
-	void setNbFrame(uint32_t nb_frame);
-	uint32_t getNbFrame();
-
-	void addVertexBufferInfo(
-		std::string name,
-		uint32_t stride,
+	void configureVertexBuffer(
+		const std::string& name,
+		uint32_t location,
 		VkFormat format,
-		uint32_t location
+		uint32_t stride = 0,
+		uint32_t offset = 0
 	);
-	std::unordered_map<std::string, VertexBufferInfo>& getVertexBuffersInfo();
-	VertexBufferInfo& getVertexBufferInfo(std::string name);
-	void addVertexBuffer(
-		std::string name,
-		Buffer<IGEBufferUsage::vertex_buffer>* buffer
-	);
-	std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::vertex_buffer>*>>& getVertexBuffers();
+	const VertexInputDescription& getVertexBufferDescription(const std::string& name) const;
+	const std::unordered_map<std::string, VertexInputDescription>& getVertexBufferDescription() const;
 
-	void addIndexBufferInfo(
-		std::string name,
+	void configureIndexBuffer(
 		uint32_t nb_elem,
 		VkIndexType index_type = VK_INDEX_TYPE_UINT32
 	);
-	std::unordered_map<std::string, IndexBufferInfo>& getIndexBufferInfo();
-	IndexBufferInfo& getIndexBufferInfo(const std::string& name);
-	void addIndexBuffer(
-		std::string name,
-		Buffer<IGEBufferUsage::index_buffer>* buffer
-	);
-	std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::index_buffer>*>>& getIndexBuffers();
-
-	void setPolygonMode(VkPolygonMode polygonMode);
-	VkPolygonMode polygonMode();
-
-	void setTopology(VkPrimitiveTopology topology);
-	VkPrimitiveTopology topology();
+	const IndexBufferInfo& getIndexBufferInfo() const;
 
 	void read(std::string vertex_shader, std::string fragment_shader);
 };

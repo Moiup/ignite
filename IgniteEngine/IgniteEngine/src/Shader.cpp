@@ -14,30 +14,22 @@ Device* Shader::getDevice() {
 	return _device;
 }
 
-void Shader::addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size) {
-	if (_push_constant_info.count(name)) {
-		std::string error = "Error: there already is a Push Constant info named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	PushConstantInfo info{};
-	info.setStageFlags(stage_flags);
-	info.setOffset(offset);
-	info.setSize(size);
-
-	_push_constant_info[name] = info;
+void Shader::configurePushConstant(
+	VkShaderStageFlags stage_flags,
+	uint32_t offset,
+	uint32_t size
+) {
+	_push_constant_range.stageFlags = stage_flags;
+	_push_constant_range.offset = offset;
+	_push_constant_range.size = size;
 }
 
-void Shader::addPushConstant(std::string name, void* push_constant) {
-	_push_constants[name] = push_constant;
+const VkPushConstantRange& Shader::getPushConstantRange() const {
+	return _push_constant_range;
 }
 
-std::unordered_map<std::string, PushConstantInfo>& Shader::getPushConstantInfo() {
-	return _push_constant_info;
-}
-
-std::unordered_map<std::string, void*>& Shader::getPushConstants() {
-	return _push_constants;
+const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& Shader::getDescLayoutBindings() const {
+	return _desc_layout_bindings;
 }
 
 void Shader::configureUniformBuffer(

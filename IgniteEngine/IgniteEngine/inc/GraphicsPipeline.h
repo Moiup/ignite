@@ -4,40 +4,51 @@
 #include "DepthBuffer.h"
 #include "GraphicShader.h"
 
+struct GraphicsPipelineConfiguration {
+	uint32_t nb_frame{2};
+	VkPrimitiveTopology topology{ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
+	VkViewport viewport{};
+	VkRect2D scissor{};
+	VkPolygonMode polygon_mode;
+	VkCullModeFlags cull_mode;
+	VkFrontFace front_face;
+	float line_width;
+	glm::vec4 blend_constants{1.0, 1.0, 1.0, 1.0};
+	VkFormat color_attachment_format;
+	VkFormat depth_attachment_format;
+	VkFormat stencil_attachment_format;
+};
+
 class GraphicsPipeline : public Pipeline
 {
 private:
-	uint32_t _nb_frame;
-	Swapchain* _swapchain;
-	DepthBuffer* _depth_buffer;
-	
-	VkPolygonMode _polygon_mode;
-	VkPrimitiveTopology _topology;
-	VkCullModeFlags _cull_mode;
-	VkFrontFace _front_face;
-	float _line_width;
+	GraphicsPipelineConfiguration _pipeline_conf;
 
-	std::vector<VkViewport> _viewport_arr;
-	std::vector<VkRect2D> _scissor_arr;
+	std::unordered_map<std::string, VkBuffer> _vertex_buffers;
+	VkBuffer _index_buffer;
+
+protected:
+	GraphicsPipeline(GraphicShader& shader);
 
 public:
 	GraphicsPipeline();
+	GraphicsPipeline(
+		GraphicShader& shader,
+		const GraphicsPipelineConfiguration& config
+	);
 
-	void setNbFrame(uint32_t nb_frame);
-	void setSwapchain(Swapchain* swapchain);
-	void setDepthBuffer(DepthBuffer* depth_buffer);
+	void setVertexBuffer(
+		const std::string& name,
+		const Buffer<IGEBufferUsage::vertex_buffer>& buff
+	);
 
-	void setPolygonMode(VkPolygonMode polygon_mode);
-	void setTopology(VkPrimitiveTopology topology);
-	void setCullMode(VkCullModeFlags cull_mode);
-	void setFrontFace(VkFrontFace front_face);
-	void setLineWidth(float line_width);
+	const std::unordered_map<std::string, VkBuffer>& getVertexBuffers() const;
+	const VkBuffer getIndexBuffer() const;
 
-	GraphicShader* getShader();
-	const std::vector<VkViewport>& getViewport() const;
-	const std::vector<VkRect2D>& getScissors() const;
+	const VkViewport& getViewport() const;
+	const VkRect2D& getScissors() const;
 
-protected:
+private:
 	void createPipeline();
 };
 

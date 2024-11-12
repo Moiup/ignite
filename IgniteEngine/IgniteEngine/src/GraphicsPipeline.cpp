@@ -1,57 +1,43 @@
 #include "GraphicsPipeline.h"
 
-GraphicsPipeline::GraphicsPipeline() :
-	_polygon_mode{ VK_POLYGON_MODE_FILL },
-	_cull_mode{ VK_CULL_MODE_NONE },
-	_front_face{ VK_FRONT_FACE_CLOCKWISE },
-	_line_width{ 1.0f },
-	_viewport_arr{},
-	_scissor_arr{}
-{ ; }
+GraphicsPipeline::GraphicsPipeline() : Pipeline() { ; }
 
-void GraphicsPipeline::setNbFrame(uint32_t nb_frame) {
-	_nb_frame = nb_frame;
-}
-
-void GraphicsPipeline::setSwapchain(Swapchain* swapchain) {
-	_swapchain = swapchain;
-}
-
-void GraphicsPipeline::setDepthBuffer(DepthBuffer* depth_buffer) {
-	_depth_buffer = depth_buffer;
-}
-
-void GraphicsPipeline::setPolygonMode(VkPolygonMode polygon_mode) {
-	_polygon_mode = polygon_mode;
-}
-
-void GraphicsPipeline::setTopology(VkPrimitiveTopology topology) {
-	_topology = topology;
-}
-
-void GraphicsPipeline::setCullMode(VkCullModeFlags cull_mode) {
-	_cull_mode = cull_mode;
-}
-
-void GraphicsPipeline::setFrontFace(VkFrontFace front_face) {
-	_front_face = front_face;
-}
-
-void GraphicsPipeline::setLineWidth(float line_width) {
-	_line_width = line_width;
-}
-
-GraphicShader* GraphicsPipeline::getShader()
+GraphicsPipeline::GraphicsPipeline(GraphicShader& shader) :
+	Pipeline(shader)
 {
-	return (GraphicShader*)_shader;
+	;
 }
 
-const std::vector<VkViewport>& GraphicsPipeline::getViewport() const {
-	return _viewport_arr;
+GraphicsPipeline::GraphicsPipeline(
+	GraphicShader& shader,
+	const GraphicsPipelineConfiguration& config
+) :  GraphicsPipeline(shader)
+{
+	_pipeline_conf = config;
+	createPipeline();
 }
 
-const std::vector<VkRect2D>& GraphicsPipeline::getScissors() const {
-	return _scissor_arr;
+void GraphicsPipeline::setVertexBuffer(
+	const std::string& name,
+	const Buffer<IGEBufferUsage::vertex_buffer>& buff
+) {
+	_vertex_buffers[name] = buff.getBuffer();
+}
+
+const std::unordered_map<std::string, VkBuffer>& GraphicsPipeline::getVertexBuffers() const {
+	return _vertex_buffers;
+}
+
+const VkBuffer GraphicsPipeline::getIndexBuffer() const {
+	return _index_buffer;
+}
+
+const VkViewport& GraphicsPipeline::getViewport() const {
+	return _pipeline_conf.viewport;
+}
+
+const VkRect2D& GraphicsPipeline::getScissors() const {
+	return _pipeline_conf.scissor;
 }
 
 void GraphicsPipeline::createPipeline() {
@@ -59,24 +45,12 @@ void GraphicsPipeline::createPipeline() {
 	std::vector<VkVertexInputBindingDescription> vertex_input_binding_desc_arr = {};
 	std::vector<VkVertexInputAttributeDescription> vertex_input_attribute_arr{};
 
-	uint32_t binding_i = 0;
-	for (auto& vert_buff : getShader()->getVertexBuffersInfo()) {
-		VkVertexInputBindingDescription input_binding_desc{};
-		input_binding_desc.binding = binding_i;
-		input_binding_desc.stride = vert_buff.second.getStride();
-		input_binding_desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	const GraphicShader* shader = static_cast<const GraphicShader*>(&getShader());
+	for (const auto& vert_buff : shader->getVertexBufferDescription()) {
+		const VertexInputDescription& input_desc = vert_buff.second;
 
-		VkVertexInputAttributeDescription input_desc{};
-		input_desc.location = vert_buff.second.getLocation();
-		input_desc.binding = input_binding_desc.binding;
-		input_desc.format = vert_buff.second.getFormat();
-		input_desc.offset = 0;
-
-		vert_buff.second.setFirstBinding(binding_i);
-
-		vertex_input_binding_desc_arr.push_back(input_binding_desc);
-		vertex_input_attribute_arr.push_back(input_desc);
-		binding_i++;
+		vertex_input_binding_desc_arr.push_back(input_desc.binding_desc);
+		vertex_input_attribute_arr.push_back(input_desc.attribute_desc);
 	}
 
 	VkPipelineVertexInputStateCreateInfo vertex_input_state_info{};
@@ -93,34 +67,18 @@ void GraphicsPipeline::createPipeline() {
 	input_assembly_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	input_assembly_state_info.pNext = nullptr;
 	input_assembly_state_info.flags = 0;
-	input_assembly_state_info.topology = _topology;
+	input_assembly_state_info.topology = _pipeline_conf.topology;
 	input_assembly_state_info.primitiveRestartEnable = VK_FALSE;
 
 	//---- Viewport State (26.9.)----//
-	VkViewport viewport{};
-	viewport.x = 0;
-	viewport.y = 0;
-	viewport.width = (float)_swapchain->getSwapchainInfo().imageExtent.width;
-	viewport.height = (float)_swapchain->getSwapchainInfo().imageExtent.height;
-	viewport.minDepth = 0;
-	viewport.maxDepth = 1.0;
-
-	_viewport_arr.push_back(viewport);
-
-	VkRect2D scissor{};
-	scissor.offset = { 0, 0 };
-	scissor.extent = _swapchain->getSwapchainInfo().imageExtent;
-
-	_scissor_arr.push_back(scissor);
-
 	VkPipelineViewportStateCreateInfo viewport_state_info{};
 	viewport_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewport_state_info.pNext = nullptr;
 	viewport_state_info.flags = 0;
-	viewport_state_info.viewportCount = _viewport_arr.size();
-	viewport_state_info.pViewports = _viewport_arr.data();
-	viewport_state_info.scissorCount = _scissor_arr.size();
-	viewport_state_info.pScissors = _scissor_arr.data();
+	viewport_state_info.viewportCount = 1;
+	viewport_state_info.pViewports = &_pipeline_conf.viewport;
+	viewport_state_info.scissorCount = 1;
+	viewport_state_info.pScissors = &_pipeline_conf.scissor;
 
 	//---- Rasterization State (27.)----//
 	VkPipelineRasterizationStateCreateInfo rasterization_state_info{};
@@ -129,14 +87,14 @@ void GraphicsPipeline::createPipeline() {
 	rasterization_state_info.flags = 0;
 	rasterization_state_info.depthClampEnable = VK_FALSE;
 	rasterization_state_info.rasterizerDiscardEnable = VK_FALSE;
-	rasterization_state_info.polygonMode = _polygon_mode;
-	rasterization_state_info.cullMode = _cull_mode;
-	rasterization_state_info.frontFace = _front_face;
+	rasterization_state_info.polygonMode = _pipeline_conf.polygon_mode;
+	rasterization_state_info.cullMode = _pipeline_conf.cull_mode;
+	rasterization_state_info.frontFace = _pipeline_conf.front_face;
 	rasterization_state_info.depthBiasEnable = VK_FALSE;
 	rasterization_state_info.depthBiasConstantFactor = 0.0;
 	rasterization_state_info.depthBiasClamp = 0.0;
 	rasterization_state_info.depthBiasSlopeFactor = 0.0;
-	rasterization_state_info.lineWidth = 1.0;
+	rasterization_state_info.lineWidth = _pipeline_conf.line_width;
 
 	//---- Multisample State ()----//
 	VkPipelineMultisampleStateCreateInfo multisample_state_info{};
@@ -213,17 +171,17 @@ void GraphicsPipeline::createPipeline() {
 	VkPipelineRenderingCreateInfoKHR pipeline_rendering_create_info{};
 	pipeline_rendering_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
 	pipeline_rendering_create_info.colorAttachmentCount = 1;
-	pipeline_rendering_create_info.pColorAttachmentFormats = &_swapchain->getSwapchainInfo().imageFormat;
-	pipeline_rendering_create_info.depthAttachmentFormat = _depth_buffer->getImageFormat();
-	pipeline_rendering_create_info.stencilAttachmentFormat = _depth_buffer->getImageFormat();
+	pipeline_rendering_create_info.pColorAttachmentFormats = &_pipeline_conf.color_attachment_format;
+	pipeline_rendering_create_info.depthAttachmentFormat = _pipeline_conf.depth_attachment_format;
+	pipeline_rendering_create_info.stencilAttachmentFormat = _pipeline_conf.stencil_attachment_format;
 
 	//---- Creating the pipeline (10.2.)----//
 	VkGraphicsPipelineCreateInfo pipeline_info{};
 	pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipeline_info.pNext = &pipeline_rendering_create_info;
 	pipeline_info.flags = 0;
-	pipeline_info.stageCount = getShader()->getShaderStages().size();
-	pipeline_info.pStages = getShader()->getShaderStages().data();
+	pipeline_info.stageCount = getShader().getShaderStages().size();
+	pipeline_info.pStages = getShader().getShaderStages().data();
 	pipeline_info.pVertexInputState = &vertex_input_state_info;
 	pipeline_info.pInputAssemblyState = &input_assembly_state_info;
 	pipeline_info.pTessellationState = nullptr;

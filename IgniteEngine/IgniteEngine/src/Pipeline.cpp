@@ -15,14 +15,29 @@ Pipeline::Pipeline(Shader& shader) :
 	Pipeline::Pipeline()
 {
 	_shader = &shader;
-	create();
+	createDescriptorSet();
+	createPipelineLayout();
 }
+
+//Pipeline::Pipeline(const Pipeline& pipeline) {
+//	*this = pipeline;
+//}
 
 Pipeline::~Pipeline() {
 	destroy();
 }
 
-const VkPipeline& Pipeline::getPipeline() const {
+//Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
+//	_shader = pipeline._shader;
+//	_descriptor_set_layout = pipeline._descriptor_set_layout;
+//	_descriptor_pool = pipeline._descriptor_pool;
+//	_descriptor_sets = pipeline._descriptor_sets;
+//	_pipeline_layout = pipeline._pipeline_layout;
+//	_pipeline = pipeline._pipeline;
+//
+//}
+
+const VkPipeline Pipeline::getPipeline() const {
 	return _pipeline;
 }
 
@@ -34,8 +49,8 @@ const std::vector<VkDescriptorSet>& Pipeline::getDescriptorSets() const {
 	return _descriptor_sets;
 }
 
-Shader* Pipeline::getShader() {
-	return _shader;
+const Shader& Pipeline::getShader() const {
+	return *_shader;
 }
 
 void Pipeline::create() {
@@ -45,18 +60,23 @@ void Pipeline::create() {
 }
 
 void Pipeline::destroy() {
-	if (!_pipeline) {
-		return;
-	}
 	destroyPipeline();
 	destroyDescriptorSet();
 	destroyPipelineLayout();
 }
 
+void Pipeline::setPushConstants(void* push_constant) {
+	_push_constants = push_constant;
+}
+
+const void* Pipeline::getPushConstants() const {
+	return _push_constants;
+}
+
 VkWriteDescriptorSet Pipeline::setWriteDescriptorSet(
 	const std::string& name
 ) {
-	VkDescriptorSetLayoutBinding infos = _shader->getBuffersInfo().at(name);
+	VkDescriptorSetLayoutBinding infos = _shader->getDescLayoutBindings().at(name);
 	VkWriteDescriptorSet write;
 	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	write.pNext = nullptr;
@@ -65,6 +85,8 @@ VkWriteDescriptorSet Pipeline::setWriteDescriptorSet(
 	write.dstArrayElement = 0;
 	write.descriptorCount = infos.descriptorCount;
 	write.descriptorType = infos.descriptorType;
+
+	_is_changed = true;
 }
 
 void Pipeline::setUniformBuffer(
@@ -213,7 +235,7 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 }
 
 void Pipeline::update() {
-	if (!is_changed) {
+	if (!_is_changed) {
 		return;
 	}
 
@@ -224,13 +246,18 @@ void Pipeline::update() {
 		0,
 		nullptr
 	);
+
+	_is_changed = false;
+	_write_descriptor_sets.clear();
+	_descriptor_buffer_infos.clear();
+	_descriptor_image_infos.clear();
 }
 
 void Pipeline::createDescriptorSet() {
 	std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_binding_arr;
 	setDescriptorSetLayoutBinding(
 		descriptor_set_layout_binding_arr,
-		_shader->getBuffersInfo()
+		_shader->getDescLayoutBindings()
 	);
 
 	if (!descriptor_set_layout_binding_arr.size()) {
@@ -272,22 +299,14 @@ void Pipeline::destroyDescriptorSetLayout() {
 }
 
 void Pipeline::createPipelineLayout() {
-	std::vector<VkPushConstantRange> push_constant_ranges;
-
-	for (const std::pair<std::string, PushConstantInfo>& str_info : _shader->getPushConstantInfo()) {
-		const PushConstantInfo& info = str_info.second;
-		const VkPushConstantRange& range = info.getPushConstantRange();
-		push_constant_ranges.push_back(range);
-	}
-
 	VkPipelineLayoutCreateInfo pipeline_layout_info{};
 	pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipeline_layout_info.pNext = nullptr;
 	pipeline_layout_info.flags = 0;
 	pipeline_layout_info.setLayoutCount = _descriptor_set_layout.size();
 	pipeline_layout_info.pSetLayouts = _descriptor_set_layout.data();
-	pipeline_layout_info.pushConstantRangeCount = push_constant_ranges.size();
-	pipeline_layout_info.pPushConstantRanges = push_constant_ranges.data();
+	pipeline_layout_info.pushConstantRangeCount = 1;
+	pipeline_layout_info.pPushConstantRanges = &_shader->getPushConstantRange();
 
 	VkResult vk_result = vkCreatePipelineLayout(
 		_shader->getDevice()->getDevice(),
@@ -301,6 +320,9 @@ void Pipeline::createPipelineLayout() {
 }
 
 void Pipeline::destroyPipelineLayout() {
+	if (!_pipeline_layout) {
+		return;
+	}
 	vkDestroyPipelineLayout(
 		_shader->getDevice()->getDevice(),
 		_pipeline_layout,
@@ -309,6 +331,9 @@ void Pipeline::destroyPipelineLayout() {
 }
 
 void Pipeline::destroyPipeline() {
+	if (!_pipeline) {
+		return;
+	}
 	vkDestroyPipeline(
 		_shader->getDevice()->getDevice(),
 		_pipeline,

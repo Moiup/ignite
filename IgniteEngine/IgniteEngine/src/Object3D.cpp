@@ -108,6 +108,10 @@ void Object3D::setSkeleton(Skeleton& skeleton) {
 	_skeleton = &skeleton;
 }
 
+Skeleton* Object3D::getSkeleton() {
+	return _skeleton;
+}
+
 const Skeleton* Object3D::getSkeleton() const {
 	return _skeleton;
 }

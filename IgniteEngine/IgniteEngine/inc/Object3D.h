@@ -58,6 +58,7 @@ public:
 	const Mesh* getMesh() const;
 
 	void setSkeleton(Skeleton& skeleton);
+	Skeleton* getSkeleton();
 	const Skeleton* getSkeleton() const;
 	
 	void setRenderer(Renderer* renderer);

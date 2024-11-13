@@ -199,7 +199,8 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
     // Let us work with the index finger
     // Let us consider that the position of a child, is (0, 1, 0) to the father
     {
-        const Joint* wrist = _hand.getSkeleton()->skeleton();
+        Joint* wrist = _hand.getSkeleton()->skeleton();
+        wrist->setPositionLocale(landmarks._landmarks[0][0]);
         {
             // --- wrist -> thumb ---
             // Mediapipe vector

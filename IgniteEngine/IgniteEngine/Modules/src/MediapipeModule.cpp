@@ -1,5 +1,7 @@
 #include "MediapipeModule.h"
 
+#define IS_NETWORK 0
+
 MediapipeModule::MediapipeModule() : Module::Module() {
 ;
 }
@@ -7,36 +9,13 @@ MediapipeModule::MediapipeModule() : Module::Module() {
 void MediapipeModule::init() {
     Module::init();
 
-    {
-        glm::vec3 v_s = glm::vec3(0, 1, 0);
-        glm::vec3 v_m = glm::vec3(1, 1, 1);
-        glm::mat4 alignment_m = findRotationMatrix(v_s, v_m);
-        const glm::vec4 v_aligned = alignment_m * glm::vec4(glm::normalize(v_s), 1.0);
-        std::cout << makeString(glm::normalize(v_s)) << " -- ";
-        std::cout << makeString(glm::normalize(v_m)) << " -- ";
-        std::cout << makeString(glm::normalize(glm::vec3(v_aligned))) << " -- ";
-        std::cout << makeString(glm::vec4(glm::normalize(v_m), 1.0) - v_aligned) << std::endl;
-    }
+    #if IS_NETWORK
+        networkInit();
+    #else
+        //readMediapipeFile("../../assets/mediapipe_data/mp_hand_straight.txt");
+        readMediapipeFile("../../assets/mediapipe_data/mp_index_moved.txt");
+    #endif  
 
-    _server_socket.Port() = SERVER_PORT;
-    _server_socket.Address() = SERVER_ADDRESS;
-    _server_socket.Initialise();
-    _server_socket.Bind();
-    _server_socket.Listen();
-
-    std::cout << "Listening on " << SERVER_ADDRESS << " -- " << SERVER_PORT << std::endl;
-    std::cout << "Waiting for mediapipe client to connect...";
-    _mediapipe_stream = _server_socket.Accept();
-    std::cout << "connected!" << std::endl;
-
-    mdp::DimMsg dim_msg;
-    _mediapipe_stream.Recv(sizeof(dim_msg), reinterpret_cast<char*>(&dim_msg));
-    std::cout << "received: " << std::endl;
-    std::cout << "    width: " << dim_msg._width << std::endl;
-    std::cout << "    height: " << dim_msg._height << std::endl;
-
-    DefaultConf::render_window_width = dim_msg._width * 2;
-    DefaultConf::render_window_height = dim_msg._height * 2;
 }
 
 void MediapipeModule::start() {
@@ -119,7 +98,11 @@ void MediapipeModule::start() {
         _right_hand[i].setPositionLocale(0, 1, 0);
     }
 
-    _network_thread = std::thread(&MediapipeModule::networkProcess, this);
+#if IS_NETWORK
+    _network_thread = std::thread(&MediapipeAndGLTF::networkProcess, this);
+#else
+    landmarksRotationMatrices(_landmarks);
+#endif
 
     //_debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
     _debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
@@ -195,9 +178,8 @@ void MediapipeModule::networkProcess() {
         }
 
         // Receiving new landmarks
-        mdp::Landmarks landmarks;
-        int32_t is_recv = _mediapipe_stream.Recv(sizeof(landmarks), reinterpret_cast<char*>(&landmarks));
-        if (is_recv < sizeof(landmarks)) {
+        int32_t is_recv = _mediapipe_stream.Recv(sizeof(_landmarks), reinterpret_cast<char*>(&_landmarks));
+        if (is_recv < sizeof(_landmarks)) {
             break;
         }
 
@@ -211,36 +193,36 @@ void MediapipeModule::networkProcess() {
 
         //landmarksToHand(landmarks);
 
-        landmarksRotationMatrices(landmarks);
+        landmarksRotationMatrices(_landmarks);
     }
 }
 
 void MediapipeModule::landmarksRotationMatrices(const mdp::Landmarks& landmarks) {
     // Let us work with the index finger
     // Let us consider that the position of a child, is (0, 1, 0) to the father
-
+    glm::vec3 next_p = glm::vec3(1, 0, 0);
     {
         // --- wrist -> thumb ---
         // Mediapipe vector
         glm::vec3 v_m = landmarks._landmarks[0][1] - landmarks._landmarks[0][0];
         // Skinning vector
-        glm::vec3 v_s = glm::vec3(0, 1, 0);
+        glm::vec3 v_s = next_p;
         // Find the rotation matrix to go from Skinning vector to Mediapipe vector
         _alignment_matrices[_wrist_index + 0] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][2] - landmarks._landmarks[0][1];
-        glm::vec3 v_s = _alignment_matrices[_wrist_index + 0] * glm::vec4(glm::vec3(0, 1, 0), 1.0f);
+        glm::vec3 v_s = _alignment_matrices[_wrist_index + 0] * glm::vec4(next_p, 1.0f);
         _alignment_matrices[1] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][3] - landmarks._landmarks[0][2];
-        glm::vec3 v_s = _alignment_matrices[1] * _alignment_matrices[_wrist_index + 0] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[1] * _alignment_matrices[_wrist_index + 0] * glm::vec4(next_p, 1.0);
         _alignment_matrices[2] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][4] - landmarks._landmarks[0][3];
-        glm::vec3 v_s = _alignment_matrices[2] * _alignment_matrices[1] * _alignment_matrices[_wrist_index + 0] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[2] * _alignment_matrices[1] * _alignment_matrices[_wrist_index + 0] * glm::vec4(next_p, 1.0);
         _alignment_matrices[3] = findRotationMatrix(v_s, v_m);
     }
 
@@ -249,23 +231,23 @@ void MediapipeModule::landmarksRotationMatrices(const mdp::Landmarks& landmarks)
         // Mediapipe vector
         glm::vec3 v_m = landmarks._landmarks[0][5] - landmarks._landmarks[0][0];
         // Skinning vector
-        glm::vec3 v_s = glm::vec3(0, 1, 0);
+        glm::vec3 v_s = next_p;
         // Find the rotation matrix to go from Skinning vector to Mediapipe vector
         _alignment_matrices[_wrist_index + 1] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][6] - landmarks._landmarks[0][5];
-        glm::vec3 v_s = _alignment_matrices[_wrist_index + 1] * glm::vec4(glm::vec3(0, 1, 0), 1.0f);
+        glm::vec3 v_s = _alignment_matrices[_wrist_index + 1] * glm::vec4(next_p, 1.0f);
         _alignment_matrices[5] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][7] - landmarks._landmarks[0][6];
-        glm::vec3 v_s = _alignment_matrices[5] * _alignment_matrices[_wrist_index + 1] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[5] * _alignment_matrices[_wrist_index + 1] * glm::vec4(next_p, 1.0);
         _alignment_matrices[6] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][8] - landmarks._landmarks[0][7];
-        glm::vec3 v_s = _alignment_matrices[6] * _alignment_matrices[5] * _alignment_matrices[_wrist_index + 1] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[6] * _alignment_matrices[5] * _alignment_matrices[_wrist_index + 1] * glm::vec4(next_p, 1.0);
         _alignment_matrices[7] = findRotationMatrix(v_s, v_m);
     }
 
@@ -273,66 +255,66 @@ void MediapipeModule::landmarksRotationMatrices(const mdp::Landmarks& landmarks)
     {
         // --- wrist -> middle finger ---
         glm::vec3 v_m = landmarks._landmarks[0][9] - landmarks._landmarks[0][0];
-        glm::vec3 v_s = glm::vec3(0, 1, 0);
+        glm::vec3 v_s = next_p;
         _alignment_matrices[_wrist_index + 2] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][10] - landmarks._landmarks[0][9];
-        glm::vec3 v_s = _alignment_matrices[_wrist_index + 2] * glm::vec4(glm::vec3(0, 1, 0), 1.0f);
+        glm::vec3 v_s = _alignment_matrices[_wrist_index + 2] * glm::vec4(next_p, 1.0f);
         _alignment_matrices[9] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][11] - landmarks._landmarks[0][10];
-        glm::vec3 v_s = _alignment_matrices[9] * _alignment_matrices[_wrist_index + 2] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[9] * _alignment_matrices[_wrist_index + 2] * glm::vec4(next_p, 1.0);
         _alignment_matrices[10] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][12] - landmarks._landmarks[0][11];
-        glm::vec3 v_s = _alignment_matrices[10] * _alignment_matrices[9] * _alignment_matrices[_wrist_index + 2] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[10] * _alignment_matrices[9] * _alignment_matrices[_wrist_index + 2] * glm::vec4(next_p, 1.0);
         _alignment_matrices[11] = findRotationMatrix(v_s, v_m);
     }
 
     {
         // --- wrist -> ring finger ---
         glm::vec3 v_m = landmarks._landmarks[0][13] - landmarks._landmarks[0][0];
-        glm::vec3 v_s = glm::vec3(0, 1, 0);
+        glm::vec3 v_s = next_p;
         _alignment_matrices[_wrist_index + 3] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][14] - landmarks._landmarks[0][13];
-        glm::vec3 v_s = _alignment_matrices[_wrist_index + 3] * glm::vec4(glm::vec3(0, 1, 0), 1.0f);
+        glm::vec3 v_s = _alignment_matrices[_wrist_index + 3] * glm::vec4(next_p, 1.0f);
         _alignment_matrices[13] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][15] - landmarks._landmarks[0][14];
-        glm::vec3 v_s = _alignment_matrices[13] * _alignment_matrices[_wrist_index + 3] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[13] * _alignment_matrices[_wrist_index + 3] * glm::vec4(next_p, 1.0);
         _alignment_matrices[14] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][16] - landmarks._landmarks[0][15];
-        glm::vec3 v_s = _alignment_matrices[14] * _alignment_matrices[13] * _alignment_matrices[_wrist_index + 3] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[14] * _alignment_matrices[13] * _alignment_matrices[_wrist_index + 3] * glm::vec4(next_p, 1.0);
         _alignment_matrices[15] = findRotationMatrix(v_s, v_m);
     }
 
     {
         // --- wrist -> pinky ---
         glm::vec3 v_m = landmarks._landmarks[0][17] - landmarks._landmarks[0][0];
-        glm::vec3 v_s = glm::vec3(0, 1, 0);
+        glm::vec3 v_s = next_p;
         _alignment_matrices[_wrist_index + 4] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][18] - landmarks._landmarks[0][17];
-        glm::vec3 v_s = _alignment_matrices[_wrist_index + 4] * glm::vec4(glm::vec3(0, 1, 0), 1.0f);
+        glm::vec3 v_s = _alignment_matrices[_wrist_index + 4] * glm::vec4(next_p, 1.0f);
         _alignment_matrices[17] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][19] - landmarks._landmarks[0][18];
-        glm::vec3 v_s = _alignment_matrices[17] * _alignment_matrices[_wrist_index + 4] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[17] * _alignment_matrices[_wrist_index + 4] * glm::vec4(next_p, 1.0);
         _alignment_matrices[18] = findRotationMatrix(v_s, v_m);
     }
     {
         glm::vec3 v_m = landmarks._landmarks[0][20] - landmarks._landmarks[0][19];
-        glm::vec3 v_s = _alignment_matrices[18] * _alignment_matrices[17] * _alignment_matrices[_wrist_index + 4] * glm::vec4(glm::vec3(0, 1, 0), 1.0);
+        glm::vec3 v_s = _alignment_matrices[18] * _alignment_matrices[17] * _alignment_matrices[_wrist_index + 4] * glm::vec4(next_p, 1.0);
         _alignment_matrices[19] = findRotationMatrix(v_s, v_m);
     }
 }
@@ -841,3 +823,35 @@ void MediapipeModule::createShaderDebug() {
     _debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer_debug);
 }
 
+void MediapipeModule::readMediapipeFile(const std::string& path) {
+    std::ifstream mp_file = std::ifstream(path);
+
+    if (!mp_file.is_open()) {
+        std::cerr << "MediapipeAndGLTF::readMediapipeFile: Error opening file '" + path + "'." << std::endl;
+        throw std::runtime_error("MediapipeAndGLTF::readMediapipeFile: Error opening file '" + path + "'.");
+    }
+
+    // -- Reading dimensions --
+    int32_t width;
+    int32_t height;
+
+    mp_file >> width;
+    mp_file >> height;
+
+    DefaultConf::render_window_width = width * 2;
+    DefaultConf::render_window_height = height * 2;
+
+    // -- Reading the landmarks --
+    int32_t i = 0;
+    while (mp_file >> _landmarks._landmarks[0][i].x
+        >> _landmarks._landmarks[0][i].y
+        >> _landmarks._landmarks[0][i].z
+        >> _landmarks._world_landmarks[0][i].x
+        >> _landmarks._world_landmarks[0][i].y
+        >> _landmarks._world_landmarks[0][i].z
+        ) {
+        ++i;
+    }
+
+    mp_file.close();
+}

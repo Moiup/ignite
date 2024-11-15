@@ -25,7 +25,7 @@ private:
 	MenuModule _menu_module;
 
 	//TestModule _test_module;
-	//MediapipeModule _mediapipe_module;
+	MediapipeModule _mediapipe_module;
 	MediapipeAndGLTF _mediapipe_and_gltf;
 	//Bistro _bistro;
 	//ComputeShaderTest _compute_shader_test;

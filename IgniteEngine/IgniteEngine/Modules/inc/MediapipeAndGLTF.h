@@ -35,10 +35,10 @@ class MediapipeAndGLTF : public Module
 {
 public:
     const std::string SERVER_ADDRESS{ "127.0.0.1" };
-    const std::string SERVER_PORT{ "8080" };
+    const std::string SERVER_PORT{ "8013" };
     const float RAD_TO_DEG = 180 / M_PI;
 private:
-    EServerSocket _server_socket;
+    EServerSocket _socket;
     EStream _mediapipe_stream;
     std::thread _network_thread;
 
@@ -53,6 +53,8 @@ private:
     LoadedObjectInfo _hand_obj_info;
     Object3D _hand;
 
+    SkeletonDebug _hand_skeleton;
+
     const uint32_t _wrist_index = 21;
 
     std::vector<std::vector<Object3D>> _hands;
@@ -60,6 +62,7 @@ private:
     std::vector<Object3D> _wrists;
     std::vector<glm::mat4> _alignment_matrices;
     std::vector<glm::mat4> _transform_matrices;
+    std::vector<glm::mat4> _transform_matrices_debug;
 
 
     uint32_t _frame_i;
@@ -86,6 +89,16 @@ private:
 
     glm::mat4 _camera;
 
+    // Debug shader
+    GraphicShader _debug_shader;
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer;
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer;
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer;
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer;
+    StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer;
+
 public:
     MediapipeAndGLTF();
 
@@ -100,8 +113,20 @@ public:
     void readMediapipeFile(const std::string& path);
 
 private:
+    void landmarksLookAtMatrices(const mdph::Landmarks& landmarks);
+
     void landmarksToLocal(const mdph::Landmarks& landmarks);
     void landmarksRotationMatrices(const mdph::Landmarks& landmarks);
+
+    void fingerAlignement(
+        const mdph::Landmarks& landmarks,
+        const Joint* wrist,
+        const Joint* wrist_bis,
+        const glm::vec3 vm1,
+        const glm::vec3 vm2,
+        const glm::vec3 vm3,
+        const glm::vec3 vm4
+    );
 
     glm::mat4 findRotationMatrix(
         const glm::vec3& from,
@@ -119,5 +144,6 @@ private:
     std::vector<uint32_t> cubeIndex();
 
     void createShaderHand();
+    void createDebugShader();
 };
 

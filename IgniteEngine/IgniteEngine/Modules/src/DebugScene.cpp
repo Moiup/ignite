@@ -24,8 +24,14 @@ void DebugScene::start() {
 	_cross_obj.addShader(&_debug_shader);
 	_cross_obj.setRenderer(DefaultConf::renderer);
 
+	_ground_obj_info.loadGLTF("../../assets/3d_objects/gltf/ground.gltf");
+	_ground.createFromObjectInfo(_ground_obj_info);
+	_ground.setRenderer(DefaultConf::renderer);
+	_ground.addShader(&_debug_shader);
+
 	createShader();
 	_debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+	//_debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 }
 
 void DebugScene::update() {

@@ -12,14 +12,15 @@ void MediapipeAndGLTF::init() {
 #if IS_NETWORK
     networkInit();
 #else
-    readMediapipeFile("../../assets/mediapipe_data/mp_hand_straight.txt");
+    //readMediapipeFile("../../assets/mediapipe_data/mp_hand_straight.txt");
+    readMediapipeFile("../../assets/mediapipe_data/mp_index_moved.txt");
 #endif  
 }
 
 void MediapipeAndGLTF::start() {
     Module::start();
 
-    _hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand.gltf");
+    _hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_nails.gltf");
     _hand.createFromObjectInfo(_hand_obj_info);
     _hand.setRenderer(DefaultConf::renderer);
     _hand.addShader(&_lbs_shader);
@@ -33,6 +34,11 @@ void MediapipeAndGLTF::start() {
 
     SkeletonDebug::createCrossMesh(_cross_mesh, 1.0f);
     SkeletonDebug::createCrossMaterial(_cross_material, _cross_material_indices);
+
+    _hand_skeleton.setObject3D(_hand);
+    _hand_skeleton.setSize(3.0f);
+    _hand_skeleton.setShader(_debug_shader);
+    _hand_skeleton.create();
 
     _right_hand.resize(_hand.getSkeleton()->joints().size());
     _alignment_matrices.resize(_right_hand.size());
@@ -54,19 +60,35 @@ void MediapipeAndGLTF::start() {
     _network_thread = std::thread(&MediapipeAndGLTF::networkProcess, this);
 #else
     for (uint32_t i = 0; i < _right_hand.size(); ++i) {
+        _landmarks._landmarks[0][i] = _landmarks._landmarks[0][i] * 20.0f;
         _right_hand[i].createFromObjectInfo(_cube_info);
         _right_hand[i].setRenderer(DefaultConf::renderer);
         _right_hand[i].addShader(DefaultConf::graphic_shader);
         _right_hand[i].setScaleLocale(glm::vec3(0.25));
         _right_hand[i].setPositionLocale(
-            glm::vec3(_landmarks._landmarks[0][i].x,_landmarks._landmarks[0][i].y, _landmarks._landmarks[0][i].z) * 20.0f
+           _landmarks._landmarks[0][i].x,
+           _landmarks._landmarks[0][i].y,
+           _landmarks._landmarks[0][i].z
         );
     }
     landmarksRotationMatrices(_landmarks);
+
+    for (int i = 0; i < _right_hand.size(); ++i) {
+        std::cout << "landmarks     : " << makeString(_landmarks._landmarks[0][i]) << std::endl;
+        std::cout << "_right_hand[" << i << "]: " << makeString(_right_hand[i].getPositionLocale()) << std::endl;
+    }
+    std::cout << "wrist         : " << makeString(_hand.getSkeleton()->skeleton()->getPositionLocale()) << std::endl;
+    std::cout << "hand          : " << makeString(_hand.getPositionLocale()) << std::endl;
+
+
+
 #endif
 
     _lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
+    _debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
+    _debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
     createShaderHand();
+    createDebugShader();
 }
 
 void MediapipeAndGLTF::update() {
@@ -77,31 +99,33 @@ void MediapipeAndGLTF::update() {
     _transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
 
     for (int i = 0; i < 5; ++i) {
-        // -- Thumb --
-        const Joint* fing0 = static_cast<Joint*>(wrist->getChildren()[i]);
-        const Joint* fing1 = static_cast<Joint*>(fing0->getChildren()[0]);
-        const Joint* fing2 = static_cast<Joint*>(fing1->getChildren()[0]);
-        const Joint* fing3 = static_cast<Joint*>(fing2->getChildren()[0]);
+        const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
+        const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+        const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+        const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
 
-        glm::mat4 tr = wrist_tr * fing0->getTransformLocale() * _alignment_matrices[fing0->id()];
-        _transform_matrices[fing0->id()] = tr * fing0->inverseBindMatrices();
+        glm::mat4 tr = wrist_tr * wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()];
+        _transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
 
-        tr = tr * fing1->getTransformLocale() * _alignment_matrices[fing1->id()];
-        _transform_matrices[fing1->id()] = tr * fing1->inverseBindMatrices();
+        tr = tr * phal1->getTransformLocale() * _alignment_matrices[phal1->id()];
+        _transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
 
-        tr = tr * fing2->getTransformLocale() * _alignment_matrices[fing2->id()];
-        _transform_matrices[fing2->id()] = tr * fing2->inverseBindMatrices();
+        tr = tr * phal2->getTransformLocale() * _alignment_matrices[phal2->id()];
+        _transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
 
-        tr = tr * fing3->getTransformLocale() * _alignment_matrices[fing3->id()];
-        _transform_matrices[fing3->id()] = tr * fing3->inverseBindMatrices();
+        tr = tr * phal3->getTransformLocale() * _alignment_matrices[phal3->id()];
+        _transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
     }
-
 
     _camera = DefaultConf::camera->getMVPC();
 
     _joint_tr_buffer_hand.setValues(
         _transform_matrices.data()
     );
+
+    //_obj_tr_buffer.setValues(
+    //    _transform_matrices.data()
+    //);
 }
 
 void MediapipeAndGLTF::close() {
@@ -110,21 +134,26 @@ void MediapipeAndGLTF::close() {
     _network_thread.join();
 
     _mediapipe_stream.Close();
-    _server_socket.Close();
 
 }
 
 void MediapipeAndGLTF::networkInit() {
-    _server_socket.Port() = SERVER_PORT;
-    _server_socket.Address() = SERVER_ADDRESS;
-    _server_socket.Initialise();
-    _server_socket.Bind();
-    _server_socket.Listen();
+    _socket = EServerSocket(SERVER_ADDRESS, SERVER_PORT);
+    _socket.Initialise();
+    //_server_socket.Port() = SERVER_PORT;
+    //_server_socket.Address() = SERVER_ADDRESS;
+    //_server_socket.Initialise();
+    //_server_socket.Bind();
+    //_server_socket.Listen();
 
-    std::cout << "Listening on " << SERVER_ADDRESS << " -- " << SERVER_PORT << std::endl;
-    std::cout << "Waiting for mediapipe client to connect...";
-    _mediapipe_stream = _server_socket.Accept();
-    std::cout << "connected!" << std::endl;
+    //std::cout << "Listening on " << SERVER_ADDRESS << " -- " << SERVER_PORT << std::endl;
+    //std::cout << "Waiting for mediapipe client to connect...";
+    //_mediapipe_stream = _server_socket.Accept();
+    //std::cout << "connected!" << std::endl;
+
+    std::cout << "Connecting to " << SERVER_ADDRESS << " -- " << SERVER_PORT << std::endl;
+    _mediapipe_stream = _socket.Connect();
+    std::cout << "Connected!" << std::endl;
 
     mdph::DimMsg dim_msg;
     _mediapipe_stream.Recv(sizeof(dim_msg), reinterpret_cast<char*>(&dim_msg));
@@ -158,7 +187,8 @@ void MediapipeAndGLTF::networkProcess() {
 
 
 
-        landmarksRotationMatrices(landmarks);
+        //landmarksRotationMatrices(landmarks);
+        landmarksLookAtMatrices(landmarks);
     }
 }
 
@@ -198,167 +228,109 @@ void MediapipeAndGLTF::readMediapipeFile(const std::string& path) {
 void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmarks) {
     // Let us work with the index finger
     // Let us consider that the position of a child, is (0, 1, 0) to the father
+    //_hand.setPositionLocale(landmarks._landmarks[0][0]);
+    //_hand.setPositionLocale(landmarks._landmarks[0][0]);
+    //_hand.setRotationLocale(-90, 0, 0);
+
+    Joint* wrist = _hand.getSkeleton()->skeleton();
     {
-        Joint* wrist = _hand.getSkeleton()->skeleton();
-        wrist->setPositionLocale(landmarks._landmarks[0][0]);
+        Joint* mid_wrist = static_cast<Joint*>(wrist->getChildren()[2]);
+        //_hand.setPositionLocale(landmarks._landmarks[0][0]);
+        //wrist->setPositionLocale(landmarks._landmarks[0][0]);
+        //wrist->setPositionLocale(0, 100, 0);
+        //wrist->setRotationLocale(glm::vec3(glm::radians(180.0f), glm::radians(90.0f), 0.0f));
         {
-            // --- wrist -> thumb ---
-            // Mediapipe vector
             glm::vec3 v_m = landmarks._landmarks[0][9] - landmarks._landmarks[0][0];
-            // Skinning vector
-            glm::vec3 v_s = wrist->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            // Find the rotation matrix to go from Skinning vector to Mediapipe vector
+            glm::vec3 v_s = mid_wrist->getTransformLocale() * glm::vec4(0, 0, 0, 1);
             _alignment_matrices[wrist->id()] = findRotationMatrix(v_s, v_m);
         }
     }
 
-    
-    {// -- THUMB --
-        const Joint* wrist = _hand.getSkeleton()->skeleton();
-        const Joint* fing0 = static_cast<Joint*>(wrist->getChildren()[0]);
-        const Joint* fing1 = static_cast<Joint*>(fing0->getChildren()[0]);
-        const Joint* fing2 = static_cast<Joint*>(fing1->getChildren()[0]);
-        const Joint* fing3 = static_cast<Joint*>(fing2->getChildren()[0]);
-        {
-            // --- wrist -> thumb ---
-            // Mediapipe vector
-            glm::vec3 v_m = landmarks._landmarks[0][1] - landmarks._landmarks[0][0];
-            // Skinning vector
-            glm::vec3 v_s = _alignment_matrices[wrist->id()] * fing0->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            // Find the rotation matrix to go from Skinning vector to Mediapipe vector
-            _alignment_matrices[fing0->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][2] - landmarks._landmarks[0][1];
-            glm::vec3 v_s = _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing1->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing1->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][3] - landmarks._landmarks[0][2];
-            glm::vec3 v_s = _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing2->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing2->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][4] - landmarks._landmarks[0][3];
-            glm::vec3 v_s = _alignment_matrices[fing2->id()] * _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing3->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing3->id()] = findRotationMatrix(v_s, v_m);
-        }
-    }
+    // Thumb
+    fingerAlignement(
+        landmarks,
+        wrist,
+        static_cast<Joint*>(wrist->getChildren()[0]),
+        landmarks._landmarks[0][1] - landmarks._landmarks[0][0],
+        landmarks._landmarks[0][2] - landmarks._landmarks[0][1],
+        landmarks._landmarks[0][3] - landmarks._landmarks[0][2],
+        landmarks._landmarks[0][4] - landmarks._landmarks[0][3]
+    );
+    // Index
+    fingerAlignement(
+        landmarks,
+        wrist,
+        static_cast<Joint*>(wrist->getChildren()[1]),
+        landmarks._landmarks[0][5] - landmarks._landmarks[0][0],
+        landmarks._landmarks[0][6] - landmarks._landmarks[0][5],
+        landmarks._landmarks[0][7] - landmarks._landmarks[0][6],
+        landmarks._landmarks[0][8] - landmarks._landmarks[0][7]
+    );
+    // Middle
+    fingerAlignement(
+        landmarks,
+        wrist,
+        static_cast<Joint*>(wrist->getChildren()[2]),
+        landmarks._landmarks[0][9] - landmarks._landmarks[0][0],
+        landmarks._landmarks[0][10] - landmarks._landmarks[0][9],
+        landmarks._landmarks[0][11] - landmarks._landmarks[0][10],
+        landmarks._landmarks[0][12] - landmarks._landmarks[0][11]
+    );
+    // Ring
+    fingerAlignement(
+        landmarks,
+        wrist,
+        static_cast<Joint*>(wrist->getChildren()[3]),
+        landmarks._landmarks[0][13] - landmarks._landmarks[0][0],
+        landmarks._landmarks[0][14] - landmarks._landmarks[0][13],
+        landmarks._landmarks[0][15] - landmarks._landmarks[0][14],
+        landmarks._landmarks[0][16] - landmarks._landmarks[0][15]
+    );
+    // Pincky
+    fingerAlignement(
+        landmarks,
+        wrist,
+        static_cast<Joint*>(wrist->getChildren()[4]),
+        landmarks._landmarks[0][17] - landmarks._landmarks[0][0],
+        landmarks._landmarks[0][18] - landmarks._landmarks[0][17],
+        landmarks._landmarks[0][19] - landmarks._landmarks[0][18],
+        landmarks._landmarks[0][20] - landmarks._landmarks[0][19]
+    );
+}
 
-    {// INDEX
-        const Joint* wrist = _hand.getSkeleton()->skeleton();
-        const Joint* fing0 = static_cast<Joint*>(wrist->getChildren()[1]);
-        const Joint* fing1 = static_cast<Joint*>(fing0->getChildren()[0]);
-        const Joint* fing2 = static_cast<Joint*>(fing1->getChildren()[0]);
-        const Joint* fing3 = static_cast<Joint*>(fing2->getChildren()[0]);
-        {
-            // --- wrist -> index ---
-            // Mediapipe vector
-            glm::vec3 v_m = landmarks._landmarks[0][5] - landmarks._landmarks[0][0];
-            // Skinning vector
-            glm::vec3 v_s = _alignment_matrices[wrist->id()] * fing0->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            // Find the rotation matrix to go from Skinning vector to Mediapipe vector
-            _alignment_matrices[fing0->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][6] - landmarks._landmarks[0][5];
-            glm::vec3 v_s = _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing1->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing1->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][7] - landmarks._landmarks[0][6];
-            glm::vec3 v_s = _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing2->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing2->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][8] - landmarks._landmarks[0][7];
-            glm::vec3 v_s = _alignment_matrices[fing2->id()] * _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing3->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing3->id()] = findRotationMatrix(v_s, v_m);
-        }
-    }
+void MediapipeAndGLTF::fingerAlignement(
+    const mdph::Landmarks& landmarks,
+    const Joint* wrist,
+    const Joint* wrist_bis,
+    const glm::vec3 vm1,
+    const glm::vec3 vm2,
+    const glm::vec3 vm3,
+    const glm::vec3 vm4
+) {
+    const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+    const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+    const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+    const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
 
-    {// -- MIDDLE --
-        const Joint* wrist = _hand.getSkeleton()->skeleton();
-        const Joint* fing0 = static_cast<Joint*>(wrist->getChildren()[2]);
-        const Joint* fing1 = static_cast<Joint*>(fing0->getChildren()[0]);
-        const Joint* fing2 = static_cast<Joint*>(fing1->getChildren()[0]);
-        const Joint* fing3 = static_cast<Joint*>(fing2->getChildren()[0]);
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][9] - landmarks._landmarks[0][0];
-            glm::vec3 v_s = _alignment_matrices[wrist->id()] * fing0->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing0->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][10] - landmarks._landmarks[0][9];
-            glm::vec3 v_s = _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing1->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing1->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][11] - landmarks._landmarks[0][10];
-            glm::vec3 v_s = _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing2->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing2->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][12] - landmarks._landmarks[0][11];
-            glm::vec3 v_s = _alignment_matrices[fing2->id()] * _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing3->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing3->id()] = findRotationMatrix(v_s, v_m);
-        }
+    {
+        glm::vec3 v_m = vm1;
+        glm::vec3 v_s = _alignment_matrices[wrist->id()] * phal1->getTransformLocale() * glm::vec4(0, 0, 0, 1);
+        _alignment_matrices[wrist_bis->id()] = findRotationMatrix(v_s, v_m);
     }
-
-    {// -- RING --
-        const Joint* wrist = _hand.getSkeleton()->skeleton();
-        const Joint* fing0 = static_cast<Joint*>(wrist->getChildren()[3]);
-        const Joint* fing1 = static_cast<Joint*>(fing0->getChildren()[0]);
-        const Joint* fing2 = static_cast<Joint*>(fing1->getChildren()[0]);
-        const Joint* fing3 = static_cast<Joint*>(fing2->getChildren()[0]);
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][13] - landmarks._landmarks[0][0];
-            glm::vec3 v_s = _alignment_matrices[wrist->id()] * fing0->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing0->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][14] - landmarks._landmarks[0][13];
-            glm::vec3 v_s = _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing1->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing1->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][15] - landmarks._landmarks[0][14];
-            glm::vec3 v_s = _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing2->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing2->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][16] - landmarks._landmarks[0][15];
-            glm::vec3 v_s = _alignment_matrices[fing2->id()] * _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing3->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing3->id()] = findRotationMatrix(v_s, v_m);
-        }
+    {
+        glm::vec3 v_m = vm2;
+        glm::vec3 v_s = _alignment_matrices[wrist_bis->id()] * _alignment_matrices[wrist->id()] * phal2->getTransformLocale() * glm::vec4(0, 0, 0, 1);
+        _alignment_matrices[phal1->id()] = findRotationMatrix(v_s, v_m);
     }
-
-    {// -- PINKY --
-        const Joint* wrist = _hand.getSkeleton()->skeleton();
-        const Joint* fing0 = static_cast<Joint*>(wrist->getChildren()[4]);
-        const Joint* fing1 = static_cast<Joint*>(fing0->getChildren()[0]);
-        const Joint* fing2 = static_cast<Joint*>(fing1->getChildren()[0]);
-        const Joint* fing3 = static_cast<Joint*>(fing2->getChildren()[0]);
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][17] - landmarks._landmarks[0][0];
-            glm::vec3 v_s = _alignment_matrices[wrist->id()] * fing0->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing0->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][18] - landmarks._landmarks[0][17];
-            glm::vec3 v_s = _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing1->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing1->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][19] - landmarks._landmarks[0][18];
-            glm::vec3 v_s = _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing2->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing2->id()] = findRotationMatrix(v_s, v_m);
-        }
-        {
-            glm::vec3 v_m = landmarks._landmarks[0][20] - landmarks._landmarks[0][19];
-            glm::vec3 v_s = _alignment_matrices[fing2->id()] * _alignment_matrices[fing1->id()] * _alignment_matrices[fing0->id()] * _alignment_matrices[wrist->id()] * fing3->getTransformLocale() * glm::vec4(0, 0, 0, 1);
-            _alignment_matrices[fing3->id()] = findRotationMatrix(v_s, v_m);
-        }
+    {
+        glm::vec3 v_m = vm3;
+        glm::vec3 v_s = _alignment_matrices[phal1->id()] * _alignment_matrices[wrist_bis->id()] * _alignment_matrices[wrist->id()] * phal3->getTransformLocale() * glm::vec4(0, 0, 0, 1);
+        _alignment_matrices[phal2->id()] = findRotationMatrix(v_s, v_m);
+    }
+    {
+        glm::vec3 v_m = vm4;
+        glm::vec3 v_s = _alignment_matrices[phal2->id()] * _alignment_matrices[phal1->id()] * _alignment_matrices[wrist_bis->id()] * _alignment_matrices[wrist->id()] * phal4->getTransformLocale() * glm::vec4(0, 0, 0, 1);
+        _alignment_matrices[phal3->id()] = findRotationMatrix(v_s, v_m);
     }
 }
 
@@ -431,6 +403,191 @@ glm::vec3 MediapipeAndGLTF::vectorAngle(glm::vec3 A, glm::vec3 B) {
         );
     }
     return glm::vec3(angle_x, angle_y, angle_z);
+}
+
+void MediapipeAndGLTF::landmarksLookAtMatrices(const mdph::Landmarks& landmarks) {
+    // Let us work with the index finger
+    // Let us consider that the position of a child, is (0, 1, 0) to the father
+    //_hand.setPositionLocale(landmarks._landmarks[0][0]);
+    //_hand.setPositionLocale(landmarks._landmarks[0][0]);
+    //_hand.setRotationLocale(-90, 0, 0);
+    glm::vec3 up = glm::vec3(0, -1, 0);
+    Joint* wrist = _hand.getSkeleton()->skeleton();
+    {
+        Joint* mid_wrist = static_cast<Joint*>(wrist->getChildren()[2]);
+        //_hand.setPositionLocale(landmarks._landmarks[0][0]);
+        wrist->setPositionLocale(landmarks._landmarks[0][0]);
+        glm::vec3 eye = landmarks._landmarks[0][0];
+        glm::vec3 center = landmarks._landmarks[0][9];
+        glm::mat4 align = glm::lookAt(eye, center, up);
+        //wrist->setPositionLocale(0, 100, 0);
+        //wrist->setRotationLocale(glm::vec3(glm::radians(180.0f), glm::radians(90.0f), 0.0f));
+        {
+            glm::vec3 v_m = landmarks._landmarks[0][9] - landmarks._landmarks[0][0];
+            //glm::vec3 v_s = mid_wrist->getTransformLocale() * glm::vec4(0, 0, 0, 1);
+            _alignment_matrices[wrist->id()] = align;
+        }
+    }
+
+    {
+        const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[0]);
+        const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+        const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+        const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+        const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+        {
+            glm::vec3 eye = landmarks._landmarks[0][0];
+            glm::vec3 center = landmarks._landmarks[0][1];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[wrist_bis->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][1];
+            glm::vec3 center = landmarks._landmarks[0][2];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal1->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][2];
+            glm::vec3 center = landmarks._landmarks[0][3];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal2->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][3];
+            glm::vec3 center = landmarks._landmarks[0][4];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal3->id()] = align;
+        }
+    }
+
+    {
+        const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[1]);
+        const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+        const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+        const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+        const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+        {
+            glm::vec3 eye = landmarks._landmarks[0][0];
+            glm::vec3 center = landmarks._landmarks[0][5];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[wrist_bis->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][5];
+            glm::vec3 center = landmarks._landmarks[0][6];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal1->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][6];
+            glm::vec3 center = landmarks._landmarks[0][7];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal2->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][7];
+            glm::vec3 center = landmarks._landmarks[0][8];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal3->id()] = align;
+        }
+    }
+
+    {
+        const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[2]);
+        const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+        const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+        const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+        const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+        {
+            glm::vec3 eye = landmarks._landmarks[0][0];
+            glm::vec3 center = landmarks._landmarks[0][9];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[wrist_bis->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][9];
+            glm::vec3 center = landmarks._landmarks[0][10];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal1->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][10];
+            glm::vec3 center = landmarks._landmarks[0][11];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal2->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][11];
+            glm::vec3 center = landmarks._landmarks[0][12];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal3->id()] = align;
+        }
+    }
+
+    {
+        const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[3]);
+        const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+        const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+        const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+        const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+        {
+            glm::vec3 eye = landmarks._landmarks[0][0];
+            glm::vec3 center = landmarks._landmarks[0][13];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[wrist_bis->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][13];
+            glm::vec3 center = landmarks._landmarks[0][14];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal1->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][14];
+            glm::vec3 center = landmarks._landmarks[0][15];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal2->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][15];
+            glm::vec3 center = landmarks._landmarks[0][16];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal3->id()] = align;
+        }
+    }
+
+    {
+        const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[4]);
+        const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+        const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+        const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+        const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+        {
+            glm::vec3 eye = landmarks._landmarks[0][0];
+            glm::vec3 center = landmarks._landmarks[0][17];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[wrist_bis->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][17];
+            glm::vec3 center = landmarks._landmarks[0][18];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal1->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][18];
+            glm::vec3 center = landmarks._landmarks[0][19];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal2->id()] = align;
+        }
+        {
+            glm::vec3 eye = landmarks._landmarks[0][19];
+            glm::vec3 center = landmarks._landmarks[0][20];
+            glm::mat4 align = glm::lookAt(eye, center, up);
+            _alignment_matrices[phal3->id()] = align;
+        }
+    }
 }
 
 
@@ -745,4 +902,120 @@ void MediapipeAndGLTF::createShaderHand() {
         "textures",
         Object3D::getTextures2D(DefaultConf::renderer, &_lbs_shader)
     );
+}
+
+void MediapipeAndGLTF::createDebugShader() {
+    _debug_shader.setNbFrame(DefaultConf::NB_FRAME);
+    _debug_shader.setDevice(DefaultConf::logical_device->getDevice());
+    _debug_shader.read(
+        "../../shaders/debug/debug.vert",
+        "../../shaders/debug/debug.frag"
+    );
+    // -- Vertex Shader -- //
+    // Configuring the Graphic Shader
+    _debug_shader.addVertexBufferInfo(
+        "coord",
+        Object3D::getCoordsStride(DefaultConf::renderer, &_debug_shader),
+        VK_FORMAT_R32G32B32_SFLOAT,
+        0
+    );
+    _debug_shader.addVertexBufferInfo(
+        "object_id",
+        Object3D::getMeshOffsetsStride(DefaultConf::renderer, &_debug_shader),
+        VK_FORMAT_R32_UINT,
+        1
+    );
+    _debug_shader.addVertexBufferInfo(
+        "material_id",
+        Object3D::getMaterialIndicesStride(DefaultConf::renderer, &_debug_shader),
+        VK_FORMAT_R32_UINT,
+        2
+    );
+
+    // Index Buffer
+    _debug_shader.addIndexBufferInfo(
+        "index",
+        Object3D::getIndicesNbElem(DefaultConf::renderer, &_debug_shader)
+    );
+
+    // Push constant
+    _debug_shader.addPushConstantInfo(
+        "pc",
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(DefaultConf::camera->getMVPC())
+    );
+
+    // Storage Buffers
+// transform
+    _debug_shader.addStorageBufferInfo(
+        "obj_tr",
+        1,
+        VK_SHADER_STAGE_VERTEX_BIT
+    );
+
+    // -- Fragment shader -- //
+    // materials
+    _debug_shader.addStorageBufferInfo(
+        "MaterialsBuffer",
+        2,
+        VK_SHADER_STAGE_FRAGMENT_BIT
+    );
+
+    //----------------------//
+    // Creating the buffers //
+    //----------------------//
+    // Coord
+    // Mesh offsets
+    _coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+        DefaultConf::logical_device->getDevice(),
+        Object3D::getCoordsSize(DefaultConf::renderer, &_debug_shader),
+        Object3D::getCoords(DefaultConf::renderer, &_debug_shader).data()
+    );
+    _debug_shader.addVertexBuffer("coord", &_coord_buffer);
+
+    _object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+        DefaultConf::logical_device->getDevice(),
+        Object3D::getObjectIdSize(DefaultConf::renderer, &_debug_shader),
+        Object3D::getObjectId(DefaultConf::renderer, &_debug_shader).data()
+    );
+    _debug_shader.addVertexBuffer("object_id", &_object_id_buffer);
+
+    _material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+        DefaultConf::logical_device->getDevice(),
+        Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_debug_shader),
+        Object3D::getMaterialIndices(DefaultConf::renderer, &_debug_shader).data()
+    );
+    _debug_shader.addVertexBuffer("material_id", &_material_indices_buffer);
+
+
+    // Index buffer
+    _index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
+        DefaultConf::logical_device->getDevice(),
+        Object3D::getIndicesSize(DefaultConf::renderer, &_debug_shader),
+        Object3D::getIndices(DefaultConf::renderer, &_debug_shader).data()
+    );
+    _debug_shader.addIndexBuffer("index", &_index_buffer);
+
+    // Push Constant
+    _camera = DefaultConf::camera->getMVPC();
+    _debug_shader.addPushConstant("pc", &_camera[0][0]);
+
+
+    // Storage Buffers
+    // transform
+    _obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+        DefaultConf::logical_device->getDevice(),
+        Object3D::getTransformMatricesSize(DefaultConf::renderer, &_debug_shader),
+        Object3D::getTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
+    );
+    _debug_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
+
+    // materials
+    _materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+        DefaultConf::logical_device->getDevice(),
+        Object3D::getMaterialsSize(DefaultConf::renderer, &_debug_shader),
+        Object3D::getMaterials(DefaultConf::renderer, &_debug_shader).data()
+    );
+    _debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
 }

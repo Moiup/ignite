@@ -21,6 +21,9 @@ private:
 	std::vector<uint32_t> _cross_material_indices;
 	Object3D _cross_obj;
 
+	LoadedObjectInfo _ground_obj_info;
+	Object3D _ground;
+
 public:
 	GraphicShader _debug_shader;
 

@@ -58,6 +58,7 @@ private:
     std::vector<glm::mat4> _alignment_matrices;
     std::vector<glm::mat4> _transform_matrices;
 
+    mdp::Landmarks _landmarks;
 
     uint32_t _frame_i;
     std::vector<glm::vec3> _wrist_pos;
@@ -118,5 +119,7 @@ private:
     std::vector<uint32_t> cubeIndex();
 
     void createShaderDebug();
+
+    void readMediapipeFile(const std::string& path);
 };
 

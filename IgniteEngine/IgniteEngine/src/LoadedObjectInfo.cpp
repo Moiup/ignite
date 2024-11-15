@@ -1,4 +1,4 @@
-#include "LoadedObjectInfo.h"
+ #include "LoadedObjectInfo.h"
 
 #define TINYGLTF_IMPLEMENTATION
 #include "tiny_gltf/tiny_gltf.h"

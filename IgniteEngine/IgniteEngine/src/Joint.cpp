@@ -99,6 +99,12 @@ void Joint::toStringChild(std::string& s, std::string tabs, int nb_tab, bool is_
 		s = s + makeString(inverseBindMatrices(), tabs);
 		s = s + tabs + "  T * IBM:\n";
 		s = s + makeString(getTransform() * inverseBindMatrices(), tabs);
+		s = s + tabs + "  Position Locale\n";
+		s = s + tabs + makeString(glm::vec4(getPositionLocale(), 1.0f));
+		s = s + "\n";
+		s = s + tabs + "  Position Globale\n";
+		s = s + tabs + makeString(getTransformParent() * glm::vec4(getPositionLocale(), 1.0f));
+		s = s + "\n";
 	}
 
 	for (Entity3D* c : _children) {

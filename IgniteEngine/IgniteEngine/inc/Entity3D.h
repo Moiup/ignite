@@ -86,6 +86,7 @@ public:
 	glm::mat4 getScale() const;
 
 	glm::mat4 getTransform() const;
+	glm::mat4 getTransformParent() const;
 	glm::mat4 getTransformLocale() const;
 	/**
 	* Must call buildTransformWorld() from the father node before 

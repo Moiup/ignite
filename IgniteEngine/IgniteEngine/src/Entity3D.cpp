@@ -306,7 +306,7 @@ glm::mat4 Entity3D::getRotateLocale() const {
 		glm::vec3(0, 0, 1.0f)
 	);
 
-	return r_x * r_y * r_z;
+	return r_z * r_y * r_x;
 }
 
 glm::mat4 Entity3D::getScale() const {
@@ -318,6 +318,16 @@ glm::mat4 Entity3D::getScale() const {
 
 glm::mat4 Entity3D::getTransformLocale() const {
 	return getTranslateLocale() * getRotateLocale() * getScale();
+}
+
+glm::mat4 Entity3D::getTransformParent() const {
+	glm::mat4 par = glm::mat4(1.0);
+	if (_parent) {
+		par = _parent->getTransformLocale();
+		par = _parent->getTransformParent() * par;
+	}
+
+	return par;
 }
 
 glm::mat4 Entity3D::getTransform() const {

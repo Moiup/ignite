@@ -296,6 +296,7 @@ void LoadedObjectInfo::loadGLTF(const std::string& file_name) {
 					node.rotation[1],
 					node.rotation[2]
 				);
+
 				glm::vec3 rot = glm::eulerAngles(q);
 				joint.setRotationLocale(rot);
 			}

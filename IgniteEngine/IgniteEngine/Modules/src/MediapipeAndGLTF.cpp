@@ -356,6 +356,19 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
 
 	}
 
+	for (int32_t i = 0; i < 5; i++) {
+		int32_t land_i = i * 4;
+		fingerAlignement(
+			landmarks,
+			wrist,
+			static_cast<Joint*>(wrist->getChildren()[i]),
+			landmarks._landmarks[0][land_i + 1],
+			landmarks._landmarks[0][land_i + 2],
+			landmarks._landmarks[0][land_i + 3],
+			landmarks._landmarks[0][land_i + 4]
+		);
+	}
+
 
 	//// Thumb
 	//fingerAlignement(
@@ -367,16 +380,16 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
 	//    landmarks._landmarks[0][3] - landmarks._landmarks[0][2],
 	//    landmarks._landmarks[0][4] - landmarks._landmarks[0][3]
 	//);
-	// Index
-	fingerAlignement(
-		landmarks,
-		wrist,
-		static_cast<Joint*>(wrist->getChildren()[1]),
-		landmarks._landmarks[0][5],
-		landmarks._landmarks[0][6],
-		landmarks._landmarks[0][7],
-		landmarks._landmarks[0][8]
-	);
+	//// Index
+	//fingerAlignement(
+	//	landmarks,
+	//	wrist,
+	//	static_cast<Joint*>(wrist->getChildren()[1]),
+	//	landmarks._landmarks[0][5],
+	//	landmarks._landmarks[0][6],
+	//	landmarks._landmarks[0][7],
+	//	landmarks._landmarks[0][8]
+	//);
 	//// Middle
 	//fingerAlignement(
 	//    landmarks,
@@ -438,11 +451,10 @@ void MediapipeAndGLTF::fingerAlignement(
 		_alignment_matrices[wrist_bis->id()] = findRotationMatrix(v_s, v_m);
 
 		glm::vec3 result =
-			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
-			* _alignment_matrices[wrist_bis->id()] * wrist_bis->getTransformLocale()
+			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
+			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
 			* phal1->getTransformLocale()
 			* glm::vec4(0, 0, 0, 1);
-
 
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -454,9 +466,9 @@ void MediapipeAndGLTF::fingerAlignement(
 		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[wrist_bis->id()] * glm::vec4(v_s, 1.0))) << std::endl;
 		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
 		std::cout << std::endl;
-		std::cout << "target: " << makeString(v_m) << std::endl;
+		std::cout << "target: " << makeString(target) << std::endl;
 		std::cout << "result: " << makeString(result) << std::endl;
-		std::cout << "diff  : " << makeString(v_m - result) << std::endl;
+		std::cout << "diff  : " << makeString(target - result) << std::endl;
 		std::cout << std::endl;
 		std::cout << "alignment matrix" << std::endl;
 		std::cout << makeString(_alignment_matrices[wrist_bis->id()]) << std::endl;

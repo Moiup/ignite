@@ -1,7 +1,7 @@
 #include "MediapipeAndGLTF.h"
 
 #define IS_NETWORK 0
-#define IS_GLTF 1
+#define IS_GLTF 0
 
 MediapipeAndGLTF::MediapipeAndGLTF() : Module::Module() {
 	;
@@ -114,6 +114,33 @@ void MediapipeAndGLTF::start() {
 void MediapipeAndGLTF::update() {
 	Module::update();
 
+
+	const Joint* wrist = _hand.getSkeleton()->skeleton();
+	glm::mat4 wrist_tr = _alignment_matrices[wrist->id()] * wrist->getTransformLocale();
+	_transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
+	for (int i = 0; i < 5; ++i) {
+		const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
+		const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+		const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+		const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+		const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+
+		glm::mat4 tr = _alignment_matrices[wrist_bis->id()] * wrist_tr * wrist_bis->getTransformLocale();
+		_transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
+
+		tr = _alignment_matrices[phal1->id()] * tr * phal1->getTransformLocale();
+		_transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
+
+		tr = _alignment_matrices[phal2->id()] * tr * phal2->getTransformLocale();
+		_transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
+
+		tr = _alignment_matrices[phal3->id()] * tr * phal3->getTransformLocale();
+		_transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
+
+		//tr = tr * phal4->getTransformLocale();
+		//_transform_matrices[phal4->id()] = tr * phal4->inverseBindMatrices();
+	}
+
 	//const Joint* wrist = _hand.getSkeleton()->skeleton();
 	//glm::mat4 wrist_tr = _alignment_matrices[wrist->id()] * wrist->getTransformLocale();
 	//_transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
@@ -140,27 +167,27 @@ void MediapipeAndGLTF::update() {
 	//    //_transform_matrices[phal4->id()] = tr * phal4->inverseBindMatrices();
 	//}
 
-	const Joint* wrist = _hand.getSkeleton()->skeleton();
-	glm::mat4 wrist_tr = wrist->getTransformLocale() * _alignment_matrices[wrist->id()];
-	_transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
-	for (int i = 0; i < 5; ++i) {
-		const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
-		const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
-		const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
-		const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+	//const Joint* wrist = _hand.getSkeleton()->skeleton();
+	//glm::mat4 wrist_tr = wrist->getTransformLocale() * _alignment_matrices[wrist->id()];
+	//_transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
+	//for (int i = 0; i < 5; ++i) {
+	//	const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
+	//	const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+	//	const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+	//	const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
 
-		glm::mat4 tr = wrist_tr * wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()];
-		_transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
+	//	glm::mat4 tr = wrist_tr * wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()];
+	//	_transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
 
-		tr = tr * phal1->getTransformLocale() * _alignment_matrices[phal1->id()];
-		_transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
+	//	tr = tr * phal1->getTransformLocale() * _alignment_matrices[phal1->id()];
+	//	_transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
 
-		tr = tr * phal2->getTransformLocale() * _alignment_matrices[phal2->id()];
-		_transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
+	//	tr = tr * phal2->getTransformLocale() * _alignment_matrices[phal2->id()];
+	//	_transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
 
-		tr = tr * phal3->getTransformLocale() * _alignment_matrices[phal3->id()];
-		_transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
-	}
+	//	tr = tr * phal3->getTransformLocale() * _alignment_matrices[phal3->id()];
+	//	_transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
+	//}
 
 	_camera = DefaultConf::camera->getMVPC();
 
@@ -309,65 +336,67 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
 	std::cout << "landmarksRotationMatrices" << std::endl;
 
 	Joint* wrist = _hand.getSkeleton()->skeleton();
-	//wrist->setPositionLocale(landmarks._landmarks[0][0]);
-	//{
-	//    Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[2]);
-	//    const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
-
-	//    glm::mat4 m1 = wrist->getTransformLocale();
-
-	//    glm::vec3 v_m = glm::inverse(m1) * (m1 * glm::vec4(0, 0, 0, 1) + glm::vec4(landmarks._landmarks[0][9] - landmarks._landmarks[0][0], 0.0f));
-
-	//    glm::vec3 v_s =
-	//        glm::inverse(m1)
-	//        * wrist->getTransformLocale()
-	//        * wrist_bis->getTransformLocale()
-	//        * glm::vec4(phal1->getPositionLocale(), 1);
-
-	//    _alignment_matrices[wrist->id()] = findRotationMatrix(v_s, v_m);
-
-	//    std::cout << makeString(glm::normalize(v_s)) << std::endl;
-	//    std::cout << makeString(glm::normalize(v_m)) << std::endl;
-
-	//    std::cout << "_alignment_matrices[wrist->id()]" << std::endl;
-	//    std::cout << makeString(_alignment_matrices[wrist->id()]) << std::endl;
-
-	//}
+	std::cout << "wrist pos: " << makeString(wrist->getPositionLocale()) << std::endl;
 	{
 		Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[2]);
 		const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
-		glm::vec3 v_m = landmarks._landmarks[0][9] - landmarks._landmarks[0][0];
-		glm::vec3 v_s = wrist->getTransformLocale() * wrist_bis->getTransformLocale() * glm::vec4(phal1->getPositionLocale(), 1);
+		//wrist->setPositionLocale(landmarks._landmarks[0][0]);
+
+		glm::mat4 l2w =
+			wrist->getTransformLocale()
+			/** wrist_bis->getTransformLocale()*/;
+
+		glm::vec3 v_s = l2w * wrist_bis->getTransformLocale() * glm::vec4(phal1->getPositionLocale(), 1.0);
+
+		glm::vec3 target = glm::vec3(0, 1, 0) * glm::length(v_s);
+		//glm::vec3 target = glm::normalize(_landmarks._landmarks[0][9] - _landmarks._landmarks[0][0]) * glm::length(v_s);
+		std::cout << "length: " << glm::length(target) << std::endl;
+		std::cout << "length: " << glm::length(v_s) << std::endl;
+		glm::vec3 v_m = target;
+		v_m = glm::vec4(v_m, 1.0);
+
 		_alignment_matrices[wrist->id()] = findRotationMatrix(v_s, v_m);
 
+		glm::vec3 result =
+			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
+			* wrist_bis->getTransformLocale()
+			* phal1->getTransformLocale()
+			* glm::vec4(0, 0, 0, 1);
+
 		std::cout << std::endl;
 		std::cout << std::endl;
 
-		std::cout << "wrist" << std::endl;
-		std::cout << makeString(v_s) << std::endl;
-		std::cout << makeString(glm::normalize(_alignment_matrices[wrist->id()] * glm::vec4(v_s, 1.0))) << std::endl;
-		std::cout << makeString(glm::normalize(v_m)) << std::endl;
-
+		std::cout << "wrist:" << std::endl;
+		std::cout << "v_m: " << makeString(v_m) << std::endl;
+		std::cout << "v_s: " << makeString(v_s) << std::endl;
+		std::cout << std::endl;
+		std::cout << "a * v_s           : " << makeString(_alignment_matrices[wrist->id()] * glm::vec4(v_s, 1.0)) << std::endl;
+		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[wrist->id()] * glm::vec4(v_s, 1.0))) << std::endl;
+		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
+		std::cout << std::endl;
+		std::cout << "target: " << makeString(target) << std::endl;
+		std::cout << "result: " << makeString(result) << std::endl;
+		std::cout << "diff  : " << makeString(target - result) << std::endl;
+		std::cout << std::endl;
 		std::cout << "alignment matrix" << std::endl;
 		std::cout << makeString(_alignment_matrices[wrist->id()]) << std::endl;
 
 		std::cout << std::endl;
 		std::cout << std::endl;
-
 	}
 
-	for (int32_t i = 0; i < 5; i++) {
-		int32_t land_i = i * 4;
-		fingerAlignement(
-			landmarks,
-			wrist,
-			static_cast<Joint*>(wrist->getChildren()[i]),
-			landmarks._landmarks[0][land_i + 1],
-			landmarks._landmarks[0][land_i + 2],
-			landmarks._landmarks[0][land_i + 3],
-			landmarks._landmarks[0][land_i + 4]
-		);
-	}
+	//for (int32_t i = 2; i < 3; i++) {
+	//	int32_t land_i = i * 4;
+	//	fingerAlignement(
+	//		landmarks,
+	//		wrist,
+	//		static_cast<Joint*>(wrist->getChildren()[i]),
+	//		landmarks._landmarks[0][land_i + 1],
+	//		landmarks._landmarks[0][land_i + 2],
+	//		landmarks._landmarks[0][land_i + 3],
+	//		landmarks._landmarks[0][land_i + 4]
+	//	);
+	//}
 
 
 	//// Thumb
@@ -380,16 +409,16 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
 	//    landmarks._landmarks[0][3] - landmarks._landmarks[0][2],
 	//    landmarks._landmarks[0][4] - landmarks._landmarks[0][3]
 	//);
-	//// Index
-	//fingerAlignement(
-	//	landmarks,
-	//	wrist,
-	//	static_cast<Joint*>(wrist->getChildren()[1]),
-	//	landmarks._landmarks[0][5],
-	//	landmarks._landmarks[0][6],
-	//	landmarks._landmarks[0][7],
-	//	landmarks._landmarks[0][8]
-	//);
+	// Index
+	fingerAlignement(
+		landmarks,
+		wrist,
+		static_cast<Joint*>(wrist->getChildren()[1]),
+		landmarks._landmarks[0][5],
+		landmarks._landmarks[0][6] - landmarks._landmarks[0][5],
+		landmarks._landmarks[0][7] - landmarks._landmarks[0][6],
+		landmarks._landmarks[0][8]
+	);
 	//// Middle
 	//fingerAlignement(
 	//    landmarks,
@@ -437,22 +466,37 @@ void MediapipeAndGLTF::fingerAlignement(
 	const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
 
 	{
-		glm::vec3 target = vm1;
-		glm::vec3 v_m = target;
-
 		glm::mat4 l2w =
-			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
-			* wrist_bis->getTransformLocale();
+			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
+			* wrist_bis->getRotateLocale();
 
-		v_m = glm::inverse(l2w) * glm::vec4(v_m, 1.0);
+		glm::vec3 start =
+			_alignment_matrices[wrist->id()]
+			* wrist->getTransformLocale()
+			* glm::vec4(0, 0, 0, 1);
 
-		glm::vec3 v_s = glm::vec4(phal1->getPositionLocale(), 1.0);
+		glm::vec3 end =
+			_alignment_matrices[wrist->id()]
+			* wrist->getTransformLocale()
+			* wrist_bis->getTransformLocale()
+			* phal1->getTransformLocale()
+			* glm::vec4(0, 0, 0, 1);
+
+		//glm::vec3 v_s = glm::vec4(phal1->getPositionLocale(), 1.0);
+		glm::vec3 v_s = end - start;
+
+		//glm::vec3 target = vm1;
+		glm::vec3 target = glm::vec3(0, 1, 0) * glm::length(v_s);
+		glm::vec3 v_m = target;
+		//v_m = glm::inverse(l2w) * glm::vec4(v_m, 1.0);
 
 		_alignment_matrices[wrist_bis->id()] = findRotationMatrix(v_s, v_m);
 
 		glm::vec3 result =
-			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
-			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
+			_alignment_matrices[wrist_bis->id()]
+			* _alignment_matrices[wrist->id()]
+			* wrist->getTransformLocale()
+			* wrist_bis->getTransformLocale()
 			* phal1->getTransformLocale()
 			* glm::vec4(0, 0, 0, 1);
 
@@ -460,8 +504,9 @@ void MediapipeAndGLTF::fingerAlignement(
 		std::cout << std::endl;
 
 		std::cout << "wrist_bis:" << std::endl;
-		std::cout << "v_m: " << makeString(v_m) << std::endl;
-		std::cout << "v_s: " << makeString(v_s) << std::endl;
+		//std::cout << "pos: " << makeString(phal1->getPositionLocale()) << std::endl;
+		std::cout << "v_m: " << makeString(v_m) << " -- " << glm::length(v_m) << std::endl;
+		std::cout << "v_s: " << makeString(v_s) << " -- " << glm::length(v_s) << std::endl;
 		std::cout << std::endl;
 		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[wrist_bis->id()] * glm::vec4(v_s, 1.0))) << std::endl;
 		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
@@ -476,156 +521,168 @@ void MediapipeAndGLTF::fingerAlignement(
 		std::cout << std::endl;
 		std::cout << std::endl;
 	}
-	{
-		//glm::vec3 v_m = vm2;
-		glm::vec3 target = vm2;
-		glm::vec3 v_m = target;
+	//{
+	//	//glm::vec3 v_m = vm2;
 
-		glm::mat4 l2w =
-			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
-			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
-			* phal1->getTransformLocale();
+	//	glm::vec3 start = 
+	//		wrist->getTransformLocale()
+	//		* wrist_bis->getTransformLocale()
+	//		* phal1->getTransformLocale()
+	//		* glm::vec4(0, 0, 0, 1)
+	//		;
 
-		v_m = glm::inverse(l2w) * glm::vec4(v_m, 1.0);
+	//	glm::vec3 end =
+	//		wrist->getTransformLocale()
+	//		* wrist_bis->getTransformLocale()
+	//		* phal1->getTransformLocale()
+	//		* phal2->getTransformLocale()
+	//		* glm::vec4(0, 0, 0, 1)
+	//		;
 
-		//glm::vec3 phal2_pos =
-		//	wrist->getTransformLocale()
-		//	* wrist_bis->getTransformLocale()
-		//	* phal1->getTransformLocale()
-		//	* phal2->getTransformLocale()
-		//	* glm::vec4(0, 0, 0, 1.0);
+	//	//glm::vec3 v_s = glm::vec4(phal2->getPositionLocale(), 1.0);
+	//	glm::vec3 v_s = 
+	//		_alignment_matrices[wrist->id()]
+	//		* _alignment_matrices[wrist_bis->id()]
+	//		* glm::vec4(end - start, 1.0f);
+	//	//glm::vec3 v_s = glm::inverse(l2w) * glm::vec4(end, 1.0);
 
-		glm::vec3 v_s = glm::vec4(phal2->getPositionLocale(), 1.0);
+	//	//glm::vec3 target = vm2;
+	//	glm::vec3 target = glm::vec3(0, 1, 0) * glm::length(v_s);
+	//	glm::vec3 v_m = target;
 
-		_alignment_matrices[phal1->id()] = findRotationMatrix(v_s, v_m);
-
-		glm::vec3 result =
-			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
-			* _alignment_matrices[wrist_bis->id()] * wrist_bis->getTransformLocale()
-			* _alignment_matrices[phal1->id()] * phal1->getTransformLocale()
-			* phal2->getTransformLocale()
-			* glm::vec4(0, 0, 0, 1);
-
-
-		std::cout << std::endl;
-		std::cout << std::endl;
-
-		std::cout << "phal1:" << std::endl;
-		std::cout << "v_m: " << makeString(v_m) << std::endl;
-		std::cout << "v_s: " << makeString(v_s) << std::endl;
-		std::cout << std::endl;
-		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[phal1->id()] * glm::vec4(v_s, 1.0))) << std::endl;
-		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
-		std::cout << std::endl;
-		std::cout << "target: " << makeString(target) << std::endl;
-		std::cout << "result: " << makeString(result) << std::endl;
-		std::cout << "diff  : " << makeString(target - result) << std::endl;
-		std::cout << std::endl;
-		std::cout << "alignment matrix" << std::endl;
-		std::cout << makeString(_alignment_matrices[phal1->id()]) << std::endl;
-
-		std::cout << std::endl;
-		std::cout << std::endl;
-	}
-
-	{
-		glm::vec3 target = vm3;
-		glm::vec3 v_m = target;
-
-		glm::mat4 l2w =
-			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
-			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
-			* phal1->getTransformLocale() * _alignment_matrices[phal1->id()]
-			* phal2->getTransformLocale();
-
-		v_m = glm::inverse(l2w) * glm::vec4(v_m, 1.0);
-
-		//glm::vec3 v_m = vm3;
-		glm::vec3 v_s = glm::vec4(phal3->getPositionLocale(), 1.0);
-
-		_alignment_matrices[phal2->id()] = findRotationMatrix(v_s, v_m);
+	//	v_m = glm::vec4(v_m, 1.0);
 
 
-		glm::vec3 result =
-			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
-			* _alignment_matrices[wrist_bis->id()] * wrist_bis->getTransformLocale()
-			* _alignment_matrices[phal1->id()] * phal1->getTransformLocale()
-			* phal2->getTransformLocale() * _alignment_matrices[phal2->id()]
-			* phal3->getTransformLocale()
-			* glm::vec4(0, 0, 0, 1);
+	//	_alignment_matrices[phal1->id()] = findRotationMatrix(v_s, v_m);
 
-		
+	//	glm::vec3 result =
+	//		_alignment_matrices[phal1->id()] * _alignment_matrices[wrist_bis->id()] * _alignment_matrices[wrist->id()]
+	//		* wrist->getTransformLocale()
+	//		* wrist_bis->getTransformLocale()
+	//		* phal1->getTransformLocale()
+	//		* phal2->getTransformLocale()
+	//		* glm::vec4(0, 0, 0, 1);
 
-		std::cout << std::endl;
-		std::cout << std::endl;
+	//	std::cout << std::endl;
+	//	std::cout << std::endl;
 
-		std::cout << "phal2:" << std::endl;
-		std::cout << "v_m:     " << makeString(v_m) << " -- " << glm::length(v_m) << std::endl;
-		std::cout << "v_s:     " << makeString(v_s) << " -- " << glm::length(v_s) << std::endl;
-		std::cout << "a * v_s: " << makeString(_alignment_matrices[phal2->id()] * glm::vec4(v_s, 1.0)) << std::endl;
-		std::cout << std::endl;
-		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[phal2->id()] * glm::vec4(v_s, 1.0))) << std::endl;
-		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
-		std::cout << std::endl;
-		std::cout << "target: " << makeString(target) << std::endl;
-		std::cout << "result: " << makeString(result) << std::endl;
-		std::cout << "diff  : " << makeString(target - result) << std::endl;
-		std::cout << std::endl;
-		std::cout << "alignment matrix" << std::endl;
-		std::cout << makeString(_alignment_matrices[phal2->id()]) << std::endl;
+	//	std::cout << "phal1:" << std::endl;
+	//	//std::cout << "pos: " << makeString(phal2->getPositionLocale()) << std::endl;
+	//	std::cout << "v_m: " << makeString(v_m) << " -- " << glm::length(v_m) << std::endl;
+	//	std::cout << "v_s: " << makeString(v_s) << " -- " << glm::length(v_s) << std::endl;
+	//	std::cout << std::endl;
+	//	std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[phal1->id()] * glm::vec4(v_s, 1.0))) << std::endl;
+	//	std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
+	//	std::cout << std::endl;
+	//	std::cout << "target: " << makeString(target) << std::endl;
+	//	std::cout << "result: " << makeString(result) << std::endl;
+	//	std::cout << "diff  : " << makeString(target - result) << std::endl;
+	//	std::cout << std::endl;
+	//	std::cout << "alignment matrix" << std::endl;
+	//	std::cout << makeString(_alignment_matrices[phal1->id()]) << std::endl;
 
-		std::cout << std::endl;
-		std::cout << std::endl;
-	}
-	{
-		glm::vec3 target = vm4;
-		glm::vec3 v_m = target;
+	//	std::cout << std::endl;
+	//	std::cout << std::endl;
+	//}
 
-		glm::mat4 l2w =
-			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
-			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
-			* phal1->getTransformLocale() * _alignment_matrices[phal1->id()]
-			* phal2->getTransformLocale() * _alignment_matrices[phal2->id()]
-			* phal3->getTransformLocale();
-
-		v_m = glm::inverse(l2w) * glm::vec4(v_m, 1.0);
-
-		//glm::vec3 v_m = vm3;
-		glm::vec3 v_s = glm::vec4(phal3->getPositionLocale(), 1.0);
-
-		_alignment_matrices[phal3->id()] = findRotationMatrix(v_s, v_m);
-
-
-		glm::vec3 result =
-			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
-			* _alignment_matrices[wrist_bis->id()] * wrist_bis->getTransformLocale()
-			* _alignment_matrices[phal1->id()] * phal1->getTransformLocale()
-			* phal2->getTransformLocale() * _alignment_matrices[phal2->id()]
-			* phal3->getTransformLocale() * _alignment_matrices[phal3->id()]
-			* phal4->getTransformLocale()
-			* glm::vec4(0, 0, 0, 1);
-
-		std::cout << std::endl;
-		std::cout << std::endl;
-
-		std::cout << "phal3:" << std::endl;
-		std::cout << "v_m:     " << makeString(v_m) << " -- " << glm::length(v_m) << std::endl;
-		std::cout << "v_s:     " << makeString(v_s) << " -- " << glm::length(v_s) << std::endl;
-		std::cout << "a * v_s: " << makeString(_alignment_matrices[phal3->id()] * glm::vec4(v_s, 1.0)) << std::endl;
-		std::cout << std::endl;
-		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[phal3->id()] * glm::vec4(v_s, 1.0))) << std::endl;
-		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
-		std::cout << std::endl;
-		std::cout << "target: " << makeString(target) << std::endl;
-		std::cout << "result: " << makeString(result) << std::endl;
-		std::cout << "diff  : " << makeString(target - result) << std::endl;
-		std::cout << std::endl;
-		std::cout << "alignment matrix" << std::endl;
-		std::cout << makeString(_alignment_matrices[phal3->id()]) << std::endl;
-
-		std::cout << std::endl;
-		std::cout << std::endl;
-	}
+//	{
+//		glm::vec3 target = vm3;
+//		glm::vec3 v_m = target;
+//
+//		glm::mat4 l2w =
+//			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
+//			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
+//			* phal1->getTransformLocale() * _alignment_matrices[phal1->id()]
+//			* phal2->getTransformLocale();
+//
+//		v_m = glm::inverse(l2w) * glm::vec4(v_m, 1.0);
+//
+//		//glm::vec3 v_m = vm3;
+//		glm::vec3 v_s = glm::vec4(phal3->getPositionLocale(), 1.0);
+//
+//		_alignment_matrices[phal2->id()] = findRotationMatrix(v_s, v_m);
+//
+//
+//		glm::vec3 result =
+//			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
+//			* _alignment_matrices[wrist_bis->id()] * wrist_bis->getTransformLocale()
+//			* _alignment_matrices[phal1->id()] * phal1->getTransformLocale()
+//			* phal2->getTransformLocale() * _alignment_matrices[phal2->id()]
+//			* phal3->getTransformLocale()
+//			* glm::vec4(0, 0, 0, 1);
+//
+//		
+//
+//		std::cout << std::endl;
+//		std::cout << std::endl;
+//
+//		std::cout << "phal2:" << std::endl;
+//		std::cout << "v_m:     " << makeString(v_m) << " -- " << glm::length(v_m) << std::endl;
+//		std::cout << "v_s:     " << makeString(v_s) << " -- " << glm::length(v_s) << std::endl;
+//		std::cout << "a * v_s: " << makeString(_alignment_matrices[phal2->id()] * glm::vec4(v_s, 1.0)) << std::endl;
+//		std::cout << std::endl;
+//		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[phal2->id()] * glm::vec4(v_s, 1.0))) << std::endl;
+//		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
+//		std::cout << std::endl;
+//		std::cout << "target: " << makeString(target) << std::endl;
+//		std::cout << "result: " << makeString(result) << std::endl;
+//		std::cout << "diff  : " << makeString(target - result) << std::endl;
+//		std::cout << std::endl;
+//		std::cout << "alignment matrix" << std::endl;
+//		std::cout << makeString(_alignment_matrices[phal2->id()]) << std::endl;
+//
+//		std::cout << std::endl;
+//		std::cout << std::endl;
+//	}
+//	{
+//		glm::vec3 target = vm4;
+//		glm::vec3 v_m = target;
+//
+//		glm::mat4 l2w =
+//			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
+//			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
+//			* phal1->getTransformLocale() * _alignment_matrices[phal1->id()]
+//			* phal2->getTransformLocale() * _alignment_matrices[phal2->id()]
+//			* phal3->getTransformLocale();
+//
+//		v_m = glm::inverse(l2w) * glm::vec4(v_m, 1.0);
+//
+//		//glm::vec3 v_m = vm3;
+//		glm::vec3 v_s = glm::vec4(phal3->getPositionLocale(), 1.0);
+//
+//		_alignment_matrices[phal3->id()] = findRotationMatrix(v_s, v_m);
+//
+//
+//		glm::vec3 result =
+//			wrist->getTransformLocale() * _alignment_matrices[wrist->id()]
+//			* wrist_bis->getTransformLocale() * _alignment_matrices[wrist_bis->id()]
+//			* phal1->getTransformLocale() * _alignment_matrices[phal1->id()]
+//			* phal2->getTransformLocale() * _alignment_matrices[phal2->id()]
+//			* phal3->getTransformLocale() * _alignment_matrices[phal3->id()]
+//			* phal4->getTransformLocale()
+//			* glm::vec4(0, 0, 0, 1);
+//
+//		std::cout << std::endl;
+//		std::cout << std::endl;
+//
+//		std::cout << "phal3:" << std::endl;
+//		std::cout << "v_m:     " << makeString(v_m) << " -- " << glm::length(v_m) << std::endl;
+//		std::cout << "v_s:     " << makeString(v_s) << " -- " << glm::length(v_s) << std::endl;
+//		std::cout << "a * v_s: " << makeString(_alignment_matrices[phal3->id()] * glm::vec4(v_s, 1.0)) << std::endl;
+//		std::cout << std::endl;
+//		std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[phal3->id()] * glm::vec4(v_s, 1.0))) << std::endl;
+//		std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
+//		std::cout << std::endl;
+//		std::cout << "target: " << makeString(target) << std::endl;
+//		std::cout << "result: " << makeString(result) << std::endl;
+//		std::cout << "diff  : " << makeString(target - result) << std::endl;
+//		std::cout << std::endl;
+//		std::cout << "alignment matrix" << std::endl;
+//		std::cout << makeString(_alignment_matrices[phal3->id()]) << std::endl;
+//
+//		std::cout << std::endl;
+//		std::cout << std::endl;
+//	}
 }
 
 glm::mat4 MediapipeAndGLTF::findRotationMatrix(

@@ -51,6 +51,7 @@ private:
     float _size;
 
     LoadedObjectInfo _hand_obj_info;
+    LoadedObjectInfo _hand_info_to_gltf;
     Object3D _hand;
 
     SkeletonDebug _hand_skeleton;
@@ -111,6 +112,7 @@ public:
     void networkProcess();
 
     void readMediapipeFile(const std::string& path);
+    void fromGLTFToLandmarks(const std::string& path);
 
 private:
     void landmarksLookAtMatrices(const mdph::Landmarks& landmarks);

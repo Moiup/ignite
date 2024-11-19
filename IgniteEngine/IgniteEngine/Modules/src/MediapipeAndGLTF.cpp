@@ -342,27 +342,20 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
 		const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
 		//wrist->setPositionLocale(landmarks._landmarks[0][0]);
 
-		glm::vec3 target = glm::vec3(0, 1, 0);
-
-		glm::vec3 eye = wrist->getPositionLocale();
-		glm::vec3 center = glm::vec3(0, 1, 0);
-
-
 		glm::mat4 l2w =
 			wrist->getTransformLocale()
 			/** wrist_bis->getTransformLocale()*/;
 
 		glm::vec3 v_s = l2w * wrist_bis->getTransformLocale() * glm::vec4(phal1->getPositionLocale(), 1.0);
 
-		//glm::vec3 target = glm::vec3(0, 1, 0) * glm::length(v_s);
+		glm::vec3 target = glm::vec3(0, 1, 0) * glm::length(v_s);
 		//glm::vec3 target = glm::normalize(_landmarks._landmarks[0][9] - _landmarks._landmarks[0][0]) * glm::length(v_s);
 		std::cout << "length: " << glm::length(target) << std::endl;
 		std::cout << "length: " << glm::length(v_s) << std::endl;
 		glm::vec3 v_m = target;
 		v_m = glm::vec4(v_m, 1.0);
 
-		//_alignment_matrices[wrist->id()] = findRotationMatrix(v_s, v_m);
-		_alignment_matrices[wrist->id()] = glm::lookAt(eye, center, glm::vec3(0, 1, 0));
+		_alignment_matrices[wrist->id()] = findRotationMatrix(v_s, v_m);
 
 		glm::vec3 result =
 			_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
@@ -392,56 +385,6 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
 		std::cout << std::endl;
 	}
 
-	//Joint* wrist = _hand.getSkeleton()->skeleton();
-	//std::cout << "wrist pos: " << makeString(wrist->getPositionLocale()) << std::endl;
-	//{
-	//	Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[2]);
-	//	const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
-	//	//wrist->setPositionLocale(landmarks._landmarks[0][0]);
-
-	//	glm::mat4 l2w =
-	//		wrist->getTransformLocale()
-	//		/** wrist_bis->getTransformLocale()*/;
-
-	//	glm::vec3 v_s = l2w * wrist_bis->getTransformLocale() * glm::vec4(phal1->getPositionLocale(), 1.0);
-
-	//	glm::vec3 target = glm::vec3(0, 1, 0) * glm::length(v_s);
-	//	//glm::vec3 target = glm::normalize(_landmarks._landmarks[0][9] - _landmarks._landmarks[0][0]) * glm::length(v_s);
-	//	std::cout << "length: " << glm::length(target) << std::endl;
-	//	std::cout << "length: " << glm::length(v_s) << std::endl;
-	//	glm::vec3 v_m = target;
-	//	v_m = glm::vec4(v_m, 1.0);
-
-	//	_alignment_matrices[wrist->id()] = findRotationMatrix(v_s, v_m);
-
-	//	glm::vec3 result =
-	//		_alignment_matrices[wrist->id()] * wrist->getTransformLocale()
-	//		* wrist_bis->getTransformLocale()
-	//		* phal1->getTransformLocale()
-	//		* glm::vec4(0, 0, 0, 1);
-
-	//	std::cout << std::endl;
-	//	std::cout << std::endl;
-
-	//	std::cout << "wrist:" << std::endl;
-	//	std::cout << "v_m: " << makeString(v_m) << std::endl;
-	//	std::cout << "v_s: " << makeString(v_s) << std::endl;
-	//	std::cout << std::endl;
-	//	std::cout << "a * v_s           : " << makeString(_alignment_matrices[wrist->id()] * glm::vec4(v_s, 1.0)) << std::endl;
-	//	std::cout << "normalized a * v_s: " << makeString(glm::normalize(_alignment_matrices[wrist->id()] * glm::vec4(v_s, 1.0))) << std::endl;
-	//	std::cout << "normalized v_m    : " << makeString(glm::normalize(v_m)) << std::endl;
-	//	std::cout << std::endl;
-	//	std::cout << "target: " << makeString(target) << std::endl;
-	//	std::cout << "result: " << makeString(result) << std::endl;
-	//	std::cout << "diff  : " << makeString(target - result) << std::endl;
-	//	std::cout << std::endl;
-	//	std::cout << "alignment matrix" << std::endl;
-	//	std::cout << makeString(_alignment_matrices[wrist->id()]) << std::endl;
-
-	//	std::cout << std::endl;
-	//	std::cout << std::endl;
-	//}
-
 	//for (int32_t i = 2; i < 3; i++) {
 	//	int32_t land_i = i * 4;
 	//	fingerAlignement(
@@ -466,16 +409,16 @@ void MediapipeAndGLTF::landmarksRotationMatrices(const mdph::Landmarks& landmark
 	//    landmarks._landmarks[0][3] - landmarks._landmarks[0][2],
 	//    landmarks._landmarks[0][4] - landmarks._landmarks[0][3]
 	//);
-	// Index
-	fingerAlignement(
-		landmarks,
-		wrist,
-		static_cast<Joint*>(wrist->getChildren()[1]),
-		landmarks._landmarks[0][5],
-		landmarks._landmarks[0][6] - landmarks._landmarks[0][5],
-		landmarks._landmarks[0][7] - landmarks._landmarks[0][6],
-		landmarks._landmarks[0][8]
-	);
+	//// Index
+	//fingerAlignement(
+	//	landmarks,
+	//	wrist,
+	//	static_cast<Joint*>(wrist->getChildren()[1]),
+	//	landmarks._landmarks[0][5],
+	//	landmarks._landmarks[0][6] - landmarks._landmarks[0][5],
+	//	landmarks._landmarks[0][7] - landmarks._landmarks[0][6],
+	//	landmarks._landmarks[0][8]
+	//);
 	//// Middle
 	//fingerAlignement(
 	//    landmarks,

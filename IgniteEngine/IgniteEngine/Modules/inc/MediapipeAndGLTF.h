@@ -70,6 +70,7 @@ private:
     std::vector<glm::vec3> _wrist_pos;
 
     mdph::Landmarks _landmarks;
+    mdph::Landmarks _landmarks_to_hand;
 
 
     // -- HAND SHADER --
@@ -118,6 +119,7 @@ private:
     void landmarksLookAtMatrices(const mdph::Landmarks& landmarks);
 
     void landmarksToLocal(const mdph::Landmarks& landmarks);
+    void landmarksToHand(const mdph::Landmarks& landmarks, mdph::Landmarks& landmark_hand);
     void landmarksRotationMatrices(const mdph::Landmarks& landmarks);
 
     void fingerAlignement(

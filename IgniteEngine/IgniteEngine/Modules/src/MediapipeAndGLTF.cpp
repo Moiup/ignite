@@ -16,6 +16,7 @@ void MediapipeAndGLTF::init() {
 #if !IS_GLTF
 	//readMediapipeFile("../../assets/mediapipe_data/mp_hand_straight.txt");
 	readMediapipeFile("../../assets/mediapipe_data/mp_index_moved.txt");
+	landmarksToHand(_landmarks, _landmarks_to_hand);
 #endif
 #endif  
 }
@@ -75,26 +76,26 @@ void MediapipeAndGLTF::start() {
 	landmarksRotationMatrices(_landmarks);
 #else
 	for (uint32_t i = 0; i < _right_hand.size(); ++i) {
-		_landmarks._landmarks[0][i] = glm::vec3(
-			_landmarks._landmarks[0][i].x,
-			_landmarks._landmarks[0][i].y,
-			_landmarks._landmarks[0][i].z
+		_landmarks_to_hand._landmarks[0][i] = glm::vec3(
+			_landmarks_to_hand._landmarks[0][i].x,
+			_landmarks_to_hand._landmarks[0][i].y,
+			_landmarks_to_hand._landmarks[0][i].z
 		) * 20.0f;
 		_right_hand[i].createFromObjectInfo(_cube_info);
 		_right_hand[i].setRenderer(DefaultConf::renderer);
 		_right_hand[i].addShader(DefaultConf::graphic_shader);
 		_right_hand[i].setScaleLocale(glm::vec3(0.25));
 		_right_hand[i].setPositionLocale(
-			_landmarks._landmarks[0][i].x,
-			_landmarks._landmarks[0][i].y,
-			_landmarks._landmarks[0][i].z
+			_landmarks_to_hand._landmarks[0][i].x,
+			_landmarks_to_hand._landmarks[0][i].y,
+			_landmarks_to_hand._landmarks[0][i].z
 		);
 	}
-	landmarksRotationMatrices(_landmarks);
+	landmarksRotationMatrices(_landmarks_to_hand);
 	//landmarksLookAtMatrices(_landmarks);
 
 	for (int i = 0; i < 21; ++i) {
-		std::cout << "landmarks     : " << makeString(_landmarks._landmarks[0][i]) << std::endl;
+		std::cout << "landmarks     : " << makeString(_landmarks_to_hand._landmarks[0][i]) << std::endl;
 		//std::cout << "_right_hand[" << i << "]: " << makeString(_right_hand[i].getPositionLocale()) << std::endl;
 	}
 	std::cout << "wrist         : " << makeString(_hand.getSkeleton()->skeleton()->getPositionLocale()) << std::endl;
@@ -115,57 +116,57 @@ void MediapipeAndGLTF::update() {
 	Module::update();
 
 
-	const Joint* wrist = _hand.getSkeleton()->skeleton();
-	glm::mat4 wrist_tr = _alignment_matrices[wrist->id()] * wrist->getTransformLocale();
-	_transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
-	for (int i = 0; i < 5; ++i) {
-		const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
-		const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
-		const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
-		const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
-		const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
-
-		glm::mat4 tr = _alignment_matrices[wrist_bis->id()] * wrist_tr * wrist_bis->getTransformLocale();
-		_transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
-
-		tr = _alignment_matrices[phal1->id()] * tr * phal1->getTransformLocale();
-		_transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
-
-		tr = _alignment_matrices[phal2->id()] * tr * phal2->getTransformLocale();
-		_transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
-
-		tr = _alignment_matrices[phal3->id()] * tr * phal3->getTransformLocale();
-		_transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
-
-		//tr = tr * phal4->getTransformLocale();
-		//_transform_matrices[phal4->id()] = tr * phal4->inverseBindMatrices();
-	}
-
 	//const Joint* wrist = _hand.getSkeleton()->skeleton();
 	//glm::mat4 wrist_tr = _alignment_matrices[wrist->id()] * wrist->getTransformLocale();
 	//_transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
 	//for (int i = 0; i < 5; ++i) {
-	//    const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
-	//    const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
-	//    const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
-	//    const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
-	//    const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+	//	const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
+	//	const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+	//	const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+	//	const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+	//	const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
 
-	//    glm::mat4 tr = wrist_tr * _alignment_matrices[wrist_bis->id()] * wrist_bis->getTransformLocale();
-	//    _transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
+	//	glm::mat4 tr = _alignment_matrices[wrist_bis->id()] * wrist_tr * wrist_bis->getTransformLocale();
+	//	_transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
 
-	//    tr = tr * _alignment_matrices[phal1->id()] * phal1->getTransformLocale();
-	//    _transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
+	//	tr = _alignment_matrices[phal1->id()] * tr * phal1->getTransformLocale();
+	//	_transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
 
-	//    tr = tr * _alignment_matrices[phal2->id()] * phal2->getTransformLocale();
-	//    _transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
+	//	tr = _alignment_matrices[phal2->id()] * tr * phal2->getTransformLocale();
+	//	_transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
 
-	//    tr = tr * _alignment_matrices[phal3->id()] * phal3->getTransformLocale();
-	//    _transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
+	//	tr = _alignment_matrices[phal3->id()] * tr * phal3->getTransformLocale();
+	//	_transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
 
-	//    //tr = tr * phal4->getTransformLocale();
-	//    //_transform_matrices[phal4->id()] = tr * phal4->inverseBindMatrices();
+	//	//tr = tr * phal4->getTransformLocale();
+	//	//_transform_matrices[phal4->id()] = tr * phal4->inverseBindMatrices();
 	//}
+
+	const Joint* wrist = _hand.getSkeleton()->skeleton();
+	glm::mat4 wrist_tr = _alignment_matrices[wrist->id()] * wrist->getTransformLocale();
+	_transform_matrices[wrist->id()] = wrist_tr * wrist->inverseBindMatrices();
+	for (int i = 0; i < 5; ++i) {
+	    const Joint* wrist_bis = static_cast<Joint*>(wrist->getChildren()[i]);
+	    const Joint* phal1 = static_cast<Joint*>(wrist_bis->getChildren()[0]);
+	    const Joint* phal2 = static_cast<Joint*>(phal1->getChildren()[0]);
+	    const Joint* phal3 = static_cast<Joint*>(phal2->getChildren()[0]);
+	    const Joint* phal4 = static_cast<Joint*>(phal3->getChildren()[0]);
+
+	    glm::mat4 tr = wrist_tr * _alignment_matrices[wrist_bis->id()] * wrist_bis->getTransformLocale();
+	    _transform_matrices[wrist_bis->id()] = tr * wrist_bis->inverseBindMatrices();
+
+	    tr = tr * _alignment_matrices[phal1->id()] * phal1->getTransformLocale();
+	    _transform_matrices[phal1->id()] = tr * phal1->inverseBindMatrices();
+
+	    tr = tr * _alignment_matrices[phal2->id()] * phal2->getTransformLocale();
+	    _transform_matrices[phal2->id()] = tr * phal2->inverseBindMatrices();
+
+	    tr = tr * _alignment_matrices[phal3->id()] * phal3->getTransformLocale();
+	    _transform_matrices[phal3->id()] = tr * phal3->inverseBindMatrices();
+
+	    //tr = tr * phal4->getTransformLocale();
+	    //_transform_matrices[phal4->id()] = tr * phal4->inverseBindMatrices();
+	}
 
 	//const Joint* wrist = _hand.getSkeleton()->skeleton();
 	//glm::mat4 wrist_tr = wrist->getTransformLocale() * _alignment_matrices[wrist->id()];
@@ -295,6 +296,18 @@ void MediapipeAndGLTF::readMediapipeFile(const std::string& path) {
 	}
 
 	mp_file.close();
+}
+
+void MediapipeAndGLTF::landmarksToHand(const mdph::Landmarks& landmarks, mdph::Landmarks& landmarks_hand) {
+	for (int32_t i = 0; i < 21; ++i) {
+		landmarks_hand._landmarks[0][i] = landmarks._landmarks[0][i] - landmarks._landmarks[0][0];
+	}
+
+	const Joint* wrist = _hand.getSkeleton()->skeleton();
+
+	//for (int32_t i = 0; i < 5; ++i) {
+
+	//}
 }
 
 void MediapipeAndGLTF::fromGLTFToLandmarks(const std::string& path) {

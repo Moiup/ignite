@@ -23,8 +23,8 @@ void Bistro::start() {
 	_bistro.addShader(DefaultConf::graphic_shader);
 
 	//_bistro.setPositionLocaleUpdateChildren(0, 0, 5);
-	_bistro.setScaleLocale(0.5, 0.5, 0.5);
-	_bistro.setPositionLocale(0, 0, 1);
+	_bistro.setScaleLocale(0.1, 0.1, 0.1);
+	_bistro.setPositionLocale(0, 0, 0);
 }
 
 void Bistro::update() {

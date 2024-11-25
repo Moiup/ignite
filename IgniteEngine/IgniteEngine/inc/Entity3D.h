@@ -27,6 +27,8 @@ protected:
 	glm::vec3 _ls;
 	glm::vec3 _as;
 
+	glm::mat4 _alignment_matrix;
+
 	glm::mat4 _transform_world;
 
 	Entity3D* _parent;
@@ -92,6 +94,9 @@ public:
 	* Must call buildTransformWorld() from the father node before 
 	*/
 	glm::mat4 getTransformWorld() const;
+
+	const glm::mat4& alignmentMatrix() const;
+	glm::mat4& alignmentMatrix();
 
 	void buildTransformWorld();
 

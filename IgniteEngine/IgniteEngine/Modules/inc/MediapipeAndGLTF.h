@@ -24,10 +24,25 @@ namespace mdph {
         uint8_t _is_ok;
     };
 
+    struct Desc {
+        int32_t _nb_joints;
+        int32_t _nb_hierarchy;
+    };
+
+    struct Hierarchy {
+        std::vector<std::vector<int32_t>> _hierarchy;
+    };
+
     struct Landmarks {
         uint32_t _handedness; // 0 -> right; 1 -> left
         glm::vec3 _landmarks[2][21];
         glm::vec3 _world_landmarks[2][21];
+    };
+
+    struct Init {
+        DimMsg _dim;
+        Desc _desc;
+        Hierarchy _hierarchy;
     };
 }
 
@@ -42,12 +57,12 @@ private:
     EStream _mediapipe_stream;
     std::thread _network_thread;
 
-    LoadedObjectInfo _cube_info;
-    Object3D _cube;
+    LoadedObjectInfo _red_sphere_info;
+    Object3D _red_sphere;
     Mesh _cross_mesh;
-    std::vector<Object3D> _cross_objs;
     std::vector<Material> _cross_material;
     std::vector<uint32_t> _cross_material_indices;
+    std::vector<Object3D> _mediapipe_cross;
     float _size;
 
     LoadedObjectInfo _hand_obj_info;
@@ -59,18 +74,15 @@ private:
     const uint32_t _wrist_index = 21;
 
     std::vector<std::vector<Object3D>> _hands;
-    std::vector<Object3D> _right_hand;
+    std::vector<Object3D> _mediapipe_hand;
     std::vector<Object3D> _wrists;
-    std::vector<glm::mat4> _alignment_matrices;
-    std::vector<glm::mat4> _transform_matrices;
-    std::vector<glm::mat4> _transform_matrices_debug;
-
 
     uint32_t _frame_i;
     std::vector<glm::vec3> _wrist_pos;
 
     mdph::Landmarks _landmarks;
     mdph::Landmarks _landmarks_to_hand;
+    mdph::Init _mediapipe_info;
 
 
     // -- HAND SHADER --
@@ -116,22 +128,6 @@ public:
     void fromGLTFToLandmarks(const std::string& path);
 
 private:
-    void landmarksLookAtMatrices(const mdph::Landmarks& landmarks);
-
-    void landmarksToLocal(const mdph::Landmarks& landmarks);
-    void landmarksToHand(const mdph::Landmarks& landmarks, mdph::Landmarks& landmark_hand);
-    void landmarksRotationMatrices(const mdph::Landmarks& landmarks);
-
-    void fingerAlignement(
-        const mdph::Landmarks& landmarks,
-        const Joint* wrist,
-        const Joint* wrist_bis,
-        const glm::vec3 vm1,
-        const glm::vec3 vm2,
-        const glm::vec3 vm3,
-        const glm::vec3 vm4
-    );
-
     glm::mat4 findRotationMatrix(
         const glm::vec3& from,
         const glm::vec3& to

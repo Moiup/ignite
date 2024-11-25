@@ -43,9 +43,12 @@ Entity3D::Entity3D() :
 	_ar{},
 	_ls{ 1.0f, 1.0f, 1.0f },
 	_as{ 1.0f, 1.0f, 1.0f },
+	_alignment_matrix{ glm::mat4(1.0) },
 	_parent{ nullptr },
 	_children{}
-{ ; }
+{ 
+	;
+}
 
 Entity3D::~Entity3D() {
 	for (Entity3D* child : _children) {

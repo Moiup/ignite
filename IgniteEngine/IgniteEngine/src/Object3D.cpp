@@ -701,6 +701,7 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 	}
 
 	std::unordered_map<const Material*, uint32_t> is_mat;
+	std::unordered_map<const Mesh*, bool> is_mesh;
 
 	// For each mesh given a renderer and a shader
 	uint32_t start_i = 1; // Default material is stored at 0, so we must start at 1
@@ -710,6 +711,13 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 		for (auto& obj : objs) {
 			std::vector<Material*> mats = obj->getMaterial();
 
+			if (is_mesh.count(m)) {
+				break;
+			}
+			else {
+				is_mesh[m] = true;
+			}
+			
 			// When there is only one material
 			if (mats.size() <= 1) {
 				uint32_t index = start_i;
@@ -763,6 +771,7 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 	}
 
 	std::unordered_map<Material*, bool> is_mat{};
+	std::unordered_map<Mesh*, bool> is_mesh{};
 
 	std::unordered_map<Texture2D*, uint32_t> texes{};
 	uint32_t tex_id = 0;
@@ -788,6 +797,14 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 		// For each object
 		for (auto obj : objs) {
 			const std::vector<Texture2D*>& Textures2D = obj->getTexture2D();
+
+			if (is_mesh.count(m)) {
+				break;
+			}
+			else {
+				is_mesh[m] = true;
+			}
+
 			for (Material* mat : obj->getMaterial()) {
 				// If the material was never added
 				// We add it to the array of material

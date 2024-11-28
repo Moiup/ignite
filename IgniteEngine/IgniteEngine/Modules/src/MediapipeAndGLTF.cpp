@@ -215,31 +215,24 @@ void MediapipeAndGLTF::retargeting(
 	}
 
 #if 1
-	int32_t m_next_i = 1;
-	int32_t joint_i = 1;
 	for (int32_t parent_i = 0; parent_i < wrist->getChildren().size(); ++parent_i) {
 		Joint* cur = static_cast<Joint*>(wrist->getChildren()[parent_i]);
 		Joint* next = cur;
 		glm::mat4 tr = wrist->getTransformLocale();
 		while (cur->getChildren().size()) {
-			m_next_i++;
-			int32_t m_cur_i = ((m_next_i % 4) == 2) ? 1 : joint_i;
 			next = static_cast<Joint*>(cur->getChildren()[0]);
 
 			glm::mat4 tr_bis = tr * cur->getTransformLocale();
 
 			glm::vec4 from = glm::vec4(next->getPositionLocale(), 1.0f);
 
-			glm::vec4 to_point = glm::vec4(lfs._landmarks[0][m_next_i], 1.0);
+			glm::vec4 to_point = glm::vec4(lfs._landmarks[0][next->id()], 1.0);
 			glm::vec3 to = glm::inverse(tr) * to_point;
-
-			std::cout << cur->id() << " -- " << next->id() << " -- " << m_next_i << std::endl;
 
 			cur->alignmentMatrix() = findRotationMatrix(from, to);
 
 			tr = tr * cur->getTransformLocale();
 
-			joint_i++;
 			cur = next;
 		}
 	}
@@ -254,13 +247,17 @@ void MediapipeAndGLTF::createWrist(
 	glm::vec3 wrist = mediapipe_landmarks._landmarks[0][0] - 0.2f * (mediapipe_landmarks._landmarks[0][9] - mediapipe_landmarks._landmarks[0][0]);
 	lfs._landmarks[0][0] = glm::vec3(0);
 	std::cout << "NB_JOINTS: " << mdph::NB_JOINTS << std::endl;
-	for (int32_t i = 0; i < 5; ++i) {
-		lfs._landmarks[0][i + 1] = mediapipe_landmarks._landmarks[0][0] - wrist;
-	}
-
-	for (int32_t i = 0; i < mdph::NB_JOINTS; ++i) {
-		lfs._landmarks[0][i + 6] = mediapipe_landmarks._landmarks[0][i] - wrist;
-		lfs._landmarks[0][i + 6] = lfs._landmarks[0][i + 6] * 20.0f;
+	int32_t offset = 1;
+	for (int32_t i = 1; i < mdph::NB_JOINTS_LFS; ++i) {
+		if (i % 5 == 1) {
+			lfs._landmarks[0][i] = mediapipe_landmarks._landmarks[0][1] - wrist;
+			lfs._landmarks[0][i] = lfs._landmarks[0][i] * 20.0f;
+			offset++;
+		}
+		else {
+			lfs._landmarks[0][i] = mediapipe_landmarks._landmarks[0][i - offset] - wrist;
+			lfs._landmarks[0][i] = lfs._landmarks[0][i] * 20.0f;
+		}
 	}
 
 }

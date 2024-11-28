@@ -45,8 +45,8 @@ namespace mdph {
     struct LandmarksForSkinning {
         Hierarchy _hierarchy;
         uint32_t _handedness; // 0 -> right; 1 -> left
-        glm::vec3 _landmarks[2][22]; // Add 1 for the second wrist
-        glm::vec3 _world_landmarks[2][22];
+        glm::vec3 _landmarks[2][NB_JOINTS_LFS];
+        glm::vec3 _world_landmarks[2][NB_JOINTS_LFS];
     };
 
     struct Init {

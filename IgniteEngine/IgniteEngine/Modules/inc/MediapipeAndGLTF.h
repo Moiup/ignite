@@ -16,7 +16,7 @@
 
 namespace mdph {
     const static int32_t NB_JOINTS = 21;
-    const static int32_t NB_JOINTS_LFS = NB_JOINTS + 6;
+    const static int32_t NB_JOINTS_LFS = NB_JOINTS + 5;
 
     struct DimMsg {
         uint32_t _width;

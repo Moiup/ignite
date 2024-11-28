@@ -320,7 +320,7 @@ glm::mat4 Entity3D::getScale() const {
 }
 
 glm::mat4 Entity3D::getTransformLocale() const {
-	return getTranslateLocale() * getRotateLocale() * getScale() * alignmentMatrix();
+	return getTranslateLocale() * getRotateLocale() * alignmentMatrix() * getScale();
 }
 
 glm::mat4 Entity3D::getTransformParent() const {
@@ -342,7 +342,7 @@ glm::mat4 Entity3D::getTransform() const {
 	return par * getTransformLocale();
 }
 
-glm::mat4 Entity3D::getTransformWorld() const {
+const glm::mat4& Entity3D::transformWorld() const {
 	return _transform_world;
 }
 

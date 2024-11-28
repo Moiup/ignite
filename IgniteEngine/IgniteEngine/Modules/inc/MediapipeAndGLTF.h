@@ -15,6 +15,9 @@
 #include <fstream>
 
 namespace mdph {
+    const static int32_t NB_JOINTS = 21;
+    const static int32_t NB_JOINTS_LFS = NB_JOINTS + 6;
+
     struct DimMsg {
         uint32_t _width;
         uint32_t _height;
@@ -39,6 +42,13 @@ namespace mdph {
         glm::vec3 _world_landmarks[2][21];
     };
 
+    struct LandmarksForSkinning {
+        Hierarchy _hierarchy;
+        uint32_t _handedness; // 0 -> right; 1 -> left
+        glm::vec3 _landmarks[2][22]; // Add 1 for the second wrist
+        glm::vec3 _world_landmarks[2][22];
+    };
+
     struct Init {
         DimMsg _dim;
         Desc _desc;
@@ -59,6 +69,8 @@ private:
 
     LoadedObjectInfo _red_sphere_info;
     Object3D _red_sphere;
+    LoadedObjectInfo _blue_sphere_info;
+    Object3D _blue_sphere;
     Mesh _cross_mesh;
     std::vector<Material> _cross_material;
     std::vector<uint32_t> _cross_material_indices;
@@ -71,17 +83,15 @@ private:
 
     SkeletonDebug _hand_skeleton;
 
-    const uint32_t _wrist_index = 21;
-
     std::vector<std::vector<Object3D>> _hands;
-    std::vector<Object3D> _mediapipe_hand;
-    std::vector<Object3D> _wrists;
+    std::vector<Object3D> _mediapipe_red_sphere;
+    std::vector<Object3D> _hand_blue_sphere;
+    Object3D _parent_hand_blue_sphere;
 
     uint32_t _frame_i;
-    std::vector<glm::vec3> _wrist_pos;
 
     mdph::Landmarks _landmarks;
-    mdph::Landmarks _landmarks_to_hand;
+    mdph::LandmarksForSkinning _lfs;
     mdph::Init _mediapipe_info;
 
 
@@ -124,6 +134,16 @@ public:
     void networkInit();
     void networkProcess();
 
+    void retargeting(
+        const mdph::LandmarksForSkinning& lfs,
+        Skeleton& skeleton
+    );
+
+    void createWrist(
+        const mdph::Hierarchy& mediapipe_h,
+        const mdph::Landmarks& mediapipe_landmarks,
+        mdph::LandmarksForSkinning& lfs
+    );
     void readMediapipeFile(const std::string& path);
     void fromGLTFToLandmarks(const std::string& path);
 
@@ -138,12 +158,10 @@ private:
     */
     glm::mat3 alignVectorMatrix(const glm::vec3& from, const glm::vec3& to);
 
-    glm::vec3 vectorAngle(glm::vec3 A, glm::vec3 B);
-
     std::vector<glm::vec3> cube();
     std::vector<uint32_t> cubeIndex();
 
-    void createShaderHand();
+    void createLBSShader();
     void createDebugShader();
 };
 

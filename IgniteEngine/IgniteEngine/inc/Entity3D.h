@@ -93,7 +93,7 @@ public:
 	/**
 	* Must call buildTransformWorld() from the father node before 
 	*/
-	glm::mat4 getTransformWorld() const;
+	const glm::mat4& transformWorld() const;
 
 	const glm::mat4& alignmentMatrix() const;
 	glm::mat4& alignmentMatrix();

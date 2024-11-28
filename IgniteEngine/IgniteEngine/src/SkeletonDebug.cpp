@@ -49,6 +49,7 @@ void SkeletonDebug::update() {
 	for (int i = 0; i < skeleton->joints().size(); ++i) {
 		_cross_objs[i].setPositionLocale(skeleton->joints()[i].getPositionLocale());
 		_cross_objs[i].setRotationLocale(skeleton->joints()[i].getRotationLocale());
+		_cross_objs[i].alignmentMatrix() = skeleton->joints()[i].alignmentMatrix();
 	}
 }
 

@@ -24,29 +24,44 @@ void MediapipeAndGLTF::start() {
 	Module::start();
 
 	//_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_nails.gltf");
-	//_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_origin.gltf");
-	//_hand.createFromObjectInfo(_hand_obj_info);
-	//_hand.setRenderer(DefaultConf::renderer);
-	//_hand.addShader(&_lbs_shader);
+	_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_origin.gltf");
+	_hand.createFromObjectInfo(_hand_obj_info);
+	_hand.setRenderer(DefaultConf::renderer);
+	_hand.addShader(&_lbs_shader);
 
-	//std::cout << *_hand.getSkeleton() << std::endl;
+	_hand.setScaleLocale(glm::vec3(0.25f));
+
+	std::cout << *_hand.getSkeleton() << std::endl;
 
 	_red_sphere_info.loadWavefont("../../assets/3d_objects/spheres/red_sphere.obj");
+	_blue_sphere_info.loadWavefont("../../assets/3d_objects/spheres/blue_sphere.obj");
 
-	//SkeletonDebug::createCrossMesh(_cross_mesh, 0.1);
-	//SkeletonDebug::createCrossMaterial(_cross_material, _cross_material_indices);
-
-	//_hand.setScaleLocale(glm::vec3(0.25f));
 
 	SkeletonDebug::createCrossMesh(_cross_mesh, 1.0f);
 	SkeletonDebug::createCrossMaterial(_cross_material, _cross_material_indices);
 
-	//_hand_skeleton.setObject3D(_hand);
-	//_hand_skeleton.setSize(3.0f);
-	//_hand_skeleton.setShader(_debug_shader);
-	//_hand_skeleton.create();
+	_hand_skeleton.setObject3D(_hand);
+	_hand_skeleton.setSize(3.0f);
+	_hand_skeleton.setShader(_debug_shader);
+	_hand_skeleton.create();
 
-	//_mediapipe_hand.resize(_hand.getSkeleton()->joints().size());
+	_hand_blue_sphere.resize(_hand.getSkeleton()->joints().size());
+	for (const Joint& j : _hand.getSkeleton()->joints()) {
+		for (const Entity3D* child : j.getChildren()) {
+			const Joint* cj = static_cast<const Joint*>(child);
+			_hand_blue_sphere[j.id()].addChild(&_hand_blue_sphere[cj->id()]);
+		}
+
+		_hand_blue_sphere[j.id()].createFromObjectInfo(_blue_sphere_info);
+		_hand_blue_sphere[j.id()].setRenderer(DefaultConf::renderer);
+		_hand_blue_sphere[j.id()].addShader(DefaultConf::graphic_shader);
+
+		_hand_blue_sphere[j.id()].setPositionLocale(j.getPositionLocale());
+		_hand_blue_sphere[j.id()].setRotationLocale(j.getRotationLocale());
+		_hand_blue_sphere[j.id()].setScaleLocale(j.getScaleLocale());
+	}
+	_parent_hand_blue_sphere.addChild(&_hand_blue_sphere[0]);
+	_parent_hand_blue_sphere.setScaleLocale(_hand.getScaleLocale());
 
 #if IS_NETWORK
 	_network_thread = std::thread(&MediapipeAndGLTF::networkProcess, this);
@@ -60,35 +75,35 @@ void MediapipeAndGLTF::start() {
 
 	landmarksRotationMatrices(_landmarks);
 #else
-	_mediapipe_hand.resize(_mediapipe_info._desc._nb_joints);
-	_mediapipe_cross.resize(_mediapipe_info._desc._nb_joints);
-	for (uint32_t i = 0; i < _mediapipe_info._desc._nb_joints; ++i) {
-		_landmarks_to_hand._landmarks[0][i] = glm::vec3(
-			_landmarks._landmarks[0][i].x,
-			_landmarks._landmarks[0][i].y,
-			_landmarks._landmarks[0][i].z
-		) * 20.0f;
-		_mediapipe_hand[i].createFromObjectInfo(_red_sphere_info);
-		_mediapipe_hand[i].setRenderer(DefaultConf::renderer);
-		_mediapipe_hand[i].addShader(DefaultConf::graphic_shader);
-		_mediapipe_hand[i].setScaleLocale(glm::vec3(0.25));
-		_mediapipe_hand[i].setPositionLocale(
-			_landmarks_to_hand._landmarks[0][i].x,
-			_landmarks_to_hand._landmarks[0][i].y,
-			_landmarks_to_hand._landmarks[0][i].z
-		);
+	createWrist(
+		_mediapipe_info._hierarchy,
+		_landmarks,
+		_lfs
+	);
+
+	_mediapipe_red_sphere.resize(mdph::NB_JOINTS_LFS);
+	_mediapipe_cross.resize(mdph::NB_JOINTS_LFS);
+	for (uint32_t i = 0; i < mdph::NB_JOINTS_LFS; ++i) {
+		_mediapipe_red_sphere[i].createFromObjectInfo(_red_sphere_info);
+		_mediapipe_red_sphere[i].setRenderer(DefaultConf::renderer);
+		_mediapipe_red_sphere[i].addShader(DefaultConf::graphic_shader);
+		//_mediapipe_red_sphere[i].setScaleLocale(glm::vec3(0.25));
+		_mediapipe_red_sphere[i].setPositionLocale(_lfs._landmarks[0][i]);
 
 		// Crosses
 		_mediapipe_cross[i].setMesh(&_cross_mesh);
 		_mediapipe_cross[i].setMaterial(_cross_material, &_cross_material_indices);
 		_mediapipe_cross[i].setRenderer(DefaultConf::renderer);
 		_mediapipe_cross[i].addShader(&_debug_shader);
-		_mediapipe_cross[i].setPositionLocale(_landmarks_to_hand._landmarks[0][i]);
+		_mediapipe_cross[i].setPositionLocale(_lfs._landmarks[0][i]);
 	}
 
 	for (int i = 0; i < 21; ++i) {
-		std::cout << "landmarks     : " << makeString(_landmarks_to_hand._landmarks[0][i]) << std::endl;
+		std::cout << "landmarks     : " << makeString(_lfs._landmarks[0][i]) << std::endl;
 	}
+
+	retargeting(_lfs, *_hand.getSkeleton());
+
 	//std::cout << "wrist         : " << makeString(_hand.getSkeleton()->skeleton()->getPositionLocale()) << std::endl;
 	//std::cout << "hand          : " << makeString(_hand.getPositionLocale()) << std::endl;
 
@@ -97,7 +112,7 @@ void MediapipeAndGLTF::start() {
 #endif
 
 	createDebugShader();
-	//createShaderHand();
+	createLBSShader();
 	_lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 	_debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 	_debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
@@ -107,12 +122,22 @@ void MediapipeAndGLTF::update() {
 	Module::update();
 	_camera = DefaultConf::camera->getMVPC();
 
-	//_obj_tr_buffer_hand.setValues(
-	//	Object3D::updateTransformMatrices(DefaultConf::renderer, &_lbs_shader).data()
-	//);
-	//_joint_tr_buffer_hand.setValues(
-	//	Object3D::updateJointsTransform(DefaultConf::renderer, &_lbs_shader).data()
-	//);
+	_obj_tr_buffer_hand.setValues(
+		Object3D::updateTransformMatrices(DefaultConf::renderer, &_lbs_shader).data()
+	);
+	_joint_tr_buffer_hand.setValues(
+		Object3D::updateJointsTransform(DefaultConf::renderer, &_lbs_shader).data()
+	);
+
+
+	for (const Joint& j : _hand.getSkeleton()->joints()) {
+		_hand_blue_sphere[j.id()].setPositionLocale(j.getPositionLocale());
+		_hand_blue_sphere[j.id()].setRotationLocale(j.getRotationLocale());
+		_hand_blue_sphere[j.id()].setScaleLocale(j.getScaleLocale());
+		_hand_blue_sphere[j.id()].alignmentMatrix() = j.alignmentMatrix();
+	}
+
+	_hand_skeleton.update();
 
 	_obj_tr_buffer.setValues(
 		Object3D::updateTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
@@ -173,6 +198,71 @@ void MediapipeAndGLTF::networkProcess() {
 			break;
 		}
 	}
+}
+
+void MediapipeAndGLTF::retargeting(
+	const mdph::LandmarksForSkinning& lfs,
+	Skeleton& skeleton
+) {
+	Joint* wrist = skeleton.skeleton();
+	
+	// Wrist case is apart
+	{
+		glm::vec3 from = wrist->getTransformLocale() * glm::vec4(wrist->getChildren()[3]->getPositionLocale(), 1.0f);
+		glm::vec3 to = lfs._landmarks[0][1] - lfs._landmarks[0][0];
+		
+		wrist->alignmentMatrix() = findRotationMatrix(from, to);
+	}
+
+#if 1
+	int32_t m_next_i = 1;
+	int32_t joint_i = 1;
+	for (int32_t parent_i = 0; parent_i < wrist->getChildren().size(); ++parent_i) {
+		Joint* cur = static_cast<Joint*>(wrist->getChildren()[parent_i]);
+		Joint* next = cur;
+		glm::mat4 tr = wrist->getTransformLocale();
+		while (cur->getChildren().size()) {
+			m_next_i++;
+			int32_t m_cur_i = ((m_next_i % 4) == 2) ? 1 : joint_i;
+			next = static_cast<Joint*>(cur->getChildren()[0]);
+
+			glm::mat4 tr_bis = tr * cur->getTransformLocale();
+
+			glm::vec4 from = glm::vec4(next->getPositionLocale(), 1.0f);
+
+			glm::vec4 to_point = glm::vec4(lfs._landmarks[0][m_next_i], 1.0);
+			glm::vec3 to = glm::inverse(tr) * to_point;
+
+			std::cout << cur->id() << " -- " << next->id() << " -- " << m_next_i << std::endl;
+
+			cur->alignmentMatrix() = findRotationMatrix(from, to);
+
+			tr = tr * cur->getTransformLocale();
+
+			joint_i++;
+			cur = next;
+		}
+	}
+#endif
+}
+
+void MediapipeAndGLTF::createWrist(
+	const mdph::Hierarchy& mediapipe_h,
+	const mdph::Landmarks& mediapipe_landmarks,
+	mdph::LandmarksForSkinning& lfs
+) {
+	glm::vec3 wrist = mediapipe_landmarks._landmarks[0][0] - 0.2f * (mediapipe_landmarks._landmarks[0][9] - mediapipe_landmarks._landmarks[0][0]);
+	lfs._landmarks[0][0] = glm::vec3(0);
+	std::cout << "NB_JOINTS: " << mdph::NB_JOINTS << std::endl;
+	for (int32_t i = 0; i < 5; ++i) {
+		lfs._landmarks[0][i + 1] = mediapipe_landmarks._landmarks[0][0] - wrist;
+	}
+
+	for (int32_t i = 0; i < mdph::NB_JOINTS; ++i) {
+		lfs._landmarks[0][i + 6] = mediapipe_landmarks._landmarks[0][i] - wrist;
+		lfs._landmarks[0][i + 6] = lfs._landmarks[0][i + 6] * 20.0f;
+	}
+
 }
 
 void MediapipeAndGLTF::readMediapipeFile(const std::string& path) {
@@ -290,36 +380,6 @@ glm::mat3 MediapipeAndGLTF::alignVectorMatrix(
 	return glm::transpose(r);
 }
 
-glm::vec3 MediapipeAndGLTF::vectorAngle(glm::vec3 A, glm::vec3 B) {
-	float angle_z = 0;
-	if (A.x * B.x + A.y * B.y > 0 || A.x * B.x + A.y * B.y < 0) {
-		angle_z = std::acos(
-			(A.x * B.x + A.y * B.y)
-			/
-			(std::sqrt(A.x * A.x + A.y * A.y) * std::sqrt(B.x * B.x + B.y * B.y))
-		);
-	}
-
-	float angle_y = 0;
-	if (A.x * B.x + A.z * B.z > 0 || A.x * B.x + A.z * B.z < 0) {
-		angle_y = std::acos(
-			(A.x * B.x + A.z * B.z)
-			/
-			(std::sqrt(A.x * A.x + A.z * A.z) * std::sqrt(B.x * B.x + B.z * B.z))
-		);
-	}
-
-	float angle_x = 0;
-	if (A.y * B.y + A.z * B.z > 0 || A.y * B.y + A.z * B.z < 0) {
-		angle_x = std::acos(
-			(A.y * B.y + A.z * B.z)
-			/
-			(std::sqrt(A.y * A.y + A.z * A.z) * std::sqrt(B.y * B.y + B.z * B.z))
-		);
-	}
-	return glm::vec3(angle_x, angle_y, angle_z);
-}
-
 std::vector<glm::vec3> MediapipeAndGLTF::cube() {
 	std::vector<glm::vec3> cube = {
 		// Front
@@ -371,7 +431,7 @@ std::vector<uint32_t> MediapipeAndGLTF::cubeIndex() {
 	return index;
 }
 
-void MediapipeAndGLTF::createShaderHand() {
+void MediapipeAndGLTF::createLBSShader() {
 	//-----------//
 	// Shader    //
 	//-----------//

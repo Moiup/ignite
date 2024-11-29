@@ -16,8 +16,8 @@
 
 namespace mdph {
     const static int32_t NB_JOINTS = 21;
-    //const static int32_t NB_JOINTS_LFS = NB_JOINTS + 5;
-    const static int32_t NB_JOINTS_LFS = 6;
+    const static int32_t NB_JOINTS_LFS = NB_JOINTS + 5;
+    //const static int32_t NB_JOINTS_LFS = 6;
 
     struct DimMsg {
         uint32_t _width;
@@ -62,7 +62,7 @@ class MediapipeAndGLTF : public Module
 public:
     const std::string SERVER_ADDRESS{ "127.0.0.1" };
     const std::string SERVER_PORT{ "8013" };
-    const float RAD_TO_DEG = 180 / M_PI;
+    const float SCALE{ 0.25f };
 private:
     EServerSocket _socket;
     EStream _mediapipe_stream;

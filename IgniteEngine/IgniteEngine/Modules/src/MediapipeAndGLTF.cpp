@@ -26,10 +26,10 @@ void MediapipeAndGLTF::start() {
 	//_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_nails.gltf");
 	_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_origin.gltf");
 	_hand.createFromObjectInfo(_hand_obj_info);
-	//_hand.setRenderer(DefaultConf::renderer);
-	//_hand.addShader(&_lbs_shader);
+	_hand.setRenderer(DefaultConf::renderer);
+	_hand.addShader(&_lbs_shader);
 
-	_hand.setScaleLocale(glm::vec3(0.25f));
+	_hand.setScaleLocale(glm::vec3(SCALE));
 
 	std::cout << *_hand.getSkeleton() << std::endl;
 
@@ -41,7 +41,7 @@ void MediapipeAndGLTF::start() {
 	SkeletonDebug::createCrossMaterial(_cross_material, _cross_material_indices);
 
 	_hand_skeleton.setObject3D(_hand);
-	_hand_skeleton.setSize(4.0f);
+	_hand_skeleton.setSize(1 / SCALE);
 	_hand_skeleton.setShader(_debug_shader);
 	_hand_skeleton.create();
 
@@ -51,9 +51,6 @@ void MediapipeAndGLTF::start() {
 			for (const Entity3D* child : j.getChildren()) {
 			const Joint* cj = static_cast<const Joint*>(child);
 			_hand_blue_sphere[j.id()].addChild(&_hand_blue_sphere[cj->id()]);
-		}
-		if (j.id() >= 6) {
-				continue;
 		}
 
 		_hand_blue_sphere[j.id()].createFromObjectInfo(_blue_sphere_info);
@@ -94,7 +91,7 @@ void MediapipeAndGLTF::start() {
 		_mediapipe_red_sphere[i].createFromObjectInfo(_red_sphere_info);
 		_mediapipe_red_sphere[i].setRenderer(DefaultConf::renderer);
 		_mediapipe_red_sphere[i].addShader(DefaultConf::graphic_shader);
-		//_mediapipe_red_sphere[i].setScaleLocale(glm::vec3(0.25));
+		//_mediapipe_red_sphere[i].setScaleLocale(glm::vec3(SCALE));
 		_mediapipe_red_sphere[i].setPositionLocale(posGlobalesMediapipe[i]);
 
 		// Crosses
@@ -118,8 +115,8 @@ void MediapipeAndGLTF::start() {
 #endif
 
 	createDebugShader();
-	//createLBSShader();
-	//_lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
+	createLBSShader();
+	_lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 	_debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 	_debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
 }
@@ -238,7 +235,7 @@ void MediapipeAndGLTF::retargeting(
 			{
 				int parentid = static_cast<Joint*>(joint.getParent())->id();
 				glm::vec3 dir = glm::normalize(posLocales[id]);
-				posGlobalesMediapipe[id] = posGlobalesMediapipe[parentid] + dir * glm::length(posLocaleGLTF) * 0.25f;
+				posGlobalesMediapipe[id] = posGlobalesMediapipe[parentid] + dir * glm::length(posLocaleGLTF) * SCALE;
 			}
 			else
 				posGlobalesMediapipe[id] = posLocaleGLTF;
@@ -252,7 +249,7 @@ void MediapipeAndGLTF::retargeting(
 	
 	// Wrist case is apart
 	{
-		glm::vec3 from = glm::vec4(wrist->getChildren()[3]->getPositionLocale() * 0.25f, 0.0f);
+		glm::vec3 from = glm::vec4(wrist->getChildren()[3]->getPositionLocale() * SCALE, 0.0f);
 		glm::vec3 to = glm::inverse(wrist->getTranslateLocale() * wrist->getRotateLocale()) * glm::vec4(posGlobalesMediapipe[1],0.0f);
 
 		wrist->alignmentMatrix() = findRotationMatrix(from, to);
@@ -262,7 +259,7 @@ void MediapipeAndGLTF::retargeting(
 	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(0, 1, 0, 0)) << std::endl;
 	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(0, 0, 1, 0)) << std::endl;
 #if 1
-	for (int32_t parent_i = 0; parent_i < 1 /*wrist->getChildren().size()*/; ++parent_i) {
+	for (int32_t parent_i = 0; parent_i < wrist->getChildren().size(); ++parent_i) {
 		Joint* cur = static_cast<Joint*>(wrist->getChildren()[parent_i]);
 		Joint* next = cur;
 		//glm::mat4 tr = wrist->getTransformLocale();  // l2p
@@ -271,18 +268,17 @@ void MediapipeAndGLTF::retargeting(
 		std::cout << glm::length(tr * glm::vec4(0, 1, 0, 0)) << std::endl;
 		std::cout << glm::length(tr * glm::vec4(0, 0, 1, 0)) << std::endl;
 
-		for (int i = 0; i < 6; i++ )
+		for (int i = 0; i < mdph::NB_JOINTS_LFS; i++ )
 			std::cout << makeString(posGlobalesMediapipe[i]) << std::endl;
 
 
 		while (cur->getChildren().size()) {
 			next = static_cast<Joint*>(cur->getChildren()[0]);
 
-
 			//glm::mat4 tr_l2w = tr * cur->getTransformLocale();
 			glm::mat4 tr_l2w = tr * cur->getTranslateLocale() * cur->getRotateLocale();
 
-			glm::vec4 from = glm::vec4(next->getPositionLocale() * 0.25f, 0.0f);
+			glm::vec4 from = glm::vec4(next->getPositionLocale() * SCALE, 0.0f);
 			std::cout << makeString(next->getTransform()) << std::endl;
 
 			std::cout << cur->id() << " -- " << next->id() << std::endl;
@@ -290,7 +286,7 @@ void MediapipeAndGLTF::retargeting(
 			glm::vec4 to_point = glm::vec4(posGlobalesMediapipe[next->id()], 1.0);
 			glm::vec4 toparent_point = glm::vec4(posGlobalesMediapipe[cur->id()], 1.0);
 			glm::vec3 to = glm::inverse(tr_l2w) * (to_point-toparent_point);
-			std::cout << "gltf length: " << glm::length(next->getPositionLocale() * 0.25f) << std::endl;
+			std::cout << "gltf length: " << glm::length(next->getPositionLocale() * SCALE) << std::endl;
 			std::cout << "mediapipe length: " << glm::length((to_point-toparent_point)) << std::endl;
 			std::cout << "mediapipe length: " << glm::length(to) << std::endl;
 

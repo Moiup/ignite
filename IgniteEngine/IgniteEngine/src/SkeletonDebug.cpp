@@ -20,6 +20,9 @@ void SkeletonDebug::create() {
 
 	_cross_objs.resize(skeleton->joints().size() + 1);
 	for (int i = 0; i < skeleton->joints().size(); ++i) {
+		if (skeleton->joints()[i].id() >= 6) {
+			continue;
+		}
 		_cross_objs[skeleton->joints()[i].id()].setMesh(&_cross_mesh);
 		_cross_objs[skeleton->joints()[i].id()].setMaterial(_cross_material, &_cross_material_indices);
 		_cross_objs[skeleton->joints()[i].id()].addShader(_shader);

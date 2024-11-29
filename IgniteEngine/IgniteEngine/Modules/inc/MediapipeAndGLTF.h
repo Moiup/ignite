@@ -16,7 +16,8 @@
 
 namespace mdph {
     const static int32_t NB_JOINTS = 21;
-    const static int32_t NB_JOINTS_LFS = NB_JOINTS + 5;
+    //const static int32_t NB_JOINTS_LFS = NB_JOINTS + 5;
+    const static int32_t NB_JOINTS_LFS = 6;
 
     struct DimMsg {
         uint32_t _width;
@@ -93,6 +94,7 @@ private:
     mdph::Landmarks _landmarks;
     mdph::LandmarksForSkinning _lfs;
     mdph::Init _mediapipe_info;
+    std::vector<glm::vec3> posGlobalesMediapipe;
 
 
     // -- HAND SHADER --

@@ -26,8 +26,8 @@ void MediapipeAndGLTF::start() {
 	//_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_nails.gltf");
 	_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_origin.gltf");
 	_hand.createFromObjectInfo(_hand_obj_info);
-	_hand.setRenderer(DefaultConf::renderer);
-	_hand.addShader(&_lbs_shader);
+	//_hand.setRenderer(DefaultConf::renderer);
+	//_hand.addShader(&_lbs_shader);
 
 	_hand.setScaleLocale(glm::vec3(0.25f));
 
@@ -41,15 +41,19 @@ void MediapipeAndGLTF::start() {
 	SkeletonDebug::createCrossMaterial(_cross_material, _cross_material_indices);
 
 	_hand_skeleton.setObject3D(_hand);
-	_hand_skeleton.setSize(3.0f);
+	_hand_skeleton.setSize(4.0f);
 	_hand_skeleton.setShader(_debug_shader);
 	_hand_skeleton.create();
 
 	_hand_blue_sphere.resize(_hand.getSkeleton()->joints().size());
 	for (const Joint& j : _hand.getSkeleton()->joints()) {
-		for (const Entity3D* child : j.getChildren()) {
+//		Joint& j = _hand.getSkeleton()->joints()[0] {
+			for (const Entity3D* child : j.getChildren()) {
 			const Joint* cj = static_cast<const Joint*>(child);
 			_hand_blue_sphere[j.id()].addChild(&_hand_blue_sphere[cj->id()]);
+		}
+		if (j.id() >= 6) {
+				continue;
 		}
 
 		_hand_blue_sphere[j.id()].createFromObjectInfo(_blue_sphere_info);
@@ -59,6 +63,7 @@ void MediapipeAndGLTF::start() {
 		_hand_blue_sphere[j.id()].setPositionLocale(j.getPositionLocale());
 		_hand_blue_sphere[j.id()].setRotationLocale(j.getRotationLocale());
 		_hand_blue_sphere[j.id()].setScaleLocale(j.getScaleLocale());
+
 	}
 	_parent_hand_blue_sphere.addChild(&_hand_blue_sphere[0]);
 	_parent_hand_blue_sphere.setScaleLocale(_hand.getScaleLocale());
@@ -81,6 +86,8 @@ void MediapipeAndGLTF::start() {
 		_lfs
 	);
 
+	retargeting(_lfs, *_hand.getSkeleton());
+
 	_mediapipe_red_sphere.resize(mdph::NB_JOINTS_LFS);
 	_mediapipe_cross.resize(mdph::NB_JOINTS_LFS);
 	for (uint32_t i = 0; i < mdph::NB_JOINTS_LFS; ++i) {
@@ -88,21 +95,20 @@ void MediapipeAndGLTF::start() {
 		_mediapipe_red_sphere[i].setRenderer(DefaultConf::renderer);
 		_mediapipe_red_sphere[i].addShader(DefaultConf::graphic_shader);
 		//_mediapipe_red_sphere[i].setScaleLocale(glm::vec3(0.25));
-		_mediapipe_red_sphere[i].setPositionLocale(_lfs._landmarks[0][i]);
+		_mediapipe_red_sphere[i].setPositionLocale(posGlobalesMediapipe[i]);
 
 		// Crosses
 		_mediapipe_cross[i].setMesh(&_cross_mesh);
 		_mediapipe_cross[i].setMaterial(_cross_material, &_cross_material_indices);
-		_mediapipe_cross[i].setRenderer(DefaultConf::renderer);
-		_mediapipe_cross[i].addShader(&_debug_shader);
-		_mediapipe_cross[i].setPositionLocale(_lfs._landmarks[0][i]);
+		//_mediapipe_cross[i].setRenderer(DefaultConf::renderer);
+		//_mediapipe_cross[i].addShader(&_debug_shader);
+		_mediapipe_cross[i].setPositionLocale(posGlobalesMediapipe[i]);
 	}
 
 	for (int i = 0; i < 21; ++i) {
-		std::cout << "landmarks     : " << makeString(_lfs._landmarks[0][i]) << std::endl;
+		std::cout << "landmarks     : " << makeString(posGlobalesMediapipe[i]) << std::endl;
 	}
 
-	retargeting(_lfs, *_hand.getSkeleton());
 
 	//std::cout << "wrist         : " << makeString(_hand.getSkeleton()->skeleton()->getPositionLocale()) << std::endl;
 	//std::cout << "hand          : " << makeString(_hand.getPositionLocale()) << std::endl;
@@ -112,8 +118,8 @@ void MediapipeAndGLTF::start() {
 #endif
 
 	createDebugShader();
-	createLBSShader();
-	_lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
+	//createLBSShader();
+	//_lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 	_debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
 	_debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
 }
@@ -204,36 +210,104 @@ void MediapipeAndGLTF::retargeting(
 	const mdph::LandmarksForSkinning& lfs,
 	Skeleton& skeleton
 ) {
+	static bool first = true;
+	posGlobalesMediapipe.resize(_hand.getSkeleton()->joints().size());
+	if (first) {
+		// rescale mediapipe data
+		std::vector<glm::vec3> posLocales(_hand.getSkeleton()->joints().size());
+		for (auto& joint : _hand.getSkeleton()->joints())
+		{
+			int id = joint.id();
+			glm::vec3 posid = lfs._landmarks[0][id];
+			if (joint.getParent())
+			{
+				int parentid = static_cast<Joint*>(joint.getParent())->id();
+				glm::vec3 posparentid = lfs._landmarks[0][parentid];
+				posLocales[id] = posid - posparentid;
+			}
+			else {
+				posLocales[id] = posid;
+			}
+			std::cout << "PosLocale [" << id << "] = " << makeString(posLocales[id]) << std::endl;
+		}
+		for (auto& joint : _hand.getSkeleton()->joints())
+		{
+			int id = joint.id();
+			glm::vec3 posLocaleGLTF = joint.getPositionLocale();
+			if (joint.getParent())
+			{
+				int parentid = static_cast<Joint*>(joint.getParent())->id();
+				glm::vec3 dir = glm::normalize(posLocales[id]);
+				posGlobalesMediapipe[id] = posGlobalesMediapipe[parentid] + dir * glm::length(posLocaleGLTF) * 0.25f;
+			}
+			else
+				posGlobalesMediapipe[id] = posLocaleGLTF;
+			std::cout << "PosGlobale [" << id << "] = " << makeString(posGlobalesMediapipe[id]) << std::endl;
+		}
+				
+
+		first = false;
+	}
 	Joint* wrist = skeleton.skeleton();
 	
 	// Wrist case is apart
 	{
-		glm::vec3 from = wrist->getTransformLocale() * glm::vec4(wrist->getChildren()[3]->getPositionLocale(), 1.0f);
-		glm::vec3 to = lfs._landmarks[0][1];
-		
+		glm::vec3 from = glm::vec4(wrist->getChildren()[3]->getPositionLocale() * 0.25f, 0.0f);
+		glm::vec3 to = glm::inverse(wrist->getTranslateLocale() * wrist->getRotateLocale()) * glm::vec4(posGlobalesMediapipe[1],0.0f);
+
 		wrist->alignmentMatrix() = findRotationMatrix(from, to);
 	}
 
+	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(1, 0, 0, 0)) << std::endl;
+	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(0, 1, 0, 0)) << std::endl;
+	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(0, 0, 1, 0)) << std::endl;
 #if 1
-	for (int32_t parent_i = 0; parent_i < wrist->getChildren().size(); ++parent_i) {
+	for (int32_t parent_i = 0; parent_i < 1 /*wrist->getChildren().size()*/; ++parent_i) {
 		Joint* cur = static_cast<Joint*>(wrist->getChildren()[parent_i]);
 		Joint* next = cur;
-		glm::mat4 tr = wrist->getTransformLocale();
+		//glm::mat4 tr = wrist->getTransformLocale();  // l2p
+		glm::mat4 tr = wrist->getTranslateLocale() * wrist->getRotateLocale() * wrist->alignmentMatrix();
+		std::cout << glm::length(tr * glm::vec4(1, 0, 0, 0)) << std::endl;
+		std::cout << glm::length(tr * glm::vec4(0, 1, 0, 0)) << std::endl;
+		std::cout << glm::length(tr * glm::vec4(0, 0, 1, 0)) << std::endl;
+
+		for (int i = 0; i < 6; i++ )
+			std::cout << makeString(posGlobalesMediapipe[i]) << std::endl;
+
+
 		while (cur->getChildren().size()) {
 			next = static_cast<Joint*>(cur->getChildren()[0]);
 
-			glm::mat4 tr_bis = tr * cur->getTransformLocale();
 
-			glm::vec4 from = glm::vec4(next->getPositionLocale(), 1.0f);
+			//glm::mat4 tr_l2w = tr * cur->getTransformLocale();
+			glm::mat4 tr_l2w = tr * cur->getTranslateLocale() * cur->getRotateLocale();
+
+			glm::vec4 from = glm::vec4(next->getPositionLocale() * 0.25f, 0.0f);
+			std::cout << makeString(next->getTransform()) << std::endl;
 
 			std::cout << cur->id() << " -- " << next->id() << std::endl;
 
-			glm::vec4 to_point = glm::vec4(lfs._landmarks[0][next->id()], 1.0);
-			glm::vec3 to = glm::inverse(tr) * to_point;
+			glm::vec4 to_point = glm::vec4(posGlobalesMediapipe[next->id()], 1.0);
+			glm::vec4 toparent_point = glm::vec4(posGlobalesMediapipe[cur->id()], 1.0);
+			glm::vec3 to = glm::inverse(tr_l2w) * (to_point-toparent_point);
+			std::cout << "gltf length: " << glm::length(next->getPositionLocale() * 0.25f) << std::endl;
+			std::cout << "mediapipe length: " << glm::length((to_point-toparent_point)) << std::endl;
+			std::cout << "mediapipe length: " << glm::length(to) << std::endl;
+
+			static int i = 0;
+			std::cout << i << std::endl;
+			std::cout << "tr_l2w=" << makeString(tr_l2w) << std::endl;
+			std::cout << "from=" << makeString(from) << std::endl;
+			std::cout<<"to=" << makeString(to) << std::endl;
+			std::cout << "to_point_w=" << makeString(to_point) << std::endl;
+			i++;
 
 			cur->alignmentMatrix() = findRotationMatrix(from, to);
 
-			tr = tr * cur->getTransformLocale();
+			std::cout << "From : " << makeString(from) << std::endl;
+			std::cout << "From : " << makeString(cur->alignmentMatrix() * from) << std::endl;
+			std::cout << "To : " << makeString(to) << std::endl;
+			tr = tr * cur->getTranslateLocale() * cur->getRotateLocale() * cur->alignmentMatrix();
 
 			cur = next;
 		}
@@ -259,7 +333,7 @@ void MediapipeAndGLTF::createWrist(
 			lfs._landmarks[0][i] = mediapipe_landmarks._landmarks[0][i - offset] - wrist;
 			//std::cout << i << " -- " << i - offset << std::endl;
 		}
-		lfs._landmarks[0][i] = lfs._landmarks[0][i] * 20.0f;
+		lfs._landmarks[0][i] = lfs._landmarks[0][i];
 	}
 	//std::cout << std::endl;
 }

@@ -94,7 +94,7 @@ private:
     mdph::Landmarks _landmarks;
     mdph::LandmarksForSkinning _lfs;
     mdph::Init _mediapipe_info;
-    std::vector<glm::vec3> posGlobalesMediapipe;
+    std::vector<glm::vec3> _posGlobalesMediapipe;
 
 
     // -- HAND SHADER --
@@ -142,7 +142,6 @@ public:
     );
 
     void createWrist(
-        const mdph::Hierarchy& mediapipe_h,
         const mdph::Landmarks& mediapipe_landmarks,
         mdph::LandmarksForSkinning& lfs
     );

@@ -6,16 +6,16 @@ DefaultRenderer::DefaultRenderer() :
 	;
 }
 
+void DefaultRenderer::setDepthBuffer(DepthBuffer& depth_buffer) {
+	_depth_buffer = &depth_buffer;
+}
+
 void DefaultRenderer::create() {
 	configureQueues();
-	createSwapchain();
-	createDepthBuffer();
 	createSemaphores();
 }
 
 void DefaultRenderer::destroy() {
-	_swapchain.destroy();
-
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vkDestroySemaphore(
 			(*_graphics_queues)[0].getDevice()->getDevice(),
@@ -41,7 +41,7 @@ void DefaultRenderer::render() {
 			1,
 			&_sem_render_ends[_present_frame],
 			1,
-			&_swapchain.getSwapchain(),
+			&_swapchain->getSwapchain(),
 			&_available_img
 		);
 	}
@@ -52,7 +52,7 @@ void DefaultRenderer::render() {
 	
 	vk_result = vkAcquireNextImageKHR(
 		(*_graphics_queues)[0].getDevice()->getDevice(),
-		_swapchain.getSwapchain(),
+		_swapchain->getSwapchain(),
 		UINT64_MAX,
 		_sem_render_starts[_current_frame],
 		VK_NULL_HANDLE,
@@ -73,16 +73,22 @@ void DefaultRenderer::render() {
 	const std::unordered_map<GraphicsPipeline*, Object3DArrays> gps_and_arrays = Object3D::getArrays(*this);
 
 	for (const auto& gp_and_arrays : gps_and_arrays) {
+		if (!gp_and_arrays.first) {
+			continue;
+		}
 		const GraphicsPipeline& gp = *gp_and_arrays.first;
 		cmd_buf.bindPipeline(
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			gp.getPipeline()
 		);
+		std::vector<VkViewport> viewport{ gp.getViewport() };
 		cmd_buf.setViewport(
-			(std::vector<VkViewport>&)gp.getViewport()
+			viewport
 		);
+
+		std::vector<VkRect2D> scissors{ gp.getScissors() };
 		cmd_buf.setScissor(
-			(std::vector<VkRect2D>&)gp.getScissors()
+			scissors
 		);
 
 		// Descriptor sets
@@ -130,7 +136,7 @@ void DefaultRenderer::render() {
 				gs->getVertexBufferDescription(buf_name).binding_desc.binding,
 				1,
 				&vertex_buffer,
-				buff_offset
+				&buff_offset
 			);
 		}
 		
@@ -179,7 +185,7 @@ void DefaultRenderer::render() {
 }
 
 Image& DefaultRenderer::getCurrentFrame() {
-	return _swapchain.getImages()[_present_frame];
+	return _swapchain->getImages()[_present_frame];
 }
 
 void DefaultRenderer::configureQueues() {
@@ -229,86 +235,6 @@ void DefaultRenderer::createSemaphores() {
 	}
 }
 
-void DefaultRenderer::createSwapchain() {
-	PhysicalDevice* gpu = DefaultConf::gpu;
-	std::vector<VkSurfaceFormatKHR> surface_formats = DefaultConf::render_window->getSurfaceFormats(*DefaultConf::gpu);
-	std::vector<VkFormat> accepted_format = {
-		VK_FORMAT_R8G8B8A8_SRGB,
-		VK_FORMAT_B8G8R8A8_SRGB
-	};
-
-	VkFormat found_format = {VK_FORMAT_UNDEFINED};
-	VkColorSpaceKHR color_space{};
-
-	for(const VkSurfaceFormatKHR& sf : surface_formats) {
-		for(const VkFormat& af : accepted_format){
-			if(sf.format == af) {
-				found_format = sf.format;
-				color_space = sf.colorSpace;
-				break;
-			}
-		}
-
-		if(found_format != VK_FORMAT_UNDEFINED){
-			break;
-		}
-	}
-
-	if(found_format == VK_FORMAT_UNDEFINED){
-		throw std::runtime_error("Error: no proper format found!");
-	}
-
-	_swapchain.setDevice(
-		_device
-	);
-	_swapchain.setSurface(
-		_window->getSurface()
-	);
-	_swapchain.setImageFormat(found_format);
-	_swapchain.setImageColorSpace(color_space);
-	_swapchain.setMinImageCount(_nb_frame);
-	_swapchain.setWidthHeight(
-		_extent.width,
-		_extent.height
-	);
-	_swapchain.setImageFormat(found_format);
-	_swapchain.setQueueFamilyIndices(
-		{(*_graphics_queues)[0].getFamilyIndex()}
-	);
-	_swapchain.create();
-
-	for (Image& img : _swapchain.getImages()) {
-		(*_graphics_queues)[0].changeLayout(
-			img,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-		);
-	}
-	(*_graphics_queues)[0].submit();
-	(*_graphics_queues)[0].wait();
-}
-
-void DefaultRenderer::createDepthBuffer() {
-	_depth_buffer = DepthBuffer(
-		_device,
-		_window->getWidthInPixel(),
-		_window->getHeightInPixel(),
-		{ (*_graphics_queues)[0].getFamilyIndex() }
-	);
-
-	//_depth_buffer.setDevice(
-	//	_device
-	//);
-	//_depth_buffer.setImageWidthHeight(
-	//	_window->getWidthInPixel(),
-	//	_window->getHeightInPixel()
-	//);
-
-	//_depth_buffer.setImageQueueFamilyIndices(
-	//	{(*_graphics_queues)[0].getFamilyIndex()}
-	//);
-	//_depth_buffer.create();
-}
-
 void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
 	VkImageSubresourceRange subresource_range_frame{};
 	subresource_range_frame.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -333,7 +259,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
 	image_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	image_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame.image = _swapchain.getImages()[_current_frame].getImage();
+	image_memory_barrier_frame.image = _swapchain->getImages()[_current_frame].getImage();
 	image_memory_barrier_frame.subresourceRange = subresource_range_frame;
 
 	VkImageMemoryBarrier depth_memory_barrier_frame{};
@@ -345,7 +271,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
 	depth_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	depth_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	depth_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	depth_memory_barrier_frame.image = _depth_buffer.getImage();
+	depth_memory_barrier_frame.image = _depth_buffer->getImage();
 	depth_memory_barrier_frame.subresourceRange = depth_subresource_range_frame;
 
 	cmd_buf.pipelineBarrier(
@@ -385,7 +311,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf
 	image_memory_barrier_frame_bk.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	image_memory_barrier_frame_bk.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame_bk.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.image = _swapchain.getImages()[_available_img].getImage();
+	image_memory_barrier_frame_bk.image = _swapchain->getImages()[_available_img].getImage();
 	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
 
 	cmd_buf.pipelineBarrier(
@@ -401,7 +327,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf
 void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	color_attachment.imageView = _swapchain.getImages()[_available_img].getImageView();
+	color_attachment.imageView = _swapchain->getImages()[_available_img].getImageView();
 	color_attachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
 	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -409,7 +335,7 @@ void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
 
 	VkRenderingAttachmentInfoKHR depth_stencil_attachment{};
 	depth_stencil_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	depth_stencil_attachment.imageView = _depth_buffer.getImageView();
+	depth_stencil_attachment.imageView = _depth_buffer->getImageView();
 	depth_stencil_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	depth_stencil_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	depth_stencil_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

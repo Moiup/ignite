@@ -3,11 +3,12 @@
 #include "CameraScene.h"
 //#include "PerspectiveCamera.h"
 
+GraphicsPipelineConfiguration DefaultConf::configuration;
 uint32_t DefaultConf::NB_FRAME = 2;
 DefaultGPU* DefaultConf::gpu;
 LogicalDevice* DefaultConf::logical_device;
-GraphicShader* DefaultConf::graphic_shader;
-GraphicShader* DefaultConf::debug_shader;
+GraphicsPipeline* DefaultConf::graphics_pipeline;
+GraphicsPipeline* DefaultConf::debug_pipeline;
 CommandBuffer* DefaultConf::copy_cmd_buf;
 WindowSurface* DefaultConf::render_window;
 uint32_t DefaultConf::render_window_width{ 1600 };

@@ -20,7 +20,7 @@ void Bistro::start() {
 	//_bistro_info.loadWavefont("../assets/bistro/bistro/exterior.obj");è
 	_bistro.createFromObjectInfo(_bistro_info);
 	_bistro.setRenderer(*DefaultConf::renderer);
-	_bistro.addShader(DefaultConf::graphic_shader);
+	_bistro.addGraphicsPipeline(*DefaultConf::graphics_pipeline);
 
 	//_bistro.setPositionLocaleUpdateChildren(0, 0, 5);
 	_bistro.setScaleLocale(0.5, 0.5, 0.5);

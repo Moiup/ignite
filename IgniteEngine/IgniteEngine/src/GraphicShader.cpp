@@ -6,10 +6,11 @@ GraphicShader::GraphicShader() :
 { ; }
 
 GraphicShader::GraphicShader(
-	std::string vertex_shader,
-	std::string fragment_shader
+	Device& device,
+	const std::string& vertex_shader,
+	const std::string& fragment_shader
 ) : 
-	GraphicShader::GraphicShader()
+	Shader::Shader(device)
 {
 	read(
 		vertex_shader, fragment_shader
@@ -21,6 +22,7 @@ GraphicShader::GraphicShader(const GraphicShader& shader) {
 }
 
 GraphicShader& GraphicShader::operator=(const GraphicShader& shader) {
+	Shader::operator=(shader);
 	_vertex_input_descs = shader._vertex_input_descs;
 	_index_buffer_info = shader._index_buffer_info;
 
@@ -31,8 +33,8 @@ void GraphicShader::configureVertexBuffer(
 	const std::string& name,
 	uint32_t location,
 	VkFormat format,
-	uint32_t stride = 0,
-	uint32_t offset = 0
+	uint32_t stride,
+	uint32_t offset
 ) {
 	VkVertexInputBindingDescription binding_desc{};
 	binding_desc.binding = _vertex_input_descs.size();

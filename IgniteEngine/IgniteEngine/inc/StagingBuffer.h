@@ -19,7 +19,7 @@ template<IGEBufferUsage U>
 StagingBuffer<U>::StagingBuffer(
 	Device* device,
 	VkDeviceSize size,
-	void* values
+	const void* values
 ) :
 	StagingBuffer<U>(device, size)
 {
@@ -54,7 +54,7 @@ void StagingBuffer<U>::unmap() {
 }
 
 template<IGEBufferUsage U>
-void StagingBuffer<U>::setValues(void* values) {
+void StagingBuffer<U>::setValues(const void* values) {
 	if (_buffer_info.size == 0) {
 		return;
 	}

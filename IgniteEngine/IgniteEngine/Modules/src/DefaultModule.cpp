@@ -7,16 +7,64 @@ void DefaultModule::init() {
 	// Setting window
 	//const VkInstance& insta = _instance.getInstance();
 	//_render_window.setInstance(const_cast<VkInstance*>(&insta));
+	const std::string name = "Ignite";
+	_render_window = WindowSurface(
+		name,
+		DefaultConf::render_window_width,
+		DefaultConf::render_window_height,
+		SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN,
+		*DefaultConf::instance
+	);
 	_render_window.setInstance(DefaultConf::instance);
 	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 	_render_window.setWidth(DefaultConf::render_window_width);
 	_render_window.setHeight(DefaultConf::render_window_height);
-	
+
 	DefaultConf::render_window = &_render_window;
-	DefaultConf::graphic_shader = &_graphic_shader;
+	
+	_depth_buffer = DepthBuffer(
+		DefaultConf::logical_device->getDevice(),
+		_render_window.getWidth(),
+		_render_window.getHeight(),
+		{ DefaultConf::graphics_queue[0].getFamilyIndex() }
+	);
 
+	_swapchain = Swapchain(
+		*DefaultConf::logical_device,
+		DefaultConf::graphics_queue[0],
+		_render_window,
+		DefaultConf::NB_FRAME,
+		_render_window.getWidth(),
+		_render_window.getHeight()
+	);
+
+	GraphicsPipelineConfiguration conf;
+	conf.nb_frame = DefaultConf::NB_FRAME;
+	conf.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	conf.viewport.x = 0;
+	conf.viewport.y = 0;
+	conf.viewport.width = _render_window.getWidth();
+	conf.viewport.height = _render_window.getHeight();
+	conf.viewport.minDepth = 0;
+	conf.viewport.maxDepth = 1.0;
+	conf.scissor.offset = {0, 0};
+	conf.scissor.extent = {_render_window.getWidth(), _render_window.getHeight()};
+	conf.polygon_mode = VK_POLYGON_MODE_FILL;
+	conf.cull_mode = VK_CULL_MODE_NONE;
+	conf.front_face = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	conf.line_width = 1.0;
+	conf.blend_constants = { 1.0, 1.0, 1.0, 1.0 };
+	conf.color_attachment_format = _swapchain.getSwapchainInfo().imageFormat;
+	conf.depth_attachment_format = _depth_buffer.getImageFormat();
+	conf.stencil_attachment_format = _depth_buffer.getImageFormat();
+
+	DefaultConf::configuration = conf;
+
+	DefaultConf::graphics_pipeline = &_graphics_pipeline;
+	
+	_renderer.setSwapchain(_swapchain);
+	_renderer.setDepthBuffer(_depth_buffer);
 	DefaultConf::renderer = &_renderer;
-
 
 	_perspective_camera.setAspectRatio(
 		static_cast<float>(_render_window.getWidth())
@@ -67,62 +115,53 @@ void DefaultModule::start() {
 	//-----------//
 	// Shader    //
 	//-----------//
-	DefaultConf::graphic_shader->setNbFrame(DefaultConf::NB_FRAME);
-	DefaultConf::graphic_shader->setDevice(DefaultConf::logical_device->getDevice()); 
-	DefaultConf::graphic_shader->read(
+	_graphics_shader = GraphicShader(
+		*DefaultConf::logical_device->getDevice(),
 		"../../shaders/vert.vert",
 		"../../shaders/frag.frag"
 	);
+
 	// -- Vertex Shader -- //
 	// Configuring the Graphic Shader
-	DefaultConf::graphic_shader->addVertexBufferInfo(
+	_graphics_shader.configureVertexBuffer(
 		"coord",
-		Object3D::getCoordsStride(DefaultConf::renderer, DefaultConf::graphic_shader),
+		0,
 		VK_FORMAT_R32G32B32_SFLOAT,
-		0
+		Object3D::getCoordsStride(*DefaultConf::renderer, *DefaultConf::graphics_pipeline)
 	);
-	DefaultConf::graphic_shader->addVertexBufferInfo(
+	_graphics_shader.configureVertexBuffer(
 		"object_id",
-		Object3D::getMeshOffsetsStride(DefaultConf::renderer, DefaultConf::graphic_shader),
+		1,
 		VK_FORMAT_R32_UINT,
-		1
+		Object3D::getMeshOffsetsStride(*DefaultConf::renderer, *DefaultConf::graphics_pipeline)
 	);
-	DefaultConf::graphic_shader->addVertexBufferInfo(
+	_graphics_shader.configureVertexBuffer(
 		"material_id",
-		Object3D::getMaterialIndicesStride(DefaultConf::renderer, DefaultConf::graphic_shader),
+		2,
 		VK_FORMAT_R32_UINT,
-		2
+		Object3D::getMaterialIndicesStride(*DefaultConf::renderer, *DefaultConf::graphics_pipeline)
 	);
-	DefaultConf::graphic_shader->addVertexBufferInfo(
+	_graphics_shader.configureVertexBuffer(
 		"uv",
-		Object3D::getUVStride(DefaultConf::renderer, DefaultConf::graphic_shader),
+		3,
 		VK_FORMAT_R32G32_SFLOAT,
-		3
+		Object3D::getUVStride(*DefaultConf::renderer, *DefaultConf::graphics_pipeline)
 	);
 	// Index Buffer
-	DefaultConf::graphic_shader->addIndexBufferInfo(
-		"index",
-		Object3D::getIndicesNbElem(DefaultConf::renderer, DefaultConf::graphic_shader)
+	_graphics_shader.configureIndexBuffer(
+		Object3D::getIndicesNbElem(*DefaultConf::renderer, *DefaultConf::graphics_pipeline)
 	);
 
 	// Push constant
-	DefaultConf::graphic_shader->addPushConstantInfo(
-		"pc",
+	_graphics_shader.configurePushConstant(
 		VK_SHADER_STAGE_VERTEX_BIT,
 		0,
 		sizeof(_cam_mvp)
 	);
 
-	// Uniform buffer
-	//DefaultConf::graphic_shader->addUniformBufferInfo(
-	//	"camera",
-	//	0,
-	//	VK_SHADER_STAGE_VERTEX_BIT
-	//);
-
 	// Storage Buffers
 	// transform
-	DefaultConf::graphic_shader->addStorageBufferInfo(
+	_graphics_shader.configureStorageBuffer(
 		"obj_tr",
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT
@@ -130,24 +169,32 @@ void DefaultModule::start() {
 
 	// -- Fragment shader -- //
 	// materials
-	DefaultConf::graphic_shader->addStorageBufferInfo(
+	_graphics_shader.configureStorageBuffer(
 		"MaterialsBuffer",
 		2,
 		VK_SHADER_STAGE_FRAGMENT_BIT
 	);
 
-	DefaultConf::graphic_shader->addSamplerInfo(
+	_graphics_shader.configureSampler(
 		"samp",
 		3,
 		VK_SHADER_STAGE_FRAGMENT_BIT
 	);
 
-	DefaultConf::graphic_shader->addTextureInfo(
+	_graphics_shader.configureTexture2D(
 		"textures",
 		4,
 		VK_SHADER_STAGE_FRAGMENT_BIT,
-		Object3D::getTextures2D(DefaultConf::renderer, DefaultConf::graphic_shader).size()
+		Object3D::getTextures2D(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).size()
 	);
+
+
+	// Creating the pipeline
+	_graphics_pipeline = GraphicsPipeline(
+		_graphics_shader,
+		DefaultConf::configuration
+	);
+
 
 	//----------------------//
 	// Creating the buffers //
@@ -156,44 +203,43 @@ void DefaultModule::start() {
 	// Mesh offsets
 	_coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getCoordsSize(DefaultConf::renderer, DefaultConf::graphic_shader),
-		Object3D::getCoords(DefaultConf::renderer, DefaultConf::graphic_shader).data()
+		Object3D::getCoordsSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
+		Object3D::getCoords(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
-	DefaultConf::graphic_shader->addVertexBuffer("coord", &_coord_buffer);
+	_graphics_pipeline.setVertexBuffer("coord", _coord_buffer);
 
 	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getObjectIdSize(DefaultConf::renderer, DefaultConf::graphic_shader),
-		Object3D::getObjectId(DefaultConf::renderer, DefaultConf::graphic_shader).data()
+		Object3D::getObjectIdSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
+		Object3D::getObjectId(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
-	DefaultConf::graphic_shader->addVertexBuffer("object_id", &_object_id_buffer);
+	_graphics_pipeline.setVertexBuffer("object_id", _object_id_buffer);
 
 	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getMaterialIndicesSize(DefaultConf::renderer, DefaultConf::graphic_shader),
-		Object3D::getMaterialIndices(DefaultConf::renderer, DefaultConf::graphic_shader).data()
+		Object3D::getMaterialIndicesSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
+		Object3D::getMaterialIndices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
-	DefaultConf::graphic_shader->addVertexBuffer("material_id", &_material_indices_buffer);
+	_graphics_pipeline.setVertexBuffer("material_id", _material_indices_buffer);
 
 	_uv_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getUVSize(DefaultConf::renderer, DefaultConf::graphic_shader),
-		Object3D::getUV(DefaultConf::renderer, DefaultConf::graphic_shader).data()
+		Object3D::getUVSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
+		Object3D::getUV(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
-	DefaultConf::graphic_shader->addVertexBuffer("uv", &_uv_buffer);
+	_graphics_pipeline.setVertexBuffer("uv", _uv_buffer);
 
 	// Index buffersetDevice(DefaultConf::logical_device->getDevice());
 	// 
 	_index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getIndicesSize(DefaultConf::renderer, DefaultConf::graphic_shader),
-		Object3D::getIndices(DefaultConf::renderer, DefaultConf::graphic_shader).data()
+		Object3D::getIndicesSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
+		Object3D::getIndices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
-	DefaultConf::graphic_shader->addIndexBuffer("index", &_index_buffer);
-
+	_graphics_pipeline.setIndexBuffer(_index_buffer);
 
 	// Push Constant
-	DefaultConf::graphic_shader->addPushConstant("pc", &_cam_mvp[0][0]);
+	_graphics_pipeline.setPushConstants(&_cam_mvp[0][0]);
 
 	// Uniform buffer
 	//_camera_buffer.setLogicalDevice(DefaultConf::logical_device);
@@ -207,29 +253,31 @@ void DefaultModule::start() {
 	// transform
 	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getTransformMatricesSize(DefaultConf::renderer, DefaultConf::graphic_shader),
-		Object3D::getTransformMatrices(DefaultConf::renderer, DefaultConf::graphic_shader).data()
+		Object3D::getTransformMatricesSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
+		Object3D::getTransformMatrices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
-	DefaultConf::graphic_shader->addStorageBuffer("obj_tr", &_obj_tr_buffer);
+	_graphics_pipeline.setStorageBuffer("obj_tr", _obj_tr_buffer);
 
 	// materials
 	_materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getMaterialsSize(DefaultConf::renderer, DefaultConf::graphic_shader),
-		Object3D::getMaterials(DefaultConf::renderer, DefaultConf::graphic_shader).data()
+		Object3D::getMaterialsSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
+		Object3D::getMaterials(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
-	DefaultConf::graphic_shader->addStorageBuffer("MaterialsBuffer", &_materials_buffer);
+	_graphics_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer);
 
 	// Sampler
 	_sampler.setDevice(DefaultConf::logical_device->getDevice());
 	_sampler.create();
-	DefaultConf::graphic_shader->addSampler("samp", &_sampler);
+	_graphics_pipeline.setSamplers("samp", { &_sampler });
 
 	// Textures
-	DefaultConf::graphic_shader->addTexture2D(
+	_graphics_pipeline.setTextures2D(
 		"textures",
-		Object3D::getTextures2D(DefaultConf::renderer, DefaultConf::graphic_shader)
+		Object3D::getTextures2D(*DefaultConf::renderer, *DefaultConf::graphics_pipeline)
 	);
+
+	_graphics_pipeline.update();
 
 	// Renderer
 	DefaultConf::renderer->setGraphicsQueues(&DefaultConf::logical_device->getQueues("graphics_queues"));
@@ -242,6 +290,7 @@ void DefaultModule::start() {
 		DefaultConf::render_window->getWidth(),
 		DefaultConf::render_window->getHeight()
 	);
+
 	DefaultConf::renderer->create();
 }
 
@@ -278,7 +327,9 @@ void DefaultModule::update() {
 	//img2.getQueue()->submit();
 	//img2.getQueue()->wait();
 
-	_obj_tr_buffer.setValues(Object3D::updateTransformMatrices(DefaultConf::renderer, DefaultConf::graphic_shader).data());
+	_obj_tr_buffer.setValues(
+		Object3D::updateTransformMatrices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
+	);
 
 	DefaultConf::renderer->render();
 }

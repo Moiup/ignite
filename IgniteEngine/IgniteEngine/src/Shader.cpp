@@ -6,6 +6,10 @@ Shader::Shader() :
 	_shared_count = new int32_t(1);
 }
 
+Shader::Shader(Device& device) : Shader::Shader() {
+	_device = &device;
+}
+
 Shader::Shader(const Shader& shader) {
 	*this = shader;
 }
@@ -102,7 +106,7 @@ void Shader::configureTexture2D(
 	const std::string& name,
 	uint32_t binding,
 	VkShaderStageFlags stage_flags,
-	int32_t descriptor_count = 1
+	int32_t descriptor_count
 ) {
 	configureDescLayoutBindings(
 		name,
@@ -117,7 +121,7 @@ void Shader::configureTexture2DCombined(
 	const std::string& name,
 	uint32_t binding,
 	VkShaderStageFlags stage_flags,
-	int32_t descriptor_count = 1
+	int32_t descriptor_count
 ) {
 	configureDescLayoutBindings(
 		name,
@@ -133,7 +137,7 @@ void Shader::configureStorageTexture2D(
 	const std::string& name,
 	uint32_t binding,
 	VkShaderStageFlags stage_flags,
-	uint32_t descriptor_count = 1
+	uint32_t descriptor_count
 ) {
 	configureDescLayoutBindings(
 		name,

@@ -35,6 +35,7 @@ protected:
 
 public:
 	Shader();
+	Shader(Device& device);
 	Shader(const Shader& shader);
 	~Shader();
 

@@ -115,28 +115,30 @@ const uint32_t Triangle::mat_id() const {
 void Triangle::buildTriangles(RTScene& scene) {
 	//materials.push_back(Material());
 
-	std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& mesh_objects = Object3D::getMeshObjects();
+	const std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& arrays = Object3D::getArrays();
+
+
 
 	std::unordered_map<Material*, uint32_t> is_mat{};
 
 	uint32_t nb_mat{ 0 };
 
 	// For each renderer
-	for (auto& r_gs : mesh_objects) {
-		Renderer* renderer = r_gs.first;
+	for (auto& r_gp : arrays) {
+		Renderer* renderer = r_gp.first;
 		if (!renderer) {
 			continue;
 		}
 
-		auto& gs_arr = r_gs.second;
-		// For each graphic shader
-		for (auto& gs_mesh : gs_arr) {
-			GraphicShader* gs = gs_mesh.first;
-			if (!gs) {
+		auto& gp_arr = r_gp.second;
+		// For each graphic pipeline
+		for (auto& gp_mesh : gp_arr) {
+			GraphicsPipeline* gp = gp_mesh.first;
+			if (!gp) {
 				continue;
 			}
 
-			auto& mesh_arr = gs_mesh.second;
+			auto& mesh_arr = gp_mesh.second.mesh_objects;
 			// For each mesh
 			for (auto& m_o : mesh_arr) {
 				Mesh* mesh = m_o.first;
@@ -146,7 +148,7 @@ void Triangle::buildTriangles(RTScene& scene) {
 				//const std::vector<uint32_t>& mat_indices = mesh->getIndicesToMaterial();
 				//const std::vector<Material>& mesh_materials = mesh->getMaterials();
 				
-				std::vector<Object3D*>& objects = m_o.second;
+				const std::vector<Object3D*>& objects = m_o.second;
 				
 				// For each objects of the same mesh
 				if (!objects.size()) {

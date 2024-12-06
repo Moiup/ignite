@@ -95,7 +95,7 @@ void EngineApp::init() {
 	//DefaultConf::graphics_queue->submit();
 	//DefaultConf::graphics_queue->wait();
 
-	_modules.init();
+	//_modules.init();
 	initEngineEntities();
 }
 
@@ -360,19 +360,22 @@ void EngineApp::close() {
 }
 
 void EngineApp::initEngineEntities() {
-	for (EngineEntity* e : EngineEntity::engine_entities) {
+	for(int32_t i = 0; i < EngineEntity::engine_entities.size(); ++i){
+		EngineEntity* e = EngineEntity::engine_entities[i];
 		e->init();
 	}
 }
 
 void EngineApp::startEngineEntities() {
-	for (EngineEntity* e : EngineEntity::engine_entities) {
+	for (int32_t i = 0; i < EngineEntity::engine_entities.size(); ++i) {
+		EngineEntity* e = EngineEntity::engine_entities[i];
 		e->start();
 	}
 }
 
 void EngineApp::updateEngineEntities() {
-	for (EngineEntity* e : EngineEntity::engine_entities) {
+	for (int32_t i = 0; i < EngineEntity::engine_entities.size(); ++i) {
+		EngineEntity* e = EngineEntity::engine_entities[i];
 		e->update();
 	}
 }

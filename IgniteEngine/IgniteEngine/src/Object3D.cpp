@@ -1,6 +1,6 @@
 #include "Object3D.h"
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>> _arrays;
+std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>> Object3D::_arrays;
 std::vector<Object3D*> Object3D::allocated_objects{};
 
 Object3D::Object3D() :
@@ -206,6 +206,10 @@ const Renderer* Object3D::getRenderer() const {
 	return _renderer;
 }
 
+const std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& Object3D::getArrays() {
+	return Object3D::_arrays;
+}
+
 const std::unordered_map<GraphicsPipeline*, Object3DArrays>& Object3D::getArrays(Renderer& renderer) {
 	return Object3D::_arrays.at(&renderer);
 }
@@ -332,11 +336,11 @@ std::vector<Texture2D*>& Object3D::getTextures2D(Renderer& renderer, GraphicsPip
 	return Object3D::_arrays[&renderer][&gp]._textures2D;
 }
 
-uint32_t Object3D::getTextures2DSize(Renderer& renderer, GraphicsPipeline& gp) {
+uint32_t Object3D::getTextures2DStride(Renderer& renderer, GraphicsPipeline& gp) {
 	return sizeof(*getTextures2D(renderer, gp).data());
 }
 
-uint32_t Object3D::getTextures2DStride(Renderer& renderer, GraphicsPipeline& gp) {
+uint32_t Object3D::getTextures2DSize(Renderer& renderer, GraphicsPipeline& gp) {
 	uint32_t stride = getTextures2DStride(renderer, gp);
 	return getTextures2D(renderer, gp).size() * stride;
 }

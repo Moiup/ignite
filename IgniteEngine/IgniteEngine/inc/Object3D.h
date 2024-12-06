@@ -15,6 +15,8 @@
 #include <sstream>
 #include <fstream>
 
+class Object3D;
+
 struct Object3DArrays {
 	std::unordered_map<Mesh*, std::vector<Object3D*>> mesh_objects;
 	std::vector<glm::vec3> coords;
@@ -89,6 +91,7 @@ private:
 	void setTextures2D(const std::vector<Texture2D>& Texture2D);
 
 public:
+	static const std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& getArrays();
 	static const std::unordered_map<GraphicsPipeline*, Object3DArrays>& getArrays(Renderer& renderer);
 
 	static const std::vector<glm::vec3>& getCoords(Renderer& renderer, GraphicsPipeline& graphics_pipeline);

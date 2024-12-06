@@ -14,8 +14,8 @@ protected:
 	VkPipeline _pipeline{ nullptr };
 
 	bool _is_changed = false;
-	std::vector<VkDescriptorBufferInfo> _descriptor_buffer_infos;
-	std::vector<VkDescriptorImageInfo> _descriptor_image_infos;
+	std::unordered_map<std::string, std::vector<VkDescriptorBufferInfo>> _descriptor_buffer_infos;
+	std::unordered_map<std::string, std::vector<VkDescriptorImageInfo>> _descriptor_image_infos;
 	std::vector<VkWriteDescriptorSet> _write_descriptor_sets;
 
 	void* _push_constants;
@@ -24,7 +24,7 @@ protected:
 
 protected:
 	Pipeline();
-	Pipeline(const Pipeline& pipeline) = delete;
+	Pipeline(const Pipeline& pipeline);
 	Pipeline(Shader& shader);
 	~Pipeline();
 
@@ -46,11 +46,11 @@ public:
 	);
 	void setSamplers(
 		const std::string& name,
-		const std::vector<Sampler&>& samp
+		const std::vector<Sampler*>& samp
 	);
 	void setTextures2D(
 		const std::string& name,
-		const std::vector<Texture2D&>& textures
+		const std::vector<Texture2D*>& textures
 	);
 
 	virtual void createPipeline() = 0;
@@ -60,8 +60,9 @@ public:
 	const std::vector<VkDescriptorSet>& getDescriptorSets() const;
 	const Shader& getShader() const;
 
+	void update();
 private:
-	VkWriteDescriptorSet setWriteDescriptorSet(
+	VkWriteDescriptorSet& setWriteDescriptorSet(
 		const std::string& name
 	);
 
@@ -73,7 +74,6 @@ private:
 	void createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
 	void createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
 	
-	void update();
 
 	void destroyDescriptorSetLayout();
 

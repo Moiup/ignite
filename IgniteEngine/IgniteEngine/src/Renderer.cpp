@@ -24,6 +24,10 @@ void Renderer::setComputeQueues(std::vector<Queue>* compute_queues) {
 	_compute_queues = compute_queues;
 }
 
+void Renderer::setSwapchain(Swapchain& swapchain) {
+	_swapchain = &swapchain;
+}
+
 void Renderer::setNbFrame(uint32_t nb_frame) {
 	_nb_frame = nb_frame;
 }

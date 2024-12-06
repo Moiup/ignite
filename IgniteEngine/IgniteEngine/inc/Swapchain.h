@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WindowSurface.h"
+#include "LogicalDevice.h"
 #include "Image.h"
 #include "Device.h"
 
@@ -9,7 +11,6 @@ private:
 	Device* _device;
 	VkSwapchainKHR _swapchain{ nullptr };
 	VkSwapchainCreateInfoKHR _info;
-	bool _created;
 
 	uint32_t _image_count;
 	//std::vector<VkImage> _images;
@@ -17,10 +18,22 @@ private:
 	std::vector<Image> _images;
 	VkImageViewCreateInfo _image_view_info;
 
+	int32_t* nb_shared{nullptr};
 
 public:
 	Swapchain();
+	Swapchain(
+		LogicalDevice& logical_device,
+		Queue& queue,
+		WindowSurface& window,
+		uint32_t nb_frame,
+		uint32_t width,
+		uint32_t height
+	);
+	Swapchain(const Swapchain& swapchain);
 	~Swapchain();
+
+	Swapchain& operator=(const Swapchain& swapchain);
 
 	void setDevice(Device* _device);
 
@@ -51,12 +64,11 @@ public:
 	const VkSwapchainCreateInfoKHR& getSwapchainInfo() const;
 	const VkSwapchainKHR& getSwapchain() const;
 
-	void create();
 	void destroy();
 
 private:
 	void createSwapchain();
-	void gettingImages();
+	void gettingImages(Queue& queue);
 	void createImagesViews();
 
 	void destroySwapchain();

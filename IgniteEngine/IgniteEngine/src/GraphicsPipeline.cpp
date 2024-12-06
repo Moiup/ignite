@@ -27,6 +27,8 @@ GraphicsPipeline& GraphicsPipeline::operator=(const GraphicsPipeline& gp) {
 	_pipeline_conf = gp._pipeline_conf;
 	_vertex_buffers = gp._vertex_buffers;
 	_index_buffer = gp._index_buffer;
+
+	return *this;
 }
 
 void GraphicsPipeline::setVertexBuffer(
@@ -34,6 +36,10 @@ void GraphicsPipeline::setVertexBuffer(
 	const Buffer<IGEBufferUsage::vertex_buffer>& buff
 ) {
 	_vertex_buffers[name] = buff.getBuffer();
+}
+
+void GraphicsPipeline::setIndexBuffer(const Buffer<IGEBufferUsage::index_buffer>& buff) {
+	_index_buffer = buff.getBuffer();
 }
 
 const std::unordered_map<std::string, VkBuffer>& GraphicsPipeline::getVertexBuffers() const {

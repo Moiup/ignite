@@ -9,7 +9,7 @@ struct GraphicsPipelineConfiguration {
 	VkPrimitiveTopology topology{ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
 	VkViewport viewport{};
 	VkRect2D scissor{};
-	VkPolygonMode polygon_mode;
+	VkPolygonMode polygon_mode{ VK_POLYGON_MODE_FILL };
 	VkCullModeFlags cull_mode;
 	VkFrontFace front_face;
 	float line_width;
@@ -45,6 +45,8 @@ public:
 		const std::string& name,
 		const Buffer<IGEBufferUsage::vertex_buffer>& buff
 	);
+
+	void setIndexBuffer(const Buffer<IGEBufferUsage::index_buffer>& buff);
 
 	const std::unordered_map<std::string, VkBuffer>& getVertexBuffers() const;
 	const VkBuffer getIndexBuffer() const;

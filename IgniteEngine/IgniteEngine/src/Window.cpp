@@ -1,12 +1,9 @@
 #include "Window.h"
 
-std::vector<Window*> Window::windows;
-
 Window::Window() :
 	EngineEntity::EngineEntity(),
 	_window{ nullptr }
 {
-	Window::windows.push_back(this);
 	setParam(DEFAULT_NAME, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
 
@@ -14,7 +11,6 @@ Window::Window(std::string name) :
 	EngineEntity::EngineEntity(),
 	_window{ nullptr }
 {
-	Window::windows.push_back(this);
 	setParam(name, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
 
@@ -22,7 +18,6 @@ Window::Window(uint32_t width, uint32_t height) :
 	EngineEntity::EngineEntity(),
 	_window{ nullptr }
 {
-	Window::windows.push_back(this);
 	setParam(DEFAULT_NAME, width, height);
 }
 
@@ -30,8 +25,24 @@ Window::Window(std::string name, uint32_t width, uint32_t height) :
 	EngineEntity::EngineEntity(),
 	_window{ nullptr }
 {
-	Window::windows.push_back(this);
 	setParam(name, width, height);
+}
+
+Window::Window(const Window& w) {
+	*this = w;
+}
+
+Window& Window::operator=(const Window& w) {
+	EngineEntity::operator=(w);
+
+	_w_id = w._w_id;
+	_width = w._width;
+	_height = w._height;
+	_flags = w._flags;
+	_window = w._window;
+	_name = w._name;
+
+	return *this;
 }
 
 void Window::setName(std::string name) {
@@ -109,19 +120,6 @@ void Window::update() {
 
 void Window::close() {
 	EngineEntity::close();
-	
-	uint32_t i = 0;
-	for (Window* e : Window::windows) {
-		if (e == this) {
-			Window::windows.erase(
-				Window::windows.begin() + i
-			);
-			break;
-		}
-		i++;
-	}
-
-	destroy();
 }
 
 void Window::create() {	
@@ -141,28 +139,4 @@ void Window::destroy() {
 
 	//glfwDestroyWindow(_window);
 	SDL_DestroyWindow(_window);
-}
-
-void Window::initAll() {
-	for (Window* w : Window::windows) {
-		w->init();
-	}
-}
-
-void Window::startAll() {
-	for (Window* w : Window::windows) {
-		w->start();
-	}
-}
-
-void Window::updateAll() {
-	for (Window* w : Window::windows) {
-		w->update();
-	}
-}
-
-void Window::closeAll() {
-	for (Window* w : Window::windows) {
-		w->close();
-	}
 }

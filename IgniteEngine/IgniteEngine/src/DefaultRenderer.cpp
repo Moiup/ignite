@@ -50,13 +50,10 @@ void DefaultRenderer::render() {
 	}
 	_graphics_queues_in_flight[_present_frame].wait();
 	
-	vk_result = vkAcquireNextImageKHR(
-		(*_graphics_queues)[0].getDevice()->getDevice(),
-		_swapchain->getSwapchain(),
+	_available_img = _swapchain->acquireNextImage(
 		UINT64_MAX,
 		_sem_render_starts[_current_frame],
-		VK_NULL_HANDLE,
-		&_available_img
+		VK_NULL_HANDLE
 	);
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed acquiring next image!");

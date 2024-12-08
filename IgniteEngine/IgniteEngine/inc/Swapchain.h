@@ -17,6 +17,7 @@ private:
 	//std::vector<VkImageView> _image_views;
 	std::vector<Image> _images;
 	VkImageViewCreateInfo _image_view_info;
+	uint32_t _current_image_i{0};
 
 	int32_t* nb_shared{nullptr};
 
@@ -60,6 +61,14 @@ public:
 	void setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count);
 
 	std::vector<Image>& getImages();
+	Image& getCurrentImage();
+	const uint32_t getCurrentImageIndex() const;
+
+	const uint32_t& acquireNextImage(
+		uint64_t timeout, 
+		VkSemaphore semaphore,
+		VkFence fence
+		);
 
 	const VkSwapchainCreateInfoKHR& getSwapchainInfo() const;
 	const VkSwapchainKHR& getSwapchain() const;

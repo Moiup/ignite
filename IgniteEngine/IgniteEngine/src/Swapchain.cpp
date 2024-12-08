@@ -219,6 +219,38 @@ std::vector<Image>& Swapchain::getImages() {
 	return _images;
 }
 
+Image& Swapchain::getCurrentImage() {
+	return _images[_current_image_i];
+}
+
+const uint32_t Swapchain::getCurrentImageIndex() const {
+	return _current_image_i;
+}
+
+const uint32_t& Swapchain::acquireNextImage(
+	uint64_t timeout,
+	VkSemaphore semaphore,
+	VkFence fence
+) {
+	uint32_t p_image_index{0};
+	VkResult vk_result = vkAcquireNextImageKHR(
+		_device->getDevice(),
+		_swapchain,
+		timeout,
+		semaphore,
+		fence,
+		&p_image_index
+	);
+
+	if (vk_result != VK_SUCCESS) {
+		std::string res = string_VkResult(vk_result);
+		throw std::runtime_error("Swapchain::acquireNextImageKHR: Error getting next image: " + res);
+	}
+	_current_image_i = p_image_index;
+
+	return _current_image_i;
+}
+
 const VkSwapchainCreateInfoKHR& Swapchain::getSwapchainInfo() const {
 	return _info;
 }

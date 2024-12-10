@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WindowSurface.h"
-#include "LogicalDevice.h"
 #include "Image.h"
 #include "Device.h"
 
@@ -24,8 +23,9 @@ private:
 public:
 	Swapchain();
 	Swapchain(
-		LogicalDevice& logical_device,
-		Queue& queue,
+		Device& device,
+		PhysicalDevice& gpu,
+		const std::vector<uint32_t>& queue_family_index,
 		WindowSurface& window,
 		uint32_t nb_frame,
 		uint32_t width,
@@ -77,7 +77,7 @@ public:
 
 private:
 	void createSwapchain();
-	void gettingImages(Queue& queue);
+	void gettingImages();
 	void createImagesViews();
 
 	void destroySwapchain();

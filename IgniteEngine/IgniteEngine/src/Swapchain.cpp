@@ -45,8 +45,9 @@ Swapchain::Swapchain() :
 }
 
 Swapchain::Swapchain(
-	LogicalDevice& logical_device,
-	Queue& queue,
+	Device& device,
+	PhysicalDevice& gpu,
+	const std::vector<uint32_t>& queue_family_index,
 	WindowSurface& window,
 	uint32_t nb_frame,
 	uint32_t width,
@@ -54,15 +55,15 @@ Swapchain::Swapchain(
 ) :
 	Swapchain::Swapchain()
 {
-	setDevice(logical_device.getDevice());
+	setDevice(&device);
 		
 	setWidthHeight(width, height);
 	setMinImageCount(nb_frame);
-	setQueueFamilyIndices({ queue.getFamilyIndex() });
+	//setQueueFamilyIndices({ queue.getFamilyIndex() });
+	setQueueFamilyIndices(queue_family_index);
 	setSurface(window.getSurface());
 
-	PhysicalDevice* gpu = logical_device.getGPU();
-	std::vector<VkSurfaceFormatKHR> surface_formats = window.getSurfaceFormats(*gpu);
+	std::vector<VkSurfaceFormatKHR> surface_formats = window.getSurfaceFormats(gpu);
 	std::vector<VkFormat> accepted_format = {
 		VK_FORMAT_R8G8B8A8_SRGB,
 		VK_FORMAT_B8G8R8A8_SRGB
@@ -92,8 +93,7 @@ Swapchain::Swapchain(
 	setImageFormat(found_format);
 
 	createSwapchain();
-	gettingImages(queue);
-	createImagesViews();
+	gettingImages();
 }
 
 Swapchain::Swapchain(const Swapchain& swapchain) {
@@ -288,7 +288,7 @@ void Swapchain::createSwapchain() {
 	}
 }
 
-void Swapchain::gettingImages(Queue& queue){
+void Swapchain::gettingImages(){
 	VkResult vk_result = vkGetSwapchainImagesKHR(
 		_device->getDevice(),
 		_swapchain,
@@ -321,18 +321,6 @@ void Swapchain::gettingImages(Queue& queue){
 			1,
 			_image_view_info
 		);
-
-		queue.changeLayout(_images[i], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		queue.submit();
-		queue.wait();
-
-		//_images[i].setDevice(_device);
-		//_images[i].setImage(imgs[i]);
-		//_images[i].setImageExtent(
-		//	_info.imageExtent.width,
-		//	_info.imageExtent.height,
-		//	1
-		//);
 	}
 }
 

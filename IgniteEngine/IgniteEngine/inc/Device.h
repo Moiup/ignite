@@ -29,5 +29,8 @@ public:
 
 	void create(std::vector<VkDeviceQueueCreateInfo>& queues_info);
 	void destroy();
+
+private:
+	VkPhysicalDeviceFeatures featuresManagement();
 };
 

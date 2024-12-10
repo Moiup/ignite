@@ -38,15 +38,16 @@ std::vector<VkQueueFamilyProperties2>& Device::getFamilyProperties() {
 }
 
 void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
+	VkPhysicalDeviceFeatures features = featuresManagement();
+	
 	VkPhysicalDeviceVulkan12Features physical_device_v12_features{};
 	physical_device_v12_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 	physical_device_v12_features.runtimeDescriptorArray = VK_TRUE;
 
-	VkPhysicalDeviceFeatures physical_device_features{};
 	VkPhysicalDeviceFeatures2 physical_device_features2{};
 	physical_device_features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 	physical_device_features2.pNext = &physical_device_v12_features;
-	physical_device_features2.features = physical_device_features;
+	physical_device_features2.features = features;
 
 	VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_features{};
 	dynamic_rendering_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
@@ -77,4 +78,17 @@ void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 
 void Device::destroy() {
 	vkDestroyDevice(_device, nullptr);
+}
+
+VkPhysicalDeviceFeatures Device::featuresManagement() {
+	VkPhysicalDeviceFeatures2 available{};
+	available.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+	vkGetPhysicalDeviceFeatures2(getGPU()->getGPU(), &available);
+
+	VkPhysicalDeviceFeatures enabled{};
+	if (available.features.fillModeNonSolid) {
+		enabled.fillModeNonSolid = true;
+	}
+
+	return enabled;
 }

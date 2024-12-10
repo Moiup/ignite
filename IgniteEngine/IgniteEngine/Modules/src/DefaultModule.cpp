@@ -21,7 +21,7 @@ void DefaultModule::init() {
 	_render_window.setHeight(DefaultConf::render_window_height);
 
 	DefaultConf::render_window = &_render_window;
-	
+
 	_depth_buffer = DepthBuffer(
 		DefaultConf::logical_device->getDevice(),
 		_render_window.getWidth(),
@@ -30,13 +30,22 @@ void DefaultModule::init() {
 	);
 
 	_swapchain = Swapchain(
-		*DefaultConf::logical_device,
-		DefaultConf::graphics_queue[0],
+		*DefaultConf::logical_device->getDevice(),
+		*DefaultConf::logical_device->getGPU(),
+		{DefaultConf::graphics_queue[0].getFamilyIndex()},
 		_render_window,
 		DefaultConf::NB_FRAME,
 		_render_window.getWidth(),
 		_render_window.getHeight()
 	);
+	for (Image& img : _swapchain.getImages()) {
+		DefaultConf::graphics_queue[0].changeLayout(
+			img,
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		);
+	}
+	DefaultConf::graphics_queue[0].submit();
+	DefaultConf::graphics_queue[0].wait();
 
 	GraphicsPipelineConfiguration conf;
 	conf.nb_frame = DefaultConf::NB_FRAME;
@@ -94,14 +103,13 @@ void DefaultModule::init() {
 		pixels.getHeight()
 	);
 
-	DefaultConf::graphics_queue->changeLayout(_white_texture, VK_IMAGE_LAYOUT_GENERAL);
-
 	StagingBuffer<IGEBufferUsage::transfer> sb = StagingBuffer<IGEBufferUsage::transfer>(
 		DefaultConf::logical_device->getDevice(),
 		pixels.getSize(),
 		pixels.getPixels().data()
 	);
 
+	DefaultConf::graphics_queue->changeLayout(_white_texture, VK_IMAGE_LAYOUT_GENERAL);
 	DefaultConf::graphics_queue->copy(sb, _white_texture);
 	DefaultConf::graphics_queue->changeLayout(_white_texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 

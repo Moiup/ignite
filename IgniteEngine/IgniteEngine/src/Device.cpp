@@ -43,6 +43,7 @@ void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 	VkPhysicalDeviceVulkan12Features physical_device_v12_features{};
 	physical_device_v12_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 	physical_device_v12_features.runtimeDescriptorArray = VK_TRUE;
+	physical_device_v12_features.timelineSemaphore = VK_TRUE;
 
 	VkPhysicalDeviceFeatures2 physical_device_features2{};
 	physical_device_features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -87,7 +88,7 @@ VkPhysicalDeviceFeatures Device::featuresManagement() {
 
 	VkPhysicalDeviceFeatures enabled{};
 	if (available.features.fillModeNonSolid) {
-		enabled.fillModeNonSolid = true;
+		enabled.fillModeNonSolid = VK_TRUE;
 	}
 
 	return enabled;

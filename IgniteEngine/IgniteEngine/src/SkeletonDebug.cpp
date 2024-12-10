@@ -8,6 +8,8 @@ void SkeletonDebug::setSize(float size) {
 	_size = size;
 }
 
+
+
 void SkeletonDebug::create() {
 	createCrossMesh(_cross_mesh, _size);
 	createCrossMaterial(_cross_material, _cross_material_indices);

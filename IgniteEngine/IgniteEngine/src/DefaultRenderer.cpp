@@ -177,7 +177,7 @@ void DefaultRenderer::render() {
 
 	//_graphics_queues_in_flight[_current_frame].wait();
 
-	_present_frame = _current_frame;
+	_present_frame = _swapchain->getCurrentImageIndex();
 	_current_frame = (_current_frame + 1) % _nb_frame;
 }
 

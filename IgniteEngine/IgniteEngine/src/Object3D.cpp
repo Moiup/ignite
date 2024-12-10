@@ -434,7 +434,7 @@ std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer& renderer, Grap
 			for (const Joint& joint : joints) {
 				const Joint* j = &joint;
 				Object3D::_arrays[&renderer][&gp].joints_transform[joint_i++] =
-					j->getTransformWorld() * j->inverseBindMatrices()
+					j->transformWorld() * j->inverseBindMatrices()
 					/*j->initialTransform() * j->getTransformLocale() * j->inverseBindMatrices()*/;
 				//j->getTransformDeTousLesPeres() * j->matriceRotationTrouve() * j->inverseBindMatrices()
 			}
@@ -820,7 +820,7 @@ void Object3D::buildJointsTransform(Renderer& renderer, GraphicsPipeline& gp) {
 				}
 
 				Object3D::_arrays[&renderer][&gp].joints_transform.push_back(
-					j->getTransformWorld() * j->inverseBindMatrices()
+					j->transformWorld() * j->inverseBindMatrices()
 				);
 				is_joint[j] = true;
 			}

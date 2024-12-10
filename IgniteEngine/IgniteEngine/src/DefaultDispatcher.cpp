@@ -42,7 +42,7 @@ void DefaultDispatcher::dispatch(
 	// Bindings
 	cmd_buf.bindPipeline(
 		VK_PIPELINE_BIND_POINT_COMPUTE,
-		(VkPipeline&)_compute_pipeline->getPipeline()
+		_compute_pipeline->getPipeline()
 	);
 	cmd_buf.bindDescriptorSets(
 		VK_PIPELINE_BIND_POINT_COMPUTE,
@@ -54,20 +54,16 @@ void DefaultDispatcher::dispatch(
 		nullptr
 	);
 
-	//_compute_pipeline->getShader()->getPushConstants();
+	const VkPushConstantRange& pc_range = _compute_pipeline->getShader()->getPushConstantRange();
 
-	for (auto& pc_info : _compute_pipeline->getShader()->getPushConstantInfo()) {
-		std::string name = pc_info.first;
-		PushConstantInfo& info = pc_info.second;
+	cmd_buf.pushConstants(
+		_compute_pipeline->getPipelineLayout(),
+		pc_range.stageFlags,
+		pc_range.offset,
+		pc_range.size,
+		_compute_pipeline->getPushConstants()
+	);
 
-		cmd_buf.pushConstants(
-			_compute_pipeline->getPipelineLayout(),
-			info.getStageFlags(),
-			info.getOffset(),
-			info.getSize(),
-			_compute_pipeline->getShader()->getPushConstants()[name]
-		);
-	}
 
 	// Dispatch
 	cmd_buf.dispatch(

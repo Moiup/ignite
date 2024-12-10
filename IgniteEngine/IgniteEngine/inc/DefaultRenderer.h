@@ -7,10 +7,7 @@
 class DefaultRenderer : public Renderer
 {
 protected:
-	Swapchain _swapchain;
-	DepthBuffer _depth_buffer;
-
-	std::vector<GraphicsPipeline> _graphics_pipelines;
+	DepthBuffer* _depth_buffer;
 
 	std::vector<Queue> _graphics_queues_in_flight;
 	std::vector<Queue> _present_queues_in_flight;
@@ -20,10 +17,13 @@ protected:
 public:
 	DefaultRenderer();
 
+	void setDepthBuffer(DepthBuffer& depth_buffer);
+
 	void create();
 	void destroy();
 
 	void render();
+
 
 	Image& getCurrentFrame();
 
@@ -31,9 +31,6 @@ protected:
 	void createSemaphores();
 
 	void configureQueues();
-	void createSwapchain();
-	void createDepthBuffer();
-	void createGraphicsPipeline();
 
 	void dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf);
 	void dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf);

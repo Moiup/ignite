@@ -2,9 +2,9 @@
 
 Swapchain::Swapchain() :
 	_swapchain{},
-	_info{},
-	_created{false}
+	_info{}
 {
+	nb_shared = new int32_t(1);
 
 	// -- Swapchain infos -- //
 	_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -44,8 +44,82 @@ Swapchain::Swapchain() :
 	_image_view_info.subresourceRange.layerCount = 1;
 }
 
+Swapchain::Swapchain(
+	LogicalDevice& logical_device,
+	Queue& queue,
+	WindowSurface& window,
+	uint32_t nb_frame,
+	uint32_t width,
+	uint32_t height
+) :
+	Swapchain::Swapchain()
+{
+	setDevice(logical_device.getDevice());
+		
+	setWidthHeight(width, height);
+	setMinImageCount(nb_frame);
+	setQueueFamilyIndices({ queue.getFamilyIndex() });
+	setSurface(window.getSurface());
+
+	PhysicalDevice* gpu = logical_device.getGPU();
+	std::vector<VkSurfaceFormatKHR> surface_formats = window.getSurfaceFormats(*gpu);
+	std::vector<VkFormat> accepted_format = {
+		VK_FORMAT_R8G8B8A8_SRGB,
+		VK_FORMAT_B8G8R8A8_SRGB
+	};
+
+	VkFormat found_format = { VK_FORMAT_UNDEFINED };
+	VkColorSpaceKHR color_space{};
+
+	for (const VkSurfaceFormatKHR& sf : surface_formats) {
+		for (const VkFormat& af : accepted_format) {
+			if (sf.format == af) {
+				found_format = sf.format;
+				color_space = sf.colorSpace;
+				break;
+			}
+		}
+
+		if (found_format != VK_FORMAT_UNDEFINED) {
+			break;
+		}
+	}
+
+	if (found_format == VK_FORMAT_UNDEFINED) {
+		throw std::runtime_error("Error: no proper format found!");
+	}
+
+	setImageFormat(found_format);
+
+	createSwapchain();
+	gettingImages(queue);
+	createImagesViews();
+}
+
+Swapchain::Swapchain(const Swapchain& swapchain) {
+	*this = swapchain;
+}
+
+Swapchain& Swapchain::operator=(const Swapchain& swapchain) {
+	_device = swapchain._device;
+	_swapchain = swapchain._swapchain;
+	_info = swapchain._info;
+	_image_count = swapchain._image_count;
+	_images = swapchain._images;
+	_image_view_info = swapchain._image_view_info;
+
+	nb_shared = swapchain.nb_shared;
+	*nb_shared += 1;
+
+	return *this;
+}
+
 Swapchain::~Swapchain() {
-	destroy();
+	*nb_shared -= 1;
+	if (!*nb_shared) {
+		destroy();
+		delete nb_shared;
+	}
 }
 
 void Swapchain::setDevice(Device* device) {
@@ -145,20 +219,44 @@ std::vector<Image>& Swapchain::getImages() {
 	return _images;
 }
 
+Image& Swapchain::getCurrentImage() {
+	return _images[_current_image_i];
+}
+
+const uint32_t Swapchain::getCurrentImageIndex() const {
+	return _current_image_i;
+}
+
+const uint32_t& Swapchain::acquireNextImage(
+	uint64_t timeout,
+	VkSemaphore semaphore,
+	VkFence fence
+) {
+	uint32_t p_image_index{0};
+	VkResult vk_result = vkAcquireNextImageKHR(
+		_device->getDevice(),
+		_swapchain,
+		timeout,
+		semaphore,
+		fence,
+		&p_image_index
+	);
+
+	if (vk_result != VK_SUCCESS) {
+		std::string res = string_VkResult(vk_result);
+		throw std::runtime_error("Swapchain::acquireNextImageKHR: Error getting next image: " + res);
+	}
+	_current_image_i = p_image_index;
+
+	return _current_image_i;
+}
+
 const VkSwapchainCreateInfoKHR& Swapchain::getSwapchainInfo() const {
 	return _info;
 }
 
 const VkSwapchainKHR& Swapchain::getSwapchain() const {
 	return _swapchain;
-}
-
-void Swapchain::create() {
-	createSwapchain();
-	gettingImages();
-	createImagesViews();
-
-	_created = true;
 }
 
 void Swapchain::destroy() {
@@ -190,7 +288,7 @@ void Swapchain::createSwapchain() {
 	}
 }
 
-void Swapchain::gettingImages(){
+void Swapchain::gettingImages(Queue& queue){
 	VkResult vk_result = vkGetSwapchainImagesKHR(
 		_device->getDevice(),
 		_swapchain,
@@ -223,6 +321,10 @@ void Swapchain::gettingImages(){
 			1,
 			_image_view_info
 		);
+
+		queue.changeLayout(_images[i], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		queue.submit();
+		queue.wait();
 
 		//_images[i].setDevice(_device);
 		//_images[i].setImage(imgs[i]);

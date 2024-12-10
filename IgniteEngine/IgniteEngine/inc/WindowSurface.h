@@ -7,15 +7,19 @@
 class WindowSurface: public Window
 {
 private:
-	bool created;
 	VkSurfaceKHR _surface;
 	Instance* _instance;
+	int32_t* _nb_shared{ nullptr };
 
 public:
 	WindowSurface();
-	WindowSurface(std::string name);
-	WindowSurface(uint32_t width, uint32_t height);
-	WindowSurface(std::string name, uint32_t width, uint32_t height);
+	WindowSurface(const std::string& name, uint32_t width, uint32_t height, uint32_t flags, Instance& instance);
+
+	WindowSurface(const WindowSurface& ws);
+
+	~WindowSurface();
+
+	WindowSurface& operator=(const WindowSurface& ws);
 
 	void init();
 	void close();

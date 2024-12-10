@@ -1,16 +1,37 @@
 #include "Shader.h"
 
 Shader::Shader() :
-	_uniform_buffers_info{},
-	_storage_buffers_info{},
-	_uniform_buffers{},
-	_storage_buffers{},
-	_sampler_info{},
-	_sampler{},
-	_texture_info{},
 	_device{nullptr}
 {
-	;
+	_shared_count = new int32_t(1);
+}
+
+Shader::Shader(Device& device) : Shader::Shader() {
+	_device = &device;
+}
+
+Shader::Shader(const Shader& shader) {
+	*this = shader;
+}
+
+Shader::~Shader() {
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+	destroy();
+}
+
+Shader& Shader::operator=(const Shader& shader) {
+	_shader_stages = shader._shader_stages;
+	_push_constant_range = shader._push_constant_range;
+	_desc_layout_bindings = shader._desc_layout_bindings;
+	_device = shader._device;
+	_shared_count = shader._shared_count;
+	*_shared_count += 1;
+
+	return *this;
 }
 
 void Shader::setDevice(Device* device) {
@@ -21,185 +42,112 @@ Device* Shader::getDevice() {
 	return _device;
 }
 
-void Shader::addPushConstantInfo(std::string name, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size) {
-	if (_push_constant_info.count(name)) {
-		std::string error = "Error: there already is a Push Constant info named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	PushConstantInfo info{};
-	info.setStageFlags(stage_flags);
-	info.setOffset(offset);
-	info.setSize(size);
-
-	_push_constant_info[name] = info;
-}
-
-void Shader::addPushConstant(std::string name, void* push_constant) {
-	_push_constants[name] = push_constant;
-}
-
-std::unordered_map<std::string, PushConstantInfo>& Shader::getPushConstantInfo() {
-	return _push_constant_info;
-}
-
-std::unordered_map<std::string, void*>& Shader::getPushConstants() {
-	return _push_constants;
-}
-
-void Shader::addUniformBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
-	if (_uniform_buffers_info.count(name)) {
-		std::string error = "Error: there already is an Uniform buffer info named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	ArrayBufferInfo info{};
-	info.setBinding(binding);
-	info.setDescriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-	info.setStageFlags(stage_flags);
-
-	_uniform_buffers_info[name] = info;
-}
-
-void Shader::addUniformBuffer(
-	std::string name,
-	Buffer<IGEBufferUsage::uniform_buffer>* buffer
+void Shader::configurePushConstant(
+	VkShaderStageFlags stage_flags,
+	uint32_t offset,
+	uint32_t size
 ) {
-	if (_uniform_buffers.count(name)) {
-		std::string error = "Error: there already is an Uniform buffer named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	_uniform_buffers[name] = buffer;
+	_push_constant_range.stageFlags = stage_flags;
+	_push_constant_range.offset = offset;
+	_push_constant_range.size = size;
 }
 
-std::unordered_map<std::string, ArrayBufferInfo>& Shader::getUniformBuffersInfo() {
-	return _uniform_buffers_info;
+const VkPushConstantRange& Shader::getPushConstantRange() const {
+	return _push_constant_range;
 }
 
-std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*>& Shader::getUniformBuffers() {
-	return _uniform_buffers;
+const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& Shader::getDescLayoutBindings() const {
+	return _desc_layout_bindings;
 }
 
-void Shader::addStorageBufferInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
-	if (_uniform_buffers_info.count(name)) {
-		std::string error = "Error: there already is a Storage buffer info named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	ArrayBufferInfo info{};
-	info.setBinding(binding);
-	info.setDescriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-	info.setStageFlags(stage_flags);
-
-	_storage_buffers_info[name] = info;
-}
-
-void Shader::addStorageBuffer(
-	std::string name,
-	Buffer<IGEBufferUsage::storage_buffer>* buffer
+void Shader::configureUniformBuffer(
+	const std::string& name,
+	uint32_t binding,
+	VkShaderStageFlags stage_flags
 ) {
-	if (_storage_buffers.count(name)) {
-		std::string error = "Error: there already is a Storage buffer named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	_storage_buffers[name] = buffer;
-}
-
-std::unordered_map<std::string, ArrayBufferInfo>& Shader::getStorageBuffersInfo() {
-	return _storage_buffers_info;
-}
-
-std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*>& Shader::getStorageBuffers() {
-	return _storage_buffers;
-}
-
-void Shader::addSamplerInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
-	if (_sampler_info.count(name)) {
-		std::string error = "Error: there already is a sampler info named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	SamplerInfo info{};
-	info.setBinding(binding);
-	info.setDescriptorType(VK_DESCRIPTOR_TYPE_SAMPLER);
-	info.setStageFlags(stage_flags);
-
-	_sampler_info[name] = info;
-}
-
-void Shader::addSampler(std::string name, Sampler* sampler) {
-	_sampler[name].push_back(sampler);
-}
-
-std::unordered_map<std::string, SamplerInfo>& Shader::getSamplerInfo() {
-	return _sampler_info;
-}
-
-std::unordered_map<std::string, std::vector<Sampler*>>& Shader::getSampler() {
-	return _sampler;
-}
-
-
-void Shader::addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count) {
-	if (_texture_info.count(name)) {
-		std::string error = "Error: there already is a texture info named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	TextureInfo info{};
-	info.setBinding(binding);
-	info.setDescriptorType(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-	info.setStageFlags(stage_flags);
-	info.setDescriptorCount(descriptor_count);
-
-	_texture_info[name] = info;
-}
-
-void Shader::addTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
-	addTextureInfo(name, binding, stage_flags, 1);
-}
-
-void Shader::addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags, uint32_t descriptor_count) {
-	if (_texture_info.count(name)) {
-		std::string error = "Error: there already is a texture info named " + name + "!";
-		throw std::runtime_error(error);
-	}
-
-	TextureInfo info{};
-	info.setBinding(binding);
-	info.setDescriptorType(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
-	info.setStageFlags(stage_flags);
-	info.setDescriptorCount(descriptor_count);
-
-	_texture_info[name] = info;
-}
-
-void Shader::addStorageTextureInfo(std::string name, uint32_t binding, VkShaderStageFlags stage_flags) {
-	addStorageTextureInfo(name, binding, stage_flags, 1);
-}
-
-void Shader::addTexture2D(std::string name, Texture2D* texture) {
-	_textures[name].push_back(texture);
-}
-
-
-void Shader::addTexture2D(std::string name, std::vector<Texture2D*>& textures) {
-	_textures[name].insert(
-		_textures[name].end(),
-		textures.begin(),
-		textures.end()
+	configureDescLayoutBindings(
+		name,
+		binding,
+		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		stage_flags,
+		1
 	);
 }
 
-std::unordered_map<std::string, TextureInfo>& Shader::getTextureInfo() {
-	return _texture_info;
+void Shader::configureStorageBuffer(
+	const std::string& name,
+	uint32_t binding,
+	VkShaderStageFlags stage_flags
+) {
+	configureDescLayoutBindings(
+		name,
+		binding,
+		VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+		stage_flags,
+		1
+	);
 }
 
-std::unordered_map<std::string, std::vector<Texture2D*>>& Shader::getTextures2D() {
-	return _textures;
+void Shader::configureSampler(
+	const std::string& name,
+	uint32_t binding,
+	VkShaderStageFlags stage_flags
+) {
+	configureDescLayoutBindings(
+		name,
+		binding,
+		VK_DESCRIPTOR_TYPE_SAMPLER,
+		stage_flags,
+		1
+	);
 }
+
+void Shader::configureTexture2D(
+	const std::string& name,
+	uint32_t binding,
+	VkShaderStageFlags stage_flags,
+	int32_t descriptor_count
+) {
+	configureDescLayoutBindings(
+		name,
+		binding,
+		VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+		stage_flags,
+		descriptor_count
+	);
+}
+
+void Shader::configureTexture2DCombined(
+	const std::string& name,
+	uint32_t binding,
+	VkShaderStageFlags stage_flags,
+	int32_t descriptor_count
+) {
+	configureDescLayoutBindings(
+		name,
+		binding,
+		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+		stage_flags,
+		descriptor_count
+	);
+}
+
+
+void Shader::configureStorageTexture2D(
+	const std::string& name,
+	uint32_t binding,
+	VkShaderStageFlags stage_flags,
+	uint32_t descriptor_count
+) {
+	configureDescLayoutBindings(
+		name,
+		binding,
+		VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+		stage_flags,
+		descriptor_count
+	);
+}
+
 
 void Shader::destroy() {
 	for (auto& stage : _shader_stages) {
@@ -216,23 +164,6 @@ const std::vector<VkPipelineShaderStageCreateInfo>& Shader::getShaderStages() co
 }
 
 std::string Shader::readShaderFile(const std::string& path) {
-	//size_t file_size{};
-	//std::vector<char> buffer;
-
-	//std::ifstream file(path, std::ios::ate | std::ios::binary);
-
-	//if (!file.is_open()) {
-	//	throw std::runtime_error("Error: failed to open file: " + path);
-	//}
-
-	//file_size = (size_t)file.tellg();
-	//buffer.resize(file_size);
-
-	//file.seekg(0);
-	//file.read(buffer.data(), file_size);
-
-	//file.close();
-
 	std::ifstream file(path);
 	std::string content;
 
@@ -263,6 +194,23 @@ std::vector<uint32_t> Shader::compile(const std::string& glsl, const std::string
 	}
 
 	return {result.cbegin(), result.cend()};
+}
+
+void Shader::configureDescLayoutBindings(
+	const std::string& name,
+	uint32_t binding,
+	VkDescriptorType descriptor_type,
+	VkShaderStageFlags stage_flags,
+	uint32_t descriptor_count
+) {
+	VkDescriptorSetLayoutBinding info{};
+	info.binding = binding;
+	info.descriptorType = descriptor_type;
+	info.descriptorCount = descriptor_count;
+	info.stageFlags = stage_flags;
+	info.pImmutableSamplers = nullptr;
+
+	_desc_layout_bindings[name] = info;
 }
 
 void Shader::createShaderModuleAndStage(const std::string& path, VkShaderStageFlagBits stage, shaderc_shader_kind shader_kind) {

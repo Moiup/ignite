@@ -25,14 +25,14 @@ const VkPushConstantRange& PushConstantInfo::getPushConstantRange() const {
 	return _constant_range;
 }
 
-VkShaderStageFlags PushConstantInfo::getStageFlags() {
+const VkShaderStageFlags PushConstantInfo::getStageFlags() const {
 	return _constant_range.stageFlags;
 }
 
-uint32_t PushConstantInfo::getOffset() {
+const uint32_t PushConstantInfo::getOffset() const {
 	return _constant_range.offset;
 }
 
-uint32_t PushConstantInfo::getSize() {
+const uint32_t PushConstantInfo::getSize() const {
 	return _constant_range.size;
 }

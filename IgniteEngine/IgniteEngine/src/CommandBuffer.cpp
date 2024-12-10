@@ -74,7 +74,7 @@ void CommandBuffer::beginRendering(VkRenderingInfoKHR& info) {
 		&info
 	);
 }
-void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, VkPipeline& pipeline) {
+void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, VkPipeline pipeline) {
 	vkCmdBindPipeline(
 		_command_buffer,
 		bind_point,
@@ -114,7 +114,7 @@ void CommandBuffer::bindDescriptorSets(VkPipelineBindPoint bind_point, VkPipelin
 	);
 }
 
-void CommandBuffer::pushConstants(VkPipelineLayout layout, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size, const void* p_values) {
+void CommandBuffer::pushConstants(const VkPipelineLayout layout, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size, const void* p_values) {
 	vkCmdPushConstants(
 		_command_buffer,
 		layout,

@@ -6,20 +6,16 @@ DefaultRenderer::DefaultRenderer() :
 	;
 }
 
+void DefaultRenderer::setDepthBuffer(DepthBuffer& depth_buffer) {
+	_depth_buffer = &depth_buffer;
+}
+
 void DefaultRenderer::create() {
 	configureQueues();
-	createSwapchain();
-	createDepthBuffer();
-	createGraphicsPipeline();
 	createSemaphores();
 }
 
 void DefaultRenderer::destroy() {
-	_swapchain.destroy();
-	for (GraphicsPipeline& gp : _graphics_pipelines) {
-		gp.destroy();
-	}
-
 	for (uint32_t i = 0; i < _nb_frame; i++) {
 		vkDestroySemaphore(
 			(*_graphics_queues)[0].getDevice()->getDevice(),
@@ -45,7 +41,7 @@ void DefaultRenderer::render() {
 			1,
 			&_sem_render_ends[_present_frame],
 			1,
-			&_swapchain.getSwapchain(),
+			&_swapchain->getSwapchain(),
 			&_available_img
 		);
 	}
@@ -54,13 +50,10 @@ void DefaultRenderer::render() {
 	}
 	_graphics_queues_in_flight[_present_frame].wait();
 	
-	vk_result = vkAcquireNextImageKHR(
-		(*_graphics_queues)[0].getDevice()->getDevice(),
-		_swapchain.getSwapchain(),
+	_available_img = _swapchain->acquireNextImage(
 		UINT64_MAX,
 		_sem_render_starts[_current_frame],
-		VK_NULL_HANDLE,
-		&_available_img
+		VK_NULL_HANDLE
 	);
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed acquiring next image!");
@@ -74,16 +67,25 @@ void DefaultRenderer::render() {
 	dynamicRenderingPipelineBarrier(cmd_buf);
 	beginRendering(cmd_buf);
 
-	for (GraphicsPipeline& gp : _graphics_pipelines) {
+	const std::unordered_map<GraphicsPipeline*, Object3DArrays> gps_and_arrays = Object3D::getArrays(*this);
+
+	for (const auto& gp_and_arrays : gps_and_arrays) {
+		if (!gp_and_arrays.first) {
+			continue;
+		}
+		const GraphicsPipeline& gp = *gp_and_arrays.first;
 		cmd_buf.bindPipeline(
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			(VkPipeline&)gp.getPipeline()
+			gp.getPipeline()
 		);
+		std::vector<VkViewport> viewport{ gp.getViewport() };
 		cmd_buf.setViewport(
-			(std::vector<VkViewport>&)gp.getViewport()
+			viewport
 		);
+
+		std::vector<VkRect2D> scissors{ gp.getScissors() };
 		cmd_buf.setScissor(
-			(std::vector<VkRect2D>&)gp.getScissors()
+			scissors
 		);
 
 		// Descriptor sets
@@ -96,66 +98,59 @@ void DefaultRenderer::render() {
 			0,
 			nullptr
 		);
+		
+		const GraphicShader* gs = static_cast<const GraphicShader*>(&gp.getShader());
+		const VkPushConstantRange& pc_range = gs->getPushConstantRange();
+		cmd_buf.pushConstants(
+			gp.getPipelineLayout(),
+			pc_range.stageFlags,
+			pc_range.offset,
+			pc_range.size,
+			gp.getPushConstants()
+		);
+		
+		const VkDeviceSize buff_offset = { 0 };
+		// Vertex Buffers
+		const std::unordered_map<std::string, VkBuffer>& vertex_buffers = gp.getVertexBuffers();
 
+		// Index Buffers
+		const VkBuffer index_buffer = gp.getIndexBuffer();
+		const IndexBufferInfo& index_buffer_info = gs->getIndexBufferInfo();
 
-		for (auto& pc_info : gp.getShader()->getPushConstantInfo()) {
-			std::string name = pc_info.first;
-			PushConstantInfo& info = pc_info.second;
-			cmd_buf.pushConstants(
-				gp.getPipelineLayout(),
-				info.getStageFlags(),
-				info.getOffset(),
-				info.getSize(),
-				gp.getShader()->getPushConstants()[name]
+		// Index buffer binding
+		cmd_buf.bindIndexBuffer(
+			index_buffer,
+			buff_offset,
+			index_buffer_info.getIndexType()
+		);
+
+		// Vertex buffers binding
+		for (const auto& vb : vertex_buffers) {
+			const std::string& buf_name = vb.first;
+			const VkBuffer vertex_buffer = vb.second;
+			
+			cmd_buf.bindVertexBuffer(
+				gs->getVertexBufferDescription(buf_name).binding_desc.binding,
+				1,
+				&vertex_buffer,
+				&buff_offset
 			);
 		}
 		
-		const VkDeviceSize buff_offset[1] = { 0 };
-		GraphicShader* gs = gp.getShader();
-		// Vertex Buffers
-		std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::vertex_buffer>* >>& vbs_map = gs->getVertexBuffers();
-		std::vector<Buffer<IGEBufferUsage::vertex_buffer>*>& vbs = vbs_map.begin()->second;
-		// Index Buffers
-		std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::index_buffer>*>>& ibs_map = gs->getIndexBuffers();
-		const IndexBufferInfo& ibs_info = gp.getShader()->getIndexBufferInfo(ibs_map.begin()->first);
-		std::vector<Buffer<IGEBufferUsage::index_buffer>*>& ibs = ibs_map.begin()->second;
-		uint32_t nb_buff = vbs.size();
-		for (uint32_t i = 0; i < nb_buff; i++) {
-			// Index buffer binding
-			Buffer<IGEBufferUsage::index_buffer>* ib = ibs[i];
-			cmd_buf.bindIndexBuffer(
-				ib->getBuffer(),
-				buff_offset[0],
-				ibs_info.getIndexType()
+		// Draw loop for mesh the number of instances
+		GraphicsPipeline* no_const_gp = gp_and_arrays.first;
+		uint32_t first_index = 0;
+		for (const auto& m_o : gps_and_arrays.at(gp_and_arrays.first).mesh_objects) {
+			Mesh* mesh = m_o.first;
+			const std::vector<Object3D*>& objects = m_o.second;
+			cmd_buf.drawIndexed(
+				mesh->getIndicesNbElem(),
+				objects.size(),
+				first_index,
+				0,
+				0
 			);
-
-			// Vertex buffers binding
-			for (auto& vbs_pair : vbs_map) {
-				std::string name = vbs_pair.first;
-				std::vector<Buffer<IGEBufferUsage::vertex_buffer>*>& vertex_buffers = vbs_pair.second;
-				Buffer<IGEBufferUsage::vertex_buffer>* vertex_buffer = vertex_buffers[i];
-				cmd_buf.bindVertexBuffer(
-					gs->getVertexBufferInfo(name).getFirstBinding(),
-					1,
-					&vertex_buffer->getBuffer(),
-					buff_offset
-				);
-			}
-
-			// Draw loop for mesh the number of instances
-			uint32_t first_index = 0;
-			for (auto& m_o : Object3D::getMeshObjects(this, gp.getShader())) {
-				Mesh* mesh = m_o.first;
-				std::vector<Object3D*>& objects = m_o.second;
-				cmd_buf.drawIndexed(
-					mesh->getIndicesNbElem(),
-					objects.size(),
-					first_index,
-					0,
-					0
-				);
-				first_index += mesh->getIndicesNbElem();
-			}
+			first_index += mesh->getIndicesNbElem();
 		}
 	}
 	
@@ -182,12 +177,12 @@ void DefaultRenderer::render() {
 
 	//_graphics_queues_in_flight[_current_frame].wait();
 
-	_present_frame = _current_frame;
+	_present_frame = _swapchain->getCurrentImageIndex();
 	_current_frame = (_current_frame + 1) % _nb_frame;
 }
 
 Image& DefaultRenderer::getCurrentFrame() {
-	return _swapchain.getImages()[_present_frame];
+	return _swapchain->getImages()[_present_frame];
 }
 
 void DefaultRenderer::configureQueues() {
@@ -237,109 +232,6 @@ void DefaultRenderer::createSemaphores() {
 	}
 }
 
-void DefaultRenderer::createSwapchain() {
-	PhysicalDevice* gpu = DefaultConf::gpu;
-	std::vector<VkSurfaceFormatKHR> surface_formats = DefaultConf::render_window->getSurfaceFormats(*DefaultConf::gpu);
-	std::vector<VkFormat> accepted_format = {
-		VK_FORMAT_R8G8B8A8_SRGB,
-		VK_FORMAT_B8G8R8A8_SRGB
-	};
-
-	VkFormat found_format = {VK_FORMAT_UNDEFINED};
-	VkColorSpaceKHR color_space{};
-
-	for(const VkSurfaceFormatKHR& sf : surface_formats) {
-		for(const VkFormat& af : accepted_format){
-			if(sf.format == af) {
-				found_format = sf.format;
-				color_space = sf.colorSpace;
-				break;
-			}
-		}
-
-		if(found_format != VK_FORMAT_UNDEFINED){
-			break;
-		}
-	}
-
-	if(found_format == VK_FORMAT_UNDEFINED){
-		throw std::runtime_error("Error: no proper format found!");
-	}
-
-	_swapchain.setDevice(
-		_device
-	);
-	_swapchain.setSurface(
-		_window->getSurface()
-	);
-	_swapchain.setImageFormat(found_format);
-	_swapchain.setImageColorSpace(color_space);
-	_swapchain.setMinImageCount(_nb_frame);
-	_swapchain.setWidthHeight(
-		_extent.width,
-		_extent.height
-	);
-	_swapchain.setImageFormat(found_format);
-	_swapchain.setQueueFamilyIndices(
-		{(*_graphics_queues)[0].getFamilyIndex()}
-	);
-	_swapchain.create();
-
-	for (Image& img : _swapchain.getImages()) {
-		(*_graphics_queues)[0].changeLayout(
-			img,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-		);
-	}
-	(*_graphics_queues)[0].submit();
-	(*_graphics_queues)[0].wait();
-}
-
-void DefaultRenderer::createDepthBuffer() {
-	_depth_buffer = DepthBuffer(
-		_device,
-		_window->getWidthInPixel(),
-		_window->getHeightInPixel(),
-		{ (*_graphics_queues)[0].getFamilyIndex() }
-	);
-
-	//_depth_buffer.setDevice(
-	//	_device
-	//);
-	//_depth_buffer.setImageWidthHeight(
-	//	_window->getWidthInPixel(),
-	//	_window->getHeightInPixel()
-	//);
-
-	//_depth_buffer.setImageQueueFamilyIndices(
-	//	{(*_graphics_queues)[0].getFamilyIndex()}
-	//);
-	//_depth_buffer.create();
-}
-
-void DefaultRenderer::createGraphicsPipeline() {
-	auto& mesh_objects = Object3D::getMeshObjects(this);
-	
-	for (auto& mo: mesh_objects) {
-		GraphicShader* shader = mo.first;
-		std::unordered_map<Mesh*, std::vector<Object3D*>>& meshes = mo.second;
-		if ((!shader) || (meshes.empty())) {
-			continue;
-		}
-		
-		_graphics_pipelines.push_back(GraphicsPipeline());
-		GraphicsPipeline& gp = _graphics_pipelines.back();
-		gp.setShader(shader);
-		gp.setNbFrame(_nb_frame);
-		gp.setSwapchain(&_swapchain);
-		gp.setDepthBuffer(&_depth_buffer);
-		gp.setPolygonMode(shader->polygonMode());
-		gp.setTopology(shader->topology());
-		//gp.setCullMode(VK_CULL_MODE_BACK_BIT);
-		gp.create();
-	}
-}
-
 void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
 	VkImageSubresourceRange subresource_range_frame{};
 	subresource_range_frame.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -364,7 +256,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
 	image_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	image_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame.image = _swapchain.getImages()[_current_frame].getImage();
+	image_memory_barrier_frame.image = _swapchain->getImages()[_current_frame].getImage();
 	image_memory_barrier_frame.subresourceRange = subresource_range_frame;
 
 	VkImageMemoryBarrier depth_memory_barrier_frame{};
@@ -376,7 +268,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
 	depth_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	depth_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	depth_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	depth_memory_barrier_frame.image = _depth_buffer.getImage();
+	depth_memory_barrier_frame.image = _depth_buffer->getImage();
 	depth_memory_barrier_frame.subresourceRange = depth_subresource_range_frame;
 
 	cmd_buf.pipelineBarrier(
@@ -416,7 +308,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf
 	image_memory_barrier_frame_bk.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	image_memory_barrier_frame_bk.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame_bk.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.image = _swapchain.getImages()[_available_img].getImage();
+	image_memory_barrier_frame_bk.image = _swapchain->getImages()[_available_img].getImage();
 	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
 
 	cmd_buf.pipelineBarrier(
@@ -432,7 +324,7 @@ void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf
 void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	color_attachment.imageView = _swapchain.getImages()[_available_img].getImageView();
+	color_attachment.imageView = _swapchain->getImages()[_available_img].getImageView();
 	color_attachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
 	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -440,7 +332,7 @@ void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
 
 	VkRenderingAttachmentInfoKHR depth_stencil_attachment{};
 	depth_stencil_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	depth_stencil_attachment.imageView = _depth_buffer.getImageView();
+	depth_stencil_attachment.imageView = _depth_buffer->getImageView();
 	depth_stencil_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	depth_stencil_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	depth_stencil_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

@@ -1,31 +1,47 @@
 #include "WindowSurface.h"
 
-WindowSurface::WindowSurface() : Window::Window(), created{false} {
-	;
+WindowSurface::WindowSurface() : Window::Window() {
+
 }
 
-WindowSurface::WindowSurface(std::string name) : 
-	Window::Window(name), created{ false } {
-	;
+WindowSurface::WindowSurface(const std::string& name, uint32_t width, uint32_t height, uint32_t flags, Instance& instance) :
+	WindowSurface::WindowSurface()
+{
+	setName(name);
+	setWidth(width);
+	setHeight(height);
+	setFlags(flags);
+	setInstance(&instance);
+
+	create();
 }
 
-WindowSurface::WindowSurface(uint32_t width, uint32_t height) :
-	Window::Window(width, height), created{ false } {
-	;
+
+WindowSurface::WindowSurface(const WindowSurface& ws) {
+	*this = ws;
 }
-WindowSurface::WindowSurface(std::string name, uint32_t width, uint32_t height) :
-	Window::Window(name, width, height), created{ false }{
-	;
+
+WindowSurface::~WindowSurface() {
+	close();
+}
+
+WindowSurface& WindowSurface::operator=(const WindowSurface& ws) {
+	Window::operator=(ws);
+
+	_surface = ws._surface;
+	_instance = _instance;
+
+	return *this;
 }
 
 void WindowSurface::init() {
 	Window::init();
-	create();
+	
 }
 
 void WindowSurface::close() {
 	Window::close();
-	destroy();
+
 }
 
 void WindowSurface::setInstance(Instance* instance) {
@@ -62,6 +78,7 @@ std::vector<VkSurfaceFormatKHR> WindowSurface::getSurfaceFormats(const PhysicalD
 }
 
 void WindowSurface::create() {
+	Window::create();
 	//VkResult vk_result = glfwCreateWindowSurface(
 	//	*_instance,
 	//	(GLFWwindow *)getWindow(),

@@ -50,8 +50,7 @@ void Texture2D::setSampler(Sampler& sampler) {
 	_sampler = sampler.getSampler();
 }
 
-
-VkSampler Texture2D::getSampler() {
+const VkSampler Texture2D::getSampler() const {
 	return _sampler;
 }
 

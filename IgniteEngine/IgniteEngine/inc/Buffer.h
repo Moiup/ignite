@@ -141,17 +141,17 @@ void Buffer<U>::setPQueueFamilyIndices(const uint32_t* p_queue_family_indices) {
 }
 
 template<IGEBufferUsage U>
-VkBuffer& Buffer<U>::getBuffer() {
+const VkBuffer& Buffer<U>::getBuffer() const {
 	return _buffer;
 }
 
 template<IGEBufferUsage U>
-uint32_t Buffer<U>::getSize() {
+const uint32_t& Buffer<U>::getSize() const {
 	return _size;
 }
 
 template<IGEBufferUsage U>
-uint32_t Buffer<U>::getCapacity() {
+const uint32_t& Buffer<U>::getCapacity() const {
 	return _capacity;
 }
 

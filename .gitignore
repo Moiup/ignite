@@ -29,3 +29,6 @@ IgniteEngine/IgniteEngine/*.vcxproj
 IgniteEngine/IgniteEngine/*.vcxproj.filters
 
 IgniteEngine/IgniteEngine/imgui.ini
+
+.vs/
+.vs/*

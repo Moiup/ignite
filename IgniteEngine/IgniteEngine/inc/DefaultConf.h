@@ -6,6 +6,7 @@
 //#include "CameraScene.h"
 #include "GraphicShader.h"
 #include "WindowSurface.h"
+#include "GraphicsPipeline.h"
 #include "Renderer.h"
 #include "WindowUI.h"
 
@@ -16,11 +17,12 @@ class CameraScene;
 class DefaultConf
 {
 public:
+	static GraphicsPipelineConfiguration configuration;
 	static uint32_t NB_FRAME;
 	static DefaultGPU* gpu;
 	static LogicalDevice* logical_device;
-	static GraphicShader* graphic_shader;
-	static GraphicShader* debug_shader;
+	static GraphicsPipeline* graphics_pipeline;
+	static GraphicsPipeline* debug_pipeline;
 	static CommandBuffer* copy_cmd_buf;
 	static WindowSurface* render_window;
 	static uint32_t render_window_width;

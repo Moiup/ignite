@@ -1,35 +1,6 @@
 #include "Object3D.h"
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>> Object3D::mesh_objects{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec3>>> Object3D::coords{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::mesh_offsets{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::object_id;
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::indices{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec2>>> Object3D::uv{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<Texture2D*>>> Object3D::_Textures2D{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::transform_indices{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> Object3D::transform_matrices{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::material_indices{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glsl::Mat>>> Object3D::materials;
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<uint32_t>>> Object3D::Texture2D_indices{};
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::uvec4>>> Object3D::joints_ids;
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::vec4>>> Object3D::weights;
-
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::vector<glm::mat4>>> Object3D::joints_transform;
-
+std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>> Object3D::_arrays;
 std::vector<Object3D*> Object3D::allocated_objects{};
 
 Object3D::Object3D() :
@@ -38,7 +9,7 @@ Object3D::Object3D() :
 	_renderer{ nullptr },
 	_material_indices{},
 	_materials{},
-	_shaders{ nullptr },
+	_gps{ nullptr },
 	_Texture2D{}
 {
 	;
@@ -77,31 +48,31 @@ void Object3D::copyAttributes(const Object3D& o) {
 	this->_material_indices = o._material_indices;
 	this->_materials = o._materials;
 	this->_Texture2D = o._Texture2D;
-	this->_shaders = o._shaders;
+	this->_gps = o._gps;
 }
 
-void Object3D::setMesh(Mesh* mesh) {
+void Object3D::setMesh(Mesh& mesh) {
 	uint32_t i = 0;
 	// For the previous mesh
-	for (GraphicShader* shader : _shaders) {
-		for (Object3D* obj : Object3D::mesh_objects[_renderer][shader][_mesh]) {
+	for (GraphicsPipeline* gp : _gps) {
+		for (Object3D* obj : Object3D::_arrays[_renderer][gp].mesh_objects[_mesh]) {
 			// Find the object
 			if (obj != this) {
 				i++;
 				continue;
 			}
 			// Remove it from the vector associated to this mesh
-			Object3D::mesh_objects[_renderer][shader][_mesh].erase(
-				Object3D::mesh_objects[_renderer][shader][_mesh].begin() + i
+			Object3D::_arrays[_renderer][gp].mesh_objects[_mesh].erase(
+				Object3D::_arrays[_renderer][gp].mesh_objects[_mesh].begin() + i
 			);
 		}
-		Object3D::mesh_objects[_renderer][shader][mesh].push_back(this);
+		Object3D::_arrays[_renderer][gp].mesh_objects[&mesh].push_back(this);
 	}
-	_mesh = mesh;
+	_mesh = &mesh;
 }
 
-const Mesh* Object3D::getMesh() const {
-	return _mesh;
+const Mesh& Object3D::getMesh() const {
+	return *_mesh;
 }
 
 void Object3D::setSkeleton(Skeleton& skeleton) {
@@ -116,30 +87,30 @@ const Skeleton* Object3D::getSkeleton() const {
 	return _skeleton;
 }
 
-void Object3D::setRenderer(Renderer* renderer) {
+void Object3D::setRenderer(Renderer& renderer) {
 	uint32_t i = 0;
 	// For the previous renderer
 	// In the corresponding mesh
-	for (auto shader : _shaders) {
-		for (Object3D* obj : Object3D::mesh_objects[_renderer][shader][_mesh]) {
+	for (auto gp : _gps) {
+		for (Object3D* obj : Object3D::_arrays[_renderer][gp].mesh_objects[_mesh]) {
 			// Find the object
 			if (obj != this) {
 				i++;
 				continue;
 			}
 			// Remove it from the vector associated to this mesh
-			Object3D::mesh_objects[_renderer][shader][_mesh].erase(
-				Object3D::mesh_objects[_renderer][shader][_mesh].begin() + i
+			Object3D::_arrays[_renderer][gp].mesh_objects[_mesh].erase(
+				Object3D::_arrays[_renderer][gp].mesh_objects[_mesh].begin() + i
 			);
 		}
 		// Finally, update the renderer and put the object in the right places
-		Object3D::mesh_objects[renderer][shader][_mesh].push_back(this);
+		Object3D::_arrays[&renderer][gp].mesh_objects[_mesh].push_back(this);
 	}
-	_renderer = renderer;
+	_renderer = &renderer;
 }
 
-void Object3D::setMaterial(Material* material) {
-	_materials = { material };
+void Object3D::setMaterial(Material& material) {
+	_materials = { &material };
 	_material_indices = { 0 };
 }
 
@@ -161,7 +132,7 @@ void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi) {
 
 void Object3D::createFromObjectInfo(const LoadedObjectInfo& loi, Object3D* obj) {
 	if (loi._meshes.size() == 1) {
-		obj->setMesh(const_cast<Mesh*>(&loi._meshes[0]));
+		obj->setMesh(const_cast<Mesh&>(loi._meshes[0]));
 		if (!loi._materials.empty()) {
 			const std::vector<Material>& mat = loi._materials[0];
 			obj->setMaterial(
@@ -212,252 +183,248 @@ void Object3D::setTextures2D(const std::vector<Texture2D>& Textures2D) {
 	}
 }
 
-void Object3D::addShader(GraphicShader* shader) {
-	if (!_shaders[0]) {
+void Object3D::addGraphicsPipeline(GraphicsPipeline& gp) {
+	if (!_gps[0]) {
 		// remove it
 		// if there is already an affected objects (otherwise, segfault)
-		if (Object3D::mesh_objects[_renderer][nullptr][_mesh].size()) {
-			Object3D::mesh_objects[_renderer][nullptr][_mesh].erase(
-				Object3D::mesh_objects[_renderer][_shaders[0]][_mesh].begin()
+		if (Object3D::_arrays[_renderer][nullptr].mesh_objects[_mesh].size()) {
+			Object3D::_arrays[_renderer][nullptr].mesh_objects[_mesh].erase(
+				Object3D::_arrays[_renderer][_gps[0]].mesh_objects[_mesh].begin()
 			);
 		}
 	}
-	_shaders.push_back(shader);
+	_gps.push_back(&gp);
 
-	Object3D::mesh_objects[_renderer][shader][_mesh].push_back(this);
+	Object3D::_arrays[_renderer][&gp].mesh_objects[_mesh].push_back(this);
 }
 
-GraphicShader* Object3D::getShader(uint32_t i) {
-	return _shaders[i];
+const GraphicsPipeline& Object3D::getGraphicsPipeline(uint32_t i) const {
+	return *_gps[i];
 }
 
-std::vector<GraphicShader*>& Object3D::getShaders() {
-	return _shaders;
+const std::vector<GraphicsPipeline*>& Object3D::getGraphicsPipeline() const {
+	return _gps;
 }
 
 const Renderer* Object3D::getRenderer() const {
 	return _renderer;
 }
 
-std::unordered_map<Mesh*, std::vector<Object3D*>>& Object3D::getMeshObjects(Renderer* renderer, GraphicShader* shader) {
-	return Object3D::mesh_objects[renderer][shader];
+const std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& Object3D::getArrays() {
+	return Object3D::_arrays;
 }
 
-std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>& Object3D::getMeshObjects(Renderer* renderer) {
-	return Object3D::mesh_objects[renderer];
+const std::unordered_map<GraphicsPipeline*, Object3DArrays>& Object3D::getArrays(Renderer& renderer) {
+	return Object3D::_arrays.at(&renderer);
 }
 
-std::unordered_map<Renderer*, std::unordered_map<GraphicShader*, std::unordered_map<Mesh*, std::vector<Object3D*>>>>& Object3D::getMeshObjects() {
-	return Object3D::mesh_objects;
+const std::vector<glm::vec3>& Object3D::getCoords(Renderer& renderer, GraphicsPipeline& gp) {
+	buildCoords(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].coords;
 }
 
-std::vector<glm::vec3>& Object3D::getCoords(Renderer* renderer, GraphicShader* shader) {
-	buildCoords(renderer, shader);
-	return Object3D::coords[renderer][shader];
-}
-
-std::vector<glm::vec3>& Object3D::updateCoords(Renderer* renderer, GraphicShader* shader) {
+std::vector<glm::vec3>& Object3D::updateCoords(Renderer& renderer, GraphicsPipeline& gp) {
 	uint32_t offset = 0;
-	for (std::pair<Mesh* const, std::vector<Object3D*>>& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (std::pair<Mesh* const, std::vector<Object3D*>>& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		Mesh* m = m_o.first;
 		//std::cout << m->getCoordsSize() << " " << m->getCoordsStride() << std::endl;
-		std::memcpy(&Object3D::coords[renderer][shader][0] + offset, &m->getCoords()[0], m->getCoordsSize());
+		std::memcpy(&Object3D::_arrays[&renderer][&gp].coords[0] + offset, &m->getCoords()[0], m->getCoordsSize());
 
-		//for (uint32_t i = 0; i < Object3D::coords[renderer][shader].size(); i++) {
+		//for (uint32_t i = 0; i < Object3D::coords[&renderer][&gp].size(); i++) {
 		//	std::cout << i << std::endl;
-		//	Object3D::coords[renderer][shader][i].x = 0.0f;
-		//	Object3D::coords[renderer][shader][i].y = 0.0f;
-		//	Object3D::coords[renderer][shader][i].z = 0.0f;
+		//	Object3D::coords[&renderer][&gp][i].x = 0.0f;
+		//	Object3D::coords[&renderer][&gp][i].y = 0.0f;
+		//	Object3D::coords[&renderer][&gp][i].z = 0.0f;
 		//}
 
 		offset += m->getCoordsSize();
 	}
 
-	return Object3D::coords[renderer][shader];
+	return Object3D::_arrays[&renderer][&gp].coords;
 }
 
-uint32_t Object3D::getCoordsStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getCoords(renderer, shader).data());
+uint32_t Object3D::getCoordsStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getCoords(renderer, gp).data());
 }
 
-uint32_t Object3D::getCoordsSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getCoordsStride(renderer, shader);
-	return getCoords(renderer, shader).size() * stride;
+uint32_t Object3D::getCoordsSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getCoordsStride(renderer, gp);
+	return getCoords(renderer, gp).size() * stride;
 }
 
-std::vector<uint32_t>& Object3D::getObjectId(Renderer* renderer, GraphicShader* shader) {
-	buildObjectId(renderer, shader);
-	return Object3D::object_id[renderer][shader];
+std::vector<uint32_t>& Object3D::getObjectId(Renderer& renderer, GraphicsPipeline& gp) {
+	buildObjectId(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].object_id;
 }
 
-uint32_t Object3D::getObjectIdStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getObjectId(renderer, shader).data());
+uint32_t Object3D::getObjectIdStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getObjectId(renderer, gp).data());
 }
 
-uint32_t Object3D::getObjectIdSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getObjectIdStride(renderer, shader);
-	return getObjectId(renderer, shader).size() * stride;
+uint32_t Object3D::getObjectIdSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getObjectIdStride(renderer, gp);
+	return getObjectId(renderer, gp).size() * stride;
 }
 
-std::vector<uint32_t>& Object3D::getMeshOffsets(Renderer* renderer, GraphicShader* shader) {
-	buildMeshOffsets(renderer, shader);
-	return Object3D::mesh_offsets[renderer][shader];
+std::vector<uint32_t>& Object3D::getMeshOffsets(Renderer& renderer, GraphicsPipeline& gp) {
+	buildMeshOffsets(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].mesh_offsets;
 }
 
-uint32_t Object3D::getMeshOffsetsStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getMeshOffsets(renderer, shader).data());
+uint32_t Object3D::getMeshOffsetsStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getMeshOffsets(renderer, gp).data());
 }
 
-uint32_t Object3D::getMeshOffsetsSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getMeshOffsetsStride(renderer, shader);
-	return getMeshOffsets(renderer, shader).size() * stride;
+uint32_t Object3D::getMeshOffsetsSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getMeshOffsetsStride(renderer, gp);
+	return getMeshOffsets(renderer, gp).size() * stride;
 }
 
-std::vector<uint32_t>& Object3D::getIndices(Renderer* renderer, GraphicShader* shader) {
-	buildIndices(renderer, shader);
-	return Object3D::indices[renderer][shader];
+std::vector<uint32_t>& Object3D::getIndices(Renderer& renderer, GraphicsPipeline& gp) {
+	buildIndices(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].indices;
 }
 
-uint32_t Object3D::getIndicesSize(Renderer* renderer, GraphicShader* shader) {
-	return getIndicesNbElem(renderer, shader) * sizeof(*getIndices(renderer, shader).data());
+uint32_t Object3D::getIndicesSize(Renderer& renderer, GraphicsPipeline& gp) {
+	return getIndicesNbElem(renderer, gp) * sizeof(*getIndices(renderer, gp).data());
 }
 
-uint32_t Object3D::getIndicesNbElem(Renderer* renderer, GraphicShader* shader) {
-	return getIndices(renderer, shader).size();
+uint32_t Object3D::getIndicesNbElem(Renderer& renderer, GraphicsPipeline& gp) {
+	return getIndices(renderer, gp).size();
 }
 
-std::vector<glm::vec2>& Object3D::getUV(Renderer* renderer, GraphicShader* shader) {
-	buildUV(renderer, shader);
-	return Object3D::uv[renderer][shader];
+std::vector<glm::vec2>& Object3D::getUV(Renderer& renderer, GraphicsPipeline& gp) {
+	buildUV(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].uv;
 }
 
-uint32_t Object3D::getUVStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getUV(renderer, shader).data());
+uint32_t Object3D::getUVStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getUV(renderer, gp).data());
 }
 
-uint32_t Object3D::getUVSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getUVStride(renderer, shader);
-	return getUV(renderer, shader).size() * stride;
+uint32_t Object3D::getUVSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getUVStride(renderer, gp);
+	return getUV(renderer, gp).size() * stride;
 }
 
-std::vector<glm::uvec4>& Object3D::getJoints(Renderer* renderer, GraphicShader* shader) {
-	buildJoints(renderer, shader);
-	return Object3D::joints_ids[renderer][shader];
+std::vector<glm::uvec4>& Object3D::getJoints(Renderer& renderer, GraphicsPipeline& gp) {
+	buildJoints(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].joints_ids;
 }
 
-uint32_t Object3D::getJointsStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getJoints(renderer, shader).data());
+uint32_t Object3D::getJointsStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getJoints(renderer, gp).data());
 }
 
-uint32_t Object3D::getJointsSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getJointsStride(renderer, shader);
-	return getJoints(renderer, shader).size() * stride;
+uint32_t Object3D::getJointsSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getJointsStride(renderer, gp);
+	return getJoints(renderer, gp).size() * stride;
 }
 
-std::vector<glm::vec4>& Object3D::getWeights(Renderer* renderer, GraphicShader* shader) {
-	buildWeights(renderer, shader);
-	return Object3D::weights[renderer][shader];
+std::vector<glm::vec4>& Object3D::getWeights(Renderer& renderer, GraphicsPipeline& gp) {
+	buildWeights(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].weights;
 }
 
-uint32_t Object3D::getWeightsStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getWeights(renderer, shader).data());
+uint32_t Object3D::getWeightsStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getWeights(renderer, gp).data());
 }
 
-uint32_t Object3D::getWeightsSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getWeightsStride(renderer, shader);
-	return getJoints(renderer, shader).size() * stride;
+uint32_t Object3D::getWeightsSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getWeightsStride(renderer, gp);
+	return getJoints(renderer, gp).size() * stride;
 }
 
-std::vector<Texture2D*>& Object3D::getTextures2D(Renderer* renderer, GraphicShader* shader) {
-	buildTextures2D(renderer, shader);
-	return _Textures2D[renderer][shader];
+std::vector<Texture2D*>& Object3D::getTextures2D(Renderer& renderer, GraphicsPipeline& gp) {
+	buildTextures2D(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp]._textures2D;
 }
 
-uint32_t Object3D::getTextures2DSize(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getTextures2D(renderer, shader).data());
+uint32_t Object3D::getTextures2DStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getTextures2D(renderer, gp).data());
 }
 
-uint32_t Object3D::getTextures2DStride(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getTextures2DStride(renderer, shader);
-	return getTextures2D(renderer, shader).size() * stride;
+uint32_t Object3D::getTextures2DSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getTextures2DStride(renderer, gp);
+	return getTextures2D(renderer, gp).size() * stride;
 }
 
-std::vector<uint32_t>& Object3D::getTransformIndices(Renderer* renderer, GraphicShader* shader) {
-	buildTransformIndices(renderer, shader);
-	return Object3D::transform_indices[renderer][shader];
+std::vector<uint32_t>& Object3D::getTransformIndices(Renderer& renderer, GraphicsPipeline& gp) {
+	buildTransformIndices(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].transform_indices;
 }
 
-uint32_t Object3D::getTransformIndicesSize(Renderer* renderer, GraphicShader* shader) {
-	return getTransformIndices(renderer, shader).size() * sizeof(*getTransformIndices(renderer, shader).data());
+uint32_t Object3D::getTransformIndicesSize(Renderer& renderer, GraphicsPipeline& gp) {
+	return getTransformIndices(renderer, gp).size() * sizeof(*getTransformIndices(renderer, gp).data());
 }
 
-uint32_t Object3D::getTransformIndicesStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getTransformIndices(renderer, shader).data());
+uint32_t Object3D::getTransformIndicesStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getTransformIndices(renderer, gp).data());
 }
 
-std::vector<glm::mat4>& Object3D::getTransformMatrices(Renderer* renderer, GraphicShader* shader) {
-	buildTransformMatrices(renderer, shader);
-	return Object3D::transform_matrices[renderer][shader];
+std::vector<glm::mat4>& Object3D::getTransformMatrices(Renderer& renderer, GraphicsPipeline& gp) {
+	buildTransformMatrices(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].transform_matrices;
 }
 
-std::vector<glm::mat4>& Object3D::updateTransformMatrices(Renderer* renderer, GraphicShader* shader) {
+std::vector<glm::mat4>& Object3D::updateTransformMatrices(Renderer& renderer, GraphicsPipeline& gp) {
 	uint32_t obj_i = 0;
 	// For each mesh in the renderer
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		std::vector<Object3D*> objects = m_o.second;
 		uint32_t n = objects.size();
 
 		for (uint32_t i = 0; i < n; i++) {
 			Object3D* obj = objects[i];
-			Object3D::transform_matrices[renderer][shader][obj_i] = obj->getTransform();
+			Object3D::_arrays[&renderer][&gp].transform_matrices[obj_i] = obj->getTransform();
 			obj_i++;
 		}
 	}
 
-	return Object3D::transform_matrices[renderer][shader];
+	return Object3D::_arrays[&renderer][&gp].transform_matrices;
 }
 
-uint32_t Object3D::getTransformMatricesSize(Renderer* renderer, GraphicShader* shader) {
-	return getTransformMatrices(renderer, shader).size() * sizeof(*getTransformMatrices(renderer, shader).data());
+uint32_t Object3D::getTransformMatricesSize(Renderer& renderer, GraphicsPipeline& gp) {
+	return getTransformMatrices(renderer, gp).size() * sizeof(*getTransformMatrices(renderer, gp).data());
 }
 
-std::vector<uint32_t>& Object3D::getMaterialIndices(Renderer* renderer, GraphicShader* shader) {
-	buildMaterialIndices(renderer, shader);
-	return Object3D::material_indices[renderer][shader];
+std::vector<uint32_t>& Object3D::getMaterialIndices(Renderer& renderer, GraphicsPipeline& gp) {
+	buildMaterialIndices(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].material_indices;
 }
 
-uint32_t Object3D::getMaterialIndicesStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getMaterialIndices(renderer, shader).data());
+uint32_t Object3D::getMaterialIndicesStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getMaterialIndices(renderer, gp).data());
 }
 
-uint32_t Object3D::getMaterialIndicesSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getMaterialIndicesStride(renderer, shader);
-	return getMaterialIndices(renderer, shader).size() * stride;
+uint32_t Object3D::getMaterialIndicesSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getMaterialIndicesStride(renderer, gp);
+	return getMaterialIndices(renderer, gp).size() * stride;
 }
 
-std::vector<glsl::Mat>& Object3D::getMaterials(Renderer* renderer, GraphicShader* shader) {
-	buildMaterials(renderer, shader);
-	return Object3D::materials[renderer][shader];
+std::vector<glsl::Mat>& Object3D::getMaterials(Renderer& renderer, GraphicsPipeline& gp) {
+	buildMaterials(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].materials;
 }
 
-uint32_t Object3D::getMaterialsStride(Renderer* renderer, GraphicShader* shader) {
-	return sizeof(*getMaterials(renderer, shader).data());
+uint32_t Object3D::getMaterialsStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getMaterials(renderer, gp).data());
 }
 
-uint32_t Object3D::getMaterialsSize(Renderer* renderer, GraphicShader* shader) {
-	uint32_t stride = getMaterialsStride(renderer, shader);
-	return getMaterials(renderer, shader).size() * stride;
+uint32_t Object3D::getMaterialsSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getMaterialsStride(renderer, gp);
+	return getMaterials(renderer, gp).size() * stride;
 }
 
-std::vector<glm::mat4>& Object3D::getJointsTransform(Renderer* renderer, GraphicShader* shader) {
-	buildJointsTransform(renderer, shader);
-	return Object3D::joints_transform[renderer][shader];
+std::vector<glm::mat4>& Object3D::getJointsTransform(Renderer& renderer, GraphicsPipeline& gp) {
+	buildJointsTransform(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].joints_transform;
 }
 
-std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer* renderer, GraphicShader* shader) {
+std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer& renderer, GraphicsPipeline& gp) {
 	uint32_t joint_i = 0;
 	// For each mesh in the renderer
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		std::vector<Object3D*> objs = m_o.second;
 
 		for (Object3D* obj : objs) {
@@ -466,8 +433,8 @@ std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer* renderer, Grap
 			skeleton->skeleton()->buildTransformWorld();
 			for (const Joint& joint : joints) {
 				const Joint* j = &joint;
-				Object3D::joints_transform[renderer][shader][joint_i++] =
-					j->transformWorld() * j->inverseBindMatrices()
+				Object3D::_arrays[&renderer][&gp].joints_transform[joint_i++] =
+					j->getTransformWorld() * j->inverseBindMatrices()
 					/*j->initialTransform() * j->getTransformLocale() * j->inverseBindMatrices()*/;
 				//j->getTransformDeTousLesPeres() * j->matriceRotationTrouve() * j->inverseBindMatrices()
 			}
@@ -476,126 +443,126 @@ std::vector<glm::mat4>& Object3D::updateJointsTransform(Renderer* renderer, Grap
 		}
 	}
 
-	return Object3D::joints_transform[renderer][shader];
+	return Object3D::_arrays[&renderer][&gp].joints_transform;
 }
 
-uint32_t Object3D::getJointsTransformSize(Renderer* renderer, GraphicShader* shader) {
-	return getJointsTransform(renderer, shader).size() * sizeof(*getJointsTransform(renderer, shader).data());
+uint32_t Object3D::getJointsTransformSize(Renderer& renderer, GraphicsPipeline& gp) {
+	return getJointsTransform(renderer, gp).size() * sizeof(*getJointsTransform(renderer, gp).data());
 }
 
-//std::vector<uint32_t>& Object3D::getTexture2DIndices(Renderer* renderer, GraphicShader* shader) {
-//	buildTexture2DIndices(renderer, shader);
-//	return Object3D::Texture2D_indices[renderer][shader];
+//std::vector<uint32_t>& Object3D::getTexture2DIndices(Renderer& renderer, GraphicsPipeline& gp) {
+//	buildTexture2DIndices(renderer, gp);
+//	return Object3D::Texture2D_indices[&renderer][&gp];
 //}
 
-//uint32_t Object3D::getTexture2DIndicesStride(Renderer* renderer, GraphicShader* shader) {
-//	return sizeof(*getTexture2DIndices(renderer, shader).data());
+//uint32_t Object3D::getTexture2DIndicesStride(Renderer& renderer, GraphicsPipeline& gp) {
+//	return sizeof(*getTexture2DIndices(renderer, gp).data());
 //}
 //
-//uint32_t Object3D::getTexture2DIndicesSize(Renderer* renderer, GraphicShader* shader) {
-//	uint32_t stride = getTexture2DIndicesStride(renderer, shader);
-//	return getTexture2DIndices(renderer, shader).size() * stride;
+//uint32_t Object3D::getTexture2DIndicesSize(Renderer& renderer, GraphicsPipeline& gp) {
+//	uint32_t stride = getTexture2DIndicesStride(renderer, gp);
+//	return getTexture2DIndices(renderer, gp).size() * stride;
 //}
 
-void Object3D::buildCoords(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildCoords(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::coords[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].coords.size()) {
 		return;
 	}
 
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		const Mesh* mesh = m_o.first;
-		Object3D::coords[renderer][shader].insert(
-			Object3D::coords[renderer][shader].end(),
+		Object3D::_arrays[&renderer][&gp].coords.insert(
+			Object3D::_arrays[&renderer][&gp].coords.end(),
 			mesh->getCoords().begin(),
 			mesh->getCoords().end()
 		);
 	}
 }
 
-void Object3D::buildMeshOffsets(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildMeshOffsets(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::mesh_offsets[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].mesh_offsets.size()) {
 		return;
 	}
 
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		Mesh* mesh = m_o.first;
 		uint32_t mesh_offset = mesh->getIndicesNbElem();
 		for (uint32_t i = 0; i < mesh->getCoords().size(); i++) {
-			Object3D::mesh_offsets[renderer][shader].push_back(mesh_offset);
+			Object3D:_arrays[&renderer][&gp].mesh_offsets.push_back(mesh_offset);
 		}
 	}
 }
 
-void Object3D::buildObjectId(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildObjectId(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::object_id[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].object_id.size()) {
 		return;
 	}
 
 	uint32_t obj_i{ 0 };
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		Mesh* mesh = m_o.first;
 		std::vector<Object3D*>& objects = m_o.second;
 		uint32_t nb_coords = mesh->getCoords().size();
 		for (uint32_t i = 0; i < nb_coords; i++) {
-			Object3D::object_id[renderer][shader].push_back(obj_i);
+			Object3D::_arrays[&renderer][&gp].object_id.push_back(obj_i);
 		}
 		obj_i += objects.size();
 	}
 }
 
-void Object3D::buildIndices(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildIndices(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::indices[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].indices.size()) {
 		return;
 	}
 
 	uint32_t max_i = 0;
 	// For each mesh
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		const Mesh* mesh = m_o.first;
 		uint32_t tmp = 0;
 		for (uint32_t i : mesh->getIndices()) {
 			tmp = std::max(tmp, i);
 			// We adapt and add the indices
-			Object3D::indices[renderer][shader].push_back(i + max_i);
+			Object3D::_arrays[&renderer][&gp].indices.push_back(i + max_i);
 		}
 		max_i = max_i + tmp + 1;
 	}
 }
 
-void Object3D::buildUV(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildUV(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::uv[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].uv.size()) {
 		return;
 	}
 
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		const Mesh* mesh = m_o.first;
-		Object3D::uv[renderer][shader].insert(
-			Object3D::uv[renderer][shader].end(),
+		Object3D::_arrays[&renderer][&gp].uv.insert(
+			Object3D::_arrays[&renderer][&gp].uv.end(),
 			mesh->getUV().begin(),
 			mesh->getUV().end()
 		);
 	}
 }
 
-void Object3D::buildJoints(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildJoints(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::joints_ids[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].joints_ids.size()) {
 		return;
 	}
 
 	uint32_t max_i = 0;
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		const Mesh* mesh = m_o.first;
 
 		uint32_t tmp_i = 0;
 		for (glm::uvec4 j_id : mesh->getJoints()) {
 			tmp_i = std::max(std::max(j_id.x, j_id.y), std::max(j_id.z, j_id.w));
-			Object3D::joints_ids[renderer][shader].push_back(
+			Object3D::_arrays[&renderer][&gp].joints_ids.push_back(
 				glm::uvec4(
 					j_id.x + max_i,
 					j_id.y + max_i,
@@ -609,16 +576,16 @@ void Object3D::buildJoints(Renderer* renderer, GraphicShader* shader) {
 	}
 }
 
-void Object3D::buildWeights(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildWeights(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::weights[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].weights.size()) {
 		return;
 	}
 
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		const Mesh* mesh = m_o.first;
-		Object3D::weights[renderer][shader].insert(
-			Object3D::weights[renderer][shader].end(),
+		Object3D::_arrays[&renderer][&gp].weights.insert(
+			Object3D::_arrays[&renderer][&gp].weights.end(),
 			mesh->getWeights().begin(),
 			mesh->getWeights().end()
 		);
@@ -626,20 +593,20 @@ void Object3D::buildWeights(Renderer* renderer, GraphicShader* shader) {
 }
 
 
-void Object3D::buildTextures2D(Renderer* renderer, GraphicShader* shader) {
-	buildMaterials(renderer, shader);
+void Object3D::buildTextures2D(Renderer& renderer, GraphicsPipeline& gp) {
+	buildMaterials(renderer, gp);
 	//// if not empty
-	//if (Object3D::_Textures2D[renderer][shader].size()) {
+	//if (Object3D::_Textures2D[&renderer][&gp].size()) {
 	//	return;
 	//}
-	//_Textures2D[renderer][shader].push_back(DefaultConf::white_Texture2D);
+	//_Textures2D[&renderer][&gp].push_back(DefaultConf::white_Texture2D);
 
 	// For each material
 
 
 	//std::unordered_map<const Texture2D*, uint32_t> texes;
 	//// Finding the Textures2D
-	//for (auto& m_o : mesh_objects[renderer][shader]) {
+	//for (auto& m_o : mesh_objects[&renderer][&gp]) {
 	//	std::vector<Object3D*> objs = m_o.second;
 
 	//	for (Object3D* obj : objs) {
@@ -649,63 +616,63 @@ void Object3D::buildTextures2D(Renderer* renderer, GraphicShader* shader) {
 	//		if (!obj->getTexture2D()) {
 	//			continue;
 	//		}
-	//		_Textures2D[renderer][shader].push_back(const_cast<Texture2D*>(obj->getTexture2D()));
+	//		_Textures2D[&renderer][&gp].push_back(const_cast<Texture2D*>(obj->getTexture2D()));
 	//		texes[obj->getTexture2D()] = 1;
 	//	}
 	//}
 }
 
-void Object3D::buildTransformIndices(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildTransformIndices(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::transform_indices[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].transform_indices.size()) {
 		return;
 	}
 
 	uint32_t tr_i = 0;
-	// For each mesh of the pair renderer - shader
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	// For each mesh of the pair renderer - gp
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		if (m_o.first == nullptr) {
 			continue;
 		}
 		// Reach each object
 		for (Object3D* obj : m_o.second) {
-			const Mesh* mesh = obj->getMesh();
-			for (uint32_t i : mesh->getIndices()) {
-				Object3D::transform_indices[renderer][shader].push_back(tr_i);
+			const Mesh& mesh = obj->getMesh();
+			for (uint32_t i : mesh.getIndices()) {
+				Object3D::_arrays[&renderer][&gp].transform_indices.push_back(tr_i);
 			}
 			tr_i++;
 		}
 	}
 }
 
-void Object3D::buildTransformMatrices(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildTransformMatrices(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty
-	if (Object3D::transform_matrices[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].transform_matrices.size()) {
 		return;
 	}
 
 	// For each mesh of the renderer
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		// Reach for each object
 		for (Object3D* obj : m_o.second) {
 			glm::mat4 tr = obj->getTransform();
-			Object3D::transform_matrices[renderer][shader].push_back(tr);
+			Object3D::_arrays[&renderer][&gp].transform_matrices.push_back(tr);
 		}
 	}
 }
 
-void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
+void Object3D::buildMaterialIndices(Renderer& renderer, GraphicsPipeline& gp) {
 	// if not empty, means already done
-	if (Object3D::material_indices[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].material_indices.size()) {
 		return;
 	}
 
 	std::unordered_map<const Material*, uint32_t> is_mat;
 	std::unordered_map<const Mesh*, bool> is_mesh;
 
-	// For each mesh given a renderer and a shader
+	// For each mesh given a renderer and a gp
 	uint32_t start_i = 1; // Default material is stored at 0, so we must start at 1
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		Mesh* m = m_o.first;
 		std::vector<Object3D*> objs = m_o.second;
 		for (auto& obj : objs) {
@@ -733,8 +700,8 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 				}
 
 				std::vector<uint32_t> indices(m->getCoords().size(), index);
-				Object3D::material_indices[renderer][shader].insert(
-					Object3D::material_indices[renderer][shader].end(),
+				Object3D::_arrays[&renderer][&gp].material_indices.insert(
+					Object3D::_arrays[&renderer][&gp].material_indices.end(),
 					indices.begin(),
 					indices.end()
 				);
@@ -754,7 +721,7 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 					is_mat[mat] = index;
 					nb_new++;
 				}
-				Object3D::material_indices[renderer][shader].push_back(index);
+				Object3D::_arrays[&renderer][&gp].material_indices.push_back(index);
 			}
 			start_i += nb_new;
 			break;
@@ -762,11 +729,11 @@ void Object3D::buildMaterialIndices(Renderer* renderer, GraphicShader* shader) {
 	}
 }
 
-void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
-	//buildTextures2D(renderer, shader);
+void Object3D::buildMaterials(Renderer& renderer, GraphicsPipeline& gp) {
+	//buildTextures2D(renderer, gp);
 
 	// if not empty, means already done
-	if (Object3D::materials[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].materials.size()) {
 		return;
 	}
 
@@ -778,19 +745,19 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 
 	// If an object exists, then we must add the default material
 	// And the default Texture2D
-	if (Object3D::mesh_objects[renderer][shader].size()) {
+	if (Object3D::_arrays[&renderer][&gp].mesh_objects.size()) {
 		Material mat{};
 		mat.Kd = glm::vec3(1.0f, 1.0f, 1.0f);
 		mat.map_Kd = 0;
-		Object3D::materials[renderer][shader].push_back(glsl::Mat(mat));
+		Object3D::_arrays[&renderer][&gp].materials.push_back(glsl::Mat(mat));
 		is_mat[(Material*)&mat] = true;
-		_Textures2D[renderer][shader].push_back(DefaultConf::white_texture);
+		Object3D::_arrays[&renderer][&gp]._textures2D.push_back(DefaultConf::white_texture);
 		texes[DefaultConf::white_texture] = tex_id;
 		tex_id++;
 	}
 
-	// For each mesh given a renderer and a shader
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	// For each mesh given a renderer and a gp
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		Mesh* m = m_o.first;
 		std::vector<Object3D*> objs = m_o.second;
 
@@ -809,37 +776,37 @@ void Object3D::buildMaterials(Renderer* renderer, GraphicShader* shader) {
 				// If the material was never added
 				// We add it to the array of material
 				if (!is_mat.count(mat)) {
-					Object3D::materials[renderer][shader].push_back(
+					Object3D::_arrays[&renderer][&gp].materials.push_back(
 						glsl::Mat(*mat)
 					);
 
 					if (mat->map_Kd == -1) {
-						Object3D::materials[renderer][shader][Object3D::materials[renderer][shader].size() - 1].map_Kd = 0;
+						Object3D::_arrays[&renderer][&gp].materials[Object3D::_arrays[&renderer][&gp].materials.size() - 1].map_Kd = 0;
 						continue;
 					}
 
 					Texture2D* tex = Textures2D[mat->map_Kd];
 					if (!texes.count(tex)) {
 						texes[tex] = tex_id;
-						_Textures2D[renderer][shader].push_back(tex);
+						Object3D::_arrays[&renderer][&gp]._textures2D.push_back(tex);
 						tex_id++;
 					}
 
-					Object3D::materials[renderer][shader][Object3D::materials[renderer][shader].size() - 1].map_Kd = texes[tex];
+					Object3D::_arrays[&renderer][&gp].materials[Object3D::_arrays[&renderer][&gp].materials.size() - 1].map_Kd = texes[tex];
 				}
 			}
 		}
 	}
 }
 
-void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
-	if (Object3D::joints_transform[renderer][shader].size()) {
+void Object3D::buildJointsTransform(Renderer& renderer, GraphicsPipeline& gp) {
+	if (Object3D::_arrays[&renderer][&gp].joints_transform.size()) {
 		return;
 	}
 
 	std::unordered_map<const Joint*, bool> is_joint;
 
-	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		std::vector<Object3D*> objs = m_o.second;
 		
 		for (Object3D* obj : objs) {
@@ -852,8 +819,8 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 					continue;
 				}
 
-				Object3D::joints_transform[renderer][shader].push_back(
-					j->transformWorld() * j->inverseBindMatrices()
+				Object3D::_arrays[&renderer][&gp].joints_transform.push_back(
+					j->getTransformWorld() * j->inverseBindMatrices()
 				);
 				is_joint[j] = true;
 			}
@@ -861,16 +828,16 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 	}
 }
 
-//void Object3D::buildTexture2DIndices(Renderer* renderer, GraphicShader* shader) {
+//void Object3D::buildTexture2DIndices(Renderer& renderer, GraphicsPipeline& gp) {
 //	// if not empty
-//	if (Object3D::Texture2D_indices[renderer][shader].size()) {
+//	if (Object3D::Texture2D_indices[&renderer][&gp].size()) {
 //		return;
 //	}
 //
 //	uint32_t tex_i = 0;
 //	std::unordered_map<const Texture2D*, uint32_t> tex_i_arr{};
 //	// For each mesh, finding the associated objects
-//	for (auto& m_o : Object3D::mesh_objects[renderer][shader]) {
+//	for (auto& m_o : Object3D::_arrays[&renderer][&gp]) {
 //		if (!m_o.first) {
 //			continue;
 //		}
@@ -888,7 +855,7 @@ void Object3D::buildJointsTransform(Renderer* renderer, GraphicShader* shader) {
 //			}
 //
 //			// +1 because index 0 is the default Texture2D
-//			Texture2D_indices[renderer][shader].push_back(tex_i + 1);
+//			Texture2D_indices[&renderer][&gp].push_back(tex_i + 1);
 //		}
 //	}
 //}

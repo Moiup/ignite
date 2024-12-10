@@ -38,8 +38,7 @@ public:
 	Texture2D(const Texture2D& tex);
 	Texture2D& operator=(const Texture2D& tex);
 
-
-	VkSampler getSampler();
+	const VkSampler getSampler() const;
 
 	const uint8_t getNbComponents() const;
 

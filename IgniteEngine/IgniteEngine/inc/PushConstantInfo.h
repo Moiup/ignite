@@ -17,8 +17,8 @@ public:
 	void setSize(uint32_t size);
 
 	const VkPushConstantRange& getPushConstantRange() const;
-	VkShaderStageFlags getStageFlags();
-	uint32_t getOffset();
-	uint32_t getSize();
+	const VkShaderStageFlags getStageFlags() const;
+	const uint32_t getOffset() const;
+	const uint32_t getSize() const;
 };
 

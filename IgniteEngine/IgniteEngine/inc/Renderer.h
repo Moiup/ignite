@@ -10,6 +10,7 @@
 class Renderer
 {
 protected:
+	Swapchain* _swapchain;
 	uint32_t _nb_frame;
 	Device* _device;
 
@@ -43,6 +44,7 @@ public:
 	void setGraphicsQueues(std::vector<Queue>* graphics_queues);
 	void setPresentQueues(std::vector<Queue>* present_queues);
 	void setComputeQueues(std::vector<Queue>* compute_queues);
+	void setSwapchain(Swapchain& swapchain);
 
 	void setNbFrame(uint32_t nb_frame);
 	void setWindow(WindowSurface* _window);
@@ -55,7 +57,6 @@ protected:
 	virtual void createFencesAndSemaphores();
 	virtual void createSwapchain();
 	virtual void createDepthBuffer();
-	virtual void createGraphicsPipeline();
 	virtual void createCommandBuffers();
 };
 

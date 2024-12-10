@@ -14,8 +14,11 @@ private:
 	//DefaultGPU _gpu{};
 	//LogicalDevice _logical_device{};
 	WindowSurface _render_window{};
-	GraphicShader _graphic_shader{};
+	Swapchain _swapchain;
+	GraphicShader _graphics_shader{};
+	GraphicsPipeline _graphics_pipeline{};
 	DefaultRenderer _renderer{};
+	DepthBuffer _depth_buffer;
 
 	Texture2D _white_texture{};
 

@@ -29,12 +29,13 @@ public:
 	void bind();
 	void destroy();
 
-	VkBuffer& getBuffer();
+	const VkBuffer& getBuffer() const;
+	//const VkBuffer& getBuffer() const;
 	Pointer<uint8_t> getValues();
 	void setValues(Pointer<uint8_t> data);
 
-	uint32_t getSize();
-	uint32_t getCapacity();
+	const uint32_t& getSize() const;
+	const uint32_t& getCapacity() const;
 
 	void* map();
 	void unmap();

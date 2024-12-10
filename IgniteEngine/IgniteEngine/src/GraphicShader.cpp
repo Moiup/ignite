@@ -2,103 +2,76 @@
 
 GraphicShader::GraphicShader() :
 	Shader::Shader(),
-	_nb_frame{ 2 },
-	_vertex_buffers_info{},
-	_index_buffer_info{},
-	_vertex_buffers{},
-	_index_buffers{}
+	_index_buffer_info{}
 { ; }
 
 GraphicShader::GraphicShader(
-	std::string vertex_shader,
-	std::string fragment_shader
+	Device& device,
+	const std::string& vertex_shader,
+	const std::string& fragment_shader
 ) : 
-	GraphicShader::GraphicShader()
+	Shader::Shader(device)
 {
 	read(
 		vertex_shader, fragment_shader
 	);
 }
 
-
-void GraphicShader::setNbFrame(uint32_t nb_frame) {
-	_nb_frame = nb_frame;
+GraphicShader::GraphicShader(const GraphicShader& shader) {
+	*this = shader;
 }
 
-uint32_t GraphicShader::getNbFrame() {
-	return _nb_frame;
+GraphicShader& GraphicShader::operator=(const GraphicShader& shader) {
+	Shader::operator=(shader);
+	_vertex_input_descs = shader._vertex_input_descs;
+	_index_buffer_info = shader._index_buffer_info;
+
+	return *this;
 }
 
-void GraphicShader::addVertexBufferInfo(std::string name, uint32_t stride, VkFormat format, uint32_t location) {
-	VertexBufferInfo info{};
+void GraphicShader::configureVertexBuffer(
+	const std::string& name,
+	uint32_t location,
+	VkFormat format,
+	uint32_t stride,
+	uint32_t offset
+) {
+	VkVertexInputBindingDescription binding_desc{};
+	binding_desc.binding = _vertex_input_descs.size();
+	binding_desc.stride = stride;
+	binding_desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-	info.setStride(stride);
-	info.setFormat(format);
-	info.setLocation(location);
+	VkVertexInputAttributeDescription attrib_desc{};
+	attrib_desc.location = location;
+	attrib_desc.binding = binding_desc.binding;
+	attrib_desc.format = format;
+	attrib_desc.offset = offset;
 
-	_vertex_buffers_info[name] = info;
+	VertexInputDescription input_desc{};
+	input_desc.binding_desc = binding_desc;
+	input_desc.attribute_desc = attrib_desc;
+
+	_vertex_input_descs[name] = input_desc;
 }
 
-void GraphicShader::addVertexBuffer(std::string name, Buffer<IGEBufferUsage::vertex_buffer>* buffer) {
-	_vertex_buffers[name].push_back(buffer);
+const VertexInputDescription& GraphicShader::getVertexBufferDescription(const std::string& name) const {
+	return _vertex_input_descs.at(name);
 }
 
-std::unordered_map<std::string, VertexBufferInfo>& GraphicShader::getVertexBuffersInfo() {
-	return _vertex_buffers_info;
+const std::unordered_map<std::string, VertexInputDescription>& GraphicShader::getVertexBufferDescription() const {
+	return _vertex_input_descs;
 }
 
-VertexBufferInfo& GraphicShader::getVertexBufferInfo(std::string name) {
-	return _vertex_buffers_info[name];
-}
-
-std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::vertex_buffer>*>>& GraphicShader::getVertexBuffers() {
-	return _vertex_buffers;
-}
-
-void GraphicShader::addIndexBufferInfo(
-	std::string name,
+void GraphicShader::configureIndexBuffer(
 	uint32_t nb_elem,
 	VkIndexType index_type
 ) {
-	IndexBufferInfo info{};
-	info.setNbElem(nb_elem);
-	info.setIndexType(index_type);
-	_index_buffer_info[name] = info;
+	_index_buffer_info.setNbElem(nb_elem);
+	_index_buffer_info.setIndexType(index_type);
 }
 
-std::unordered_map<std::string, IndexBufferInfo>& GraphicShader::getIndexBufferInfo() {
+const IndexBufferInfo& GraphicShader::getIndexBufferInfo() const {
 	return _index_buffer_info;
-}
-
-IndexBufferInfo& GraphicShader::getIndexBufferInfo(const std::string& name) {
-	return _index_buffer_info[name];
-}
-
-void GraphicShader::addIndexBuffer(
-	std::string name,
-	Buffer<IGEBufferUsage::index_buffer>* buffer
-) {
-	_index_buffers[name].push_back(buffer);
-}
-
-std::unordered_map<std::string, std::vector<Buffer<IGEBufferUsage::index_buffer>*>>& GraphicShader::getIndexBuffers() {
-	return _index_buffers;
-}
-
-void GraphicShader::setPolygonMode(VkPolygonMode polygon_mode) {
-	_polygon_mode = polygon_mode;
-}
-
-VkPolygonMode GraphicShader::polygonMode() {
-	return _polygon_mode;
-}
-
-void GraphicShader::setTopology(VkPrimitiveTopology topology) {
-	_topology = topology;
-}
-
-VkPrimitiveTopology GraphicShader::topology() {
-	return _topology;
 }
 
 void GraphicShader::read(std::string vertex_shader, std::string fragment_shader) {

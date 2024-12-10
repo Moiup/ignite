@@ -18,7 +18,7 @@ void RendererDisplayImage::render() {
 
 	vk_result = vkAcquireNextImageKHR(
 		(*_graphics_queues)[0].getDevice()->getDevice(),
-		_swapchain.getSwapchain(),
+		_swapchain->getSwapchain(),
 		UINT64_MAX,
 		_sem_render_starts[_current_frame],
 		VK_NULL_HANDLE,
@@ -30,7 +30,7 @@ void RendererDisplayImage::render() {
 
 	// --- We want to copy the image into the swapchain image
 	// Retreiving the available swapchain image
-	Image& swapchain_img = _swapchain.getImages()[_available_img];
+	Image& swapchain_img = _swapchain->getImages()[_available_img];
 
 	Image& img = *_img;
 	_graphics_queues_in_flight[_current_frame].copy(img, swapchain_img);
@@ -48,7 +48,7 @@ void RendererDisplayImage::render() {
 		1,
 		&_sem_render_ends[_current_frame],
 		1,
-		&_swapchain.getSwapchain(),
+		&_swapchain->getSwapchain(),
 		&_available_img
 	);
 

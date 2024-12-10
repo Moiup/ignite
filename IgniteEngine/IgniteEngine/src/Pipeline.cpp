@@ -6,20 +6,56 @@ Pipeline::Pipeline() :
 	_descriptor_pool{},
 	_descriptor_sets{},
 	_pipeline_layout{},
-	_pipeline{}
+	_pipeline{nullptr}
 {
-	;
+	_shared_count = new int32_t(1);
+}
+
+Pipeline::Pipeline(Shader& shader) :
+	Pipeline::Pipeline()
+{
+	_shader = &shader;
+	createDescriptorSet();
+	createPipelineLayout();
+}
+
+Pipeline::Pipeline(const Pipeline& pipeline) {
+	*this = pipeline;
 }
 
 Pipeline::~Pipeline() {
-	//destroy();
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+	destroy();
 }
 
-void Pipeline::setShader(Shader* shader) {
-	_shader = shader;
+Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
+	_shader = pipeline._shader;
+
+	_descriptor_set_layout = pipeline._descriptor_set_layout;
+	_descriptor_pool = pipeline._descriptor_pool;
+	_descriptor_sets = pipeline._descriptor_sets;
+	_pipeline_layout = pipeline._pipeline_layout;
+	_pipeline = pipeline._pipeline;
+
+	_is_changed = pipeline._is_changed;
+
+	_descriptor_buffer_infos = pipeline._descriptor_buffer_infos;
+	_descriptor_image_infos = pipeline._descriptor_image_infos;
+	_write_descriptor_sets = pipeline._write_descriptor_sets;
+
+	_push_constants = pipeline._push_constants;
+
+	_shared_count = pipeline._shared_count;
+	*_shared_count += 1;
+
+	return *this;
 }
 
-const VkPipeline& Pipeline::getPipeline() const {
+const VkPipeline Pipeline::getPipeline() const {
 	return _pipeline;
 }
 
@@ -31,8 +67,8 @@ const std::vector<VkDescriptorSet>& Pipeline::getDescriptorSets() const {
 	return _descriptor_sets;
 }
 
-Shader* Pipeline::getShader() {
-	return _shader;
+const Shader& Pipeline::getShader() const {
+	return *_shader;
 }
 
 void Pipeline::create() {
@@ -42,55 +78,113 @@ void Pipeline::create() {
 }
 
 void Pipeline::destroy() {
-	if (!_pipeline) {
-		return;
-	}
 	destroyPipeline();
 	destroyDescriptorSet();
 	destroyPipelineLayout();
 }
 
-void Pipeline::setDescriptorSetLayoutBinding(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_binding_arr, std::unordered_map<std::string, ArrayBufferInfo>& buffer_arr) {
-	for (auto& name_buff : buffer_arr) {
-		ArrayBufferInfo& buff_info = name_buff.second;
-		VkDescriptorSetLayoutBinding descriptor_set_binding{};
-		descriptor_set_binding.binding = buff_info.getBinding();
-		descriptor_set_binding.descriptorType = buff_info.getDescriptorType();
-		descriptor_set_binding.descriptorCount = buff_info.getDescriptorCount();
-		descriptor_set_binding.stageFlags = buff_info.getStageFlags();
-		descriptor_set_binding.pImmutableSamplers = nullptr;
-		descriptor_set_binding_arr.push_back(descriptor_set_binding);
-	}
+void Pipeline::setPushConstants(void* push_constant) {
+	_push_constants = push_constant;
 }
 
-std::vector<VkDescriptorSetLayoutBinding> Pipeline::setDescriptorSetLayoutBindingArray() {
-	std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_binding_arr;
+const void* Pipeline::getPushConstants() const {
+	return _push_constants;
+}
 
-	// Uniform buffers
-	setDescriptorSetLayoutBinding(
-		descriptor_set_layout_binding_arr,
-		_shader->getUniformBuffersInfo()
-	);
+VkWriteDescriptorSet& Pipeline::setWriteDescriptorSet(
+	const std::string& name
+) {
+	VkDescriptorSetLayoutBinding infos = _shader->getDescLayoutBindings().at(name);
+	VkWriteDescriptorSet write{};
+	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	write.pNext = nullptr;
+	write.dstSet = _descriptor_sets[0];
+	write.dstBinding = infos.binding;
+	write.dstArrayElement = 0;
+	write.descriptorCount = infos.descriptorCount;
+	write.descriptorType = infos.descriptorType;
+	_write_descriptor_sets.push_back(write);
 
-	// Storage buffers
-	setDescriptorSetLayoutBinding(
-		descriptor_set_layout_binding_arr,
-		_shader->getStorageBuffersInfo()
-	);
+	_is_changed = true;
 
-	// Sampler
-	setDescriptorSetLayoutBinding(
-		descriptor_set_layout_binding_arr,
-		(std::unordered_map<std::string, ArrayBufferInfo>&)_shader->getSamplerInfo()
-	);
+	return _write_descriptor_sets.back();
+}
 
-	// Textures
-	setDescriptorSetLayoutBinding(
-		descriptor_set_layout_binding_arr,
-		(std::unordered_map<std::string, ArrayBufferInfo>&)_shader->getTextureInfo()
-	);
+void Pipeline::setUniformBuffer(
+	const std::string& name,
+	const Buffer<IGEBufferUsage::uniform_buffer>& buff
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	_descriptor_buffer_infos[name].push_back(VkDescriptorBufferInfo{});
+	VkDescriptorBufferInfo& desc_buf_info = _descriptor_buffer_infos[name].back();
+	desc_buf_info.buffer = buff.getBuffer();
+	desc_buf_info.offset = 0;
+	desc_buf_info.range = buff.getCapacity();
 
-	return descriptor_set_layout_binding_arr;
+	write.pBufferInfo = _descriptor_buffer_infos[name].data();
+	write.pImageInfo = nullptr;
+	write.pTexelBufferView = nullptr;
+}
+
+void Pipeline::setStorageBuffer(
+	const std::string& name,
+	const Buffer<IGEBufferUsage::storage_buffer>& buff
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	_descriptor_buffer_infos[name].push_back(VkDescriptorBufferInfo{});
+	VkDescriptorBufferInfo& desc_buf_info = _descriptor_buffer_infos[name].back();
+	desc_buf_info.buffer = buff.getBuffer();
+	desc_buf_info.offset = 0;
+	desc_buf_info.range = buff.getCapacity();
+
+	write.pBufferInfo = _descriptor_buffer_infos[name].data();
+	write.pImageInfo = nullptr;
+	write.pTexelBufferView = nullptr;
+}
+
+void Pipeline::setSamplers(
+	const std::string& name,
+	const std::vector<Sampler*>& samp
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	uint32_t offset = _descriptor_image_infos.size();
+	for (const Sampler* s : samp) {
+		_descriptor_image_infos[name].push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = _descriptor_image_infos[name].back();
+		desc_img_info.sampler = s->getSampler();
+		desc_img_info.imageView = nullptr;
+		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	}
+
+	write.pBufferInfo = nullptr;
+	write.pImageInfo = _descriptor_image_infos[name].data();
+	write.pTexelBufferView = nullptr;
+}
+
+void Pipeline::setTextures2D(
+	const std::string& name,
+	const std::vector<Texture2D*>& textures
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	uint32_t offset = _descriptor_image_infos.size();
+	for (const Texture2D* t : textures) {
+		_descriptor_image_infos[name].push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = _descriptor_image_infos[name].back();
+		desc_img_info.sampler = t->getSampler();
+		desc_img_info.imageView = t->getImageView();
+		desc_img_info.imageLayout = t->getImageLayout();
+	}
+
+	write.pBufferInfo = nullptr;
+	write.pImageInfo = _descriptor_image_infos[name].data();
+	write.pTexelBufferView = nullptr;
+}
+
+void Pipeline::setDescriptorSetLayoutBinding(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_binding_arr, const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& buffer_arr) {
+	for (auto& name_buff : buffer_arr) {
+		const VkDescriptorSetLayoutBinding& buff_info = name_buff.second;
+		descriptor_set_binding_arr.push_back(buff_info);
+	}
 }
 
 void Pipeline::createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr) {
@@ -161,127 +255,38 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	}
 }
 
-void Pipeline::setWriteDescriptorSet(
-	std::unordered_map<std::string, std::vector<Sampler*>>& sampler_arr,
-	std::unordered_map<std::string, SamplerInfo>& sampler_info_arr,
-	std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-) {
-	for (auto& sampler_data : sampler_arr) {
-		std::string name = sampler_data.first;
-		std::vector<Sampler*>& samplers = sampler_data.second;
-		SamplerInfo& info = sampler_info_arr[name];
-
-		VkDescriptorImageInfo* image_info = new VkDescriptorImageInfo[samplers.size()];
-		uint32_t i = 0;
-		for (auto& s : samplers) {
-			image_info[i].sampler = s->getSampler();
-			//image_info[i].imageLayout = 0;
-			image_info[i].imageView = nullptr;
-		}
-
-		VkWriteDescriptorSet writes{};
-		writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writes.pNext = nullptr;
-		writes.dstSet = _descriptor_sets[0];
-		writes.dstBinding = info.getBinding();
-		writes.dstArrayElement = 0;
-		writes.descriptorCount = samplers.size();
-		writes.descriptorType = info.getDescriptorType();
-		writes.pImageInfo = image_info;
-		writes.pBufferInfo = nullptr;
-		writes.pTexelBufferView = nullptr;
-
-		write_descriptor_set_arr.push_back(writes);
-	}
-}
-
-void Pipeline::setWriteDescriptorSet(
-	std::unordered_map<std::string, std::vector<Texture2D*>>& texture_arr,
-	std::unordered_map<std::string, TextureInfo>& texture_info_arr,
-	std::vector<VkWriteDescriptorSet>& write_descriptor_set_arr
-) {
-	for (auto& texture_data : texture_arr) {
-		std::string name = texture_data.first;
-		std::vector<Texture2D*>& textures = texture_data.second;
-		TextureInfo& info = texture_info_arr[name];
-
-		VkDescriptorImageInfo* image_info = new VkDescriptorImageInfo[textures.size()];
-		uint32_t i = 0;
-		for (auto& tex : textures) {
-			image_info[i].sampler = textures[i]->getSampler();
-			image_info[i].imageLayout = textures[i]->getImageLayout();
-			image_info[i].imageView = (VkImageView)textures[i]->getImageView();
-			i++;
-		}
-
-		VkWriteDescriptorSet writes{};
-		writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writes.pNext = nullptr;
-		writes.dstSet = _descriptor_sets[0];
-		writes.dstBinding = info.getBinding();
-		writes.dstArrayElement = 0;
-		writes.descriptorCount = textures.size();
-		writes.descriptorType = info.getDescriptorType();
-		writes.pImageInfo = image_info;
-		writes.pBufferInfo = nullptr;
-		writes.pTexelBufferView = nullptr;
-
-		write_descriptor_set_arr.push_back(writes);
-	}
-}
-
-void Pipeline::updateDescriptorSets() {
-	std::vector<VkWriteDescriptorSet> write_descriptor_set_arr;
-	setWriteDescriptorSet(
-		(std::unordered_map<std::string, Buffer<IGEBufferUsage::uniform_buffer>*>&)_shader->getUniformBuffers(),
-		_shader->getUniformBuffersInfo(),
-		write_descriptor_set_arr
-	);
-
-	setWriteDescriptorSet(
-		(std::unordered_map<std::string, Buffer<IGEBufferUsage::storage_buffer>*>&)_shader->getStorageBuffers(),
-		_shader->getStorageBuffersInfo(),
-		write_descriptor_set_arr
-	);
-
-	setWriteDescriptorSet(
-		_shader->getSampler(),
-		_shader->getSamplerInfo(),
-		write_descriptor_set_arr
-	);
-
-	setWriteDescriptorSet(
-		_shader->getTextures2D(),
-		_shader->getTextureInfo(),
-		write_descriptor_set_arr
-	);
+void Pipeline::update() {
+	//if (!_is_changed) {
+	//	return;
+	//}
 
 	vkUpdateDescriptorSets(
 		_shader->getDevice()->getDevice(),
-		write_descriptor_set_arr.size(),
-		write_descriptor_set_arr.data(),
+		_write_descriptor_sets.size(),
+		_write_descriptor_sets.data(),
 		0,
 		nullptr
 	);
 
-	for (VkWriteDescriptorSet& w : write_descriptor_set_arr) {
-		if (w.pBufferInfo != nullptr) {
-			delete w.pBufferInfo;
-		}
-		else if (w.pImageInfo != nullptr) {
-			delete w.pImageInfo;
-		}
-	}
+	_is_changed = false;
+	_write_descriptor_sets.clear();
+	_descriptor_buffer_infos.clear();
+	_descriptor_image_infos.clear();
 }
 
 void Pipeline::createDescriptorSet() {
-	std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_binding_arr = setDescriptorSetLayoutBindingArray();
+	std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_binding_arr;
+	setDescriptorSetLayoutBinding(
+		descriptor_set_layout_binding_arr,
+		_shader->getDescLayoutBindings()
+	);
+
 	if (!descriptor_set_layout_binding_arr.size()) {
 		return;
 	}
 	createDescriptorSetLayout(descriptor_set_layout_binding_arr);
 	createDescriptorSet(descriptor_set_layout_binding_arr);
-	updateDescriptorSets();
+	//updateDescriptorSets();
 }
 
 void Pipeline::destroyDescriptorSet() {
@@ -315,22 +320,14 @@ void Pipeline::destroyDescriptorSetLayout() {
 }
 
 void Pipeline::createPipelineLayout() {
-	std::vector<VkPushConstantRange> push_constant_ranges;
-
-	for (const std::pair<std::string, PushConstantInfo>& str_info : _shader->getPushConstantInfo()) {
-		const PushConstantInfo& info = str_info.second;
-		const VkPushConstantRange& range = info.getPushConstantRange();
-		push_constant_ranges.push_back(range);
-	}
-
 	VkPipelineLayoutCreateInfo pipeline_layout_info{};
 	pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipeline_layout_info.pNext = nullptr;
 	pipeline_layout_info.flags = 0;
 	pipeline_layout_info.setLayoutCount = _descriptor_set_layout.size();
 	pipeline_layout_info.pSetLayouts = _descriptor_set_layout.data();
-	pipeline_layout_info.pushConstantRangeCount = push_constant_ranges.size();
-	pipeline_layout_info.pPushConstantRanges = push_constant_ranges.data();
+	pipeline_layout_info.pushConstantRangeCount = 1;
+	pipeline_layout_info.pPushConstantRanges = &_shader->getPushConstantRange();
 
 	VkResult vk_result = vkCreatePipelineLayout(
 		_shader->getDevice()->getDevice(),
@@ -344,6 +341,9 @@ void Pipeline::createPipelineLayout() {
 }
 
 void Pipeline::destroyPipelineLayout() {
+	if (!_pipeline_layout) {
+		return;
+	}
 	vkDestroyPipelineLayout(
 		_shader->getDevice()->getDevice(),
 		_pipeline_layout,
@@ -352,6 +352,9 @@ void Pipeline::destroyPipelineLayout() {
 }
 
 void Pipeline::destroyPipeline() {
+	if (!_pipeline) {
+		return;
+	}
 	vkDestroyPipeline(
 		_shader->getDevice()->getDevice(),
 		_pipeline,

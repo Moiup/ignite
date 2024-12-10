@@ -1,12 +1,6 @@
 #include "CameraScene.h"
 
-CameraScene::CameraScene() :
-	_perspective_camera{},
-	_camera{&_perspective_camera},
-	_was_middle_clicked{false},
-	_is_middle_clicked{false},
-	_middle_prev_mouse{},
-	_right_prev_mouse{}
+CameraScene::CameraScene() : EngineEntity()
 {
 }
 

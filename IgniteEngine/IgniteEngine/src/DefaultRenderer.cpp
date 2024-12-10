@@ -64,8 +64,17 @@ void DefaultRenderer::render() {
 	cmd_buf.reset();
 	cmd_buf.begin();
 	
-	dynamicRenderingPipelineBarrier(cmd_buf);
-	beginRendering(cmd_buf);
+	cmd_buf.dynamicRenderingPipelineBarrier(
+		*_swapchain,
+		*_depth_buffer
+	);
+	cmd_buf.beginRendering(
+		_clear_color_value,
+		*_swapchain,
+		*_depth_buffer,
+		_offset,
+		_extent
+	);
 
 	const std::unordered_map<GraphicsPipeline*, Object3DArrays> gps_and_arrays = Object3D::getArrays(*this);
 
@@ -155,7 +164,7 @@ void DefaultRenderer::render() {
 	}
 	
 	cmd_buf.endRendering();
-	dynamicRenderingPipelineBarrierBack(cmd_buf);
+	cmd_buf.dynamicRenderingPipelineBarrierBack(*_swapchain);
 	cmd_buf.end();
 
 	// Submit
@@ -230,134 +239,4 @@ void DefaultRenderer::createSemaphores() {
 			throw std::runtime_error("Error: failed creating semaphore!");
 		}
 	}
-}
-
-void DefaultRenderer::dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf) {
-	VkImageSubresourceRange subresource_range_frame{};
-	subresource_range_frame.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	subresource_range_frame.baseMipLevel = 0;
-	subresource_range_frame.levelCount = 1;
-	subresource_range_frame.baseArrayLayer = 0;
-	subresource_range_frame.layerCount = 1;
-
-	VkImageSubresourceRange depth_subresource_range_frame{};
-	depth_subresource_range_frame.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-	depth_subresource_range_frame.baseMipLevel = 0;
-	depth_subresource_range_frame.levelCount = 1;
-	depth_subresource_range_frame.baseArrayLayer = 0;
-	depth_subresource_range_frame.layerCount = 1;
-
-	VkImageMemoryBarrier image_memory_barrier_frame{};
-	image_memory_barrier_frame.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	image_memory_barrier_frame.pNext = nullptr;
-	image_memory_barrier_frame.srcAccessMask = 0;
-	image_memory_barrier_frame.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	image_memory_barrier_frame.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	image_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	image_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame.image = _swapchain->getImages()[_current_frame].getImage();
-	image_memory_barrier_frame.subresourceRange = subresource_range_frame;
-
-	VkImageMemoryBarrier depth_memory_barrier_frame{};
-	depth_memory_barrier_frame.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	depth_memory_barrier_frame.pNext = nullptr;
-	depth_memory_barrier_frame.srcAccessMask = 0;
-	depth_memory_barrier_frame.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	depth_memory_barrier_frame.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depth_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	depth_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	depth_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	depth_memory_barrier_frame.image = _depth_buffer->getImage();
-	depth_memory_barrier_frame.subresourceRange = depth_subresource_range_frame;
-
-	cmd_buf.pipelineBarrier(
-		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, &image_memory_barrier_frame
-	);
-
-	cmd_buf.pipelineBarrier(
-		VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-		VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, &depth_memory_barrier_frame
-	);
-}
-
-void DefaultRenderer::dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf) {
-	// Changing image layout
-	VkImageSubresourceRange subresource_range_frame_bk{};
-	subresource_range_frame_bk.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	subresource_range_frame_bk.baseMipLevel = 0;
-	subresource_range_frame_bk.levelCount = 1;
-	subresource_range_frame_bk.baseArrayLayer = 0;
-	subresource_range_frame_bk.layerCount = 1;
-
-	VkImageMemoryBarrier image_memory_barrier_frame_bk{};
-	image_memory_barrier_frame_bk.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	image_memory_barrier_frame_bk.pNext = nullptr;
-	image_memory_barrier_frame_bk.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	image_memory_barrier_frame_bk.dstAccessMask = 0;
-	image_memory_barrier_frame_bk.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	image_memory_barrier_frame_bk.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	image_memory_barrier_frame_bk.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.image = _swapchain->getImages()[_available_img].getImage();
-	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
-
-	cmd_buf.pipelineBarrier(
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, &image_memory_barrier_frame_bk
-	);
-}
-
-void DefaultRenderer::beginRendering(CommandBuffer& cmd_buf) {
-	VkRenderingAttachmentInfoKHR color_attachment{};
-	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	color_attachment.imageView = _swapchain->getImages()[_available_img].getImageView();
-	color_attachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
-	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	color_attachment.clearValue.color = _clear_color_value;
-
-	VkRenderingAttachmentInfoKHR depth_stencil_attachment{};
-	depth_stencil_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	depth_stencil_attachment.imageView = _depth_buffer->getImageView();
-	depth_stencil_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	depth_stencil_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depth_stencil_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	depth_stencil_attachment.clearValue.color.float32[0] = 0.0f;
-	depth_stencil_attachment.clearValue.color.float32[1] = 0.0f;
-	depth_stencil_attachment.clearValue.color.float32[2] = 0.0f;
-	depth_stencil_attachment.clearValue.color.float32[3] = 0.0f;
-	depth_stencil_attachment.clearValue.depthStencil.depth = 1.0f;
-	depth_stencil_attachment.clearValue.depthStencil.stencil = 0;
-
-	VkRenderingInfoKHR rendering_info_khr{};
-	rendering_info_khr.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
-	rendering_info_khr.pNext = nullptr;
-	rendering_info_khr.flags = 0;
-	//rendering_info_khr.renderArea = graphics_pipeline.getScissors()[0];
-	rendering_info_khr.renderArea.offset = _offset;
-	rendering_info_khr.renderArea.extent = _extent;
-	rendering_info_khr.layerCount = 1;
-	rendering_info_khr.viewMask = 0;
-	rendering_info_khr.colorAttachmentCount = 1;
-	rendering_info_khr.pColorAttachments = &color_attachment;
-	rendering_info_khr.pDepthAttachment = &depth_stencil_attachment;
-	rendering_info_khr.pStencilAttachment = &depth_stencil_attachment;
-
-	cmd_buf.beginRendering(
-		rendering_info_khr
-	);
 }

@@ -32,8 +32,5 @@ protected:
 
 	void configureQueues();
 
-	void dynamicRenderingPipelineBarrier(CommandBuffer& cmd_buf);
-	void dynamicRenderingPipelineBarrierBack(CommandBuffer& cmd_buf);
-	void beginRendering(CommandBuffer& cmd_buf);
 };
 

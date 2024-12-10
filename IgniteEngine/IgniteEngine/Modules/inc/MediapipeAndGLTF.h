@@ -1,5 +1,7 @@
 #pragma once
 #include <thread>
+#include <mutex>
+
 #include "EngineEntity.h"
 #include "Module.h"
 #include "Object3D.h"
@@ -68,7 +70,11 @@ private:
     EStream _mediapipe_stream;
     std::thread _network_thread;
 
+    std::mutex _data_mutex;
+
     std::vector<uint8_t> _frame_data;
+    StagingBuffer<IGEBufferUsage::transfer> _recv_frame_buff;
+    Image _recv_image;
 
     LoadedObjectInfo _red_sphere_info;
     Object3D _red_sphere;

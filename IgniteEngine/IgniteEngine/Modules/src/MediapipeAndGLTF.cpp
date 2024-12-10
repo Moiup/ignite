@@ -99,6 +99,11 @@ void MediapipeAndGLTF::start() {
 
 #endif
 
+	_recv_frame_buff = StagingBuffer<IGEBufferUsage::transfer>(
+		DefaultConf::logical_device->getDevice(),
+		_frame_data.size() * sizeof(_frame_data[0])
+	);
+
 	//createDebugShader();
 	createLBSShader();
 }
@@ -106,6 +111,8 @@ void MediapipeAndGLTF::start() {
 void MediapipeAndGLTF::update() {
 	Module::update();
 	_camera = DefaultConf::camera->getMVPC();
+
+	_data_mutex.lock();
 
 	_obj_tr_buffer_hand.setValues(
 		Object3D::updateTransformMatrices(*DefaultConf::renderer, _lbs_pipeline).data()
@@ -126,6 +133,8 @@ void MediapipeAndGLTF::update() {
 	}
 
 	_hand_skeleton.update();
+
+	_data_mutex.unlock();
 
 	//_obj_tr_buffer.setValues(
 	//	Object3D::updateTransformMatrices(*DefaultConf::renderer, _debug_pipeline).data()
@@ -199,12 +208,16 @@ void MediapipeAndGLTF::networkProcess() {
 			break;
 		}
 
+		_data_mutex.lock();
+
 		createWrist(
 			landmarks,
 			_lfs
 		);
 
 		retargeting(_lfs, *_hand.getSkeleton());
+	
+		_data_mutex.unlock();
 	}
 }
 

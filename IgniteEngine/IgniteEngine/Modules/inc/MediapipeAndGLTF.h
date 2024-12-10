@@ -99,6 +99,7 @@ private:
 
     // -- HAND SHADER --
     GraphicShader _lbs_shader{};
+    GraphicsPipeline _lbs_pipeline;
     // Buffers
     StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer_hand{};
     StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer_hand{};
@@ -117,6 +118,7 @@ private:
 
     // Debug shader
     GraphicShader _debug_shader;
+    GraphicsPipeline _debug_pipeline;
     StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer;
     StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer;
     StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer;

@@ -26,8 +26,8 @@ void MediapipeAndGLTF::start() {
 	//_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_nails.gltf");
 	_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_origin.gltf");
 	_hand.createFromObjectInfo(_hand_obj_info);
-	_hand.setRenderer(DefaultConf::renderer);
-	_hand.addShader(&_lbs_shader);
+	_hand.setRenderer(*DefaultConf::renderer);
+	_hand.addGraphicsPipeline(_lbs_pipeline);
 
 	_hand.setScaleLocale(glm::vec3(SCALE));
 
@@ -42,7 +42,6 @@ void MediapipeAndGLTF::start() {
 
 	_hand_skeleton.setObject3D(_hand);
 	_hand_skeleton.setSize(1 / SCALE);
-	_hand_skeleton.setShader(_debug_shader);
 	_hand_skeleton.create();
 
 	_hand_blue_sphere.resize(_hand.getSkeleton()->joints().size());
@@ -54,8 +53,8 @@ void MediapipeAndGLTF::start() {
 		}
 
 		_hand_blue_sphere[j.id()].createFromObjectInfo(_blue_sphere_info);
-		_hand_blue_sphere[j.id()].setRenderer(DefaultConf::renderer);
-		_hand_blue_sphere[j.id()].addShader(DefaultConf::graphic_shader);
+		_hand_blue_sphere[j.id()].setRenderer(*DefaultConf::renderer);
+		_hand_blue_sphere[j.id()].addGraphicsPipeline(*DefaultConf::graphics_pipeline);
 
 		_hand_blue_sphere[j.id()].setPositionLocale(j.getPositionLocale());
 		_hand_blue_sphere[j.id()].setRotationLocale(j.getRotationLocale());
@@ -70,8 +69,8 @@ void MediapipeAndGLTF::start() {
 	_mediapipe_cross.resize(mdph::NB_JOINTS_LFS);
 	for (uint32_t i = 0; i < mdph::NB_JOINTS_LFS; ++i) {
 		_mediapipe_red_sphere[i].createFromObjectInfo(_red_sphere_info);
-		_mediapipe_red_sphere[i].setRenderer(DefaultConf::renderer);
-		_mediapipe_red_sphere[i].addShader(DefaultConf::graphic_shader);
+		_mediapipe_red_sphere[i].setRenderer(*DefaultConf::renderer);
+		_mediapipe_red_sphere[i].addGraphicsPipeline(*DefaultConf::graphics_pipeline);
 		//_mediapipe_red_sphere[i].setScaleLocale(glm::vec3(SCALE));
 	}
 
@@ -100,11 +99,8 @@ void MediapipeAndGLTF::start() {
 
 #endif
 
-	createDebugShader();
+	//createDebugShader();
 	createLBSShader();
-	_lbs_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
-	_debug_shader.setPolygonMode(VK_POLYGON_MODE_LINE);
-	_debug_shader.setTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
 }
 
 void MediapipeAndGLTF::update() {
@@ -112,10 +108,10 @@ void MediapipeAndGLTF::update() {
 	_camera = DefaultConf::camera->getMVPC();
 
 	_obj_tr_buffer_hand.setValues(
-		Object3D::updateTransformMatrices(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::updateTransformMatrices(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 	_joint_tr_buffer_hand.setValues(
-		Object3D::updateJointsTransform(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::updateJointsTransform(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
 	for (uint32_t i = 0; i < mdph::NB_JOINTS_LFS; ++i) {
@@ -131,9 +127,9 @@ void MediapipeAndGLTF::update() {
 
 	_hand_skeleton.update();
 
-	_obj_tr_buffer.setValues(
-		Object3D::updateTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
-	);
+	//_obj_tr_buffer.setValues(
+	//	Object3D::updateTransformMatrices(*DefaultConf::renderer, _debug_pipeline).data()
+	//);
 }
 
 void MediapipeAndGLTF::close() {
@@ -498,60 +494,58 @@ void MediapipeAndGLTF::createLBSShader() {
 	//-----------//
 	// Shader    //
 	//-----------//
-	_lbs_shader.setNbFrame(DefaultConf::NB_FRAME);
-	_lbs_shader.setDevice(DefaultConf::logical_device->getDevice());
-	_lbs_shader.read(
+	_lbs_shader = GraphicShader(
+		*DefaultConf::logical_device->getDevice(),
 		"../../shaders/lbs.vert",
 		"../../shaders/lbs.frag"
 	);
+
 	// -- Vertex Shader -- //
 	// Configuring the Graphic Shader
-	_lbs_shader.addVertexBufferInfo(
+	_lbs_shader.configureVertexBuffer(
 		"coord",
-		Object3D::getCoordsStride(DefaultConf::renderer, &_lbs_shader),
+		0,
 		VK_FORMAT_R32G32B32_SFLOAT,
-		0
+		Object3D::getCoordsStride(*DefaultConf::renderer, _lbs_pipeline)
 	);
-	_lbs_shader.addVertexBufferInfo(
+	_lbs_shader.configureVertexBuffer(
 		"object_id",
-		Object3D::getMeshOffsetsStride(DefaultConf::renderer, &_lbs_shader),
+		1,
 		VK_FORMAT_R32_UINT,
-		1
+		Object3D::getMeshOffsetsStride(*DefaultConf::renderer, _lbs_pipeline)
 	);
-	_lbs_shader.addVertexBufferInfo(
+	_lbs_shader.configureVertexBuffer(
 		"material_id",
-		Object3D::getMaterialIndicesStride(DefaultConf::renderer, &_lbs_shader),
+		2,
 		VK_FORMAT_R32_UINT,
-		2
+		Object3D::getMaterialIndicesStride(*DefaultConf::renderer, _lbs_pipeline)
 	);
-	_lbs_shader.addVertexBufferInfo(
+	_lbs_shader.configureVertexBuffer(
 		"uv",
-		Object3D::getUVStride(DefaultConf::renderer, &_lbs_shader),
+		3,
 		VK_FORMAT_R32G32_SFLOAT,
-		3
+		Object3D::getUVStride(*DefaultConf::renderer, _lbs_pipeline)
 	);
-	_lbs_shader.addVertexBufferInfo(
+	_lbs_shader.configureVertexBuffer(
 		"joints",
-		Object3D::getJointsStride(DefaultConf::renderer, &_lbs_shader),
+		4,
 		VK_FORMAT_R32G32B32A32_UINT,
-		4
+		Object3D::getJointsStride(*DefaultConf::renderer, _lbs_pipeline)
 	);
-	_lbs_shader.addVertexBufferInfo(
+	_lbs_shader.configureVertexBuffer(
 		"weights",
-		Object3D::getWeightsStride(DefaultConf::renderer, &_lbs_shader),
+		5,
 		VK_FORMAT_R32G32B32A32_SFLOAT,
-		5
+		Object3D::getWeightsStride(*DefaultConf::renderer, _lbs_pipeline)
 	);
 
 	// Index Buffer
-	_lbs_shader.addIndexBufferInfo(
-		"index",
-		Object3D::getIndicesNbElem(DefaultConf::renderer, &_lbs_shader)
+	_lbs_shader.configureIndexBuffer(
+		Object3D::getIndicesNbElem(*DefaultConf::renderer, _lbs_pipeline)
 	);
 
 	// Push constant
-	_lbs_shader.addPushConstantInfo(
-		"pc",
+	_lbs_shader.configurePushConstant(
 		VK_SHADER_STAGE_VERTEX_BIT,
 		0,
 		sizeof(_camera)
@@ -559,13 +553,13 @@ void MediapipeAndGLTF::createLBSShader() {
 
 	// Storage Buffers
 	// transform
-	_lbs_shader.addStorageBufferInfo(
+	_lbs_shader.configureStorageBuffer(
 		"obj_tr",
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT
 	);
 
-	_lbs_shader.addStorageBufferInfo(
+	_lbs_shader.configureStorageBuffer(
 		"joint_tr",
 		2,
 		VK_SHADER_STAGE_VERTEX_BIT
@@ -573,164 +567,177 @@ void MediapipeAndGLTF::createLBSShader() {
 
 	// -- Fragment shader -- //
 	// materials
-	_lbs_shader.addStorageBufferInfo(
+	_lbs_shader.configureStorageBuffer(
 		"MaterialsBuffer",
 		3,
 		VK_SHADER_STAGE_FRAGMENT_BIT
 	);
 
-	_lbs_shader.addSamplerInfo(
+	_lbs_shader.configureSampler(
 		"samp",
 		4,
 		VK_SHADER_STAGE_FRAGMENT_BIT
 	);
 
-	_lbs_shader.addTextureInfo(
+	_lbs_shader.configureTexture2D(
 		"textures",
 		5,
 		VK_SHADER_STAGE_FRAGMENT_BIT,
-		Object3D::getTextures2D(DefaultConf::renderer, &_lbs_shader).size()
+		Object3D::getTextures2D(*DefaultConf::renderer, _lbs_pipeline).size()
 	);
-
 
 	//----------------------//
 	// Creating the buffers //
 	//----------------------//
 	_coord_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getCoordsSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getCoords(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getCoordsSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getCoords(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addVertexBuffer("coord", &_coord_buffer_hand);
 
 	_object_id_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getObjectIdSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getObjectId(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getObjectIdSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getObjectId(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addVertexBuffer("object_id", &_object_id_buffer_hand);
 
 	_material_indices_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getMaterialIndices(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getMaterialIndicesSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getMaterialIndices(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addVertexBuffer("material_id", &_material_indices_buffer_hand);
 
 	_uv_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getUVSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getUV(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getUVSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getUV(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addVertexBuffer("uv", &_uv_buffer_hand);
 
 	_joints_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getJointsSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getJoints(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getJointsSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getJoints(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addVertexBuffer("joints", &_joints_buffer_hand);
 
 	_weights_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getWeightsSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getWeights(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getWeightsSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getWeights(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addVertexBuffer("weights", &_weights_buffer_hand);
 
 	// Index buffer
 	_index_buffer_hand = StagingBuffer<IGEBufferUsage::index_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getIndicesSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getIndices(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getIndicesSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getIndices(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addIndexBuffer("index", &_index_buffer_hand);
 
-	// Push Constant
-	_lbs_shader.addPushConstant("pc", &_camera[0][0]);
 
 	// Storage Buffers
 	// transform
 	_obj_tr_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getTransformMatricesSize(DefaultConf::renderer, &_lbs_shader),
-		&Object3D::getTransformMatrices(DefaultConf::renderer, &_lbs_shader)[0][0]
+		Object3D::getTransformMatricesSize(*DefaultConf::renderer, _lbs_pipeline),
+		&Object3D::getTransformMatrices(*DefaultConf::renderer, _lbs_pipeline)[0][0]
 	);
-	_lbs_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer_hand);
 
 	// Joint transform
 	_joint_tr_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getJointsTransformSize(DefaultConf::renderer, &_lbs_shader),
-		&Object3D::getJointsTransform(DefaultConf::renderer, &_lbs_shader)[0][0]
+		Object3D::getJointsTransformSize(*DefaultConf::renderer, _lbs_pipeline),
+		&Object3D::getJointsTransform(*DefaultConf::renderer, _lbs_pipeline)[0][0]
 	);
-	_lbs_shader.addStorageBuffer("joint_tr", &_joint_tr_buffer_hand);
 
 	// materials
 	_materials_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getMaterialsSize(DefaultConf::renderer, &_lbs_shader),
-		Object3D::getMaterials(DefaultConf::renderer, &_lbs_shader).data()
+		Object3D::getMaterialsSize(*DefaultConf::renderer, _lbs_pipeline),
+		Object3D::getMaterials(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
-	_lbs_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer_hand);
 
 	// Sampler
 	_sampler_hand.setDevice(DefaultConf::logical_device->getDevice());
 	_sampler_hand.create();
-	_lbs_shader.addSampler("samp", &_sampler_hand);
 
-	// Textures
-	_lbs_shader.addTexture2D(
-		"textures",
-		Object3D::getTextures2D(DefaultConf::renderer, &_lbs_shader)
+	
+	// --------------------- //
+	// Creating the pipeline //
+	// --------------------- //
+	GraphicsPipelineConfiguration conf = DefaultConf::configuration;
+	conf.polygon_mode = VK_POLYGON_MODE_LINE;
+	conf.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	conf.line_width = 1.0;
+
+	_lbs_pipeline = GraphicsPipeline(
+		_lbs_shader,
+		conf
 	);
+
+	// Push Constant
+	_lbs_pipeline.setPushConstants(&_camera[0][0]);
+	_lbs_pipeline.setVertexBuffer("coord", _coord_buffer_hand);
+	_lbs_pipeline.setVertexBuffer("object_id", _object_id_buffer_hand);
+	_lbs_pipeline.setVertexBuffer("material_id", _material_indices_buffer_hand);
+	_lbs_pipeline.setVertexBuffer("uv", _uv_buffer_hand);
+	_lbs_pipeline.setVertexBuffer("joints", _joints_buffer_hand);
+	_lbs_pipeline.setVertexBuffer("weights", _weights_buffer_hand);
+	_lbs_pipeline.setIndexBuffer(_index_buffer_hand);
+	_lbs_pipeline.setStorageBuffer("obj_tr", _obj_tr_buffer_hand);
+	_lbs_pipeline.setStorageBuffer("joint_tr", _joint_tr_buffer_hand);
+	_lbs_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer_hand);
+	_lbs_pipeline.setSamplers("samp", { &_sampler_hand });
+	// Textures
+	_lbs_pipeline.setTextures2D(
+		"textures",
+		Object3D::getTextures2D(*DefaultConf::renderer, _lbs_pipeline)
+	);
+
+	_lbs_pipeline.update();
 }
 
 void MediapipeAndGLTF::createDebugShader() {
-	_debug_shader.setNbFrame(DefaultConf::NB_FRAME);
-	_debug_shader.setDevice(DefaultConf::logical_device->getDevice());
-	_debug_shader.read(
+	_debug_shader = GraphicShader(
+		*DefaultConf::logical_device->getDevice(),
 		"../../shaders/debug/debug.vert",
 		"../../shaders/debug/debug.frag"
 	);
+
 	// -- Vertex Shader -- //
 	// Configuring the Graphic Shader
-	_debug_shader.addVertexBufferInfo(
+	_debug_shader.configureVertexBuffer(
 		"coord",
-		Object3D::getCoordsStride(DefaultConf::renderer, &_debug_shader),
+		0,
 		VK_FORMAT_R32G32B32_SFLOAT,
-		0
+		Object3D::getCoordsStride(*DefaultConf::renderer, _debug_pipeline)
 	);
-	_debug_shader.addVertexBufferInfo(
+	_debug_shader.configureVertexBuffer(
 		"object_id",
-		Object3D::getMeshOffsetsStride(DefaultConf::renderer, &_debug_shader),
+		1,
 		VK_FORMAT_R32_UINT,
-		1
+		Object3D::getMeshOffsetsStride(*DefaultConf::renderer, _debug_pipeline)
 	);
-	_debug_shader.addVertexBufferInfo(
+	_debug_shader.configureVertexBuffer(
 		"material_id",
-		Object3D::getMaterialIndicesStride(DefaultConf::renderer, &_debug_shader),
+		2,
 		VK_FORMAT_R32_UINT,
-		2
+		Object3D::getMaterialIndicesStride(*DefaultConf::renderer, _debug_pipeline)
 	);
 
 	// Index Buffer
-	_debug_shader.addIndexBufferInfo(
-		"index",
-		Object3D::getIndicesNbElem(DefaultConf::renderer, &_debug_shader)
+	_debug_shader.configureIndexBuffer(
+		Object3D::getIndicesNbElem(*DefaultConf::renderer, _debug_pipeline)
 	);
 
 	// Push constant
-	_debug_shader.addPushConstantInfo(
-		"pc",
+	_debug_shader.configurePushConstant(
 		VK_SHADER_STAGE_VERTEX_BIT,
 		0,
 		sizeof(DefaultConf::camera->getMVPC())
 	);
 
 	// Storage Buffers
-// transform
-	_debug_shader.addStorageBufferInfo(
+	// transform
+	_debug_shader.configureStorageBuffer(
 		"obj_tr",
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT
@@ -738,7 +745,7 @@ void MediapipeAndGLTF::createDebugShader() {
 
 	// -- Fragment shader -- //
 	// materials
-	_debug_shader.addStorageBufferInfo(
+	_debug_shader.configureStorageBuffer(
 		"MaterialsBuffer",
 		2,
 		VK_SHADER_STAGE_FRAGMENT_BIT
@@ -751,53 +758,64 @@ void MediapipeAndGLTF::createDebugShader() {
 	// Mesh offsets
 	_coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getCoordsSize(DefaultConf::renderer, &_debug_shader),
-		Object3D::getCoords(DefaultConf::renderer, &_debug_shader).data()
+		Object3D::getCoordsSize(*DefaultConf::renderer, _debug_pipeline),
+		Object3D::getCoords(*DefaultConf::renderer, _debug_pipeline).data()
 	);
-	_debug_shader.addVertexBuffer("coord", &_coord_buffer);
 
 	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getObjectIdSize(DefaultConf::renderer, &_debug_shader),
-		Object3D::getObjectId(DefaultConf::renderer, &_debug_shader).data()
+		Object3D::getObjectIdSize(*DefaultConf::renderer, _debug_pipeline),
+		Object3D::getObjectId(*DefaultConf::renderer, _debug_pipeline).data()
 	);
-	_debug_shader.addVertexBuffer("object_id", &_object_id_buffer);
 
 	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_debug_shader),
-		Object3D::getMaterialIndices(DefaultConf::renderer, &_debug_shader).data()
+		Object3D::getMaterialIndicesSize(*DefaultConf::renderer, _debug_pipeline),
+		Object3D::getMaterialIndices(*DefaultConf::renderer, _debug_pipeline).data()
 	);
-	_debug_shader.addVertexBuffer("material_id", &_material_indices_buffer);
-
 
 	// Index buffer
 	_index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getIndicesSize(DefaultConf::renderer, &_debug_shader),
-		Object3D::getIndices(DefaultConf::renderer, &_debug_shader).data()
+		Object3D::getIndicesSize(*DefaultConf::renderer, _debug_pipeline),
+		Object3D::getIndices(*DefaultConf::renderer, _debug_pipeline).data()
 	);
-	_debug_shader.addIndexBuffer("index", &_index_buffer);
-
-	// Push Constant
-	_camera = DefaultConf::camera->getMVPC();
-	_debug_shader.addPushConstant("pc", &_camera[0][0]);
-
 
 	// Storage Buffers
 	// transform
 	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getTransformMatricesSize(DefaultConf::renderer, &_debug_shader),
-		Object3D::getTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
+		Object3D::getTransformMatricesSize(*DefaultConf::renderer, _debug_pipeline),
+		Object3D::getTransformMatrices(*DefaultConf::renderer, _debug_pipeline).data()
 	);
-	_debug_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
 
 	// materials
 	_materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		Object3D::getMaterialsSize(DefaultConf::renderer, &_debug_shader),
-		Object3D::getMaterials(DefaultConf::renderer, &_debug_shader).data()
+		Object3D::getMaterialsSize(*DefaultConf::renderer, _debug_pipeline),
+		Object3D::getMaterials(*DefaultConf::renderer, _debug_pipeline).data()
 	);
-	_debug_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
+
+
+	GraphicsPipelineConfiguration conf = DefaultConf::configuration;
+	conf.polygon_mode = VK_POLYGON_MODE_LINE;
+	conf.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+	conf.line_width = 3.0f;
+
+	_debug_pipeline = GraphicsPipeline(
+		_debug_shader,
+		conf
+	);
+
+	// Push Constant
+	_camera = DefaultConf::camera->getMVPC();
+	_debug_pipeline.setPushConstants(&_camera[0][0]);
+	_debug_pipeline.setVertexBuffer("coord", _coord_buffer);
+	_debug_pipeline.setVertexBuffer("object_id", _object_id_buffer);
+	_debug_pipeline.setVertexBuffer("material_id", _material_indices_buffer);
+	_debug_pipeline.setIndexBuffer(_index_buffer);
+	_debug_pipeline.setStorageBuffer("obj_tr", _obj_tr_buffer);
+	_debug_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer);
+
+	_debug_pipeline.update();
 }

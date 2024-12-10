@@ -68,6 +68,8 @@ private:
     EStream _mediapipe_stream;
     std::thread _network_thread;
 
+    std::vector<uint8_t> _frame_data;
+
     LoadedObjectInfo _red_sphere_info;
     Object3D _red_sphere;
     LoadedObjectInfo _blue_sphere_info;

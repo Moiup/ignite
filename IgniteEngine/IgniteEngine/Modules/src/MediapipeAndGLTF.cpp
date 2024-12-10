@@ -145,17 +145,6 @@ void MediapipeAndGLTF::networkInit() {
 	_socket = EServerSocket(SERVER_ADDRESS, SERVER_PORT);
 	_socket.Initialise();
 
-	//_server_socket.Port() = SERVER_PORT;
-	//_server_socket.Address() = SERVER_ADDRESS;
-	//_server_socket.Initialise();
-	//_server_socket.Bind();
-	//_server_socket.Listen();
-
-	//std::cout << "Listening on " << SERVER_ADDRESS << " -- " << SERVER_PORT << std::endl;
-	//std::cout << "Waiting for mediapipe client to connect...";
-	//_mediapipe_stream = _server_socket.Accept();
-	//std::cout << "connected!" << std::endl;
-
 	std::cout << "Connecting to " << SERVER_ADDRESS << " -- " << SERVER_PORT << std::endl;
 	_mediapipe_stream = _socket.Connect();
 	std::cout << "Connected!" << std::endl;
@@ -166,8 +155,10 @@ void MediapipeAndGLTF::networkInit() {
 	std::cout << "    width: " << dim_msg._width << std::endl;
 	std::cout << "    height: " << dim_msg._height << std::endl;
 
-	DefaultConf::render_window_width = dim_msg._width * 2;
-	DefaultConf::render_window_height = dim_msg._height * 2;
+	DefaultConf::render_window_width = dim_msg._width;
+	DefaultConf::render_window_height = dim_msg._height;
+
+	_frame_data.resize(dim_msg._width * dim_msg._height * 3);
 }
 
 void MediapipeAndGLTF::networkProcess() {
@@ -184,6 +175,27 @@ void MediapipeAndGLTF::networkProcess() {
 		mdph::Landmarks landmarks;
 		int32_t is_recv = _mediapipe_stream.Recv(sizeof(landmarks), reinterpret_cast<char*>(&landmarks));
 		if (is_recv < sizeof(landmarks)) {
+			break;
+		}
+
+		// Data to big
+		// Sometimes fails to be read in one time
+		// Therefore, loop to go through all the chunck of data
+		uint32_t fd_size = _frame_data.size() * sizeof(_frame_data[0]);
+		int32_t total_read = 0;
+		do {
+			int32_t nb_read = _mediapipe_stream.Recv(
+				fd_size - total_read,
+				reinterpret_cast<char*>(_frame_data.data() + total_read)
+			);
+
+			if (!is_recv) {
+				std::cerr << "Problem reading frame data. Connection lost." << std::endl;
+				break;
+			}
+			total_read += nb_read;
+		} while (total_read < fd_size);
+		if (total_read < fd_size) {
 			break;
 		}
 
@@ -217,7 +229,6 @@ void MediapipeAndGLTF::retargeting(
 		else {
 			posLocales[id] = posid;
 		}
-		std::cout << "PosLocale [" << id << "] = " << makeString(posLocales[id]) << std::endl;
 	}
 	for (auto& joint : _hand.getSkeleton()->joints())
 	{
@@ -232,7 +243,6 @@ void MediapipeAndGLTF::retargeting(
 		else {
 			_posGlobalesMediapipe[id] = posLocaleGLTF;
 		}
-		std::cout << "PosGlobale [" << id << "] = " << makeString(_posGlobalesMediapipe[id]) << std::endl;
 	}
 				
 	Joint* wrist = skeleton.skeleton();
@@ -245,22 +255,12 @@ void MediapipeAndGLTF::retargeting(
 		wrist->alignmentMatrix() = findRotationMatrix(from, to);
 	}
 
-	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(1, 0, 0, 0)) << std::endl;
-	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(0, 1, 0, 0)) << std::endl;
-	std::cout << glm::length(wrist->alignmentMatrix() * glm::vec4(0, 0, 1, 0)) << std::endl;
 #if 1
 	for (int32_t parent_i = 0; parent_i < wrist->getChildren().size(); ++parent_i) {
 		Joint* cur = static_cast<Joint*>(wrist->getChildren()[parent_i]);
 		Joint* next = cur;
 		//glm::mat4 tr = wrist->getTransformLocale();  // l2p
 		glm::mat4 tr = wrist->getTranslateLocale() * wrist->getRotateLocale() * wrist->alignmentMatrix();
-		std::cout << glm::length(tr * glm::vec4(1, 0, 0, 0)) << std::endl;
-		std::cout << glm::length(tr * glm::vec4(0, 1, 0, 0)) << std::endl;
-		std::cout << glm::length(tr * glm::vec4(0, 0, 1, 0)) << std::endl;
-
-		for (int i = 0; i < mdph::NB_JOINTS_LFS; i++ )
-			std::cout << makeString(_posGlobalesMediapipe[i]) << std::endl;
-
 
 		while (cur->getChildren().size()) {
 			next = static_cast<Joint*>(cur->getChildren()[0]);
@@ -269,30 +269,18 @@ void MediapipeAndGLTF::retargeting(
 			glm::mat4 tr_l2w = tr * cur->getTranslateLocale() * cur->getRotateLocale();
 
 			glm::vec4 from = glm::vec4(next->getPositionLocale() * SCALE, 0.0f);
-			std::cout << makeString(next->getTransform()) << std::endl;
-
-			std::cout << cur->id() << " -- " << next->id() << std::endl;
 
 			glm::vec4 to_point = glm::vec4(_posGlobalesMediapipe[next->id()], 1.0);
 			glm::vec4 toparent_point = glm::vec4(_posGlobalesMediapipe[cur->id()], 1.0);
 			glm::vec3 to = glm::inverse(tr_l2w) * (to_point-toparent_point);
-			std::cout << "gltf length: " << glm::length(next->getPositionLocale() * SCALE) << std::endl;
-			std::cout << "mediapipe length: " << glm::length((to_point-toparent_point)) << std::endl;
-			std::cout << "mediapipe length: " << glm::length(to) << std::endl;
+
 
 			static int i = 0;
-			std::cout << i << std::endl;
-			std::cout << "tr_l2w=" << makeString(tr_l2w) << std::endl;
-			std::cout << "from=" << makeString(from) << std::endl;
-			std::cout<<"to=" << makeString(to) << std::endl;
-			std::cout << "to_point_w=" << makeString(to_point) << std::endl;
+
 			i++;
 
 			cur->alignmentMatrix() = findRotationMatrix(from, to);
 
-			std::cout << "From : " << makeString(from) << std::endl;
-			std::cout << "From : " << makeString(cur->alignmentMatrix() * from) << std::endl;
-			std::cout << "To : " << makeString(to) << std::endl;
 			tr = tr * cur->getTranslateLocale() * cur->getRotateLocale() * cur->alignmentMatrix();
 
 			cur = next;

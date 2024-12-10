@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Device.h"
+#include "Swapchain.h"
+#include "DepthBuffer.h"
 
 class CommandBuffer
 {
@@ -43,6 +45,20 @@ public:
 	void dispatch(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
 
 	void endRendering();
+
+	void beginRendering(
+		VkClearColorValue& clear_color,
+		Swapchain& swapchain,
+		DepthBuffer& depth_buffer,
+		VkOffset2D& offset,
+		VkExtent2D& extent
+	);
+
+	void dynamicRenderingPipelineBarrier(
+		Swapchain& swapchain,
+		DepthBuffer& depth_buffer
+	);
+	void dynamicRenderingPipelineBarrierBack(Swapchain& swapchain);
 
 	void pipelineBarrier(
 		VkPipelineStageFlags srcStageMask,

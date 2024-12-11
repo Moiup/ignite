@@ -58,6 +58,11 @@ namespace mdph {
         Desc _desc;
         Hierarchy _hierarchy;
     };
+
+    struct ImgSumPC {
+        uint32_t width;
+        uint32_t height;
+    };
 }
 
 class MediapipeAndGLTF : public Module
@@ -75,6 +80,7 @@ private:
 
     bool _is_new_data{ false };
 
+    const uint32_t _FRAME_NB_CHANNEL{ 4 };
     std::vector<uint8_t> _frame_data;
     StagingBuffer<IGEBufferUsage::transfer> _recv_frame_stag_buff;
     Image _recv_image;
@@ -151,8 +157,17 @@ private:
 
     std::vector<VkSemaphore> _sem_rend_start;
     std::vector<VkSemaphore> _sem_rend_end;
+    std::vector<VkSemaphore> _sem_copy_swap_end;
+    std::vector<VkSemaphore> _sem_comp_sum_end;
     uint32_t _current_queue_i{0};
     uint32_t _to_present_img_i{0};
+
+    // -- IMAGE SUM --
+    ComputeShader _image_sum_shader;
+    ComputePipeline _image_sum_pipeline;
+    Texture2D _video_img;
+    Texture2D _sum_img;
+    mdph::ImgSumPC _img_sum_pc;
 
 public:
     MediapipeAndGLTF();
@@ -194,5 +209,6 @@ private:
     void createLBSShader();
     void createDebugShader();
     void createHandShader();
+    void createCompImageSumShader();
 };
 

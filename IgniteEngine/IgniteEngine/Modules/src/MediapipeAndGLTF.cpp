@@ -85,9 +85,15 @@ void MediapipeAndGLTF::start() {
 	//createDebugShader();
 	//createLBSShader();
 	createHandShader();
+	createCompImageSumShader();
+
+	_img_sum_pc.width = DefaultConf::render_window_width;
+	_img_sum_pc.height = DefaultConf::render_window_height;
 
 	_sem_rend_start.resize(DefaultConf::NB_FRAME);
 	_sem_rend_end.resize(DefaultConf::NB_FRAME);
+	_sem_copy_swap_end.resize(DefaultConf::NB_FRAME);
+	_sem_comp_sum_end.resize(DefaultConf::NB_FRAME);
 
 	VkSemaphoreCreateInfo sem_info{};
 	sem_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -107,6 +113,20 @@ void MediapipeAndGLTF::start() {
 			&sem_info,
 			nullptr,
 			&_sem_rend_end[i]
+		);
+
+		vkCreateSemaphore(
+			DefaultConf::logical_device->getDevice()->getDevice(),
+			&sem_info,
+			nullptr,
+			&_sem_copy_swap_end[i]
+		);
+
+		vkCreateSemaphore(
+			DefaultConf::logical_device->getDevice()->getDevice(),
+			&sem_info,
+			nullptr,
+			&_sem_comp_sum_end[i]
 		);
 	}
 
@@ -142,8 +162,15 @@ void MediapipeAndGLTF::update() {
 	_data_mutex.lock();
 
 	Swapchain& swapchain = *DefaultConf::swapchain;
-	std::vector<Queue>& g_queues = DefaultConf::logical_device->getQueues("graphics_queues");
-	std::vector<Queue>& p_queues = DefaultConf::logical_device->getQueues("present_queues");
+	Queue& g_queue = DefaultConf::logical_device->getQueues("graphics_queues")[0];
+	Queue& p_queue = DefaultConf::logical_device->getQueues("present_queues")[0];
+	Queue& c_queue = DefaultConf::logical_device->getQueues("compute_queues")[0];
+
+
+	c_queue.copy(_recv_frame_stag_buff, _video_img);
+	c_queue.submit();
+	c_queue.wait();
+
 
 	_to_present_img_i = swapchain.acquireNextImage(
 		UINT64_MAX,
@@ -151,7 +178,7 @@ void MediapipeAndGLTF::update() {
 		VK_NULL_HANDLE
 	);
 
-	CommandBuffer cmd_buf = g_queues[_current_queue_i].newCommandBuffer();
+	CommandBuffer cmd_buf = g_queue.newCommandBuffer();
 	cmd_buf.reset();
 	cmd_buf.begin();
 
@@ -165,7 +192,7 @@ void MediapipeAndGLTF::update() {
 		DefaultConf::render_window_width,
 		DefaultConf::render_window_height
 	};
-	VkClearColorValue clear_color_value = { 1.0, 0.0, 0.0, 1.0 };
+	VkClearColorValue clear_color_value = { 0.0, 0.0, 0.0, 1.0 };
 	cmd_buf.beginRendering(
 		clear_color_value,
 		swapchain,
@@ -231,25 +258,93 @@ void MediapipeAndGLTF::update() {
 	cmd_buf.dynamicRenderingPipelineBarrierBack(swapchain);
 	cmd_buf.end();
 
-	VkPipelineStageFlags pipeline_stage_flag = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	g_queues[_current_queue_i].submit(
+	VkPipelineStageFlags pipeline_vert_stage_flag = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	g_queue.submit(
 		1,
 		&_sem_rend_start[_current_queue_i],
-		&pipeline_stage_flag,
+		&pipeline_vert_stage_flag,
 		1,
 		&_sem_rend_end[_current_queue_i]
 	);
 
-	p_queues[_current_queue_i].present(
+	std::vector<Texture2D*> video_img = { &_video_img };
+	std::vector<Texture2D*> sum_img = { &_sum_img };
+	_image_sum_pipeline.setTextures2D("video", video_img);
+	_image_sum_pipeline.setTextures2D("swapchain", sum_img);
+	_image_sum_pipeline.update();
+
+	c_queue.copy(
+		swapchain.getCurrentImage(),
+		_sum_img
+	);
+
+	// Compute buffer here
+	CommandBuffer cmd_sum = c_queue.newCommandBuffer();
+	cmd_sum.begin();
+	cmd_sum.bindPipeline(
+		VK_PIPELINE_BIND_POINT_COMPUTE,
+		_image_sum_pipeline.getPipeline()
+	);
+	cmd_sum.bindDescriptorSets(
+		VK_PIPELINE_BIND_POINT_COMPUTE,
+		_image_sum_pipeline.getPipelineLayout(),
+		0,
+		_image_sum_pipeline.getDescriptorSets().size(),
+		_image_sum_pipeline.getDescriptorSets().data(),
+		0,
+		nullptr
+	);
+	cmd_sum.pushConstants(
+		_image_sum_pipeline.getPipelineLayout(),
+		_image_sum_shader.getPushConstantRange().stageFlags,
+		_image_sum_shader.getPushConstantRange().offset,
+		_image_sum_shader.getPushConstantRange().size,
+		_image_sum_pipeline.getPushConstants()
+	);
+
+	cmd_sum.dispatch(
+		(_video_img.getWidth() / 16) + 1,
+		(_video_img.getHeight() / 16) + 1,
+		1
+	);
+
+	cmd_sum.end();
+
+	VkPipelineStageFlags pipeline_comp_stage_flag = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+	c_queue.submitNoFence(
 		1,
 		&_sem_rend_end[_current_queue_i],
+		&pipeline_comp_stage_flag,
+		1,
+		&_sem_comp_sum_end[_current_queue_i]
+	);
+
+	c_queue.copy(
+		_sum_img,
+		swapchain.getCurrentImage()
+	);
+
+	c_queue.submit(
+		1,
+		&_sem_comp_sum_end[_current_queue_i],
+		&pipeline_comp_stage_flag,
+		1,
+		&_sem_copy_swap_end[_current_queue_i]
+	);
+
+	p_queue.present(
+		1,
+		&_sem_copy_swap_end[_current_queue_i],
 		1,
 		&swapchain.getSwapchain(),
 		&_to_present_img_i
 	);
-	g_queues[_current_queue_i].wait();
+	c_queue.wait();
+	g_queue.wait();
 
 	_data_mutex.unlock();
+
+	_current_queue_i = (_current_queue_i + 1) % DefaultConf::NB_FRAME;
 }
 
 void MediapipeAndGLTF::close() {
@@ -278,7 +373,7 @@ void MediapipeAndGLTF::networkInit() {
 	DefaultConf::render_window_width = dim_msg._width;
 	DefaultConf::render_window_height = dim_msg._height;
 
-	_frame_data.resize(dim_msg._width * dim_msg._height * 3);
+	_frame_data.resize(dim_msg._width * dim_msg._height * _FRAME_NB_CHANNEL);
 }
 
 void MediapipeAndGLTF::networkProcess() {
@@ -286,6 +381,7 @@ void MediapipeAndGLTF::networkProcess() {
 		// Asking for new landmarks
 		mdph::OkMsg ok_msg;
 		ok_msg._is_ok = true;
+
 		int32_t is_sent = _mediapipe_stream.Send(reinterpret_cast<char*>(&ok_msg), sizeof(ok_msg));
 		if (is_sent < sizeof(ok_msg)) {
 			break;
@@ -294,6 +390,7 @@ void MediapipeAndGLTF::networkProcess() {
 		// Receiving new landmarks
 		mdph::Landmarks landmarks;
 		int32_t is_recv = _mediapipe_stream.Recv(sizeof(landmarks), reinterpret_cast<char*>(&landmarks));
+
 		if (is_recv < sizeof(landmarks)) {
 			break;
 		}
@@ -301,28 +398,28 @@ void MediapipeAndGLTF::networkProcess() {
 		// Data to big
 		// Sometimes fails to be read in one time
 		// Therefore, loop to go through all the chunck of data
-		//uint32_t fd_size = _frame_data.size() * sizeof(_frame_data[0]);
-		//int32_t total_read = 0;
-		//do {
-		//	int32_t nb_read = _mediapipe_stream.Recv(
-		//		fd_size - total_read,
-		//		reinterpret_cast<char*>(_frame_data.data() + total_read)
-		//	);
+		uint32_t fd_size = _frame_data.size() * sizeof(_frame_data[0]);
+		int32_t total_read = 0;
+		do {
+			int32_t nb_read = _mediapipe_stream.Recv(
+				fd_size - total_read,
+				reinterpret_cast<char*>(_frame_data.data() + total_read)
+			);
 
-		//	if (!is_recv) {
-		//		std::cerr << "Problem reading frame data. Connection lost." << std::endl;
-		//		break;
-		//	}
-		//	total_read += nb_read;
-		//} while (total_read < fd_size);
-		//if (total_read < fd_size) {
-		//	break;
-		//}
+			if (!is_recv) {
+				std::cerr << "Problem reading frame data. Connection lost." << std::endl;
+				break;
+			}
+			total_read += nb_read;
+		} while (total_read < fd_size);
+		if (total_read < fd_size) {
+			break;
+		}
 
 		_data_mutex.lock();
 
 		_is_new_data = true;
-		//_recv_frame_stag_buff.setValues(_frame_data.data());
+		_recv_frame_stag_buff.setValues(_frame_data.data());
 
 		createWrist(
 			landmarks,
@@ -1049,4 +1146,66 @@ void MediapipeAndGLTF::createHandShader() {
 	_hand_pipeline.setStorageBuffer("joint_tr", _joint_tr_hand);
 
 	_hand_pipeline.update();
+}
+
+void MediapipeAndGLTF::createCompImageSumShader() {
+	_image_sum_shader = ComputeShader(
+		*DefaultConf::logical_device->getDevice(),
+		"../../shaders/hand/addition.comp"
+	);
+
+	_image_sum_shader.configureStorageTexture2D(
+		"video",
+		0,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		1
+	);
+
+	_image_sum_shader.configureStorageTexture2D(
+		"swapchain",
+		1,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		1
+	);
+
+	_image_sum_shader.configurePushConstant(
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		0,
+		sizeof(_img_sum_pc)
+	);
+
+	
+
+	_video_img = Texture2D(
+		DefaultConf::logical_device->getDevice(),
+		DefaultConf::render_window_width,
+		DefaultConf::render_window_height,
+		IGEImgFormat::r8g8b8a8_uint
+	);
+
+	_sum_img = Texture2D(
+		DefaultConf::logical_device->getDevice(),
+		DefaultConf::render_window_width,
+		DefaultConf::render_window_height,
+		IGEImgFormat::r8g8b8a8_uint
+	);
+
+	DefaultConf::graphics_queue->changeLayout(
+		_video_img,
+		VK_IMAGE_LAYOUT_GENERAL
+	);
+
+	DefaultConf::graphics_queue->changeLayout(
+		_sum_img,
+		VK_IMAGE_LAYOUT_GENERAL
+	);
+	DefaultConf::graphics_queue->submit();
+	DefaultConf::graphics_queue->wait();
+
+	_image_sum_pipeline = ComputePipeline(_image_sum_shader);
+	
+	
+	_image_sum_pipeline.setPushConstants(&_img_sum_pc);
+	
+	_image_sum_pipeline.update();
 }

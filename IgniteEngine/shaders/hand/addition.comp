@@ -14,24 +14,39 @@ void main(){
     const uint idx = gl_GlobalInvocationID.x;
     const uint idy = gl_GlobalInvocationID.y;
 
-    if((idx >= width) || (idy >= height)){
+    const uint width_half = width / 2;
+    if((idx >= width_half) || (idy >= height)){
         return;
     }
 
-    uvec4 video_color = imageLoad(video, ivec2(idx, idy));
-    uvec4 sum_img_color = imageLoad(sum_img, ivec2(idx, idy));
+    uvec4 video_color_1 = imageLoad(video, ivec2(idx, idy));
+    uvec4 video_color_2 = imageLoad(video, ivec2(width - idx - 1, idy));
+    uvec4 sum_img_color_1 = imageLoad(sum_img, ivec2(idx, idy));
+    uvec4 sum_img_color_2 = imageLoad(sum_img, ivec2(width - idx - 1, idy));
 
-    video_color = uvec4(
-        video_color.b,
-        video_color.g,
-        video_color.r,
-        video_color.a
+    video_color_1 = uvec4(
+        video_color_1.b,
+        video_color_1.g,
+        video_color_1.r,
+        video_color_1.a
     );
 
+    video_color_2 = uvec4(
+        video_color_2.b,
+        video_color_2.g,
+        video_color_2.r,
+        video_color_2.a
+    );
 
     imageStore(
         sum_img,
         ivec2(idx, idy),
-        video_color + sum_img_color
+        video_color_2 + sum_img_color_1
+    );
+
+    imageStore(
+        sum_img,
+        ivec2(width - idx - 1, idy),
+        video_color_1 + sum_img_color_2
     );
 }

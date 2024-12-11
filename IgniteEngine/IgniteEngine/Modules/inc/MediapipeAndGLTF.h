@@ -6,6 +6,7 @@
 #include "Module.h"
 #include "Object3D.h"
 #include "Renderer.h"
+#include "DefaultRenderer.h"
 
 #include "esocket/inc/EServerSocket.h"
 //#include "InitNetworkProtocole.h"
@@ -72,8 +73,10 @@ private:
 
     std::mutex _data_mutex;
 
+    bool _is_new_data{ false };
+
     std::vector<uint8_t> _frame_data;
-    StagingBuffer<IGEBufferUsage::transfer> _recv_frame_buff;
+    StagingBuffer<IGEBufferUsage::transfer> _recv_frame_stag_buff;
     Image _recv_image;
 
     LoadedObjectInfo _red_sphere_info;
@@ -105,26 +108,26 @@ private:
     std::vector<glm::vec3> _posGlobalesMediapipe;
 
 
-    // -- HAND SHADER --
+    // -- LBS SHADER --
     GraphicShader _lbs_shader{};
     GraphicsPipeline _lbs_pipeline;
     // Buffers
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _joints_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::vertex_buffer> _weights_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _joints_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _weights_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer_lbs{};
     // Uniform buffer
-    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::storage_buffer> _joint_tr_buffer_hand{};
-    StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer_hand{};
+    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::storage_buffer> _joint_tr_buffer_lbs{};
+    StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer_lbs{};
     Sampler _sampler_hand{};
 
     glm::mat4 _camera;
 
-    // Debug shader
+    // -- Debug shader --
     GraphicShader _debug_shader;
     GraphicsPipeline _debug_pipeline;
     StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer;
@@ -134,6 +137,22 @@ private:
     StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer;
     StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer;
     StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer;
+
+    // -- HAND SHADER --
+    DefaultRenderer _fake_renderer;
+    GraphicShader _hand_shader;
+    GraphicsPipeline _hand_pipeline;
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_hand;
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _joints_hand;
+    StagingBuffer<IGEBufferUsage::vertex_buffer> _weights_hand;
+    StagingBuffer<IGEBufferUsage::index_buffer> _index_hand;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_hand;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _joint_tr_hand;
+
+    std::vector<VkSemaphore> _sem_rend_start;
+    std::vector<VkSemaphore> _sem_rend_end;
+    uint32_t _current_queue_i{0};
+    uint32_t _to_present_img_i{0};
 
 public:
     MediapipeAndGLTF();
@@ -174,5 +193,6 @@ private:
 
     void createLBSShader();
     void createDebugShader();
+    void createHandShader();
 };
 

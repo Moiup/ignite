@@ -26,12 +26,12 @@ void MediapipeAndGLTF::start() {
 	//_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_nails.gltf");
 	_hand_obj_info.loadGLTF("../../assets/3d_objects/gltf/Hand/hand_origin.gltf");
 	_hand.createFromObjectInfo(_hand_obj_info);
-	_hand.setRenderer(*DefaultConf::renderer);
-	_hand.addGraphicsPipeline(_lbs_pipeline);
+	_hand.setRenderer(_fake_renderer);
+	_hand.addGraphicsPipeline(_hand_pipeline);
 
 	_hand.setScaleLocale(glm::vec3(SCALE));
 
-	std::cout << *_hand.getSkeleton() << std::endl;
+	//std::cout << *_hand.getSkeleton() << std::endl;
 
 	_red_sphere_info.loadWavefont("../../assets/3d_objects/spheres/red_sphere.obj");
 	_blue_sphere_info.loadWavefont("../../assets/3d_objects/spheres/blue_sphere.obj");
@@ -46,8 +46,8 @@ void MediapipeAndGLTF::start() {
 
 	_hand_blue_sphere.resize(_hand.getSkeleton()->joints().size());
 	for (const Joint& j : _hand.getSkeleton()->joints()) {
-//		Joint& j = _hand.getSkeleton()->joints()[0] {
-			for (const Entity3D* child : j.getChildren()) {
+		//		Joint& j = _hand.getSkeleton()->joints()[0] {
+		for (const Entity3D* child : j.getChildren()) {
 			const Joint* cj = static_cast<const Joint*>(child);
 			_hand_blue_sphere[j.id()].addChild(&_hand_blue_sphere[cj->id()]);
 		}
@@ -76,6 +76,41 @@ void MediapipeAndGLTF::start() {
 
 	_posGlobalesMediapipe.resize(_hand.getSkeleton()->joints().size());
 
+
+	_recv_frame_stag_buff = StagingBuffer<IGEBufferUsage::transfer>(
+		DefaultConf::logical_device->getDevice(),
+		_frame_data.size() * sizeof(_frame_data[0])
+	);
+
+	//createDebugShader();
+	//createLBSShader();
+	createHandShader();
+
+	_sem_rend_start.resize(DefaultConf::NB_FRAME);
+	_sem_rend_end.resize(DefaultConf::NB_FRAME);
+
+	VkSemaphoreCreateInfo sem_info{};
+	sem_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	sem_info.pNext = nullptr;
+	sem_info.flags = 0;
+
+	for (int32_t i = 0; i < DefaultConf::NB_FRAME; ++i) {
+		vkCreateSemaphore(
+			DefaultConf::logical_device->getDevice()->getDevice(),
+			&sem_info,
+			nullptr,
+			&_sem_rend_start[i]
+		);
+
+		vkCreateSemaphore(
+			DefaultConf::logical_device->getDevice()->getDevice(),
+			&sem_info,
+			nullptr,
+			&_sem_rend_end[i]
+		);
+	}
+
+
 #if IS_NETWORK
 	_network_thread = std::thread(&MediapipeAndGLTF::networkProcess, this);
 #else
@@ -98,14 +133,6 @@ void MediapipeAndGLTF::start() {
 #endif
 
 #endif
-
-	_recv_frame_buff = StagingBuffer<IGEBufferUsage::transfer>(
-		DefaultConf::logical_device->getDevice(),
-		_frame_data.size() * sizeof(_frame_data[0])
-	);
-
-	//createDebugShader();
-	createLBSShader();
 }
 
 void MediapipeAndGLTF::update() {
@@ -114,31 +141,115 @@ void MediapipeAndGLTF::update() {
 
 	_data_mutex.lock();
 
-	_obj_tr_buffer_hand.setValues(
-		Object3D::updateTransformMatrices(*DefaultConf::renderer, _lbs_pipeline).data()
-	);
-	_joint_tr_buffer_hand.setValues(
-		Object3D::updateJointsTransform(*DefaultConf::renderer, _lbs_pipeline).data()
+	Swapchain& swapchain = *DefaultConf::swapchain;
+	std::vector<Queue>& g_queues = DefaultConf::logical_device->getQueues("graphics_queues");
+	std::vector<Queue>& p_queues = DefaultConf::logical_device->getQueues("present_queues");
+
+	_to_present_img_i = swapchain.acquireNextImage(
+		UINT64_MAX,
+		_sem_rend_start[_current_queue_i],
+		VK_NULL_HANDLE
 	);
 
-	for (uint32_t i = 0; i < mdph::NB_JOINTS_LFS; ++i) {
-		_mediapipe_red_sphere[i].setPositionLocale(_posGlobalesMediapipe[i]);
+	CommandBuffer cmd_buf = g_queues[_current_queue_i].newCommandBuffer();
+	cmd_buf.reset();
+	cmd_buf.begin();
+
+	cmd_buf.dynamicRenderingPipelineBarrier(
+		swapchain,
+		*DefaultConf::depth_buffer
+	);
+
+	VkOffset2D vk_offset2D = { 0, 0 };
+	VkExtent2D vk_extent2D = {
+		DefaultConf::render_window_width,
+		DefaultConf::render_window_height
+	};
+	VkClearColorValue clear_color_value = { 1.0, 0.0, 0.0, 1.0 };
+	cmd_buf.beginRendering(
+		clear_color_value,
+		swapchain,
+		*DefaultConf::depth_buffer,
+		vk_offset2D,
+		vk_extent2D
+	);
+
+	cmd_buf.bindPipeline(
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		_hand_pipeline.getPipeline()
+	);
+
+	std::vector<VkViewport> viewport{ _hand_pipeline.getViewport() };
+	cmd_buf.setViewport(viewport);
+	std::vector<VkRect2D> scissor{ _hand_pipeline.getScissors() };
+	cmd_buf.setScissor(scissor);
+	cmd_buf.bindDescriptorSets(
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		_hand_pipeline.getPipelineLayout(),
+		0,
+		_hand_pipeline.getDescriptorSets().size(),
+		_hand_pipeline.getDescriptorSets().data(),
+		0,
+		nullptr
+	);
+	cmd_buf.pushConstants(
+		_hand_pipeline.getPipelineLayout(),
+		_hand_shader.getPushConstantRange().stageFlags,
+		_hand_shader.getPushConstantRange().offset,
+		_hand_shader.getPushConstantRange().size,
+		_hand_pipeline.getPushConstants()
+	);
+
+	const VkDeviceSize buff_offset = { 0 };
+	cmd_buf.bindIndexBuffer(
+		_index_hand.getBuffer(),
+		buff_offset,
+		_hand_shader.getIndexBufferInfo().getIndexType()
+	);
+
+	for (const auto& vb : _hand_pipeline.getVertexBuffers()) {
+		const std::string& buf_name = vb.first;
+		const VkBuffer vertex_buffer = vb.second;
+
+		cmd_buf.bindVertexBuffer(
+			_hand_shader.getVertexBufferDescription(buf_name).binding_desc.binding,
+			1,
+			&vertex_buffer,
+			&buff_offset
+		);
 	}
 
-	for (const Joint& j : _hand.getSkeleton()->joints()) {
-		_hand_blue_sphere[j.id()].setPositionLocale(j.getPositionLocale());
-		_hand_blue_sphere[j.id()].setRotationLocale(j.getRotationLocale());
-		_hand_blue_sphere[j.id()].setScaleLocale(j.getScaleLocale());
-		_hand_blue_sphere[j.id()].alignmentMatrix() = j.alignmentMatrix();
-	}
+	cmd_buf.drawIndexed(
+		_hand.getMesh().getIndices().size(),
+		1,
+		0,
+		0,
+		0
+	);
 
-	_hand_skeleton.update();
+	cmd_buf.endRendering();
+	cmd_buf.dynamicRenderingPipelineBarrierBack(swapchain);
+	cmd_buf.end();
+
+	VkPipelineStageFlags pipeline_stage_flag = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	g_queues[_current_queue_i].submit(
+		1,
+		&_sem_rend_start[_current_queue_i],
+		&pipeline_stage_flag,
+		1,
+		&_sem_rend_end[_current_queue_i]
+	);
+
+	p_queues[_current_queue_i].present(
+		1,
+		&_sem_rend_end[_current_queue_i],
+		1,
+		&swapchain.getSwapchain(),
+		&_to_present_img_i
+	);
+	g_queues[_current_queue_i].wait();
 
 	_data_mutex.unlock();
-
-	//_obj_tr_buffer.setValues(
-	//	Object3D::updateTransformMatrices(*DefaultConf::renderer, _debug_pipeline).data()
-	//);
 }
 
 void MediapipeAndGLTF::close() {
@@ -190,25 +301,28 @@ void MediapipeAndGLTF::networkProcess() {
 		// Data to big
 		// Sometimes fails to be read in one time
 		// Therefore, loop to go through all the chunck of data
-		uint32_t fd_size = _frame_data.size() * sizeof(_frame_data[0]);
-		int32_t total_read = 0;
-		do {
-			int32_t nb_read = _mediapipe_stream.Recv(
-				fd_size - total_read,
-				reinterpret_cast<char*>(_frame_data.data() + total_read)
-			);
+		//uint32_t fd_size = _frame_data.size() * sizeof(_frame_data[0]);
+		//int32_t total_read = 0;
+		//do {
+		//	int32_t nb_read = _mediapipe_stream.Recv(
+		//		fd_size - total_read,
+		//		reinterpret_cast<char*>(_frame_data.data() + total_read)
+		//	);
 
-			if (!is_recv) {
-				std::cerr << "Problem reading frame data. Connection lost." << std::endl;
-				break;
-			}
-			total_read += nb_read;
-		} while (total_read < fd_size);
-		if (total_read < fd_size) {
-			break;
-		}
+		//	if (!is_recv) {
+		//		std::cerr << "Problem reading frame data. Connection lost." << std::endl;
+		//		break;
+		//	}
+		//	total_read += nb_read;
+		//} while (total_read < fd_size);
+		//if (total_read < fd_size) {
+		//	break;
+		//}
 
 		_data_mutex.lock();
+
+		_is_new_data = true;
+		//_recv_frame_stag_buff.setValues(_frame_data.data());
 
 		createWrist(
 			landmarks,
@@ -216,7 +330,16 @@ void MediapipeAndGLTF::networkProcess() {
 		);
 
 		retargeting(_lfs, *_hand.getSkeleton());
-	
+
+		// UPDATE THE BUFFERS HERE
+		_obj_tr_hand.setValues(
+			Object3D::updateTransformMatrices(_fake_renderer, _hand_pipeline).data()
+		);
+
+		_joint_tr_hand.setValues(
+			Object3D::updateJointsTransform(_fake_renderer, _hand_pipeline).data()
+		);
+
 		_data_mutex.unlock();
 	}
 }
@@ -590,44 +713,44 @@ void MediapipeAndGLTF::createLBSShader() {
 	//----------------------//
 	// Creating the buffers //
 	//----------------------//
-	_coord_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+	_coord_buffer_lbs = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getCoordsSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getCoords(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
-	_object_id_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+	_object_id_buffer_lbs = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getObjectIdSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getObjectId(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
-	_material_indices_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+	_material_indices_buffer_lbs = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getMaterialIndicesSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getMaterialIndices(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
-	_uv_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+	_uv_buffer_lbs = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getUVSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getUV(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
-	_joints_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+	_joints_buffer_lbs = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getJointsSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getJoints(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
-	_weights_buffer_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+	_weights_buffer_lbs = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getWeightsSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getWeights(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
 	// Index buffer
-	_index_buffer_hand = StagingBuffer<IGEBufferUsage::index_buffer>(
+	_index_buffer_lbs = StagingBuffer<IGEBufferUsage::index_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getIndicesSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getIndices(*DefaultConf::renderer, _lbs_pipeline).data()
@@ -636,21 +759,21 @@ void MediapipeAndGLTF::createLBSShader() {
 
 	// Storage Buffers
 	// transform
-	_obj_tr_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
+	_obj_tr_buffer_lbs = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getTransformMatricesSize(*DefaultConf::renderer, _lbs_pipeline),
-		&Object3D::getTransformMatrices(*DefaultConf::renderer, _lbs_pipeline)[0][0]
+		Object3D::getTransformMatrices(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
 	// Joint transform
-	_joint_tr_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
+	_joint_tr_buffer_lbs = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getJointsTransformSize(*DefaultConf::renderer, _lbs_pipeline),
-		&Object3D::getJointsTransform(*DefaultConf::renderer, _lbs_pipeline)[0][0]
+		Object3D::getJointsTransform(*DefaultConf::renderer, _lbs_pipeline).data()
 	);
 
 	// materials
-	_materials_buffer_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
+	_materials_buffer_lbs = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		Object3D::getMaterialsSize(*DefaultConf::renderer, _lbs_pipeline),
 		Object3D::getMaterials(*DefaultConf::renderer, _lbs_pipeline).data()
@@ -676,16 +799,16 @@ void MediapipeAndGLTF::createLBSShader() {
 
 	// Push Constant
 	_lbs_pipeline.setPushConstants(&_camera[0][0]);
-	_lbs_pipeline.setVertexBuffer("coord", _coord_buffer_hand);
-	_lbs_pipeline.setVertexBuffer("object_id", _object_id_buffer_hand);
-	_lbs_pipeline.setVertexBuffer("material_id", _material_indices_buffer_hand);
-	_lbs_pipeline.setVertexBuffer("uv", _uv_buffer_hand);
-	_lbs_pipeline.setVertexBuffer("joints", _joints_buffer_hand);
-	_lbs_pipeline.setVertexBuffer("weights", _weights_buffer_hand);
-	_lbs_pipeline.setIndexBuffer(_index_buffer_hand);
-	_lbs_pipeline.setStorageBuffer("obj_tr", _obj_tr_buffer_hand);
-	_lbs_pipeline.setStorageBuffer("joint_tr", _joint_tr_buffer_hand);
-	_lbs_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer_hand);
+	_lbs_pipeline.setVertexBuffer("coord", _coord_buffer_lbs);
+	_lbs_pipeline.setVertexBuffer("object_id", _object_id_buffer_lbs);
+	_lbs_pipeline.setVertexBuffer("material_id", _material_indices_buffer_lbs);
+	_lbs_pipeline.setVertexBuffer("uv", _uv_buffer_lbs);
+	_lbs_pipeline.setVertexBuffer("joints", _joints_buffer_lbs);
+	_lbs_pipeline.setVertexBuffer("weights", _weights_buffer_lbs);
+	_lbs_pipeline.setIndexBuffer(_index_buffer_lbs);
+	_lbs_pipeline.setStorageBuffer("obj_tr", _obj_tr_buffer_lbs);
+	_lbs_pipeline.setStorageBuffer("joint_tr", _joint_tr_buffer_lbs);
+	_lbs_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer_lbs);
 	_lbs_pipeline.setSamplers("samp", { &_sampler_hand });
 	// Textures
 	_lbs_pipeline.setTextures2D(
@@ -819,4 +942,111 @@ void MediapipeAndGLTF::createDebugShader() {
 	_debug_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer);
 
 	_debug_pipeline.update();
+}
+
+void MediapipeAndGLTF::createHandShader() {
+	_hand_shader = GraphicShader(
+		*DefaultConf::logical_device->getDevice(),
+		"../../shaders/hand/vert.vert",
+		"../../shaders/hand/frag.frag"
+	);
+
+	_hand_shader.configureVertexBuffer(
+		"coord",
+		0,
+		VK_FORMAT_R32G32B32_SFLOAT,
+		Object3D::getCoordsStride(_fake_renderer, _hand_pipeline)
+	);
+
+	_hand_shader.configureVertexBuffer(
+		"joints",
+		1,
+		VK_FORMAT_R32G32B32A32_UINT,
+		Object3D::getJointsStride(_fake_renderer, _hand_pipeline)
+	);
+
+	_hand_shader.configureVertexBuffer(
+		"weights",
+		2,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		Object3D::getWeightsStride(_fake_renderer, _hand_pipeline)
+	);
+
+	_hand_shader.configureIndexBuffer(
+		Object3D::getIndicesNbElem(_fake_renderer, _hand_pipeline)
+	);
+
+	_hand_shader.configurePushConstant(
+		VK_SHADER_STAGE_VERTEX_BIT,
+		0,
+		sizeof(_camera)
+	);
+
+	_hand_shader.configureStorageBuffer(
+		"obj_tr",
+		1,
+		VK_SHADER_STAGE_VERTEX_BIT
+	);
+
+	_hand_shader.configureStorageBuffer(
+		"joint_tr",
+		2,
+		VK_SHADER_STAGE_VERTEX_BIT
+	);
+
+	_coord_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getCoordsSize(_fake_renderer, _hand_pipeline),
+		Object3D::getCoords(_fake_renderer, _hand_pipeline).data()
+	);
+
+	_joints_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getJointsSize(_fake_renderer, _hand_pipeline),
+		Object3D::getJoints(_fake_renderer, _hand_pipeline).data()
+	);
+
+	_weights_hand = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getWeightsSize(_fake_renderer, _hand_pipeline),
+		Object3D::getWeights(_fake_renderer, _hand_pipeline).data()
+	);
+
+	_index_hand = StagingBuffer<IGEBufferUsage::index_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getIndicesSize(_fake_renderer, _hand_pipeline),
+		Object3D::getIndices(_fake_renderer, _hand_pipeline).data()
+	);
+
+	_obj_tr_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getTransformMatricesSize(_fake_renderer, _hand_pipeline),
+		Object3D::getTransformMatrices(_fake_renderer, _hand_pipeline).data()
+	);
+
+	_joint_tr_hand = StagingBuffer<IGEBufferUsage::storage_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		Object3D::getJointsTransformSize(_fake_renderer, _hand_pipeline),
+		Object3D::getJointsTransform(_fake_renderer, _hand_pipeline).data()
+	);
+
+	GraphicsPipelineConfiguration conf = DefaultConf::configuration;
+	conf.polygon_mode = VK_POLYGON_MODE_LINE;
+	conf.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	conf.line_width = 1.0;
+	_hand_pipeline = GraphicsPipeline(
+		_hand_shader,
+		conf
+	);
+
+	_camera = DefaultConf::camera->getMVPC();
+	_hand_pipeline.setPushConstants(&_camera[0][0]);
+	_hand_pipeline.setVertexBuffer("coord", _coord_hand);
+	_hand_pipeline.setVertexBuffer("joints", _joints_hand);
+	_hand_pipeline.setVertexBuffer("weights", _weights_hand);
+	_hand_pipeline.setIndexBuffer(_index_hand);
+	_hand_pipeline.setStorageBuffer("obj_tr", _obj_tr_hand);
+	_hand_pipeline.setStorageBuffer("joint_tr", _joint_tr_hand);
+
+	_hand_pipeline.update();
 }

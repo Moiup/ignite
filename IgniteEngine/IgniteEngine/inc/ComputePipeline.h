@@ -8,6 +8,7 @@ class ComputePipeline : public Pipeline
 
 public:
 	ComputePipeline();
+	ComputePipeline(ComputeShader& shader);
 
 	ComputeShader* getShader();
 

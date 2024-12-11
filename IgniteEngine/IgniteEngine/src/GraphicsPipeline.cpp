@@ -58,6 +58,10 @@ const VkRect2D& GraphicsPipeline::getScissors() const {
 	return _pipeline_conf.scissor;
 }
 
+const GraphicsPipelineConfiguration& GraphicsPipeline::configuration() const {
+	return _pipeline_conf;
+}
+
 void GraphicsPipeline::createPipeline() {
 	//---- Vertex Input State (22.2)----//
 	std::vector<VkVertexInputBindingDescription> vertex_input_binding_desc_arr = {};

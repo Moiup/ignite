@@ -54,6 +54,8 @@ public:
 	const VkViewport& getViewport() const;
 	const VkRect2D& getScissors() const;
 
+	const GraphicsPipelineConfiguration& configuration() const;
+
 private:
 	void createPipeline();
 };

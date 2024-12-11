@@ -5,8 +5,11 @@ ComputeShader::ComputeShader() :
 {
 
 }
-ComputeShader::ComputeShader(std::string compute_shader) :
-	ComputeShader::ComputeShader()
+ComputeShader::ComputeShader(
+	Device& device,
+	std::string compute_shader
+) :
+	Shader::Shader(device)
 {
 	read(compute_shader);
 }

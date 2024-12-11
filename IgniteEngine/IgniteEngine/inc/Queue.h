@@ -5,6 +5,7 @@
 #include "CommandBuffer.h"
 #include "Buffer.h"
 #include "Image.h"
+#include "ComputePipeline.h"
 #include <vector>
 #include <list>
 #include <unordered_map>
@@ -88,6 +89,13 @@ public:
 		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	void dispatch(
+		ComputePipeline& cp,
+		uint32_t group_count_x,	
+		uint32_t group_count_y,	
+		uint32_t group_count_z	
 	);
 
 	void flush();

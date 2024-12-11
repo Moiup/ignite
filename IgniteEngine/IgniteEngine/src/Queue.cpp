@@ -161,6 +161,45 @@ void Queue::changeLayout(
 	cmd.end();
 }
 
+void Queue::dispatch(
+	ComputePipeline& cp,
+	uint32_t group_count_x,
+	uint32_t group_count_y,
+	uint32_t group_count_z
+) {
+	CommandBuffer cmd_buf = newCommandBuffer();
+	
+	cmd_buf.begin();
+
+	cmd_buf.bindPipeline(
+		VK_PIPELINE_BIND_POINT_COMPUTE,
+		cp.getPipeline()
+	);
+	cmd_buf.bindDescriptorSets(
+		VK_PIPELINE_BIND_POINT_COMPUTE,
+		cp.getPipelineLayout(),
+		0,
+		cp.getDescriptorSets().size(),
+		cp.getDescriptorSets().data(),
+		0,
+		nullptr
+	);
+	cmd_buf.pushConstants(
+		cp.getPipelineLayout(),
+		cp.getShader()->getPushConstantRange().stageFlags,
+		cp.getShader()->getPushConstantRange().offset,
+		cp.getShader()->getPushConstantRange().size,
+		cp.getPushConstants()
+	);
+	cmd_buf.dispatch(
+		group_count_x,
+		group_count_y,
+		group_count_z
+	);
+
+	cmd_buf.end();
+}
+
 void Queue::flush() {
 	VkSubmitInfo info{};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

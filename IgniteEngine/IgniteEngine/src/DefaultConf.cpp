@@ -20,7 +20,9 @@ CameraScene* DefaultConf::camera;
 Queue* DefaultConf::graphics_queue;
 Queue* DefaultConf::present_queue;
 Queue* DefaultConf::compute_queue;
+Swapchain* DefaultConf::swapchain;
 Texture2D* DefaultConf::white_texture;
+DepthBuffer* DefaultConf::depth_buffer;
 float DefaultConf::delta_time; // ms
 SDL_Event* DefaultConf::event;
 

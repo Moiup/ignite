@@ -34,7 +34,9 @@ public:
 	static Queue* graphics_queue;
 	static Queue* present_queue;
 	static Queue* compute_queue;
+	static Swapchain* swapchain;
 	static Texture2D* white_texture;
+	static DepthBuffer* depth_buffer;
 	static float delta_time; // ms
 	static SDL_Event* event;
 

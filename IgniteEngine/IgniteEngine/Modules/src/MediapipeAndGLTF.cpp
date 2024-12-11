@@ -279,36 +279,12 @@ void MediapipeAndGLTF::update() {
 	);
 
 	// Compute buffer here
-	CommandBuffer cmd_sum = c_queue.newCommandBuffer();
-	cmd_sum.begin();
-	cmd_sum.bindPipeline(
-		VK_PIPELINE_BIND_POINT_COMPUTE,
-		_image_sum_pipeline.getPipeline()
-	);
-	cmd_sum.bindDescriptorSets(
-		VK_PIPELINE_BIND_POINT_COMPUTE,
-		_image_sum_pipeline.getPipelineLayout(),
-		0,
-		_image_sum_pipeline.getDescriptorSets().size(),
-		_image_sum_pipeline.getDescriptorSets().data(),
-		0,
-		nullptr
-	);
-	cmd_sum.pushConstants(
-		_image_sum_pipeline.getPipelineLayout(),
-		_image_sum_shader.getPushConstantRange().stageFlags,
-		_image_sum_shader.getPushConstantRange().offset,
-		_image_sum_shader.getPushConstantRange().size,
-		_image_sum_pipeline.getPushConstants()
-	);
-	 
-	cmd_sum.dispatch(
+	c_queue.dispatch(
+		_image_sum_pipeline,
 		(_video_img.getWidth() / 16) + 1,
 		(_video_img.getHeight() / 16) + 1,
 		1
 	);
-
-	cmd_sum.end();
 
 	VkPipelineStageFlags pipeline_comp_stage_flag = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 	c_queue.submitNoFence(

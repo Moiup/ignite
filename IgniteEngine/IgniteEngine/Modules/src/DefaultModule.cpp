@@ -89,7 +89,8 @@ void DefaultModule::init() {
 
 	DefaultConf::camera = &_camera;
 	DefaultConf::white_texture = &_white_texture;
-
+	DefaultConf::swapchain = &_swapchain;
+	DefaultConf::depth_buffer = &_depth_buffer;
 	DefaultConf::coord_buffer = &_coord_buffer;
 	DefaultConf::index_buffer = &_index_buffer;
 	DefaultConf::uv_buffer = &_uv_buffer;
@@ -339,7 +340,7 @@ void DefaultModule::update() {
 		Object3D::updateTransformMatrices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
 
-	DefaultConf::renderer->render();
+	//DefaultConf::renderer->render();
 }
 
 void DefaultModule::close() {

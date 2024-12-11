@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Device.h"
-#include "Queue.h"
 #include "Image.h"
 #include "PhysicalDevice.h"
 #include "Pixels.h"

@@ -301,7 +301,7 @@ void MediapipeAndGLTF::update() {
 		_image_sum_shader.getPushConstantRange().size,
 		_image_sum_pipeline.getPushConstants()
 	);
-
+	 
 	cmd_sum.dispatch(
 		(_video_img.getWidth() / 16) + 1,
 		(_video_img.getHeight() / 16) + 1,
@@ -427,6 +427,8 @@ void MediapipeAndGLTF::networkProcess() {
 		);
 
 		retargeting(_lfs, *_hand.getSkeleton());
+
+		_hand.setPositionLocale(landmarks._landmarks[0][0] * 30.0f);
 
 		// UPDATE THE BUFFERS HERE
 		_obj_tr_hand.setValues(

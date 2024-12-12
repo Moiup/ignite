@@ -178,85 +178,28 @@ void MediapipeAndGLTF::update() {
 		VK_NULL_HANDLE
 	);
 
-	CommandBuffer cmd_buf = g_queue.newCommandBuffer();
-	cmd_buf.reset();
-	cmd_buf.begin();
-
-	cmd_buf.dynamicRenderingPipelineBarrier(
-		swapchain,
-		*DefaultConf::depth_buffer
-	);
-
 	VkOffset2D vk_offset2D = { 0, 0 };
 	VkExtent2D vk_extent2D = {
 		DefaultConf::render_window_width,
 		DefaultConf::render_window_height
 	};
-	VkClearColorValue clear_color_value = { 0.0, 0.0, 0.0, 1.0 };
-	cmd_buf.beginRendering(
-		clear_color_value,
+
+	g_queue.beginRendering(
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
 		swapchain,
 		*DefaultConf::depth_buffer,
 		vk_offset2D,
 		vk_extent2D
 	);
-
-	cmd_buf.bindPipeline(
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		_hand_pipeline.getPipeline()
-	);
-
-	std::vector<VkViewport> viewport{ _hand_pipeline.getViewport() };
-	cmd_buf.setViewport(viewport);
-	std::vector<VkRect2D> scissor{ _hand_pipeline.getScissors() };
-	cmd_buf.setScissor(scissor);
-	cmd_buf.bindDescriptorSets(
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		_hand_pipeline.getPipelineLayout(),
-		0,
-		_hand_pipeline.getDescriptorSets().size(),
-		_hand_pipeline.getDescriptorSets().data(),
-		0,
-		nullptr
-	);
-	cmd_buf.pushConstants(
-		_hand_pipeline.getPipelineLayout(),
-		_hand_shader.getPushConstantRange().stageFlags,
-		_hand_shader.getPushConstantRange().offset,
-		_hand_shader.getPushConstantRange().size,
-		_hand_pipeline.getPushConstants()
-	);
-
-	const VkDeviceSize buff_offset = { 0 };
-	cmd_buf.bindIndexBuffer(
-		_index_hand.getBuffer(),
-		buff_offset,
-		_hand_shader.getIndexBufferInfo().getIndexType()
-	);
-
-	for (const auto& vb : _hand_pipeline.getVertexBuffers()) {
-		const std::string& buf_name = vb.first;
-		const VkBuffer vertex_buffer = vb.second;
-
-		cmd_buf.bindVertexBuffer(
-			_hand_shader.getVertexBufferDescription(buf_name).binding_desc.binding,
-			1,
-			&vertex_buffer,
-			&buff_offset
-		);
-	}
-
-	cmd_buf.drawIndexed(
+	g_queue.bindPipeline(_hand_pipeline);
+	g_queue.drawIndexed(
 		_hand.getMesh().getIndices().size(),
 		1,
 		0,
 		0,
 		0
 	);
-
-	cmd_buf.endRendering();
-	cmd_buf.dynamicRenderingPipelineBarrierBack(swapchain);
-	cmd_buf.end();
+	g_queue.endRendering(swapchain);
 
 	VkPipelineStageFlags pipeline_vert_stage_flag = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	g_queue.submit(

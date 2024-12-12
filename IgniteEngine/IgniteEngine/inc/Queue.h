@@ -98,6 +98,23 @@ public:
 		uint32_t group_count_z	
 	);
 
+	void begineRendering(
+		glm::vec4& clear_color_value,
+		Swapchain& swapchain,
+		DepthBuffer& depth_buffer,
+		VkOffset2D& offset,
+		VkExtent2D& extent
+	);
+	void bindPipeline(GraphicsPipeline& gp);
+	void drawIndexed(
+		uint32_t index_count,
+		uint32_t instance_count,
+		uint32_t first_index,
+		uint32_t vertex_offset,
+		uint32_t first_instance
+	);
+	void endRendering(Swapchain& swapchain);
+
 	void flush();
 
 	const void submit(

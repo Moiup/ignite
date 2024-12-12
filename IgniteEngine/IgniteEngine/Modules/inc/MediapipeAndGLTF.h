@@ -62,6 +62,7 @@ namespace mdph {
     struct ImgSumPC {
         uint32_t width;
         uint32_t height;
+        float intensity{ 1.0f };
     };
 }
 
@@ -211,5 +212,7 @@ private:
     void createDebugShader();
     void createHandShader();
     void createCompImageSumShader();
+
+    void menu();
 };
 

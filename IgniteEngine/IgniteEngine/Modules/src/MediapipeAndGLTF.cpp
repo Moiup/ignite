@@ -158,15 +158,15 @@ void MediapipeAndGLTF::start() {
 void MediapipeAndGLTF::update() {
 	Module::update();
 	_camera = DefaultConf::camera->getMVPC();
-
-	_data_mutex.lock();
+	
+	menu();
 
 	Swapchain& swapchain = *DefaultConf::swapchain;
 	Queue& g_queue = DefaultConf::logical_device->getQueues("graphics_queues")[0];
 	Queue& p_queue = DefaultConf::logical_device->getQueues("present_queues")[0];
 	Queue& c_queue = DefaultConf::logical_device->getQueues("compute_queues")[0];
 
-
+	_data_mutex.lock();
 	c_queue.copy(_recv_frame_stag_buff, _video_img);
 	c_queue.submit();
 	c_queue.wait();
@@ -1148,4 +1148,20 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 	_image_sum_pipeline.setPushConstants(&_img_sum_pc);
 	
 	_image_sum_pipeline.update();
+}
+
+void MediapipeAndGLTF::menu() {
+	static bool is_first_loop = true;
+
+	if (is_first_loop) {
+		ImGui::SetNextWindowPos({ 300, 50 });
+		ImGui::SetNextWindowSize({ 250, 250 });
+		is_first_loop = false;
+	}
+	ImGui::Begin("Background Manager");
+
+	ImGui::Text("Display background");
+	ImGui::SliderFloat("Intensity", &_img_sum_pc.intensity, 0, 1.0f);
+
+	ImGui::End();
 }

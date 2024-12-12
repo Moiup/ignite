@@ -8,6 +8,7 @@ layout (binding = 2, rgba8ui) writeonly uniform uimage2D sum_img;
 layout(push_constant, std430) uniform pc {
     uint width;
     uint height;
+    float intensity;
 };
 
 layout(local_size_x = 16, local_size_y = 16) in;
@@ -22,11 +23,13 @@ void main(){
     const uint width_half = width / 2;
 
     uvec4 video_img_color = imageLoad(video_img, ivec2(width - idx - 1, idy));
+    vec4 bg_intensity = vec4(video_img_color) * intensity;
+        
     video_img_color = uvec4(
-        video_img_color.b,
-        video_img_color.g,
-        video_img_color.r,
-        video_img_color.a
+        bg_intensity.b,
+        bg_intensity.g,
+        bg_intensity.r,
+        bg_intensity.a
     );
 
     uvec4 rendered_img_color = imageLoad(rendered_img, ivec2(idx, idy));

@@ -6,6 +6,7 @@
 #include "Buffer.h"
 #include "Image.h"
 #include "ComputePipeline.h"
+#include "GraphicsPipeline.h"
 #include <vector>
 #include <list>
 #include <unordered_map>
@@ -33,6 +34,7 @@ private:
 
 	std::list<CommandPool>* _command_pools{nullptr};
 	std::vector<VkCommandBuffer>* _pending_command_buffers{nullptr};
+
 	int32_t* _shared_count{nullptr};
 
 public:

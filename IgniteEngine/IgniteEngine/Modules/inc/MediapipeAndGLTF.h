@@ -166,6 +166,7 @@ private:
     ComputeShader _image_sum_shader;
     ComputePipeline _image_sum_pipeline;
     Texture2D _video_img;
+    Texture2D _rendered_img;
     Texture2D _sum_img;
     mdph::ImgSumPC _img_sum_pc;
 

@@ -171,7 +171,6 @@ void MediapipeAndGLTF::update() {
 	c_queue.submit();
 	c_queue.wait();
 
-
 	_to_present_img_i = swapchain.acquireNextImage(
 		UINT64_MAX,
 		_sem_rend_start[_current_queue_i],
@@ -185,7 +184,7 @@ void MediapipeAndGLTF::update() {
 	};
 
 	g_queue.beginRendering(
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 		swapchain,
 		*DefaultConf::depth_buffer,
 		vk_offset2D,
@@ -210,15 +209,10 @@ void MediapipeAndGLTF::update() {
 		&_sem_rend_end[_current_queue_i]
 	);
 
-	std::vector<Texture2D*> video_img = { &_video_img };
-	std::vector<Texture2D*> sum_img = { &_sum_img };
-	_image_sum_pipeline.setTextures2D("video", video_img);
-	_image_sum_pipeline.setTextures2D("swapchain", sum_img);
-	_image_sum_pipeline.update();
-
+	// Copying the rendered image from the swapchain
 	c_queue.copy(
 		swapchain.getCurrentImage(),
-		_sum_img
+		_rendered_img
 	);
 
 	// Compute buffer here
@@ -238,6 +232,7 @@ void MediapipeAndGLTF::update() {
 		&_sem_comp_sum_end[_current_queue_i]
 	);
 
+	// Result is in _sum img, copying to swapchain image to display it
 	c_queue.copy(
 		_sum_img,
 		swapchain.getCurrentImage()
@@ -1076,15 +1071,22 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 	);
 
 	_image_sum_shader.configureStorageTexture2D(
-		"video",
+		"video_img",
 		0,
 		VK_SHADER_STAGE_COMPUTE_BIT,
 		1
 	);
 
 	_image_sum_shader.configureStorageTexture2D(
-		"swapchain",
+		"rendered_img",
 		1,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		1
+	);
+
+	_image_sum_shader.configureStorageTexture2D(
+		"sum_img",
+		2,
 		VK_SHADER_STAGE_COMPUTE_BIT,
 		1
 	);
@@ -1104,6 +1106,13 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 		IGEImgFormat::r8g8b8a8_uint
 	);
 
+	_rendered_img = Texture2D(
+		DefaultConf::logical_device->getDevice(),
+		DefaultConf::render_window_width,
+		DefaultConf::render_window_height,
+		IGEImgFormat::r8g8b8a8_uint
+	);
+
 	_sum_img = Texture2D(
 		DefaultConf::logical_device->getDevice(),
 		DefaultConf::render_window_width,
@@ -1117,6 +1126,11 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 	);
 
 	DefaultConf::graphics_queue->changeLayout(
+		_rendered_img,
+		VK_IMAGE_LAYOUT_GENERAL
+	);
+
+	DefaultConf::graphics_queue->changeLayout(
 		_sum_img,
 		VK_IMAGE_LAYOUT_GENERAL
 	);
@@ -1125,7 +1139,12 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 
 	_image_sum_pipeline = ComputePipeline(_image_sum_shader);
 	
-	
+	std::vector<Texture2D*> video_img = { &_video_img };
+	std::vector<Texture2D*> rendered_img = { &_rendered_img };
+	std::vector<Texture2D*> sum_img = { &_sum_img };
+	_image_sum_pipeline.setTextures2D("video_img", video_img);
+	_image_sum_pipeline.setTextures2D("rendered_img", rendered_img);
+	_image_sum_pipeline.setTextures2D("sum_img", sum_img);
 	_image_sum_pipeline.setPushConstants(&_img_sum_pc);
 	
 	_image_sum_pipeline.update();

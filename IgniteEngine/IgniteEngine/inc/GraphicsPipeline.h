@@ -52,9 +52,12 @@ public:
 	const VkBuffer getIndexBuffer() const;
 
 	const VkViewport& getViewport() const;
+	VkViewport& getViewport();
 	const VkRect2D& getScissors() const;
+	VkRect2D& getScissors();
 
 	const GraphicsPipelineConfiguration& configuration() const;
+	const GraphicShader& getShader() const;
 
 private:
 	void createPipeline();

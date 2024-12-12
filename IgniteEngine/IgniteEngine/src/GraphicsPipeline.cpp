@@ -54,12 +54,24 @@ const VkViewport& GraphicsPipeline::getViewport() const {
 	return _pipeline_conf.viewport;
 }
 
+VkViewport& GraphicsPipeline::getViewport() {
+	return _pipeline_conf.viewport;
+}
+
 const VkRect2D& GraphicsPipeline::getScissors() const {
+	return _pipeline_conf.scissor;
+}
+
+VkRect2D& GraphicsPipeline::getScissors() {
 	return _pipeline_conf.scissor;
 }
 
 const GraphicsPipelineConfiguration& GraphicsPipeline::configuration() const {
 	return _pipeline_conf;
+}
+
+const GraphicShader& GraphicsPipeline::getShader() const {
+	return *static_cast<GraphicShader*>(_shader);
 }
 
 void GraphicsPipeline::createPipeline() {

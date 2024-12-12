@@ -1,8 +1,9 @@
 #version 450
 #extension GL_EXT_scalar_block_layout : enable
 
-layout (binding = 0, rgba8ui) readonly uniform uimage2D video;
-layout (binding = 1, rgba8ui) uniform uimage2D sum_img;
+layout (binding = 0, rgba8ui) readonly uniform uimage2D video_img;
+layout (binding = 1, rgba8ui) readonly uniform uimage2D rendered_img;
+layout (binding = 2, rgba8ui) writeonly uniform uimage2D sum_img;
 
 layout(push_constant, std430) uniform pc {
     uint width;
@@ -14,39 +15,26 @@ void main(){
     const uint idx = gl_GlobalInvocationID.x;
     const uint idy = gl_GlobalInvocationID.y;
 
-    const uint width_half = width / 2;
-    if((idx >= width_half) || (idy >= height)){
+    if((idx >= width) || (idy >= height)){
         return;
     }
 
-    uvec4 video_color_1 = imageLoad(video, ivec2(idx, idy));
-    uvec4 video_color_2 = imageLoad(video, ivec2(width - idx - 1, idy));
-    uvec4 sum_img_color_1 = imageLoad(sum_img, ivec2(idx, idy));
-    uvec4 sum_img_color_2 = imageLoad(sum_img, ivec2(width - idx - 1, idy));
+    const uint width_half = width / 2;
 
-    video_color_1 = uvec4(
-        video_color_1.b,
-        video_color_1.g,
-        video_color_1.r,
-        video_color_1.a
+    uvec4 video_img_color = imageLoad(video_img, ivec2(width - idx - 1, idy));
+    video_img_color = uvec4(
+        video_img_color.b,
+        video_img_color.g,
+        video_img_color.r,
+        video_img_color.a
     );
 
-    video_color_2 = uvec4(
-        video_color_2.b,
-        video_color_2.g,
-        video_color_2.r,
-        video_color_2.a
-    );
+    uvec4 rendered_img_color = imageLoad(rendered_img, ivec2(idx, idy));
+    uvec4 sum_res = video_img_color + rendered_img_color;
 
     imageStore(
         sum_img,
         ivec2(idx, idy),
-        video_color_2 + sum_img_color_1
-    );
-
-    imageStore(
-        sum_img,
-        ivec2(width - idx - 1, idy),
-        video_color_1 + sum_img_color_2
+        sum_res
     );
 }

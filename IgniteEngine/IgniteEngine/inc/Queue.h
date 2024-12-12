@@ -100,7 +100,7 @@ public:
 		uint32_t group_count_z	
 	);
 
-	void begineRendering(
+	void beginRendering(
 		glm::vec4& clear_color_value,
 		Swapchain& swapchain,
 		DepthBuffer& depth_buffer,

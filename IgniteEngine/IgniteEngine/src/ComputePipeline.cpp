@@ -13,7 +13,7 @@ ComputePipeline::ComputePipeline(ComputeShader& shader) :
 }
 
 ComputeShader* ComputePipeline::getShader() {
-	return (ComputeShader*)_shader;
+	return static_cast<ComputeShader*>(_shader);
 }
 
 void ComputePipeline::createPipeline() {

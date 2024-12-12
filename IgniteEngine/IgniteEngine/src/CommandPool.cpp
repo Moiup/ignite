@@ -7,7 +7,8 @@ CommandPool::CommandPool() :
 	_family_index{},
 	_shared_count{nullptr}
 {
-	_command_buffers = new std::vector<VkCommandBuffer>;
+	_vk_cmd_buffs = new std::vector<VkCommandBuffer>;
+	_cmd_buffs = new std::vector<CommandBuffer>;
 	_shared_count = new int(1);
 }
 
@@ -21,7 +22,8 @@ CommandPool& CommandPool::operator=(const CommandPool& cp) {
 	_device = { cp._device };
 	_flags = { cp._flags };
 	_family_index = { cp._family_index };
-	_command_buffers = { cp._command_buffers };
+	_vk_cmd_buffs = { cp._vk_cmd_buffs };
+	_cmd_buffs = { cp._cmd_buffs };
 	_shared_count = { cp._shared_count };
 	*_shared_count += 1;
 
@@ -71,7 +73,7 @@ void CommandPool::create() {
 }
 
 void CommandPool::reset() {
-	if (_command_buffers->empty()) {
+	if (_vk_cmd_buffs->empty()) {
 		return;
 	}
 
@@ -88,7 +90,7 @@ const VkCommandPool& CommandPool::getPool() const {
 }
 
 CommandBuffer& CommandPool::newCommandBuffer() {
-	VkCommandBuffer cmd_buf{ nullptr };
+	VkCommandBuffer vk_cmd_buf{ nullptr };
 	VkCommandBufferAllocateInfo info{};
 	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	info.pNext = nullptr;
@@ -99,18 +101,24 @@ CommandBuffer& CommandPool::newCommandBuffer() {
 	VkResult vk_result = vkAllocateCommandBuffers(
 		_device->getDevice(),
 		&info,
-		&cmd_buf
+		&vk_cmd_buf
 	);
 
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed allocating command buffer!");
 	}
 
-	CommandBuffer command_buffer;
-	command_buffer._command_buffer = cmd_buf;
-	_command_buffers->push_back(cmd_buf);
+	CommandBuffer cmd_buf;
+	cmd_buf._command_buffer = vk_cmd_buf;
+	cmd_buf._level = info.level;
+	_vk_cmd_buffs->push_back(vk_cmd_buf);
+	_cmd_buffs->push_back(cmd_buf);
 
-	return command_buffer;
+	return _cmd_buffs->back();
+}
+
+std::vector<CommandBuffer>& CommandPool::commandBuffers() {
+	return *_cmd_buffs;
 }
 
 void CommandPool::destroy() {
@@ -120,7 +128,8 @@ void CommandPool::destroy() {
 
 	reset();
 	
-	delete _command_buffers;
+	delete _vk_cmd_buffs;
+	delete _cmd_buffs;
 
 	vkDestroyCommandPool(
 		_device->getDevice(),
@@ -133,8 +142,9 @@ void CommandPool::resetCommandBuffers() {
 	vkFreeCommandBuffers(
 		_device->getDevice(),
 		_pool,
-		_command_buffers->size(),
-		_command_buffers->data()
+		_vk_cmd_buffs->size(),
+		_vk_cmd_buffs->data()
 	);
-	_command_buffers->clear();
+	_vk_cmd_buffs->clear();
+	_cmd_buffs->clear();
 }

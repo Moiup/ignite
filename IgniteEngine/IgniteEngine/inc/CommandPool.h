@@ -15,7 +15,8 @@ private:
 	VkCommandPoolCreateFlagBits _flags;
 	uint32_t _family_index;
 
-	std::vector<VkCommandBuffer>* _command_buffers;
+	std::vector<VkCommandBuffer>* _vk_cmd_buffs;
+	std::vector<CommandBuffer>* _cmd_buffs;
 	int32_t* _shared_count{nullptr};
 
 public:
@@ -35,7 +36,7 @@ public:
 	const VkCommandPool& getPool() const;
 
 	CommandBuffer& newCommandBuffer();
-
+	std::vector<CommandBuffer>& commandBuffers();
 
 private:
 	void destroy();

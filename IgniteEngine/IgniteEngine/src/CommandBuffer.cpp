@@ -91,12 +91,30 @@ void CommandBuffer::setViewport(std::vector<VkViewport>& viewport_arr) {
 	);
 }
 
+void CommandBuffer::setViewport(VkViewport* p_viewport, uint32_t count) {
+	vkCmdSetViewport(
+		_command_buffer,
+		0,
+		count,
+		p_viewport
+	);
+}
+
 void CommandBuffer::setScissor(std::vector<VkRect2D>& scissor_arr) {
 	vkCmdSetScissor(
 		_command_buffer,
 		0,
 		scissor_arr.size(),
 		scissor_arr.data()
+	);
+}
+
+void CommandBuffer::setScissor(VkRect2D* p_scissor, uint32_t count) {
+	vkCmdSetScissor(
+		_command_buffer,
+		0,
+		count,
+		p_scissor
 	);
 }
 

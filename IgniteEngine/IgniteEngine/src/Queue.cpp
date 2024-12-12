@@ -90,7 +90,7 @@ std::vector<VkCommandBuffer>& Queue::getPendingCommandBuffers() {
 }
 
 CommandBuffer& Queue::newCommandBuffer() {
-	CommandBuffer cmd_buf = _command_pool.newCommandBuffer();
+	CommandBuffer& cmd_buf = _command_pool.newCommandBuffer();
 	_pending_command_buffers->push_back(cmd_buf.getCommandBuffer());
 	getNbPendingCommandBuffers() += 1;
 	return cmd_buf;
@@ -197,6 +197,111 @@ void Queue::dispatch(
 		group_count_z
 	);
 
+	cmd_buf.end();
+}
+
+void Queue::begineRendering(
+	glm::vec4& clear_color_value,
+	Swapchain& swapchain,
+	DepthBuffer& depth_buffer,
+	VkOffset2D& offset,
+	VkExtent2D& extent
+) {
+	CommandBuffer cmd_buf = newCommandBuffer();
+
+	cmd_buf.reset();
+	cmd_buf.begin();
+
+	VkClearColorValue ccv = {
+		clear_color_value.x,
+		clear_color_value.y,
+		clear_color_value.z
+	};
+	cmd_buf.beginRendering(
+		ccv,
+		swapchain,
+		depth_buffer,
+		offset,
+		extent
+	);
+}
+
+void Queue::bindPipeline(GraphicsPipeline& gp) {
+	CommandBuffer cmd_buf = _command_pool.commandBuffers().back();
+
+	cmd_buf.bindPipeline(
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		gp.getPipeline()
+	);
+	cmd_buf.setViewport(
+		&gp.getViewport(),
+		1
+	);
+	cmd_buf.setScissor(
+		&gp.getScissors(),
+		1
+	);
+
+	cmd_buf.bindDescriptorSets(
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		gp.getPipelineLayout(),
+		0,
+		gp.getDescriptorSets().size(),
+		gp.getDescriptorSets().data(),
+		0,
+		nullptr
+	);
+
+	cmd_buf.pushConstants(
+		gp.getPipelineLayout(),
+		gp.getShader().getPushConstantRange().stageFlags,
+		gp.getShader().getPushConstantRange().offset,
+		gp.getShader().getPushConstantRange().size,
+		gp.getPushConstants()
+	);
+
+	cmd_buf.bindIndexBuffer(
+		gp.getIndexBuffer(),
+		0,
+		gp.getShader().getIndexBufferInfo().getIndexType()
+	);
+
+	for (const auto& vb : gp.getVertexBuffers()) {
+		const std::string& buf_name = vb.first;
+		const VkBuffer vertex_buffer = vb.second;
+
+		cmd_buf.bindVertexBuffer(
+			gp.getShader().getVertexBufferDescription(buf_name).binding_desc.binding,
+			1,
+			&vertex_buffer,
+			0
+		);
+	}
+}
+
+void Queue::drawIndexed(
+	uint32_t index_count,
+	uint32_t instance_count,
+	uint32_t first_index,
+	uint32_t vertex_offset,
+	uint32_t first_instance
+) {
+	CommandBuffer cmd_buf = _command_pool.commandBuffers().back();
+
+	cmd_buf.drawIndexed(
+		index_count,
+		instance_count,
+		first_index,
+		vertex_offset,
+		first_instance
+	);
+}
+
+void Queue::endRendering(Swapchain& swapchain) {
+	CommandBuffer cmd_buf = _command_pool.commandBuffers().back();
+
+	cmd_buf.endRendering();
+	cmd_buf.dynamicRenderingPipelineBarrierBack(swapchain);
 	cmd_buf.end();
 }
 
@@ -528,3 +633,4 @@ const uint32_t Queue::getNbPendingCommandBuffers() const {
 uint32_t& Queue::getNbPendingCommandBuffers() {
 	return _command_pool_indices.nb_cmd_buf;
 }
+

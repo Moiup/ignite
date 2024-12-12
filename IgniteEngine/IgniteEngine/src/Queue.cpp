@@ -167,7 +167,7 @@ void Queue::dispatch(
 	uint32_t group_count_y,
 	uint32_t group_count_z
 ) {
-	CommandBuffer cmd_buf = newCommandBuffer();
+	CommandBuffer& cmd_buf = newCommandBuffer();
 	
 	cmd_buf.begin();
 
@@ -200,17 +200,22 @@ void Queue::dispatch(
 	cmd_buf.end();
 }
 
-void Queue::begineRendering(
+void Queue::beginRendering(
 	glm::vec4& clear_color_value,
 	Swapchain& swapchain,
 	DepthBuffer& depth_buffer,
 	VkOffset2D& offset,
 	VkExtent2D& extent
 ) {
-	CommandBuffer cmd_buf = newCommandBuffer();
+	CommandBuffer& cmd_buf = newCommandBuffer();
 
 	cmd_buf.reset();
 	cmd_buf.begin();
+
+	cmd_buf.dynamicRenderingPipelineBarrier(
+		swapchain,
+		depth_buffer
+	);
 
 	VkClearColorValue ccv = {
 		clear_color_value.x,
@@ -227,7 +232,7 @@ void Queue::begineRendering(
 }
 
 void Queue::bindPipeline(GraphicsPipeline& gp) {
-	CommandBuffer cmd_buf = _command_pool.commandBuffers().back();
+	CommandBuffer& cmd_buf = _command_pool.commandBuffers().back();
 
 	cmd_buf.bindPipeline(
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -266,6 +271,7 @@ void Queue::bindPipeline(GraphicsPipeline& gp) {
 		gp.getShader().getIndexBufferInfo().getIndexType()
 	);
 
+	VkDeviceSize v_offsets = { 0 };
 	for (const auto& vb : gp.getVertexBuffers()) {
 		const std::string& buf_name = vb.first;
 		const VkBuffer vertex_buffer = vb.second;
@@ -274,7 +280,7 @@ void Queue::bindPipeline(GraphicsPipeline& gp) {
 			gp.getShader().getVertexBufferDescription(buf_name).binding_desc.binding,
 			1,
 			&vertex_buffer,
-			0
+			&v_offsets
 		);
 	}
 }
@@ -286,7 +292,7 @@ void Queue::drawIndexed(
 	uint32_t vertex_offset,
 	uint32_t first_instance
 ) {
-	CommandBuffer cmd_buf = _command_pool.commandBuffers().back();
+	CommandBuffer& cmd_buf = _command_pool.commandBuffers().back();
 
 	cmd_buf.drawIndexed(
 		index_count,
@@ -298,7 +304,7 @@ void Queue::drawIndexed(
 }
 
 void Queue::endRendering(Swapchain& swapchain) {
-	CommandBuffer cmd_buf = _command_pool.commandBuffers().back();
+	CommandBuffer& cmd_buf = _command_pool.commandBuffers().back();
 
 	cmd_buf.endRendering();
 	cmd_buf.dynamicRenderingPipelineBarrierBack(swapchain);

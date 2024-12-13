@@ -29,14 +29,15 @@ void main(){
 
     uvec4 video_img_color = imageLoad(video_img, ivec2(width - idx - 1, idy));
         
-    // -- Chroma keying
+    // -- Chroma keying -- //
     vec3 bg_color = vec3(video_img_color.rgb) / 255.0f;
     vec3 cck = color_chroma_key.rgb;
     uint is_color = length(bg_color - cck) <= SQRT_3 - hardness * SQRT_3 ? 0 : 1;
     video_img_color = video_img_color * is_color;
 
-    // -- Image sum
+    // -- Image sum -- //
     vec4 bg_intensity = vec4(video_img_color) * intensity;
+    // Changing RGB to BGR because the swapchain image is in BGR mode
     video_img_color = uvec4(
         bg_intensity.b,
         bg_intensity.g,

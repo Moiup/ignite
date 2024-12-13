@@ -1,6 +1,9 @@
 #version 450
 #extension GL_EXT_scalar_block_layout : enable
 
+#define SQRT_3 1.7321f
+// #define SQRT_3 2.0f
+
 layout (binding = 0, rgba8ui) readonly uniform uimage2D video_img;
 layout (binding = 1, rgba8ui) readonly uniform uimage2D rendered_img;
 layout (binding = 2, rgba8ui) writeonly uniform uimage2D sum_img;
@@ -9,6 +12,8 @@ layout(push_constant, std430) uniform pc {
     uint width;
     uint height;
     float intensity;
+    float hardness;
+    vec4 color_chroma_key;
 };
 
 layout(local_size_x = 16, local_size_y = 16) in;
@@ -23,15 +28,21 @@ void main(){
     const uint width_half = width / 2;
 
     uvec4 video_img_color = imageLoad(video_img, ivec2(width - idx - 1, idy));
-    vec4 bg_intensity = vec4(video_img_color) * intensity;
         
+    // -- Chroma keying
+    vec3 bg_color = vec3(video_img_color.rgb) / 255.0f;
+    vec3 cck = color_chroma_key.rgb;
+    uint is_color = length(bg_color - cck) <= SQRT_3 - hardness * SQRT_3 ? 0 : 1;
+    video_img_color = video_img_color * is_color;
+
+    // -- Image sum
+    vec4 bg_intensity = vec4(video_img_color) * intensity;
     video_img_color = uvec4(
         bg_intensity.b,
         bg_intensity.g,
         bg_intensity.r,
         bg_intensity.a
     );
-
     uvec4 rendered_img_color = imageLoad(rendered_img, ivec2(idx, idy));
     uvec4 sum_res = video_img_color + rendered_img_color;
 

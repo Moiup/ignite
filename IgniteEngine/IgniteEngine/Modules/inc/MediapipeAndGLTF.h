@@ -81,8 +81,6 @@ private:
 
     std::mutex _data_mutex;
 
-    bool _is_new_data{ false };
-
     const uint32_t _FRAME_NB_CHANNEL{ 4 };
     std::vector<uint8_t> _frame_data;
     StagingBuffer<IGEBufferUsage::transfer> _recv_frame_stag_buff;

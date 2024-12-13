@@ -100,6 +100,17 @@ public:
 		uint32_t group_count_z	
 	);
 
+	void dispatchBarrier(
+		ComputePipeline& cp,
+		uint32_t group_count_x,
+		uint32_t group_count_y,
+		uint32_t group_count_z,
+		VkPipelineStageFlags2 src_stage_mask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags2 dst_stage_mask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+		VkAccessFlags2 src_access_mask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT,
+		VkAccessFlags2 dst_access_mask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT
+	);
+
 	void beginRendering(
 		glm::vec4& clear_color_value,
 		Swapchain& swapchain,
@@ -176,6 +187,14 @@ private:
 		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	void dispatch(
+		CommandBuffer& cmd_buf,
+		ComputePipeline& cp,
+		uint32_t group_count_x,
+		uint32_t group_count_y,
+		uint32_t group_count_z
 	);
 
 

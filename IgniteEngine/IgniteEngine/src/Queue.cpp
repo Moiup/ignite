@@ -161,6 +161,51 @@ void Queue::changeLayout(
 	cmd.end();
 }
 
+void Queue::dispatchBarrier(
+	ComputePipeline& cp,
+	uint32_t group_count_x,
+	uint32_t group_count_y,
+	uint32_t group_count_z,
+	VkPipelineStageFlags2 src_stage_mask,
+	VkPipelineStageFlags2 dst_stage_mask,
+	VkAccessFlags2 src_access_mask,
+	VkAccessFlags2 dst_access_mask
+) {
+	CommandBuffer& cmd_buf = newCommandBuffer();
+
+	VkMemoryBarrier2 mem_bar{};
+	mem_bar.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
+	mem_bar.pNext = nullptr;
+	mem_bar.srcStageMask = src_stage_mask;
+	mem_bar.dstStageMask = dst_stage_mask;
+	mem_bar.srcAccessMask = src_access_mask;
+	mem_bar.dstAccessMask = dst_access_mask;
+
+	VkDependencyInfo dependency_info{};
+	dependency_info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+	dependency_info.pNext = nullptr;
+	dependency_info.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	dependency_info.memoryBarrierCount = 1;
+	dependency_info.pMemoryBarriers = &mem_bar;
+	dependency_info.bufferMemoryBarrierCount = 0;
+	dependency_info.pBufferMemoryBarriers = nullptr;
+	dependency_info.imageMemoryBarrierCount = 0;
+	dependency_info.pImageMemoryBarriers = nullptr;
+
+	cmd_buf.begin();
+	dispatch(
+		cmd_buf,
+		cp,
+		group_count_x,
+		group_count_y,
+		group_count_z
+	);
+
+	cmd_buf.pipelineBarrier(&dependency_info);
+
+	cmd_buf.end();
+}
+
 void Queue::dispatch(
 	ComputePipeline& cp,
 	uint32_t group_count_x,
@@ -168,8 +213,25 @@ void Queue::dispatch(
 	uint32_t group_count_z
 ) {
 	CommandBuffer& cmd_buf = newCommandBuffer();
-	
+
 	cmd_buf.begin();
+	dispatch(
+		cmd_buf,
+		cp,
+		group_count_x,
+		group_count_y,
+		group_count_z
+	);
+	cmd_buf.end();
+}
+
+void Queue::dispatch(
+	CommandBuffer& cmd_buf,
+	ComputePipeline& cp,
+	uint32_t group_count_x,
+	uint32_t group_count_y,
+	uint32_t group_count_z
+) {	
 
 	cmd_buf.bindPipeline(
 		VK_PIPELINE_BIND_POINT_COMPUTE,
@@ -196,8 +258,6 @@ void Queue::dispatch(
 		group_count_y,
 		group_count_z
 	);
-
-	cmd_buf.end();
 }
 
 void Queue::beginRendering(

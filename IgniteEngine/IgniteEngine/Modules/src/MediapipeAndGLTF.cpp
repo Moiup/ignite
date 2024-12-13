@@ -166,11 +166,6 @@ void MediapipeAndGLTF::update() {
 	Queue& p_queue = DefaultConf::logical_device->getQueues("present_queues")[0];
 	Queue& c_queue = DefaultConf::logical_device->getQueues("compute_queues")[0];
 
-	_data_mutex.lock();
-	c_queue.copy(_recv_frame_stag_buff, _video_img);
-	c_queue.submit();
-	c_queue.wait();
-
 	_to_present_img_i = swapchain.acquireNextImage(
 		UINT64_MAX,
 		_sem_rend_start[_current_queue_i],
@@ -208,6 +203,9 @@ void MediapipeAndGLTF::update() {
 		1,
 		&_sem_rend_end[_current_queue_i]
 	);
+
+	_data_mutex.lock();
+	c_queue.copy(_recv_frame_stag_buff, _video_img);
 
 	// Copying the rendered image from the swapchain
 	c_queue.copy(

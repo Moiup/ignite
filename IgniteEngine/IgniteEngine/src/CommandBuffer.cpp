@@ -349,6 +349,10 @@ void CommandBuffer::pipelineBarrier(
 	);
 }
 
+void CommandBuffer::pipelineBarrier(const VkDependencyInfo* p_dependency_info){
+	vkCmdPipelineBarrier2(_command_buffer, p_dependency_info);
+}
+
 void CommandBuffer::copyBufferToImage(
 	VkBuffer srcBuffer,
 	VkImage dstImage,

@@ -74,6 +74,11 @@ public:
 		const VkImageMemoryBarrier* pImageMemoryBarriers
 	);
 
+	/**
+	* Uses vkCmdPipelineBarrier2
+	*/
+	void pipelineBarrier(const VkDependencyInfo* p_dependency_info);
+
 	void copyBufferToImage(
 		VkBuffer srcBuffer,
 		VkImage dstImage,

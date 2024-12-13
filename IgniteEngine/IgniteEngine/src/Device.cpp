@@ -40,8 +40,15 @@ std::vector<VkQueueFamilyProperties2>& Device::getFamilyProperties() {
 void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 	VkPhysicalDeviceFeatures features = featuresManagement();
 	
+	VkPhysicalDeviceVulkan13Features physical_device_v13_features{};
+	physical_device_v13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+	physical_device_v13_features.pNext = nullptr;
+	physical_device_v13_features.synchronization2 = VK_TRUE;
+	physical_device_v13_features.dynamicRendering = VK_TRUE;
+
 	VkPhysicalDeviceVulkan12Features physical_device_v12_features{};
 	physical_device_v12_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+	physical_device_v12_features.pNext = &physical_device_v13_features;
 	physical_device_v12_features.runtimeDescriptorArray = VK_TRUE;
 	physical_device_v12_features.timelineSemaphore = VK_TRUE;
 
@@ -50,14 +57,14 @@ void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 	physical_device_features2.pNext = &physical_device_v12_features;
 	physical_device_features2.features = features;
 
-	VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_features{};
-	dynamic_rendering_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
-	dynamic_rendering_features.pNext = &physical_device_features2;
-	dynamic_rendering_features.dynamicRendering = VK_TRUE;
+	//VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_features{};
+	//dynamic_rendering_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+	//dynamic_rendering_features.pNext = &physical_device_features2;
+	//dynamic_rendering_features.dynamicRendering = VK_TRUE;
 
 	VkDeviceCreateInfo device_info{};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	device_info.pNext = &dynamic_rendering_features;
+	device_info.pNext = &physical_device_features2;
 	device_info.flags = 0;
 	device_info.queueCreateInfoCount = queues_info.size();
 	device_info.pQueueCreateInfos = queues_info.data();
@@ -85,7 +92,7 @@ VkPhysicalDeviceFeatures Device::featuresManagement() {
 	VkPhysicalDeviceFeatures2 available{};
 	available.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 	vkGetPhysicalDeviceFeatures2(getGPU()->getGPU(), &available);
-
+	
 	VkPhysicalDeviceFeatures enabled{};
 	if (available.features.fillModeNonSolid) {
 		enabled.fillModeNonSolid = VK_TRUE;

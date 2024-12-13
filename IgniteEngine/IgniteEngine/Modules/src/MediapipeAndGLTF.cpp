@@ -172,6 +172,8 @@ void MediapipeAndGLTF::update() {
 		VK_NULL_HANDLE
 	);
 
+	_data_mutex.lock();
+
 	VkOffset2D vk_offset2D = { 0, 0 };
 	VkExtent2D vk_extent2D = {
 		DefaultConf::render_window_width,
@@ -204,7 +206,6 @@ void MediapipeAndGLTF::update() {
 		&_sem_rend_end[_current_queue_i]
 	);
 
-	_data_mutex.lock();
 	c_queue.copy(_recv_frame_stag_buff, _video_img);
 
 	// Copying the rendered image from the swapchain
@@ -320,18 +321,15 @@ void MediapipeAndGLTF::networkProcess() {
 			break;
 		}
 
-		_data_mutex.lock();
-
-		_is_new_data = true;
-		_recv_frame_stag_buff.setValues(_frame_data.data());
-
 		createWrist(
 			landmarks,
 			_lfs
 		);
-
 		retargeting(_lfs, *_hand.getSkeleton());
 
+		_data_mutex.lock();
+	
+		_recv_frame_stag_buff.setValues(_frame_data.data());
 		_hand.setPositionLocale(landmarks._landmarks[0][0] * 30.0f);
 
 		// UPDATE THE BUFFERS HERE

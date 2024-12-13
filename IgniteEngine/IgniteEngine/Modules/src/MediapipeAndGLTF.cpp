@@ -216,20 +216,11 @@ void MediapipeAndGLTF::update() {
 	);
 
 	// Compute buffer here
-	c_queue.dispatch(
+	c_queue.dispatchBarrier(
 		_image_sum_pipeline,
 		(_video_img.getWidth() / 16) + 1,
 		(_video_img.getHeight() / 16) + 1,
 		1
-	);
-
-	VkPipelineStageFlags pipeline_comp_stage_flag = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-	c_queue.submitNoFence(
-		1,
-		&_sem_rend_end[_current_queue_i],
-		&pipeline_comp_stage_flag,
-		1,
-		&_sem_comp_sum_end[_current_queue_i]
 	);
 
 	// Result is in _sum img, copying to swapchain image to display it
@@ -238,9 +229,10 @@ void MediapipeAndGLTF::update() {
 		swapchain.getCurrentImage()
 	);
 
+	VkPipelineStageFlags pipeline_comp_stage_flag = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 	c_queue.submit(
 		1,
-		&_sem_comp_sum_end[_current_queue_i],
+		&_sem_rend_end[_current_queue_i],
 		&pipeline_comp_stage_flag,
 		1,
 		&_sem_copy_swap_end[_current_queue_i]
@@ -1161,7 +1153,10 @@ void MediapipeAndGLTF::menu() {
 	ImGui::Begin("Background Manager");
 
 	ImGui::Text("Display background");
-	ImGui::SliderFloat("Intensity", &_img_sum_pc.intensity, 0, 1.0f);
+	ImGui::SliderFloat("intensity", &_img_sum_pc.intensity, 0, 1.0f);
+	ImGui::Text("Chroma keying");
+	ImGui::ColorPicker3("color", &_img_sum_pc.color_chroma_key.x);
+	ImGui::SliderFloat("hardness", &_img_sum_pc.hardness, 0, 1.0f);
 
 	ImGui::End();
 }

@@ -63,6 +63,8 @@ namespace mdph {
         uint32_t width;
         uint32_t height;
         float intensity{ 1.0f };
+        float hardness{ 1.0f };
+        glm::vec4 color_chroma_key{ 0.0, 1.0, 0.0, 1.0 };
     };
 }
 

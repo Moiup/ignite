@@ -1,5 +1,19 @@
 #include "Entity3D.h"
 
+std::string makeString(const glm::uvec2 v) {
+	std::string s = "";
+	s += std::to_string(v.x)
+		+ " " + std::to_string(v.y);
+	return s;
+}
+
+std::string makeString(const glm::vec2 v) {
+	std::string s = "";
+	s += std::to_string(v.x)
+		+ " " + std::to_string(v.y);
+	return s;
+}
+
 std::string makeString(const glm::vec3 v) {
 	std::string s = "";
 	s += std::to_string(v.x)

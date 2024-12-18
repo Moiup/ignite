@@ -10,8 +10,10 @@
 #include <vector>
 #include <iostream>
 
-std::string makeString(const glm::vec3 m);
-std::string makeString(const glm::vec4 m);
+std::string makeString(const glm::uvec2 v);
+std::string makeString(const glm::vec2 v);
+std::string makeString(const glm::vec3 v);
+std::string makeString(const glm::vec4 v);
 std::string makeString(const glm::mat4 m);
 std::string makeString(const glm::mat4 m, const std::string& tabs);
 

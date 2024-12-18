@@ -214,15 +214,21 @@ void MediapipeAndGLTF::update() {
 		_rendered_img
 	);
 
-	// Compute buffer here
-	c_queue.dispatchBarrier(
+	// Compute shader: mirror, chroma keying and sum
+	c_queue.dispatchBarrier( 
 		_image_sum_pipeline,
-		(_video_img.getWidth() / 16) + 1,
-		(_video_img.getHeight() / 16) + 1,
+		(_video_img.getWidth() / 256) + 1,
+		(_video_img.getHeight() / 4) + 1,
 		1
 	);
 
-	// Result is in _sum img, copying to swapchain image to display it
+	//c_queue.dispatchBarrier( 
+	//	_image_sum_pipeline,
+	//	(_video_img.getWidth() / 32) + 1,
+	//	(_video_img.getHeight() / 32) + 1,
+	//	1
+	//);
+	
 	c_queue.copy(
 		_sum_img,
 		swapchain.getCurrentImage()
@@ -244,6 +250,7 @@ void MediapipeAndGLTF::update() {
 		&swapchain.getSwapchain(),
 		&_to_present_img_i
 	);
+
 	c_queue.wait();
 	g_queue.wait();
 
@@ -1078,6 +1085,12 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 		VK_SHADER_STAGE_COMPUTE_BIT,
 		1
 	);
+	_image_sum_shader.configureStorageTexture2D(
+		"flipped_img",
+		3,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		1
+	);
 
 	_image_sum_shader.configurePushConstant(
 		VK_SHADER_STAGE_COMPUTE_BIT,
@@ -1085,41 +1098,46 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 		sizeof(_img_sum_pc)
 	);
 
-	
-
 	_video_img = Texture2D(
 		DefaultConf::logical_device->getDevice(),
 		DefaultConf::render_window_width,
 		DefaultConf::render_window_height,
 		IGEImgFormat::r8g8b8a8_uint
 	);
-
 	_rendered_img = Texture2D(
 		DefaultConf::logical_device->getDevice(),
 		DefaultConf::render_window_width,
 		DefaultConf::render_window_height,
 		IGEImgFormat::r8g8b8a8_uint
 	);
-
 	_sum_img = Texture2D(
 		DefaultConf::logical_device->getDevice(),
 		DefaultConf::render_window_width,
 		DefaultConf::render_window_height,
 		IGEImgFormat::r8g8b8a8_uint
 	);
+	_flipped_img = Texture2D(
+		DefaultConf::logical_device->getDevice(),
+		DefaultConf::render_window_width,
+		DefaultConf::render_window_height,
+		IGEImgFormat::r8g8b8a8_uint
+	);
+
 
 	DefaultConf::graphics_queue->changeLayout(
 		_video_img,
 		VK_IMAGE_LAYOUT_GENERAL
 	);
-
 	DefaultConf::graphics_queue->changeLayout(
 		_rendered_img,
 		VK_IMAGE_LAYOUT_GENERAL
 	);
-
 	DefaultConf::graphics_queue->changeLayout(
 		_sum_img,
+		VK_IMAGE_LAYOUT_GENERAL
+	);
+	DefaultConf::graphics_queue->changeLayout(
+		_flipped_img,
 		VK_IMAGE_LAYOUT_GENERAL
 	);
 	DefaultConf::graphics_queue->submit();
@@ -1130,12 +1148,60 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 	std::vector<Texture2D*> video_img = { &_video_img };
 	std::vector<Texture2D*> rendered_img = { &_rendered_img };
 	std::vector<Texture2D*> sum_img = { &_sum_img };
+	std::vector<Texture2D*> flipped_img = { &_flipped_img };
 	_image_sum_pipeline.setTextures2D("video_img", video_img);
 	_image_sum_pipeline.setTextures2D("rendered_img", rendered_img);
 	_image_sum_pipeline.setTextures2D("sum_img", sum_img);
+	_image_sum_pipeline.setTextures2D("flipped_img", flipped_img);
+
 	_image_sum_pipeline.setPushConstants(&_img_sum_pc);
 	
 	_image_sum_pipeline.update();
+
+	// -- error shader
+	_image_error_shader = ComputeShader(
+		*DefaultConf::logical_device->getDevice(),
+		"../../shaders/hand/img_error.comp"
+	);
+
+	_image_error_shader.configureStorageTexture2D(
+		"img1",
+		0,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		1
+	);
+	_image_error_shader.configureStorageTexture2D(
+		"img2",
+		1,
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		1
+	);
+	_image_error_shader.configureStorageBuffer(
+		"error",
+		2,
+		VK_SHADER_STAGE_COMPUTE_BIT
+	);
+	_image_error_shader.configurePushConstant(
+		VK_SHADER_STAGE_COMPUTE_BIT,
+		0,
+		sizeof(mdph::ImgDiffPC)
+	);
+
+	_error_buf = StagingBuffer<IGEBufferUsage::storage_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		sizeof(float)
+	);
+
+	_image_error_pipeline = ComputePipeline(_image_error_shader);
+	
+	std::vector<Texture2D*> img1 = { &_flipped_img };
+	std::vector<Texture2D*> img2 = { &_rendered_img };
+	_image_error_pipeline.setTextures2D("img1", img1);
+	_image_error_pipeline.setTextures2D("img2", img2);
+	_image_error_pipeline.setStorageBuffer("error", _error_buf);
+	_image_error_pipeline.setPushConstants(&_img_diff_pc);
+
+	_image_error_pipeline.update();
 }
 
 void MediapipeAndGLTF::menu() {

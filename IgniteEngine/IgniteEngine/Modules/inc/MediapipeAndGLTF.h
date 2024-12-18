@@ -66,6 +66,16 @@ namespace mdph {
         float hardness{ 1.0f };
         glm::vec4 color_chroma_key{ 0.0, 1.0, 0.0, 1.0 };
     };
+
+    struct ImgDiffPC {
+        uint32_t width;
+        uint32_t height;
+    };
+
+    struct DebugBuff {
+        glm::uvec2 pos;
+        glm::uvec2 work_group;
+    };
 }
 
 class MediapipeAndGLTF : public Module
@@ -167,9 +177,17 @@ private:
     ComputeShader _image_sum_shader;
     ComputePipeline _image_sum_pipeline;
     Texture2D _video_img;
+    Texture2D _flipped_img;
     Texture2D _rendered_img;
     Texture2D _sum_img;
     mdph::ImgSumPC _img_sum_pc;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _debug_pos_buf;
+
+    // -- IMAGE ERROR --
+    ComputeShader _image_error_shader;
+    ComputePipeline _image_error_pipeline;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _error_buf;
+    mdph::ImgDiffPC _img_diff_pc;
 
 public:
     MediapipeAndGLTF();

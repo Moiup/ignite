@@ -1,0 +1,119 @@
+#version 450
+
+#extension GL_EXT_scalar_block_layout: enable
+#extension GL_EXT_shader_atomic_float: enable
+
+#define SIMD_SIZE 32
+
+#define NB_SWIZZLE_LINE 4
+#define NB_SWIZZLE_COL 8
+#define NB_SWIZZLE_HALF (NB_SWIZZLE_COL / 2)
+#define NB_SWIZZLE_QUARTER (NB_SWIZZLE_HALF / 2)
+
+#define LOCAL_SIZE_X 32
+#define LOCAL_SIZE_Y 32
+#define LOCAL_SIZE_Z 1
+
+#define TOTAL_THREAD (LOCAL_SIZE_X * LOCAL_SIZE_Y * LOCAL_SIZE_Z)
+
+#define IMG_LOCAL_SIZE_X TOTAL_THREAD / NB_SWIZZLE_LINE
+#define IMG_LOCAL_SIZE_Y NB_SWIZZLE_LINE
+
+#define zX_1_SHIFT 0
+#define zX_2_SHIFT 2
+#define zX_3_SHIFT 4
+
+#define zY_1_SHIFT 1
+#define zY_2_SHIFT 3
+
+layout(
+    local_size_x = LOCAL_SIZE_X,
+    local_size_y = LOCAL_SIZE_Y,
+    local_size_z = LOCAL_SIZE_Z
+) in;
+
+layout (binding = 0, rgba8ui) readonly uniform uimage2D img1;
+layout (binding = 1, rgba8ui) readonly uniform uimage2D img2;
+
+layout (std430, binding = 2) writeonly buffer errorBuffer {
+    float error;
+};
+
+shared float shared_error;
+
+layout (push_constant, std430) uniform pc {
+    uint width;
+    uint height;
+};
+
+uvec2 accessor(uint li){
+    uint simd_i = li % SIMD_SIZE;
+        
+    uint x = ((simd_i >> zX_1_SHIFT) & 1)
+     + (((simd_i >> zX_2_SHIFT) & 1) * NB_SWIZZLE_QUARTER)
+     + (((simd_i >> zX_3_SHIFT) & 1) * NB_SWIZZLE_HALF);
+
+    uint y = ((simd_i >> zY_1_SHIFT) & 1)
+     + (((simd_i >> zY_2_SHIFT) & 1) * NB_SWIZZLE_QUARTER);
+
+    return uvec2(x, y); 
+}
+
+uvec2 imgPosFinder(uvec2 group, uint li){
+    uvec2 swizzle_pos = accessor(li);
+    uint num_block_x = li / SIMD_SIZE;
+
+    uvec2 img_pos = uvec2(
+        swizzle_pos.x + (group.x * IMG_LOCAL_SIZE_X) + num_block_x * NB_SWIZZLE_COL,
+        swizzle_pos.y + group.y * IMG_LOCAL_SIZE_Y
+    );
+
+    return img_pos;
+}
+
+void main(){
+    uint local_x = gl_LocalInvocationID.x;
+    uint local_y = gl_LocalInvocationID.y;
+    uint global_x = gl_GlobalInvocationID.x;
+    uint global_y = gl_GlobalInvocationID.y;
+    uint work_group_x = gl_NumWorkGroups.x;
+    uint work_group_y = gl_NumWorkGroups.y;
+    uint local_invocation_index = gl_LocalInvocationIndex;
+
+    // For each group
+    // For each thread, compute the distance pixel to pixel
+    // Add the distance into a local variable until line is completed
+    // Add the local variable to a shared array variable
+    // Take one thread to sum up all the elements of the shared array
+    if(global_y * NB_SWIZZLE_LINE >= height){
+        return;
+    }
+
+    shared_error = 0;
+
+    float local_error = 0;
+    for(uint g_x = local_x; g_x < width; g_x += LOCAL_SIZE_X / NB_SWIZZLE_LINE){
+        uvec2 pos = imgPosFinder(
+            uvec2(work_group_x, work_group_y),
+            local_invocation_index
+        );
+
+        vec3 p1 = vec3(imageLoad(img1, ivec2(pos.x, pos.y)));
+        p1 /= 255.0f;
+
+        vec3 p2 = vec3(imageLoad(img2, ivec2(pos.x, pos.y)));
+        p2 /= 255.0f;
+
+        vec3 p1p2 = p2 - p1;
+        float dist_2 = dot(p1p2, p1p2);
+
+        local_error += dist_2;
+    }
+    atomicAdd(shared_error, local_error);
+
+    memoryBarrier();
+
+    if(local_x == 0 && local_y == 0){
+        atomicAdd(error, shared_error / float(width * height));
+    }
+}

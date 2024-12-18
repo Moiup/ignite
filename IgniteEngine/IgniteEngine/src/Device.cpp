@@ -40,25 +40,9 @@ std::vector<VkQueueFamilyProperties2>& Device::getFamilyProperties() {
 void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 	VkPhysicalDeviceFeatures features = featuresManagement();
 
-	VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT shader_atomic_float_2_feats;
-	shader_atomic_float_2_feats.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_2_FEATURES_EXT;
-	shader_atomic_float_2_feats.pNext = nullptr;
-	shader_atomic_float_2_feats.shaderBufferFloat16Atomics = VK_TRUE;
-	shader_atomic_float_2_feats.shaderBufferFloat16AtomicAdd = VK_TRUE;
-	shader_atomic_float_2_feats.shaderBufferFloat16AtomicMinMax = VK_TRUE;
-	shader_atomic_float_2_feats.shaderBufferFloat32AtomicMinMax = VK_TRUE;
-	shader_atomic_float_2_feats.shaderBufferFloat64AtomicMinMax = VK_TRUE;
-	shader_atomic_float_2_feats.shaderSharedFloat16Atomics = VK_TRUE;
-	shader_atomic_float_2_feats.shaderSharedFloat16AtomicAdd = VK_TRUE;
-	shader_atomic_float_2_feats.shaderSharedFloat16AtomicMinMax = VK_TRUE;
-	shader_atomic_float_2_feats.shaderSharedFloat32AtomicMinMax = VK_TRUE;
-	shader_atomic_float_2_feats.shaderSharedFloat64AtomicMinMax = VK_TRUE;
-	shader_atomic_float_2_feats.shaderImageFloat32AtomicMinMax = VK_TRUE;
-	shader_atomic_float_2_feats.sparseImageFloat32AtomicMinMax = VK_TRUE;
-
 	VkPhysicalDeviceShaderAtomicFloatFeaturesEXT shader_atomic_float_feats{};
 	shader_atomic_float_feats.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
-	shader_atomic_float_feats.pNext = &shader_atomic_float_2_feats;
+	shader_atomic_float_feats.pNext = nullptr;
 	shader_atomic_float_feats.shaderBufferFloat32Atomics = VK_TRUE;
 	shader_atomic_float_feats.shaderBufferFloat32AtomicAdd = VK_TRUE;
 	shader_atomic_float_feats.shaderBufferFloat64Atomics = VK_TRUE;

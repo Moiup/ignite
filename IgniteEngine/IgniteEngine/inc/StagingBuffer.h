@@ -73,7 +73,7 @@ Pointer<uint8_t> StagingBuffer<U>::getValues() {
 
 	void* copy{};
 	uint8_t* v = new uint8_t[_size];
-	copy = map<U>();
+	copy = map();
 	memcpy(v, copy, _size);
 	unmap();
 

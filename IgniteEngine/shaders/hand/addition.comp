@@ -1,12 +1,42 @@
 #version 450
 #extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+
+#define SIMD_SIZE 32
+
+#define NB_SWIZZLE_LINE 4
+#define NB_SWIZZLE_COL 8
+#define NB_SWIZZLE_HALF (NB_SWIZZLE_COL / 2)
+#define NB_SWIZZLE_QUARTER (NB_SWIZZLE_HALF / 2)
+
+#define LOCAL_SIZE_X 32
+#define LOCAL_SIZE_Y 32
+#define LOCAL_SIZE_Z 1
+
+#define TOTAL_THREAD (LOCAL_SIZE_X * LOCAL_SIZE_Y * LOCAL_SIZE_Z)
+
+#define IMG_LOCAL_SIZE_X TOTAL_THREAD / NB_SWIZZLE_LINE
+#define IMG_LOCAL_SIZE_Y NB_SWIZZLE_LINE
+
+#define zX_1_SHIFT 0
+#define zX_2_SHIFT 2
+#define zX_3_SHIFT 4
+
+#define zY_1_SHIFT 1
+#define zY_2_SHIFT 3
 
 #define SQRT_3 1.7321f
-// #define SQRT_3 2.0f
+
+layout(
+    local_size_x = LOCAL_SIZE_X,
+    local_size_y = LOCAL_SIZE_Y,
+    local_size_z = LOCAL_SIZE_Z
+) in;
 
 layout (binding = 0, rgba8ui) readonly uniform uimage2D video_img;
 layout (binding = 1, rgba8ui) readonly uniform uimage2D rendered_img;
 layout (binding = 2, rgba8ui) writeonly uniform uimage2D sum_img;
+layout (binding = 3, rgba8ui) writeonly uniform uimage2D flipped_img;
 
 layout(push_constant, std430) uniform pc {
     uint width;
@@ -16,19 +46,56 @@ layout(push_constant, std430) uniform pc {
     vec4 color_chroma_key;
 };
 
-layout(local_size_x = 16, local_size_y = 16) in;
-void main(){
-    const uint idx = gl_GlobalInvocationID.x;
-    const uint idy = gl_GlobalInvocationID.y;
+uvec2 accessor(uint li){
+    uint simd_i = li % SIMD_SIZE;
+        
+    uint x = ((simd_i >> zX_1_SHIFT) & 1)
+     + (((simd_i >> zX_2_SHIFT) & 1) * NB_SWIZZLE_QUARTER)
+     + (((simd_i >> zX_3_SHIFT) & 1) * NB_SWIZZLE_HALF);
 
-    if((idx >= width) || (idy >= height)){
+    uint y = ((simd_i >> zY_1_SHIFT) & 1)
+     + (((simd_i >> zY_2_SHIFT) & 1) * NB_SWIZZLE_QUARTER);
+
+    return uvec2(x, y); 
+}
+
+uvec2 imgPosFinder(uvec2 group, uint li){
+    uvec2 swizzle_pos = accessor(li);
+    uint num_block_x = li / SIMD_SIZE;
+
+    uvec2 img_pos = uvec2(
+        swizzle_pos.x + (group.x * IMG_LOCAL_SIZE_X) + num_block_x * NB_SWIZZLE_COL,
+        swizzle_pos.y + group.y * IMG_LOCAL_SIZE_Y
+    );
+
+    return img_pos;
+}
+
+void main(){
+    const uint local_x = gl_LocalInvocationID.x;
+    const uint local_y = gl_LocalInvocationID.y;
+    const uint global_x = gl_GlobalInvocationID.x;
+    const uint global_y = gl_GlobalInvocationID.y;
+    const uint work_group_x = gl_WorkGroupID.x;
+    const uint work_group_y = gl_WorkGroupID.y;
+    const uint local_invocation_index = gl_LocalInvocationIndex;
+
+    if(work_group_y * NB_SWIZZLE_LINE >= height || work_group_x * NB_SWIZZLE_COL >= width){
         return;
     }
 
-    const uint width_half = width / 2;
+    uvec2 pos_original = imgPosFinder(
+        uvec2(work_group_x, work_group_y),
+        local_invocation_index
+    );
 
-    uvec4 video_img_color = imageLoad(video_img, ivec2(width - idx - 1, idy));
-        
+    uvec2 pos_flipped = uvec2(
+        width - pos_original.x - 1,
+        pos_original.y
+    );
+
+    uvec4 video_img_color = imageLoad(video_img, ivec2(pos_flipped));
+ 
     // -- Chroma keying -- //
     vec3 bg_color = vec3(video_img_color.rgb) / 255.0f;
     vec3 cck = color_chroma_key.rgb;
@@ -36,20 +103,26 @@ void main(){
     video_img_color = video_img_color * is_color;
 
     // -- Image sum -- //
-    vec4 bg_intensity = vec4(video_img_color) * intensity;
-    // Changing RGB to BGR because the swapchain image is in BGR mode
-    video_img_color = uvec4(
-        bg_intensity.b,
-        bg_intensity.g,
-        bg_intensity.r,
-        bg_intensity.a
+    uvec4 video_img_rgba = uvec4(
+        video_img_color.b,
+        video_img_color.g,
+        video_img_color.r,
+        video_img_color.a
     );
-    uvec4 rendered_img_color = imageLoad(rendered_img, ivec2(idx, idy));
-    uvec4 sum_res = video_img_color + rendered_img_color;
+    vec4 bg_intensity = vec4(video_img_rgba) * intensity;
+    // Changing RGB to BGR because the swapchain image is in BGR mode
+
+    uvec4 rendered_img_color = imageLoad(rendered_img, ivec2(pos_original));
+    uvec4 sum_res = uvec4(bg_intensity) + rendered_img_color;
 
     imageStore(
         sum_img,
-        ivec2(idx, idy),
+        ivec2(pos_original),
         sum_res
+    );
+    imageStore(
+        flipped_img,
+        ivec2(pos_original),
+        video_img_rgba
     );
 }

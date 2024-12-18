@@ -1,0 +1,60 @@
+#version 450
+#extension GL_EXT_scalar_block_layout : enable
+
+#define SQRT_3 1.7321f
+// #define SQRT_3 2.0f
+
+layout (binding = 0, rgba8ui) readonly uniform uimage2D video_img;
+layout (binding = 1, rgba8ui) readonly uniform uimage2D rendered_img;
+layout (binding = 2, rgba8ui) writeonly uniform uimage2D sum_img;
+layout (binding = 3, rgba8ui) writeonly uniform uimage2D flipped_img;
+
+layout(push_constant, std430) uniform pc {
+    uint width;
+    uint height;
+    float intensity;
+    float hardness;
+    vec4 color_chroma_key;
+};
+
+layout(local_size_x = 32, local_size_y = 32) in;
+void main(){
+    const uint idx = gl_GlobalInvocationID.x;
+    const uint idy = gl_GlobalInvocationID.y;
+
+    if((idx >= width) || (idy >= height)){
+        return;
+    }
+
+    uvec4 video_img_color = imageLoad(video_img, ivec2(width - idx - 1, idy));
+        
+    // -- Chroma keying -- //
+    vec3 bg_color = vec3(video_img_color.rgb) / 255.0f;
+    vec3 cck = color_chroma_key.rgb;
+    uint is_color = length(bg_color - cck) <= SQRT_3 - hardness * SQRT_3 ? 0 : 1;
+    video_img_color = video_img_color * is_color;
+
+    // -- Image sum -- //
+    uvec4 video_img_rgba = uvec4(
+        video_img_color.b,
+        video_img_color.g,
+        video_img_color.r,
+        video_img_color.a
+    );
+    vec4 bg_intensity = vec4(video_img_rgba) * intensity;
+    // Changing RGB to BGR because the swapchain image is in BGR mode
+
+    uvec4 rendered_img_color = imageLoad(rendered_img, ivec2(idx, idy));
+    uvec4 sum_res = uvec4(bg_intensity) + rendered_img_color;
+
+    imageStore(
+        sum_img,
+        ivec2(idx, idy),
+        sum_res
+    );
+    imageStore(
+        flipped_img,
+        ivec2(idx, idy),
+        video_img_rgba
+    );
+}

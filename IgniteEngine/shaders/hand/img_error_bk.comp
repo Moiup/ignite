@@ -1,0 +1,68 @@
+#version 450
+
+#extension GL_EXT_scalar_block_layout: enable
+#extension GL_EXT_shader_atomic_float: enable
+
+#define LOCAL_SIZE_X 1024
+#define LOCAL_SIZE_Y 1
+#define LOCAL_SIZE_Z 1
+
+layout (binding = 0, rgba8ui) readonly uniform uimage2D img1;
+layout (binding = 1, rgba8ui) readonly uniform uimage2D img2;
+
+layout (std430, binding = 2) writeonly buffer errorBuffer {
+    float error;
+};
+
+shared float shared_error;
+
+layout (push_constant, std430) uniform pc {
+    uint width;
+    uint height;
+};
+
+layout(
+    local_size_x = LOCAL_SIZE_X,
+    local_size_y = LOCAL_SIZE_Y,
+    local_size_z = LOCAL_SIZE_Z
+) in;
+void main(){
+    uint local_x = gl_LocalInvocationID.x;
+    uint local_y = gl_LocalInvocationID.y;
+    uint global_x = gl_GlobalInvocationID.x;
+    uint global_y = gl_GlobalInvocationID.y;
+    uint work_group_x = gl_NumWorkGroups.x;
+    uint work_group_y = gl_NumWorkGroups.y;
+
+    // For each group
+    // For each thread, compute the distance pixel to pixel
+    // Add the distance into a local variable until line is completed
+    // Add the local variable to a shared array variable
+    // Take one thread to sum up all the elements of the shared array
+    if(global_y >= height){
+        return;
+    }
+
+    shared_error = 0;
+
+    float local_error = 0;
+    for(uint g_x = local_x; g_x < width; g_x +=  LOCAL_SIZE_X){
+        vec3 p1 = vec3(imageLoad(img1, ivec2(g_x, global_y)));
+        p1 /= 255.0f;
+
+        vec3 p2 = vec3(imageLoad(img2, ivec2(g_x, global_y)));
+        p2 /= 255.0f;
+
+        vec3 p1p2 = p2 - p1;
+        float dist_2 = dot(p1p2, p1p2);
+
+        local_error += dist_2;
+    }
+    atomicAdd(shared_error, local_error);
+
+    memoryBarrier();
+
+    if(local_x == 0 && local_y == 0){
+        atomicAdd(error, shared_error / float(width * height));
+    }
+}

@@ -336,11 +336,13 @@ void DefaultModule::update() {
 	//img2.getQueue()->submit();
 	//img2.getQueue()->wait();
 
+#if 0
 	_obj_tr_buffer.setValues(
 		Object3D::updateTransformMatrices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
 
-	//DefaultConf::renderer->render();
+	DefaultConf::renderer->render();
+#endif
 }
 
 void DefaultModule::close() {

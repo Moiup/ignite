@@ -27,7 +27,7 @@ void EngineApp::init() {
 
 	// Instance
 	_instance.setExtensionsAndLayers({
-		"VK_LAYER_KHRONOS_validation",
+		"VK_LAYER_KHRONOS_validation"
 	});
 	_instance.create();
 

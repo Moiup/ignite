@@ -42,7 +42,7 @@ void WindowUI::create() {
 	_renderer = SDL_CreateRenderer(
 		getWindow(),
 		-1,
-		SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED
+		/*SDL_RENDERER_PRESENTVSYNC | */SDL_RENDERER_ACCELERATED
 	);
 
 	if (!_renderer) {

@@ -39,10 +39,42 @@ std::vector<VkQueueFamilyProperties2>& Device::getFamilyProperties() {
 
 void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 	VkPhysicalDeviceFeatures features = featuresManagement();
+
+	VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT shader_atomic_float_2_feats;
+	shader_atomic_float_2_feats.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_2_FEATURES_EXT;
+	shader_atomic_float_2_feats.pNext = nullptr;
+	shader_atomic_float_2_feats.shaderBufferFloat16Atomics = VK_TRUE;
+	shader_atomic_float_2_feats.shaderBufferFloat16AtomicAdd = VK_TRUE;
+	shader_atomic_float_2_feats.shaderBufferFloat16AtomicMinMax = VK_TRUE;
+	shader_atomic_float_2_feats.shaderBufferFloat32AtomicMinMax = VK_TRUE;
+	shader_atomic_float_2_feats.shaderBufferFloat64AtomicMinMax = VK_TRUE;
+	shader_atomic_float_2_feats.shaderSharedFloat16Atomics = VK_TRUE;
+	shader_atomic_float_2_feats.shaderSharedFloat16AtomicAdd = VK_TRUE;
+	shader_atomic_float_2_feats.shaderSharedFloat16AtomicMinMax = VK_TRUE;
+	shader_atomic_float_2_feats.shaderSharedFloat32AtomicMinMax = VK_TRUE;
+	shader_atomic_float_2_feats.shaderSharedFloat64AtomicMinMax = VK_TRUE;
+	shader_atomic_float_2_feats.shaderImageFloat32AtomicMinMax = VK_TRUE;
+	shader_atomic_float_2_feats.sparseImageFloat32AtomicMinMax = VK_TRUE;
+
+	VkPhysicalDeviceShaderAtomicFloatFeaturesEXT shader_atomic_float_feats{};
+	shader_atomic_float_feats.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
+	shader_atomic_float_feats.pNext = &shader_atomic_float_2_feats;
+	shader_atomic_float_feats.shaderBufferFloat32Atomics = VK_TRUE;
+	shader_atomic_float_feats.shaderBufferFloat32AtomicAdd = VK_TRUE;
+	shader_atomic_float_feats.shaderBufferFloat64Atomics = VK_TRUE;
+	shader_atomic_float_feats.shaderBufferFloat64AtomicAdd = VK_TRUE;
+	shader_atomic_float_feats.shaderSharedFloat32Atomics = VK_TRUE;
+	shader_atomic_float_feats.shaderSharedFloat32AtomicAdd = VK_TRUE;
+	shader_atomic_float_feats.shaderSharedFloat64Atomics = VK_TRUE;
+	shader_atomic_float_feats.shaderSharedFloat64AtomicAdd = VK_TRUE;
+	shader_atomic_float_feats.shaderImageFloat32Atomics = VK_TRUE;
+	shader_atomic_float_feats.shaderImageFloat32AtomicAdd = VK_TRUE;
+	shader_atomic_float_feats.sparseImageFloat32Atomics = VK_TRUE;
+	shader_atomic_float_feats.sparseImageFloat32AtomicAdd = VK_TRUE;
 	
 	VkPhysicalDeviceVulkan13Features physical_device_v13_features{};
 	physical_device_v13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-	physical_device_v13_features.pNext = nullptr;
+	physical_device_v13_features.pNext = &shader_atomic_float_feats;
 	physical_device_v13_features.synchronization2 = VK_TRUE;
 	physical_device_v13_features.dynamicRendering = VK_TRUE;
 

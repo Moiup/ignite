@@ -90,6 +90,9 @@ void MediapipeAndGLTF::start() {
 	_img_sum_pc.width = DefaultConf::render_window_width;
 	_img_sum_pc.height = DefaultConf::render_window_height;
 
+	_img_diff_pc.width = DefaultConf::render_window_width;
+	_img_diff_pc.height = DefaultConf::render_window_height;
+
 	_sem_rend_start.resize(DefaultConf::NB_FRAME);
 	_sem_rend_end.resize(DefaultConf::NB_FRAME);
 	_sem_copy_swap_end.resize(DefaultConf::NB_FRAME);
@@ -222,12 +225,12 @@ void MediapipeAndGLTF::update() {
 		1
 	);
 
-	//c_queue.dispatchBarrier( 
-	//	_image_sum_pipeline,
-	//	(_video_img.getWidth() / 32) + 1,
-	//	(_video_img.getHeight() / 32) + 1,
-	//	1
-	//);
+	c_queue.dispatch( 
+		_image_error_pipeline,
+		(_video_img.getWidth() / 256) + 1,
+		(_video_img.getHeight() / 4) + 1,
+		1
+	);
 	
 	c_queue.copy(
 		_sum_img,
@@ -1177,8 +1180,13 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 		1
 	);
 	_image_error_shader.configureStorageBuffer(
-		"error",
+		"dev_error",
 		2,
+		VK_SHADER_STAGE_COMPUTE_BIT
+	);
+	_image_error_shader.configureStorageBuffer(
+		"stag_error",
+		3,
 		VK_SHADER_STAGE_COMPUTE_BIT
 	);
 	_image_error_shader.configurePushConstant(
@@ -1187,7 +1195,11 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 		sizeof(mdph::ImgDiffPC)
 	);
 
-	_error_buf = StagingBuffer<IGEBufferUsage::storage_buffer>(
+	_error_dev_buf = DeviceBuffer<IGEBufferUsage::storage_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		sizeof(float)
+	);
+	_error_stag_buf = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
 		sizeof(float)
 	);
@@ -1198,7 +1210,8 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 	std::vector<Texture2D*> img2 = { &_rendered_img };
 	_image_error_pipeline.setTextures2D("img1", img1);
 	_image_error_pipeline.setTextures2D("img2", img2);
-	_image_error_pipeline.setStorageBuffer("error", _error_buf);
+	_image_error_pipeline.setStorageBuffer("dev_error", _error_dev_buf);
+	_image_error_pipeline.setStorageBuffer("stag_error", _error_stag_buf);
 	_image_error_pipeline.setPushConstants(&_img_diff_pc);
 
 	_image_error_pipeline.update();

@@ -73,11 +73,6 @@ void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 	physical_device_features2.pNext = &physical_device_v12_features;
 	physical_device_features2.features = features;
 
-	//VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_features{};
-	//dynamic_rendering_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
-	//dynamic_rendering_features.pNext = &physical_device_features2;
-	//dynamic_rendering_features.dynamicRendering = VK_TRUE;
-
 	VkDeviceCreateInfo device_info{};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	device_info.pNext = &physical_device_features2;

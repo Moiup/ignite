@@ -186,7 +186,8 @@ private:
     // -- IMAGE ERROR --
     ComputeShader _image_error_shader;
     ComputePipeline _image_error_pipeline;
-    StagingBuffer<IGEBufferUsage::storage_buffer> _error_buf;
+    DeviceBuffer<IGEBufferUsage::storage_buffer> _error_dev_buf;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _error_stag_buf;
     mdph::ImgDiffPC _img_diff_pc;
 
 public:

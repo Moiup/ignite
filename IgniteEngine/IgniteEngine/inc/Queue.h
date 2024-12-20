@@ -138,6 +138,15 @@ public:
 		const VkSemaphore* pSignalSemaphores = nullptr
 	);
 
+	const void submit(
+		uint32_t waitSemaphorecount,
+		const VkSemaphore* pWaitSemaphores,
+		const VkPipelineStageFlags* pWaitDstStageMask,
+		uint32_t signalSemaphoreCount,
+		const VkSemaphore* pSignalSemaphores,
+		const uint64_t* pSignalSemaphoreValues
+	);
+
 	/**
 	* Flush but with parameters
 	*/
@@ -157,8 +166,10 @@ public:
 		const VkCommandBuffer* pCommandBuffers,
 		uint32_t signalSemaphoreCount,
 		const VkSemaphore* pSignalSemaphores,
-		VkFence fence
+		VkFence fence,
+		VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
 	) const;
+
 
 	const void wait();
 

@@ -405,6 +405,24 @@ const void Queue::submit(
 	uint32_t signalSemaphoreCount,
 	const VkSemaphore* pSignalSemaphores
 ) {
+	submit(
+		waitSemaphorecount,
+		pWaitSemaphores,
+		pWaitDstStageMask,
+		signalSemaphoreCount,
+		pSignalSemaphores,
+		nullptr
+	);
+}
+
+const void Queue::submit(
+	uint32_t waitSemaphorecount,
+	const VkSemaphore* pWaitSemaphores,
+	const VkPipelineStageFlags* pWaitDstStageMask,
+	uint32_t signalSemaphoreCount,
+	const VkSemaphore* pSignalSemaphores,
+	const uint64_t* pSignalSemaphoreValues
+) {
 	VkResult vk_result = vkResetFences(
 		_device->getDevice(),
 		1,
@@ -419,6 +437,14 @@ const void Queue::submit(
 		return;
 	}
 
+	VkTimelineSemaphoreSubmitInfo timeline_sem_submit_info{};
+	timeline_sem_submit_info.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+	timeline_sem_submit_info.pNext = nullptr;
+	timeline_sem_submit_info.waitSemaphoreValueCount = 0;
+	timeline_sem_submit_info.pWaitSemaphoreValues = nullptr;
+	timeline_sem_submit_info.signalSemaphoreValueCount = signalSemaphoreCount;
+	timeline_sem_submit_info.pSignalSemaphoreValues = pSignalSemaphoreValues;
+
 	submit(
 		waitSemaphorecount,
 		pWaitSemaphores,
@@ -427,7 +453,8 @@ const void Queue::submit(
 		getPendingCommandBufferStartPointer(),
 		signalSemaphoreCount,
 		pSignalSemaphores,
-		_fence
+		_fence,
+		&timeline_sem_submit_info
 	);
 
 	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
@@ -449,6 +476,7 @@ const void Queue::submitNoFence(
 		getPendingCommandBufferStartPointer(),
 		signalSemaphoreCount,
 		pSignalSemaphores,
+		nullptr,
 		nullptr
 	);
 
@@ -464,11 +492,12 @@ const void Queue::submit(
 	const VkCommandBuffer* pCommandBuffers,
 	uint32_t signalSemaphoreCount,
 	const VkSemaphore* pSignalSemaphores,
-	VkFence fence
+	VkFence fence,
+	VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSumbintInfo
 ) const {
 	VkSubmitInfo submit_info{};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submit_info.pNext = nullptr;
+	submit_info.pNext = timelineSemaphoreSumbintInfo;
 	submit_info.waitSemaphoreCount = waitSemaphorecount;
 	submit_info.pWaitSemaphores = pWaitSemaphores;
 	submit_info.pWaitDstStageMask = pWaitDstStageMask;

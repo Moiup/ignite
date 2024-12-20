@@ -72,9 +72,10 @@ namespace mdph {
         uint32_t height;
     };
 
-    struct DebugBuff {
+    struct DebugBuf {
         glm::uvec2 pos;
         glm::uvec2 work_group;
+        uint32_t local_index;
     };
 }
 
@@ -181,13 +182,13 @@ private:
     Texture2D _rendered_img;
     Texture2D _sum_img;
     mdph::ImgSumPC _img_sum_pc;
-    StagingBuffer<IGEBufferUsage::storage_buffer> _debug_pos_buf;
 
     // -- IMAGE ERROR --
     ComputeShader _image_error_shader;
     ComputePipeline _image_error_pipeline;
     DeviceBuffer<IGEBufferUsage::storage_buffer> _error_dev_buf;
     StagingBuffer<IGEBufferUsage::storage_buffer> _error_stag_buf;
+    StagingBuffer<IGEBufferUsage::storage_buffer> _debug_buf;
     mdph::ImgDiffPC _img_diff_pc;
 
 public:

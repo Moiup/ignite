@@ -91,6 +91,7 @@ private:
     std::thread _network_thread;
 
     std::mutex _data_mutex;
+    bool is_new_data{ false };
 
     const uint32_t _FRAME_NB_CHANNEL{ 4 };
     std::vector<uint8_t> _frame_data;
@@ -171,6 +172,8 @@ private:
     std::vector<VkSemaphore> _sem_rend_end;
     std::vector<VkSemaphore> _sem_copy_swap_end;
     std::vector<VkSemaphore> _sem_comp_sum_end;
+    std::vector<VkSemaphore> _sem_img_error;
+    uint64_t _sem_img_error_sig_val{ 0 };
     uint32_t _current_queue_i{0};
     uint32_t _to_present_img_i{0};
 

@@ -97,13 +97,22 @@ void MediapipeAndGLTF::start() {
 	_sem_rend_end.resize(DefaultConf::NB_FRAME);
 	_sem_copy_swap_end.resize(DefaultConf::NB_FRAME);
 	_sem_comp_sum_end.resize(DefaultConf::NB_FRAME);
+	_sem_img_error.resize(DefaultConf::NB_FRAME);
 
 	VkSemaphoreCreateInfo sem_info{};
 	sem_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 	sem_info.pNext = nullptr;
 	sem_info.flags = 0;
 
+	VkSemaphoreTypeCreateInfo sem_timeline_info{};
+	sem_timeline_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+	sem_timeline_info.pNext = nullptr;
+	sem_timeline_info.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+	sem_timeline_info.initialValue = 0;
+
+
 	for (int32_t i = 0; i < DefaultConf::NB_FRAME; ++i) {
+		sem_info.pNext = nullptr;
 		vkCreateSemaphore(
 			DefaultConf::logical_device->getDevice()->getDevice(),
 			&sem_info,
@@ -130,6 +139,14 @@ void MediapipeAndGLTF::start() {
 			&sem_info,
 			nullptr,
 			&_sem_comp_sum_end[i]
+		);
+
+		sem_info.pNext = &sem_timeline_info;
+		vkCreateSemaphore(
+			DefaultConf::logical_device->getDevice()->getDevice(),
+			&sem_info,
+			nullptr,
+			&_sem_img_error[i]
 		);
 	}
 
@@ -218,6 +235,13 @@ void MediapipeAndGLTF::update() {
 	);
 
 	// Compute shader: mirror, chroma keying and sum
+	//c_queue.dispatchBarrier(
+	//	_image_sum_pipeline,
+	//	(_video_img.getWidth() / 32) + 1,
+	//	(_video_img.getHeight() / 32) + 1,
+	//	1
+	//);
+
 	c_queue.dispatchBarrier( 
 		_image_sum_pipeline,
 		(_video_img.getWidth() / 256) + 1,
@@ -225,25 +249,39 @@ void MediapipeAndGLTF::update() {
 		1
 	);
 
-	c_queue.dispatch( 
-		_image_error_pipeline,
-		1,
-		(_video_img.getHeight() / 4) + 1,
-		1
-	);
+	uint32_t nb_sem = 1;
+	if (is_new_data) {
+		nb_sem = 2;
+		c_queue.dispatch(
+			_image_error_pipeline,
+			1,
+			(_video_img.getHeight() / 4) + 1,
+			1
+		);
+		is_new_data = false;
+	}
 	
 	c_queue.copy(
 		_sum_img,
 		swapchain.getCurrentImage()
 	);
 
+
+	VkSemaphore sem_arr_comp_sign[2] = {
+		_sem_copy_swap_end[_current_queue_i],
+		_sem_img_error[_current_queue_i]
+	};
+		
+	const uint64_t sig_val[2] = { 0, _sem_img_error_sig_val };
+
 	VkPipelineStageFlags pipeline_comp_stage_flag = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 	c_queue.submit(
 		1,
 		&_sem_rend_end[_current_queue_i],
 		&pipeline_comp_stage_flag,
-		1,
-		&_sem_copy_swap_end[_current_queue_i]
+		nb_sem,
+		&sem_arr_comp_sign[_current_queue_i],
+		sig_val
 	);
 
 	p_queue.present(
@@ -257,13 +295,13 @@ void MediapipeAndGLTF::update() {
 	c_queue.wait();
 	g_queue.wait();
 
-	Pointer<uint8_t> ptr = _error_stag_buf.getValues();
-	float* val = reinterpret_cast<float*>(ptr.data());
-	std::cout << *val << std::endl;
+	//Pointer<uint8_t> ptr = _error_stag_buf.getValues();
+	//float* val = reinterpret_cast<float*>(ptr.data());
+	//std::cout << *val << std::endl;
 
 	_data_mutex.unlock();
 
-	_current_queue_i = (_current_queue_i + 1) % DefaultConf::NB_FRAME;
+	//_current_queue_i = (_current_queue_i + 1) % DefaultConf::NB_FRAME;
 }
 
 void MediapipeAndGLTF::close() {
@@ -342,7 +380,9 @@ void MediapipeAndGLTF::networkProcess() {
 		retargeting(_lfs, *_hand.getSkeleton());
 
 		_data_mutex.lock();
-	
+
+		is_new_data = true;
+		
 		_recv_frame_stag_buff.setValues(_frame_data.data());
 		_hand.setPositionLocale(landmarks._landmarks[0][0] * 30.0f);
 
@@ -355,7 +395,26 @@ void MediapipeAndGLTF::networkProcess() {
 			Object3D::updateJointsTransform(_fake_renderer, _hand_pipeline).data()
 		);
 
+		_sem_img_error_sig_val++;
+		VkSemaphoreWaitInfo sem_wait_info{};
+		sem_wait_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+		sem_wait_info.pNext = nullptr;
+		sem_wait_info.flags = 0;
+		sem_wait_info.semaphoreCount = 1;
+		sem_wait_info.pSemaphores = &_sem_img_error[0];
+		sem_wait_info.pValues = &_sem_img_error_sig_val;
+
 		_data_mutex.unlock();
+
+		vkWaitSemaphores(
+			DefaultConf::logical_device->getDevice()->getDevice(),
+			&sem_wait_info,
+			UINT64_MAX
+		);
+
+		Pointer<uint8_t> ptr = _error_stag_buf.getValues();
+		float* val = reinterpret_cast<float*>(ptr.data());
+		std::cout << *val << std::endl;
 	}
 }
 

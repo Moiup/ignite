@@ -32,24 +32,6 @@ layout(
     local_size_z = LOCAL_SIZE_Z
 ) in;
 
-layout (binding = 0, rgba8ui) readonly uniform uimage2D img1;
-layout (binding = 1, rgba8ui) readonly uniform uimage2D img2;
-
-layout (std430, binding = 2) buffer errorBufferDevice {
-    float error;
-} dev_error;
-
-layout (std430, binding = 3) writeonly buffer errorBufferStaging {
-    float error;
-} stag_error;
-
-shared float shared_error;
-
-layout (push_constant, std430) uniform pc {
-    uint width;
-    uint height;
-};
-
 uvec2 accessor(uint li){
     uint simd_i = li % SIMD_SIZE;
         
@@ -75,41 +57,71 @@ uvec2 imgPosFinder(uvec2 group, uint li){
     return img_pos;
 }
 
+layout (binding = 0, rgba8ui) readonly uniform uimage2D img1;
+layout (binding = 1, rgba8ui) readonly uniform uimage2D img2;
+
+layout (std430, binding = 2) buffer errorBufferDevice {
+    float error;
+} dev_error;
+
+layout (std430, binding = 3) writeonly buffer errorBufferStaging {
+    float error;
+} stag_error;
+
+struct Debug {
+    uvec2 pos;
+    uvec2 work_group;
+    uint local_index;
+};
+
+layout (std430, binding = 4) writeonly buffer debugBuffer {
+    Debug info[];
+} debug_buf;
+
+
+layout (push_constant, std430) uniform pc {
+    uint width;
+    uint height;
+};
+
+shared float shared_error;
+
 void main(){
-    uint local_x = gl_LocalInvocationID.x;
-    uint local_y = gl_LocalInvocationID.y;
-    uint global_x = gl_GlobalInvocationID.x;
-    uint global_y = gl_GlobalInvocationID.y;
-    uint work_group_x = gl_NumWorkGroups.x;
-    uint work_group_y = gl_NumWorkGroups.y;
-    uint local_invocation_index = gl_LocalInvocationIndex;
+    const uint local_x = gl_LocalInvocationID.x;
+    const uint local_y = gl_LocalInvocationID.y;
+    const uint global_x = gl_GlobalInvocationID.x;
+    const uint global_y = gl_GlobalInvocationID.y;
+    const uint work_group_x = gl_WorkGroupID.x;
+    const uint work_group_y = gl_WorkGroupID.y;
+    const uint local_invocation_index = gl_LocalInvocationIndex;
 
     // For each group
     // For each thread, compute the distance pixel to pixel
     // Add the distance into a local variable until line is completed
     // Add the local variable to a shared array variable
     // Take one thread to sum up all the elements of the shared array
-    if(global_y * NB_SWIZZLE_LINE >= height){
+    if(work_group_y * NB_SWIZZLE_LINE >= height || work_group_x * IMG_LOCAL_SIZE_X >= width){
         return;
     }
 
-    if(local_x == 0 && local_y == 0){
-        shared_error = 0;
-    }
+    dev_error.error = 0;
+    stag_error.error = 0;
+    shared_error = 0;
 
-    float local_error = 0;
-
+    barrier();
+    
     uvec2 pos = imgPosFinder(
         uvec2(work_group_x, work_group_y),
         local_invocation_index
     );
 
+    float local_error = 0.0f;
     for(uint g_x = pos.x; g_x < width; g_x += IMG_LOCAL_SIZE_X){
         vec3 p1 = imageLoad(img1, ivec2(g_x, pos.y)).rgb;
-        p1 /= 255.0f;
+        // p1 /= 255.0f;
 
         vec3 p2 = imageLoad(img2, ivec2(g_x, pos.y)).rgb;
-        p2 /= 255.0f;
+        // p2 /= 255.0f;
 
         vec3 p1p2 = p2 - p1;
         float pix_error = dot(p1p2, p1p2);
@@ -119,13 +131,9 @@ void main(){
 
     atomicAdd(shared_error, local_error);
 
-    memoryBarrier();
+    barrier();
 
     if(local_x == 0 && local_y == 0){
-        atomicAdd(dev_error.error, shared_error / float(width * height));
-    }
-
-    if(global_x == 0 && global_y == 0){
-        stag_error.error = dev_error.error;
+        atomicAdd(stag_error.error, shared_error / float(width * height));
     }
 }

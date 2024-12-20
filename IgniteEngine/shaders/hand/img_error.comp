@@ -100,7 +100,12 @@ void main(){
     // Add the distance into a local variable until line is completed
     // Add the local variable to a shared array variable
     // Take one thread to sum up all the elements of the shared array
-    if(work_group_y * NB_SWIZZLE_LINE >= height || work_group_x * IMG_LOCAL_SIZE_X >= width){
+    uvec2 pos = imgPosFinder(
+        uvec2(work_group_x, work_group_y),
+        local_invocation_index
+    );
+
+    if(pos.x >= width || pos.y >= height){
         return;
     }
 
@@ -110,11 +115,6 @@ void main(){
 
     barrier();
     
-    uvec2 pos = imgPosFinder(
-        uvec2(work_group_x, work_group_y),
-        local_invocation_index
-    );
-
     float local_error = 0.0f;
     for(uint g_x = pos.x; g_x < width; g_x += IMG_LOCAL_SIZE_X){
         vec3 p1 = imageLoad(img1, ivec2(g_x, pos.y)).rgb;

@@ -80,14 +80,14 @@ void main(){
     const uint work_group_y = gl_WorkGroupID.y;
     const uint local_invocation_index = gl_LocalInvocationIndex;
 
-    if(work_group_y * NB_SWIZZLE_LINE >= height || work_group_x * NB_SWIZZLE_COL >= width){
-        return;
-    }
-
     uvec2 pos_original = imgPosFinder(
         uvec2(work_group_x, work_group_y),
         local_invocation_index
     );
+
+    if(pos_original.x >= width || pos_original.y >= height){
+        return;
+    }
 
     uvec2 pos_flipped = uvec2(
         width - pos_original.x - 1,

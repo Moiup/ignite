@@ -227,7 +227,7 @@ void MediapipeAndGLTF::update() {
 
 	c_queue.dispatch( 
 		_image_error_pipeline,
-		(_video_img.getWidth() / 256) + 1,
+		1,
 		(_video_img.getHeight() / 4) + 1,
 		1
 	);
@@ -256,6 +256,10 @@ void MediapipeAndGLTF::update() {
 
 	c_queue.wait();
 	g_queue.wait();
+
+	Pointer<uint8_t> ptr = _error_stag_buf.getValues();
+	float* val = reinterpret_cast<float*>(ptr.data());
+	std::cout << *val << std::endl;
 
 	_data_mutex.unlock();
 
@@ -1189,6 +1193,11 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 		3,
 		VK_SHADER_STAGE_COMPUTE_BIT
 	);
+	_image_error_shader.configureStorageBuffer(
+		"debug_buf",
+		4,
+		VK_SHADER_STAGE_COMPUTE_BIT
+	);
 	_image_error_shader.configurePushConstant(
 		VK_SHADER_STAGE_COMPUTE_BIT,
 		0,
@@ -1203,7 +1212,11 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 		DefaultConf::logical_device->getDevice(),
 		sizeof(float)
 	);
-
+	_debug_buf = StagingBuffer<IGEBufferUsage::storage_buffer>(
+		DefaultConf::logical_device->getDevice(),
+		sizeof(mdph::DebugBuf) * DefaultConf::render_window_height * DefaultConf::render_window_width
+	);
+	
 	_image_error_pipeline = ComputePipeline(_image_error_shader);
 	
 	std::vector<Texture2D*> img1 = { &_flipped_img };
@@ -1212,6 +1225,7 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 	_image_error_pipeline.setTextures2D("img2", img2);
 	_image_error_pipeline.setStorageBuffer("dev_error", _error_dev_buf);
 	_image_error_pipeline.setStorageBuffer("stag_error", _error_stag_buf);
+	_image_error_pipeline.setStorageBuffer("debug_buf", _debug_buf);
 	_image_error_pipeline.setPushConstants(&_img_diff_pc);
 
 	_image_error_pipeline.update();

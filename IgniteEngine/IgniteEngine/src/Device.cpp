@@ -109,5 +109,7 @@ VkPhysicalDeviceFeatures Device::featuresManagement() {
 		enabled.fillModeNonSolid = VK_TRUE;
 	}
 
+	enabled.shaderFloat64 = VK_TRUE;
+
 	return enabled;
 }

@@ -387,6 +387,15 @@ void CommandBuffer::copyImageToBuffer(
 	);
 }
 
+void CommandBuffer::copyImageToBuffer(
+	VkCopyImageToBufferInfo2* p_copy_image_to_buffer_info
+) {
+	vkCmdCopyImageToBuffer2(
+		_command_buffer,
+		p_copy_image_to_buffer_info
+	);
+}
+
 void CommandBuffer::copyImageToImage(
 	VkImage src_image,
 	VkImageLayout src_image_layout,

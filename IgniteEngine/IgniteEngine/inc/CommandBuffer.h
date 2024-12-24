@@ -95,6 +95,10 @@ public:
 		const VkBufferImageCopy* p_regions
 	);
 
+	void copyImageToBuffer(
+		VkCopyImageToBufferInfo2* p_copy_image_to_buffer_info
+	);
+
 	void copyImageToImage(
 		VkImage src_image,
 		VkImageLayout src_image_layout,

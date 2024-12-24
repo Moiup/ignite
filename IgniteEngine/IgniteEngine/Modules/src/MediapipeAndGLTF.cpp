@@ -295,9 +295,66 @@ void MediapipeAndGLTF::update() {
 	c_queue.wait();
 	g_queue.wait();
 
-	//Pointer<uint8_t> ptr = _error_stag_buf.getValues();
+#if 0
+	static bool is_first = true;
+	static StagingBuffer<IGEBufferUsage::transfer> debug_flipped_buff;
+	static StagingBuffer<IGEBufferUsage::transfer> debug_rend_buff;
+	if (is_first) {
+		debug_flipped_buff = StagingBuffer<IGEBufferUsage::transfer>(
+			DefaultConf::logical_device->getDevice(),
+			_flipped_img.getWidth() * _flipped_img.getHeight() * sizeof(uint8_t) * 4 
+		);
+
+		debug_rend_buff = StagingBuffer<IGEBufferUsage::transfer>(
+			DefaultConf::logical_device->getDevice(),
+			swapchain.getCurrentImage().getWidth() * swapchain.getCurrentImage().getHeight() * sizeof(uint8_t) * 4
+		);
+		is_first = false;
+	}
+	c_queue.copy(_flipped_img, debug_flipped_buff);
+	c_queue.copy(_rendered_img, debug_rend_buff);
+	c_queue.submit();
+	c_queue.wait();
+
+	uint8_t* flipped_val = static_cast<uint8_t*>(debug_flipped_buff.map());
+	uint8_t* rend_val = static_cast<uint8_t*>(debug_rend_buff.map());
+	double cpu_error = 0;
+	for (int32_t i = 0; i < debug_flipped_buff.getSize(); i += 4) {
+		float flipped_val_tmp = 0;
+		//flipped_val_tmp = flipped_val[i + 0];
+		//flipped_val[i + 0] = flipped_val[i + 2];
+		//flipped_val[i + 2] = flipped_val_tmp;
+		glm::vec3 p1 = glm::vec3(
+			flipped_val[i + 0],
+			flipped_val[i + 1],
+			flipped_val[i + 2]
+		);
+		glm::vec3 p2 = glm::vec3(
+			rend_val[i + 0],
+			rend_val[i + 1],
+			rend_val[i + 2]
+		);
+
+		glm::vec3 p1p2 = p2 - p1;
+		uint32_t dist = glm::dot(p1p2, p1p2);
+
+		cpu_error += dist;
+	}
+	
+	cpu_error = cpu_error / (_rendered_img.getWidth() * _rendered_img.getHeight());
+
+	debug_flipped_buff.unmap();
+	debug_rend_buff.unmap();
+	Pointer<uint8_t> ptr_flipped = debug_flipped_buff.getValues();
 	//float* val = reinterpret_cast<float*>(ptr.data());
-	//std::cout << *val << std::endl;
+	//Pixels p;
+	//p.setPixels(ptr_flipped, _rendered_img.getWidth(), _rendered_img.getHeight());
+	//p.saveFile("test.png");
+
+	Pointer<uint8_t> ptr = _error_stag_buf.getValues();
+	double* val = reinterpret_cast<double*>(ptr.data());
+	std::cout << cpu_error << " -- " << *val << " -- " << cpu_error - *val << std::endl;
+#endif
 
 	_data_mutex.unlock();
 
@@ -412,9 +469,14 @@ void MediapipeAndGLTF::networkProcess() {
 			UINT64_MAX
 		);
 
-		Pointer<uint8_t> ptr = _error_stag_buf.getValues();
-		float* val = reinterpret_cast<float*>(ptr.data());
-		std::cout << *val << std::endl;
+		//Pointer<uint8_t> ptr = _error_stag_buf.getValues();
+		//float* val = reinterpret_cast<float*>(ptr.data());
+
+		double* img_error_ptr = static_cast<double*>(_error_stag_buf.map());
+		double img_error = *img_error_ptr;
+		_error_stag_buf.unmap();
+
+		std::cout << img_error << std::endl;
 	}
 }
 
@@ -1269,7 +1331,7 @@ void MediapipeAndGLTF::createCompImageSumShader() {
 	);
 	_error_stag_buf = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),
-		sizeof(float)
+		sizeof(double)
 	);
 	_debug_buf = StagingBuffer<IGEBufferUsage::storage_buffer>(
 		DefaultConf::logical_device->getDevice(),

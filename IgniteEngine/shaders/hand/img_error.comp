@@ -65,7 +65,7 @@ layout (std430, binding = 2) buffer errorBufferDevice {
 } dev_error;
 
 layout (std430, binding = 3) writeonly buffer errorBufferStaging {
-    float error;
+    double error;
 } stag_error;
 
 struct Debug {
@@ -84,7 +84,7 @@ layout (push_constant, std430) uniform pc {
     uint height;
 };
 
-shared float shared_error;
+shared double shared_error;
 
 void main(){
     const uint local_x = gl_LocalInvocationID.x;
@@ -115,7 +115,7 @@ void main(){
 
     barrier();
     
-    float local_error = 0.0f;
+    double local_error = 0.0f;
     for(uint g_x = pos.x; g_x < width; g_x += IMG_LOCAL_SIZE_X){
         vec3 p1 = imageLoad(img1, ivec2(g_x, pos.y)).rgb;
         // p1 /= 255.0f;
@@ -124,16 +124,16 @@ void main(){
         // p2 /= 255.0f;
 
         vec3 p1p2 = p2 - p1;
-        float pix_error = dot(p1p2, p1p2);
+        double pix_error = dot(p1p2, p1p2);
 
         local_error += pix_error;
     }
 
-    atomicAdd(shared_error, local_error);
+    atomicAdd(shared_error, local_error / (width * height));
 
     barrier();
 
     if(local_x == 0 && local_y == 0){
-        atomicAdd(stag_error.error, shared_error / float(width * height));
+        atomicAdd(stag_error.error, shared_error);
     }
 }

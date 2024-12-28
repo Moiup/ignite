@@ -1,7 +1,55 @@
 #include "Device.h"
 
 Device::Device() {
-	;
+	_shared_count = new int32_t(1);
+}
+
+Device::Device(
+	PhysicalDevice& gpu,
+	std::vector<VkDeviceQueueCreateInfo>& queues_info
+) :
+	Device::Device()
+{
+	configure(&gpu);
+	create(queues_info);
+}
+
+Device::Device(const Device& device) {
+	*this = device;
+}
+
+Device::Device(Device&& device) {
+	*this = std::move(device);
+}
+
+Device& Device::operator=(const Device& device) {
+	destroy();
+	_gpu = device._gpu;
+	_device = device._device;
+	_family_properties = device._family_properties;
+
+	_shared_count = device._shared_count;
+	*_shared_count += 1;
+	
+	return *this;
+}
+
+Device& Device::operator=(Device&& device) {
+	destroy();
+	_gpu = std::move(device)._gpu;
+	device._gpu = nullptr;
+	_device = std::move(device)._device;
+	device._device = nullptr;
+	_family_properties = std::move(device._family_properties);
+
+	_shared_count = std::move(device)._shared_count;
+	device._shared_count = nullptr;
+
+	return *this;
+}
+
+Device::~Device() {
+	destroy();
 }
 
 VkDevice Device::getDevice() {
@@ -12,6 +60,9 @@ PhysicalDevice* Device::getGPU() {
 	return _gpu;
 }
 
+void Device::waitIdle() {
+	vkDeviceWaitIdle(_device);
+}
 
 void Device::configure(PhysicalDevice* gpu) {
 	_gpu = gpu;
@@ -96,6 +147,21 @@ void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 }
 
 void Device::destroy() {
+	if (!_shared_count) {
+		return;
+	}
+
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+
+	delete _shared_count;
+	_shared_count = nullptr;
+
+	if (!_device) {
+		return;
+	}
 	vkDestroyDevice(_device, nullptr);
 }
 

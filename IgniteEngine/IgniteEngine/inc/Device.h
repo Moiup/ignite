@@ -20,18 +20,33 @@ private:
 
 	std::vector<VkQueueFamilyProperties2> _family_properties;
 
+	int32_t* _shared_count{nullptr};
+
 public:
 	Device();
+	Device(
+		PhysicalDevice& gpu,
+		std::vector<VkDeviceQueueCreateInfo>& queues_info
+	);
 
-	void configure(PhysicalDevice* gpu);
+	Device(const Device& device);
+	Device(Device&& device);
+
+	Device& operator=(const Device& device);
+	Device& operator=(Device&& device);
+
+	~Device();
+
 	VkDevice getDevice();
 	PhysicalDevice* getGPU();
 	std::vector<VkQueueFamilyProperties2>& getFamilyProperties();
 
-	void create(std::vector<VkDeviceQueueCreateInfo>& queues_info);
-	void destroy();
+	void waitIdle();
 
 private:
+	void destroy();
+	void configure(PhysicalDevice* gpu);
+	void create(std::vector<VkDeviceQueueCreateInfo>& queues_info);
 	VkPhysicalDeviceFeatures featuresManagement();
 };
 

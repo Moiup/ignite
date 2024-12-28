@@ -2,7 +2,7 @@
 
 Instance::Instance() {
 	setApplicationInfo(
-		"Ingnite",
+		"Ignite",
 		VK_MAKE_VERSION(1, 0, 0),
 		"IngiteEngine",
 		VK_MAKE_VERSION(1, 0, 0),
@@ -10,13 +10,22 @@ Instance::Instance() {
 	);
 }
 
+Instance::Instance(std::vector<std::string>& layer_arr) :
+	Instance::Instance()
+{
+	setExtensionsAndLayers(layer_arr);
+	create();
+}
+
 Instance::Instance(
+	std::vector<std::string>& layer_arr,
 	std::string application_name,
 	uint32_t application_version,
 	std::string engine_name,
 	uint32_t engine_version,
 	uint32_t api_version
 ) {
+	setExtensionsAndLayers(layer_arr);
 	setApplicationInfo(
 		application_name,
 		application_version,
@@ -24,6 +33,41 @@ Instance::Instance(
 		engine_version,
 		api_version
 	);
+	create();
+}
+
+Instance::Instance(const Instance& instance) {
+	*this = instance;
+}
+
+Instance::Instance(Instance&& instance) {
+	*this = std::move(instance);
+}
+
+Instance& Instance::operator=(const Instance& instance) {
+	_instance = instance._instance;
+	_application_info = instance._application_info;
+	_available_layers = instance._available_layers;
+	_extension_count = instance._extension_count;
+	_extensions = instance._extensions;
+
+	return *this;
+}
+
+Instance& Instance::operator=(Instance&& instance) {
+	_instance = std::move(instance)._instance;
+	_application_info = std::move(instance)._application_info;
+	_available_layers = std::move(instance._available_layers);
+	_extension_count = std::move(instance)._extension_count;
+	_extensions = std::move(instance._extensions);
+
+	instance._instance = nullptr;
+
+	return *this;
+}
+
+Instance::~Instance() {
+	destroy();
 }
 
 void Instance::setApplicationInfo(
@@ -42,7 +86,7 @@ void Instance::setApplicationInfo(
 	_application_info.apiVersion = api_version;
 }
 
-void Instance::setExtensionsAndLayers(std::vector<std::string> layer_arr) {
+void Instance::setExtensionsAndLayers(std::vector<std::string>& layer_arr) {
 	// Instance Extensions
 	/*_extensions = glfwGetRequiredInstanceExtensions(&_extension_count);*/
 
@@ -81,6 +125,67 @@ const VkInstance& Instance::getInstance() const {
 	return _instance;
 }
 
+void Instance::displayAvailableGPUs() {
+	std::vector<PhysicalDevice> gpus = enumeratePhysicalDevices();
+
+	int32_t gpu_id = 0;
+	std::cout << "--------------------------" << std::endl;
+	for (auto& gpu : gpus) {
+		std::cout << "gpu id: " << gpu_id << std::endl;
+		gpu.displayProperties();
+		std::cout << "--------------------------" << std::endl;
+
+		gpu_id++;
+	}
+}
+
+PhysicalDevice Instance::getGPU(uint32_t gpu_id) {
+	std::vector<PhysicalDevice> gpus = enumeratePhysicalDevices();
+	return gpus[gpu_id];
+}
+
+PhysicalDevice Instance::getDefaultGPU() {
+	std::vector<PhysicalDevice> gpus = enumeratePhysicalDevices();
+
+	for (auto& gpu : gpus) {
+		if (gpu.getProperties().deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+			return gpu;
+		}
+	}
+	return gpus[0];
+}
+
+std::vector<PhysicalDevice> Instance::enumeratePhysicalDevices() {
+	std::vector<VkPhysicalDevice> vk_gpus;
+	std::vector<PhysicalDevice> gpus;
+	uint32_t gpus_count{ 0 };
+	VkResult vk_result{};
+
+	vk_result = vkEnumeratePhysicalDevices(
+		_instance,
+		&gpus_count,
+		nullptr
+	);
+	if (vk_result != VK_SUCCESS) {
+		throw std::runtime_error("Unable to get physical device count.");
+	}
+	vk_gpus.resize(gpus_count);
+	vk_result = vkEnumeratePhysicalDevices(
+		_instance,
+		&gpus_count,
+		vk_gpus.data()
+	);
+	if (vk_result != VK_SUCCESS) {
+		throw std::runtime_error("Unable to get the physical device(s).");
+	}
+
+	for (auto& vk_gpu : vk_gpus) {
+		gpus.push_back(PhysicalDevice(vk_gpu));
+	}
+
+	return gpus;
+}
+
 void Instance::create() {
 	VkInstanceCreateInfo vk_instance_create_info{};
 	vk_instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -102,11 +207,13 @@ void Instance::create() {
 }
 
 void Instance::destroy() {
-	if (_instance) {
-		vkDestroyInstance(_instance, nullptr);
+	if (!_instance) {
+		return;
+	}
+	vkDestroyInstance(_instance, nullptr);
 
-		for (auto layer : _available_layers) {
-			free(layer);
-		}
+	for (auto layer : _available_layers) {
+		free(layer);
 	}
 }
+

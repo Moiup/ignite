@@ -5,7 +5,7 @@
 
 GraphicsPipelineConfiguration DefaultConf::configuration;
 uint32_t DefaultConf::NB_FRAME = 2;
-DefaultGPU* DefaultConf::gpu;
+PhysicalDevice* DefaultConf::gpu;
 LogicalDevice* DefaultConf::logical_device;
 GraphicsPipeline* DefaultConf::graphics_pipeline;
 GraphicsPipeline* DefaultConf::debug_pipeline;

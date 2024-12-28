@@ -1,7 +1,6 @@
 #pragma once
 
 #include "LogicalDevice.h"
-#include "DefaultGPU.h"
 #include "Buffer.h"
 //#include "CameraScene.h"
 #include "GraphicShader.h"
@@ -19,7 +18,7 @@ class DefaultConf
 public:
 	static GraphicsPipelineConfiguration configuration;
 	static uint32_t NB_FRAME;
-	static DefaultGPU* gpu;
+	static PhysicalDevice* gpu;
 	static LogicalDevice* logical_device;
 	static GraphicsPipeline* graphics_pipeline;
 	static GraphicsPipeline* debug_pipeline;

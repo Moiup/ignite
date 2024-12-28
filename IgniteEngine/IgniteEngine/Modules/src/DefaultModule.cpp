@@ -15,10 +15,6 @@ void DefaultModule::init() {
 		SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN,
 		*DefaultConf::instance
 	);
-	_render_window.setInstance(DefaultConf::instance);
-	_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
-	_render_window.setWidth(DefaultConf::render_window_width);
-	_render_window.setHeight(DefaultConf::render_window_height);
 
 	DefaultConf::render_window = &_render_window;
 
@@ -276,8 +272,7 @@ void DefaultModule::start() {
 	_graphics_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer);
 
 	// Sampler
-	_sampler.setDevice(DefaultConf::logical_device->getDevice());
-	_sampler.create();
+	_sampler = Sampler(*DefaultConf::logical_device->getDevice());
 	_graphics_pipeline.setSamplers("samp", { &_sampler });
 
 	// Textures
@@ -336,7 +331,7 @@ void DefaultModule::update() {
 	//img2.getQueue()->submit();
 	//img2.getQueue()->wait();
 
-#if 0
+#if 1
 	_obj_tr_buffer.setValues(
 		Object3D::updateTransformMatrices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
@@ -348,5 +343,5 @@ void DefaultModule::update() {
 void DefaultModule::close() {
 	Module::close();
 
-
+	_renderer.destroy();
 }

@@ -1,19 +1,30 @@
 #pragma once
-#include "Instance.h"
+#include "vulkan/vulkan.h"
+#include <vector>
+#include <iostream>
+#include <string>
+
+class Instance;
 
 class PhysicalDevice
 {
+	friend Instance;
+
 private:
-	VkPhysicalDevice _gpu;
-	VkPhysicalDeviceMemoryProperties _memory_properties;
+	VkPhysicalDevice _gpu{nullptr};
 
 public:
 	PhysicalDevice();
 
-	virtual void configure();
+	VkPhysicalDeviceProperties getProperties();
+	void displayProperties();
 
 	const VkPhysicalDevice& getGPU() const;
-	void setGPU(VkPhysicalDevice& gpu);
-	VkPhysicalDeviceMemoryProperties* getMemoryProperties();
+	VkPhysicalDeviceMemoryProperties getMemoryProperties();
+	std::vector<VkQueueFamilyProperties2> getQueueFamilyProperties();
+
+private:
+	PhysicalDevice(VkPhysicalDevice gpu);
+	std::string makeString(VkPhysicalDeviceType type);
 };
 

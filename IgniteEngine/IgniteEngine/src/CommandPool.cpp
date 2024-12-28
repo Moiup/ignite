@@ -18,6 +18,8 @@ CommandPool::CommandPool(const CommandPool& cp)
 }
 
 CommandPool& CommandPool::operator=(const CommandPool& cp) {
+	destroy();
+
 	_pool = { cp._pool };
 	_device = { cp._device };
 	_flags = { cp._flags };
@@ -35,11 +37,7 @@ bool CommandPool::operator==(const CommandPool& cp) {
 }
 
 CommandPool::~CommandPool() {
-	*_shared_count -= 1;
-	if (!*_shared_count) {
-		destroy();
-		delete _shared_count;
-	}
+	destroy();
 }
 
 void CommandPool::setDevice(Device* device) {
@@ -108,9 +106,11 @@ CommandBuffer& CommandPool::newCommandBuffer() {
 		throw std::runtime_error("Error: failed allocating command buffer!");
 	}
 
-	CommandBuffer cmd_buf;
-	cmd_buf._command_buffer = vk_cmd_buf;
-	cmd_buf._level = info.level;
+	CommandBuffer cmd_buf = CommandBuffer(
+		vk_cmd_buf,
+		info.level
+	);
+	
 	_vk_cmd_buffs->push_back(vk_cmd_buf);
 	_cmd_buffs->push_back(cmd_buf);
 
@@ -122,6 +122,16 @@ std::vector<CommandBuffer>& CommandPool::commandBuffers() {
 }
 
 void CommandPool::destroy() {
+	if (!_shared_count) {
+		return;
+	}
+
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+
 	if (!_pool) {
 		return;
 	}

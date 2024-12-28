@@ -26,23 +26,20 @@ void EngineApp::init() {
 	ImGui::StyleColorsDark();
 
 	// Instance
-	_instance.setExtensionsAndLayers({
+	std::vector<std::string> instance_layer = {
 		"VK_LAYER_KHRONOS_validation"
-	});
-	_instance.create();
+	};
+	_instance = Instance(instance_layer);
 
-	//// Setting window
-	////const VkInstance& insta = _instance.getInstance();
-	////_render_window.setInstance(const_cast<VkInstance*>(&insta));
-	////_render_window.setInstance(&_instance);
-	////_render_window.setFlags(SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
-
+	_instance.displayAvailableGPUs();
+	
 	// Initialising
-	_gpu.configure(_instance);
+	_gpu = _instance.getDefaultGPU();
+	std::cout << "Selected GPU:" << std::endl;
+	_gpu.displayProperties();
 	
 	// Initialising logical device and queues
-	_logical_device.setGPU(&_gpu);
-	_logical_device.configure();
+	_logical_device.setGPU(_gpu);
 	_logical_device.defineQueue(
 		"graphics_queues",
 		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
@@ -326,7 +323,7 @@ void EngineApp::update() {
 		//std::cout << delta_time << "\t" << static_cast<uint32_t>(1000 / delta_time) << std::endl;
 	}
 
-	DefaultConf::logical_device->waitIdle();
+	DefaultConf::logical_device->getDevice()->waitIdle();
 }
 
 void EngineApp::close() {
@@ -357,6 +354,8 @@ void EngineApp::close() {
 	//_logical_device.destroy();
 
 	//_instance.destroy();
+
+	closeEngineEntities();
 }
 
 void EngineApp::initEngineEntities() {
@@ -381,8 +380,8 @@ void EngineApp::updateEngineEntities() {
 }
 
 void EngineApp::closeEngineEntities() {
-	while (EngineEntity::engine_entities.size()) {
-		EngineEntity* e = EngineEntity::engine_entities[0];
+	for (int32_t i = 0; i < EngineEntity::engine_entities.size(); ++i) {
+		EngineEntity* e = EngineEntity::engine_entities[i];
 		e->close();
 	}
 

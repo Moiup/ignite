@@ -8,18 +8,25 @@ class Sampler
 {
 private:
 	VkSamplerCreateInfo _info;
-	VkSampler _sampler;
+	VkSampler _sampler{ nullptr };
 
-	Device* _device;
+	Device* _device{ nullptr };
+
+	int32_t* _shared_count{ nullptr };
 
 public:
 	Sampler();
+	Sampler(Device& device);
+	Sampler(const Sampler& s);
+	Sampler(Sampler&& s);
+	~Sampler();
 
-	void create();
-	void destroy();
+	Sampler& operator=(const Sampler& s);
+	Sampler& operator=(Sampler&& s);
 
 	const VkSampler getSampler() const;
 
+private:
 	void setDevice(Device* device);
 
 	void setPNext(const void* p_next);
@@ -39,5 +46,8 @@ public:
 	void setMaxLod(float max_lod);
 	void setBorderColor(VkBorderColor border_color);
 	void setUnnormalizedCoordinates(VkBool32 unnormalized_coordinates);
+
+	void create();
+	void destroy();
 };
 

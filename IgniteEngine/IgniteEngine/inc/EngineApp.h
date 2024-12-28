@@ -3,7 +3,7 @@
 #include "App.h"
 
 #include "Instance.h"
-#include "DefaultGPU.h"
+#include "PhysicalDevice.h"
 #include "Window.h"
 #include "WindowSurface.h"
 #include "LogicalDevice.h"
@@ -32,7 +32,7 @@ class EngineApp: public App
 {
 private:
 	Instance _instance;
-	DefaultGPU _gpu;
+	PhysicalDevice _gpu;
 	LogicalDevice _logical_device;
 	//WindowSurface _render_window;
 	//GraphicShader _graphic_shader;

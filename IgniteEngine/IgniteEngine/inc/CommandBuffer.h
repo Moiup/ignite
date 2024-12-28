@@ -14,7 +14,10 @@ private:
 
 public:
 	CommandBuffer();
-
+	CommandBuffer(
+		VkCommandBuffer command_buffer,
+		VkCommandBufferLevel level
+	);
 	CommandBuffer(const CommandBuffer& cmd_buf);
 	//CommandBuffer(CommandBuffer&& cmd_buf);
 

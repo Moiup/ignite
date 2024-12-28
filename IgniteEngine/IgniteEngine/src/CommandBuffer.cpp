@@ -7,6 +7,16 @@ CommandBuffer::CommandBuffer() :
 	;
 }
 
+CommandBuffer::CommandBuffer(
+	VkCommandBuffer command_buffer,
+	VkCommandBufferLevel level
+) :
+	_command_buffer{command_buffer},
+	_level{level}
+{
+	;
+}
+
 CommandBuffer::CommandBuffer(const CommandBuffer& cmd_buf) :
 	_command_buffer {cmd_buf._command_buffer},
 	_level{cmd_buf._level}
@@ -19,7 +29,6 @@ CommandBuffer::CommandBuffer(const CommandBuffer& cmd_buf) :
 //}
 
 CommandBuffer& CommandBuffer::operator=(const CommandBuffer& cmd_buf) {
-
 	return CommandBuffer(cmd_buf);
 }
 

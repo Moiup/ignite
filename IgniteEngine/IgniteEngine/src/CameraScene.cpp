@@ -102,7 +102,9 @@ void CameraScene::update() {
 	}
 }
 
-void CameraScene::close() { ; }
+void CameraScene::close() { 
+	EngineEntity::close();
+}
 
 void CameraScene::setCamera(Camera* camera) {
 	_camera = camera;

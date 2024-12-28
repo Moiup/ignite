@@ -1,0 +1,25 @@
+Done:
+ - Queue
+ - Pipeline
+ - GraphicsPipeline
+ - ComputePipeline
+ - Swapchain
+ - Ressource
+ - Buffer
+ - Image
+ - Texture 2D
+ - Depth Buffer
+ - Staging Buffer
+ - Device Buffer
+ - Device
+ - Sampler
+
+In progress:
+
+To Do:
+ - Instance
+ - Command Buffer
+ - Shader
+ - Compute Shader
+ - Graphic Shader
+ - Command Pool

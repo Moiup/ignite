@@ -19,6 +19,8 @@ private:
 	//const char** _extensions;
 	std::vector<const char*> _extensions;
 
+	int32_t* _shared_count{ nullptr };
+
 public:
 	Instance();
 	Instance(std::vector<std::string>& layer_arr);
@@ -58,6 +60,8 @@ private:
 	void setExtensionsAndLayers(std::vector<std::string>& layer_arr);
 	void create();
 	void destroy();
+	void destroyInstance();
+	void freeLayers();
 	std::vector<PhysicalDevice> enumeratePhysicalDevices();
 };
 

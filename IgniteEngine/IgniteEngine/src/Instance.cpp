@@ -8,6 +8,8 @@ Instance::Instance() {
 		VK_MAKE_VERSION(1, 0, 0),
 		VK_API_VERSION_1_3
 	);
+
+	_shared_count = new int32_t(1);
 }
 
 Instance::Instance(std::vector<std::string>& layer_arr) :
@@ -24,7 +26,9 @@ Instance::Instance(
 	std::string engine_name,
 	uint32_t engine_version,
 	uint32_t api_version
-) {
+) :
+	Instance::Instance()
+{
 	setExtensionsAndLayers(layer_arr);
 	setApplicationInfo(
 		application_name,
@@ -45,23 +49,30 @@ Instance::Instance(Instance&& instance) {
 }
 
 Instance& Instance::operator=(const Instance& instance) {
+	destroy();
 	_instance = instance._instance;
 	_application_info = instance._application_info;
 	_available_layers = instance._available_layers;
 	_extension_count = instance._extension_count;
 	_extensions = instance._extensions;
 
+	_shared_count = instance._shared_count;
+	*_shared_count += 1;
+
 	return *this;
 }
 
 Instance& Instance::operator=(Instance&& instance) {
+	destroy();
 	_instance = std::move(instance)._instance;
+	instance._instance = nullptr;
 	_application_info = std::move(instance)._application_info;
 	_available_layers = std::move(instance._available_layers);
 	_extension_count = std::move(instance)._extension_count;
 	_extensions = std::move(instance._extensions);
 
-	instance._instance = nullptr;
+	_shared_count = std::move(instance)._shared_count;
+	instance._shared_count = nullptr;
 
 	return *this;
 }
@@ -207,11 +218,30 @@ void Instance::create() {
 }
 
 void Instance::destroy() {
+	if (!_shared_count) {
+		return;
+	}
+
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+	_shared_count = nullptr;
+
+	destroyInstance();
+	freeLayers();
+}
+
+void Instance::destroyInstance() {
 	if (!_instance) {
 		return;
 	}
 	vkDestroyInstance(_instance, nullptr);
+	_instance = nullptr;
+}
 
+void Instance::freeLayers() {
 	for (auto layer : _available_layers) {
 		free(layer);
 	}

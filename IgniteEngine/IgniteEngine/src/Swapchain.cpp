@@ -4,7 +4,7 @@ Swapchain::Swapchain() :
 	_swapchain{},
 	_info{}
 {
-	nb_shared = new int32_t(1);
+	_nb_shared = new int32_t(1);
 
 	// -- Swapchain infos -- //
 	_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -100,7 +100,12 @@ Swapchain::Swapchain(const Swapchain& swapchain) {
 	*this = swapchain;
 }
 
+Swapchain::Swapchain(Swapchain&& swapchain) {
+	*this = std::move(swapchain);
+}
+
 Swapchain& Swapchain::operator=(const Swapchain& swapchain) {
+	destroy();
 	_device = swapchain._device;
 	_swapchain = swapchain._swapchain;
 	_info = swapchain._info;
@@ -108,18 +113,31 @@ Swapchain& Swapchain::operator=(const Swapchain& swapchain) {
 	_images = swapchain._images;
 	_image_view_info = swapchain._image_view_info;
 
-	nb_shared = swapchain.nb_shared;
-	*nb_shared += 1;
+	_nb_shared = swapchain._nb_shared;
+	*_nb_shared += 1;
+
+	return *this;
+}
+
+Swapchain& Swapchain::operator=(Swapchain&& swapchain) {
+	destroy();
+	_device = std::move(swapchain)._device;
+	swapchain._device = nullptr;
+	_swapchain = std::move(swapchain)._swapchain;
+	swapchain._swapchain = nullptr;
+	_info = std::move(swapchain)._info;
+	_image_count = std::move(swapchain)._image_count;
+	_images = std::move(swapchain._images);
+	_image_view_info = std::move(swapchain)._image_view_info;
+
+	_nb_shared = std::move(swapchain)._nb_shared;
+	swapchain._nb_shared = nullptr;
 
 	return *this;
 }
 
 Swapchain::~Swapchain() {
-	*nb_shared -= 1;
-	if (!*nb_shared) {
-		destroy();
-		delete nb_shared;
-	}
+	destroy();
 }
 
 void Swapchain::setDevice(Device* device) {
@@ -260,11 +278,16 @@ const VkSwapchainKHR& Swapchain::getSwapchain() const {
 }
 
 void Swapchain::destroy() {
-	if (!_swapchain) {
+	if (!_nb_shared) {
 		return;
 	}
+	*_nb_shared -= 1;
+	if (*_nb_shared) {
+		return;
+	}
+	delete _nb_shared;
+
 	destroySwapchain();
-	destroyImageViews();
 }
 
 void Swapchain::createSwapchain() {
@@ -336,15 +359,21 @@ void Swapchain::createImagesViews(){
 }
 
 void Swapchain::destroySwapchain() {
+	if (!_swapchain) {
+		return;
+	}
+
 	vkDestroySwapchainKHR(
 		_device->getDevice(),
 		_swapchain,
 		nullptr
 	);
+
+	for (uint32_t i = 0; i < _image_count; i++) {
+		_images[i]._image = nullptr;
+	}
 }
 
 void Swapchain::destroyImageViews() {
-	//for (uint32_t i = 0; i < _image_count; i++) {
-	//	_images[i].destroyImageView();
-	//}
+	
 }

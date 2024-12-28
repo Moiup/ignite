@@ -35,7 +35,9 @@ public:
 	);
 
 	Texture2D(const Texture2D& tex);
+	Texture2D(Texture2D&& tex);
 	Texture2D& operator=(const Texture2D& tex);
+	Texture2D& operator=(Texture2D&& tex);
 
 	const VkSampler getSampler() const;
 
@@ -43,5 +45,6 @@ public:
 
 private:
 	void setSampler(Sampler& sampler);
+	void destroy();
 };
 

@@ -38,8 +38,10 @@ public:
 	);
 
 	GraphicsPipeline(const GraphicsPipeline& gp);
+	GraphicsPipeline(GraphicsPipeline&& gp);
 
 	GraphicsPipeline& operator=(const GraphicsPipeline& gp);
+	GraphicsPipeline& operator=(GraphicsPipeline&& gp);
 
 	void setVertexBuffer(
 		const std::string& name,

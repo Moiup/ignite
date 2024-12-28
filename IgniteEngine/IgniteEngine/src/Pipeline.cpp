@@ -23,16 +23,16 @@ Pipeline::Pipeline(const Pipeline& pipeline) {
 	*this = pipeline;
 }
 
+Pipeline::Pipeline(Pipeline&& pipeline) {
+	*this = std::move(pipeline);
+}
+
 Pipeline::~Pipeline() {
-	*_shared_count -= 1;
-	if (*_shared_count) {
-		return;
-	}
-	delete _shared_count;
 	destroy();
 }
 
 Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
+	destroy();
 	_shader = pipeline._shader;
 
 	_descriptor_set_layout = pipeline._descriptor_set_layout;
@@ -51,6 +51,32 @@ Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
 
 	_shared_count = pipeline._shared_count;
 	*_shared_count += 1;
+
+	return *this;
+}
+
+Pipeline& Pipeline::operator=(Pipeline&& pipeline) {
+	destroy();
+	_shader = pipeline._shader;
+
+	_descriptor_set_layout = std::move(pipeline._descriptor_set_layout);
+	_descriptor_pool = std::move(pipeline)._descriptor_pool;
+	_descriptor_sets = std::move(pipeline._descriptor_sets);
+	_pipeline_layout = std::move(pipeline)._pipeline_layout;
+	_pipeline = std::move(pipeline)._pipeline;
+	pipeline._pipeline = nullptr;
+
+	_is_changed = std::move(pipeline)._is_changed;
+
+	_descriptor_buffer_infos = std::move(pipeline._descriptor_buffer_infos);
+	_descriptor_image_infos = std::move(pipeline._descriptor_image_infos);
+	_write_descriptor_sets = std::move(pipeline._write_descriptor_sets);
+
+	_push_constants = std::move(pipeline)._push_constants;
+	pipeline._push_constants = nullptr;
+
+	_shared_count = std::move(pipeline)._shared_count;
+	pipeline._shared_count = nullptr;
 
 	return *this;
 }
@@ -78,6 +104,16 @@ void Pipeline::create() {
 }
 
 void Pipeline::destroy() {
+	if (!_shared_count) {
+		return;
+	}
+
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+
 	destroyPipeline();
 	destroyDescriptorSet();
 	destroyPipelineLayout();

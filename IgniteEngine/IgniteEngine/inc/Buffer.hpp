@@ -11,8 +11,6 @@ protected:
 	VkDeviceSize _capacity{ 0 };
 	VkDeviceSize _size{ 0 };
 
-	int32_t* _nb_shared{nullptr};
-
 	Buffer();
 	Buffer(
 		Device* device,
@@ -21,9 +19,11 @@ protected:
 
 public:
 	Buffer(const Buffer<U>& buf);
+	Buffer(Buffer<U>&& buf);
 	~Buffer();
 
 	Buffer<U>& operator=(const Buffer<U>& buf);
+	Buffer<U>& operator=(Buffer<U>&& buf);
 
 	void setValues(void* values);
 	void bind();

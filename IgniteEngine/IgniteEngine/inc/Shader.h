@@ -8,7 +8,6 @@
 #include "IndexBufferInfo.h"
 #include "ArrayBufferInfo.h"
 #include "Sampler.h"
-#include "SamplerInfo.h"
 #include "TextureInfo.h"
 #include "Texture2D.h"
 

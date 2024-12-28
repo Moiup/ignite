@@ -24,7 +24,6 @@ public:
 
 	void render();
 
-
 	Image& getCurrentFrame();
 
 protected:

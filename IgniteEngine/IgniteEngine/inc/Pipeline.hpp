@@ -24,11 +24,13 @@ protected:
 
 protected:
 	Pipeline();
-	Pipeline(const Pipeline& pipeline);
 	Pipeline(Shader& shader);
+	Pipeline(const Pipeline& pipeline);
+	Pipeline(Pipeline&& pipeline);
 	~Pipeline();
 
 	Pipeline& operator=(const Pipeline& pipeline);
+	Pipeline& operator=(Pipeline&& pipeline);
 
 	void create();
 	void destroy();

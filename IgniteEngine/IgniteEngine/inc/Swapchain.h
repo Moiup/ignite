@@ -18,7 +18,7 @@ private:
 	VkImageViewCreateInfo _image_view_info;
 	uint32_t _current_image_i{0};
 
-	int32_t* nb_shared{nullptr};
+	int32_t* _nb_shared{nullptr};
 
 public:
 	Swapchain();
@@ -32,9 +32,11 @@ public:
 		uint32_t height
 	);
 	Swapchain(const Swapchain& swapchain);
+	Swapchain(Swapchain&& swapchain);
 	~Swapchain();
 
 	Swapchain& operator=(const Swapchain& swapchain);
+	Swapchain& operator=(Swapchain&& swapchain);
 
 	void setDevice(Device* _device);
 

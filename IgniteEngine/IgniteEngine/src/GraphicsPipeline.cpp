@@ -21,12 +21,27 @@ GraphicsPipeline::GraphicsPipeline(const GraphicsPipeline& gp) {
 	*this = gp;
 }
 
+GraphicsPipeline::GraphicsPipeline(GraphicsPipeline&& gp) {
+	*this = gp;
+}
+
 GraphicsPipeline& GraphicsPipeline::operator=(const GraphicsPipeline& gp) {
 	Pipeline::operator=(gp);
 
 	_pipeline_conf = gp._pipeline_conf;
 	_vertex_buffers = gp._vertex_buffers;
 	_index_buffer = gp._index_buffer;
+
+	return *this;
+}
+
+GraphicsPipeline& GraphicsPipeline::operator=(GraphicsPipeline&& gp) {
+	Pipeline::operator=(std::move(gp));
+
+	_pipeline_conf = std::move(gp)._pipeline_conf;
+	_vertex_buffers = std::move(gp._vertex_buffers);
+	_index_buffer = std::move(gp)._index_buffer;
+	gp._index_buffer = nullptr;
 
 	return *this;
 }

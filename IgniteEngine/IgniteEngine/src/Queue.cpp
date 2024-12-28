@@ -12,23 +12,17 @@ Queue::Queue(const Queue& q)
 	*this = q;
 }
 
+Queue::Queue(Queue&& q)
+{
+	*this = std::move(q);
+}
+
 Queue::~Queue() {
-	removeCommandPool();
-
-	*_shared_count -= 1;
-	if (!*_shared_count) {
-		delete _shared_count;
-	}
-
-	if (!_command_pools) {
-		delete _command_pools;
-		delete _pending_command_buffers;
-		_command_pools = nullptr;
-		_pending_command_buffers = nullptr;
-	}
+	destroy();
 }
 
 Queue& Queue::operator=(const Queue& q) {
+	destroy();
 	_queue = q._queue;
 	_device = q._device;
 	_fence = q._fence;
@@ -40,7 +34,29 @@ Queue& Queue::operator=(const Queue& q) {
 	_shared_count = q._shared_count;
 	*_shared_count += 1;
 
-	removeCommandPool();
+	addCommandPool();
+
+	return *this;
+}
+
+Queue& Queue::operator=(Queue&& q) {
+	destroy();
+	_queue = std::move(q)._queue;
+	q._queue = nullptr;
+	_device = std::move(q)._device;
+	q._device = nullptr;
+	_fence = std::move(q)._fence;
+	q._fence = nullptr;
+	_family_index = std::move(q)._family_index;
+	_command_pool_indices = std::move(q)._command_pool_indices;
+
+	_command_pools = std::move(q)._command_pools;
+	q._command_pools = nullptr;
+	_pending_command_buffers = std::move(q)._pending_command_buffers;
+	q._pending_command_buffers = nullptr;
+	_shared_count = std::move(q)._shared_count;
+	q._shared_count = nullptr;
+
 	addCommandPool();
 
 	return *this;
@@ -63,6 +79,7 @@ void Queue::create() {
 	);
 
 	addCommandPool();
+	createFence();
 }
 
 const CommandPool& Queue::getCommandPool() const {
@@ -96,7 +113,7 @@ CommandBuffer& Queue::newCommandBuffer() {
 	return cmd_buf;
 }
 
-void Queue::addCommandPool(VkFenceCreateFlags flags) {
+void Queue::addCommandPool() {
 	if (_command_pool.getPool()) {
 		return;
 	}
@@ -109,22 +126,6 @@ void Queue::addCommandPool(VkFenceCreateFlags flags) {
 
 	_command_pool = cmd_pool;
 	_command_pools->push_front(_command_pool);
-
-	VkFenceCreateInfo fence_info{};
-	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fence_info.pNext = nullptr;
-	fence_info.flags = flags;
-
-	_fence = nullptr;
-	VkResult vk_result = vkCreateFence(
-		_device->getDevice(),
-		&fence_info,
-		nullptr,
-		&_fence
-	);
-	if (vk_result != VK_SUCCESS) {
-		throw std::runtime_error("Error: failed creating fence!");
-	}
 }
 
 void Queue::removeCommandPool() {
@@ -136,6 +137,36 @@ void Queue::removeCommandPool() {
 				break;
 			}
 		}
+	}
+}
+
+void Queue::destroy() {
+	if (!_shared_count) {
+		return;
+	}
+
+	removeCommandPool();
+
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+
+	if (_command_pools) {
+		delete _command_pools;
+		delete _pending_command_buffers;
+		_command_pools = nullptr;
+		_pending_command_buffers = nullptr;
+	}
+
+	if (_fence) {
+		vkDestroyFence(
+			_device->getDevice(),
+			_fence,
+			nullptr
+		);
+		_fence = nullptr;
 	}
 }
 
@@ -579,12 +610,21 @@ void Queue::waitIdle() {
 	vkQueueWaitIdle(_queue);
 }
 
-void Queue::createFence() {
-	VkFenceCreateInfo info{};
+void Queue::createFence(VkFenceCreateFlags flags) {
+	VkFenceCreateInfo fence_info{};
+	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fence_info.pNext = nullptr;
+	fence_info.flags = flags;
 
-	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	info.pNext = nullptr;
-	info.flags = 0;
+	VkResult vk_result = vkCreateFence(
+		_device->getDevice(),
+		&fence_info,
+		nullptr,
+		&_fence
+	);
+	if (vk_result != VK_SUCCESS) {
+		throw std::runtime_error("Error: failed creating fence!");
+	}
 }
 
 void Queue::copy(Image& src, Image& dst,

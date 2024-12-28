@@ -3,8 +3,10 @@
 #include "Buffer.hpp"
 
 template<IGEBufferUsage U>
-Buffer<U>::Buffer() {
-	_nb_shared = new int32_t(1);
+Buffer<U>::Buffer() :
+	Ressource::Ressource()
+{
+
 }
 
 template<IGEBufferUsage U>
@@ -35,19 +37,37 @@ Buffer<U>::Buffer(const Buffer<U>& buf) {
 }
 
 template<IGEBufferUsage U>
+Buffer<U>::Buffer(Buffer<U>&& buf) {
+	*this = std::move(buf);
+}
+
+template<IGEBufferUsage U>
 Buffer<U>::~Buffer() {
 	destroy();
 }
 
 template<IGEBufferUsage U>
 Buffer<U>& Buffer<U>::operator=(const Buffer<U>& buf) {
+	destroy();
 	Ressource::operator=(buf);
 	_buffer = buf._buffer;
 	_buffer_info = buf._buffer_info;
 	_capacity = buf._capacity;
 	_size = buf._size;
-	_nb_shared = buf._nb_shared;
-	*_nb_shared += 1;
+
+	return *this;
+}
+
+template<IGEBufferUsage U>
+Buffer<U>& Buffer<U>::operator=(Buffer<U>&& buf) {
+	destroy();
+	Ressource::operator=(std::move(buf));
+	_buffer = std::move(buf)._buffer;
+	buf._buffer = nullptr;
+	_buffer_info = std::move(buf)._buffer_info;
+	_capacity = std::move(buf)._capacity;
+	_size = std::move(buf)._size;
+
 	return *this;
 }
 
@@ -63,16 +83,13 @@ void Buffer<U>::create() {
 
 template<IGEBufferUsage U>
 void Buffer<U>::destroy() {
-	*_nb_shared -= 1;
-	if(*_nb_shared){
+	if (getNbShared() > 1) {
 		return;
 	}
-	delete _nb_shared;
 
 	if (!_buffer) {
 		return;
 	}
-	freeMemory();
 	destroyBuffer();
 }
 

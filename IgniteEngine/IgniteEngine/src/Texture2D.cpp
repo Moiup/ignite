@@ -38,10 +38,23 @@ Texture2D::Texture2D(const Texture2D& tex) {
 	*this = tex;
 }
 
+Texture2D::Texture2D(Texture2D&& tex) {
+	*this = std::move(tex);
+}
 
 Texture2D& Texture2D::operator=(const Texture2D& tex) {
+	destroy();
 	Image::operator=(tex);
 	_sampler = tex._sampler;
+
+	return *this;
+}
+
+Texture2D& Texture2D::operator=(Texture2D&& tex) {
+	destroy();
+	Image::operator=(std::move(tex));
+	_sampler = std::move(tex)._sampler;
+	tex._sampler = nullptr;
 
 	return *this;
 }
@@ -56,4 +69,8 @@ const VkSampler Texture2D::getSampler() const {
 
 const uint8_t Texture2D::getNbComponents() const {
 	return _n;
+}
+
+void Texture2D::destroy() {
+	_sampler = nullptr;
 }

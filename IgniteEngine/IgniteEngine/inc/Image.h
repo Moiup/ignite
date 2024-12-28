@@ -4,10 +4,12 @@
 #include <vector>
 
 class Queue;
+class Swapchain;
 
 class Image: public Ressource
 {
 	friend Queue;
+	friend Swapchain;
 protected:
 	static const uint8_t _n{ 4 };
 
@@ -16,8 +18,6 @@ protected:
 
 	VkImageCreateInfo _image_info{};
 	VkImageViewCreateInfo _image_view_info{};
-
-	int32_t* _nb_shared;
 
 protected:
 	Image(
@@ -39,10 +39,12 @@ public:
 		VkImageViewCreateInfo view_info
 	);
 	Image(const Image& img);
+	Image(Image&& img);
 
 	~Image();
 
 	Image& operator=(const Image& img);
+	Image& operator=(Image&& img);
 
 protected:
 	void createImage();

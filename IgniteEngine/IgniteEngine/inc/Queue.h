@@ -40,11 +40,12 @@ private:
 public:
 	Queue();
 	Queue(const Queue& q);
-	//Queue(Queue&& q);
+	Queue(Queue&& q);
 
 	~Queue();
 
 	Queue& operator=(const Queue& q);
+	Queue& operator=(Queue&& q);
 
 	void setDevice(Device* device);
 	void setFamilyIndex(uint32_t family_index);
@@ -186,9 +187,11 @@ public:
 	void waitIdle();
 
 private:
-	void createFence();
-	void addCommandPool(VkFenceCreateFlags flags = VK_FENCE_CREATE_SIGNALED_BIT);
+	void createFence(VkFenceCreateFlags flags = VK_FENCE_CREATE_SIGNALED_BIT);
+	void addCommandPool();
 	void removeCommandPool();
+	
+	void destroy();
 
 	// Methods that does not create command buffer
 	void changeLayout(

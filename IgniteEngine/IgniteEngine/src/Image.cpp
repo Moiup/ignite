@@ -1,11 +1,10 @@
 #include "Image.h"
 
-Image::Image()
+Image::Image() :
+	Ressource::Ressource()
 {
 	_image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	_image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-
-	_nb_shared = new int32_t(1);
 }
 
 Image::Image(
@@ -66,19 +65,33 @@ Image::Image(const Image& img) {
 	*this = img;
 }
 
+Image::Image(Image&& img) {
+	*this = std::move(img);
+}
+
 Image& Image::operator=(const Image& img) {
+	destroy();
 	Ressource::operator=(img);
 	_image = img._image;
 	_image_view = img._image_view;
 	_image_info = img._image_info;
 	_image_view_info = img._image_view_info;
-
-	_nb_shared = img._nb_shared;
-	*_nb_shared += 1;
 	
 	return *this;
 }
 
+Image& Image::operator=(Image&& img) {
+	destroy();
+	Ressource::operator=(std::move(img));
+	_image = std::move(img)._image;
+	img._image = nullptr;
+	_image_view = std::move(img)._image_view;
+	img._image_view = nullptr;
+	_image_info = std::move(img)._image_info;
+	_image_view_info = std::move(img)._image_view_info;
+
+	return *this;
+}
 
 Image::~Image() {
 	destroy();
@@ -132,34 +145,37 @@ void Image::create() {
 
 
 void Image::destroyImage() {
+	if (!_image) {
+		return;
+	}
+
 	vkDestroyImage(
 		_device->getDevice(),
 		_image,
 		nullptr
 	);
+	_image = nullptr;
 }
 
 
 void Image::destroyImageView() {
+	if (!_image_view) {
+		return;
+	}
 	vkDestroyImageView(
 		_device->getDevice(),
 		_image_view,
 		nullptr
 	);
+	_image_view = nullptr;
 }
 
 
 void Image::destroy() {
-	*_nb_shared -= 1;
-	if (_nb_shared) {
+	if (getNbShared() > 1) {
 		return;
 	}
-	delete _nb_shared;
 
-	if (!_image) {
-		return;
-	}
-	freeMemory();
 	destroyImage();
 	destroyImageView();
 }

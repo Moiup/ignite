@@ -18,9 +18,8 @@ private:
 public:
 	LogicalDevice();
 
-	void setGPU(PhysicalDevice* gpu);
+	void setGPU(PhysicalDevice& gpu);
 
-	void configure();
 	bool defineQueue(std::string name, std::vector<VkQueueFlagBits> flags, uint32_t count);
 	std::vector<Queue>& getQueues(const std::string& name);
 
@@ -29,8 +28,6 @@ public:
 	Device* getDevice();
 	PhysicalDevice* getGPU();
 
-	void waitIdle();
-
 private:
 	bool isFlag(VkQueueFlags family_flags, std::vector<VkQueueFlagBits> flags);
 
@@ -38,7 +35,7 @@ private:
 		std::vector<VkDeviceQueueCreateInfo>& queues_info,
 		std::unordered_map<uint32_t, std::vector<float>>& priorities
 	);
-	void createLogicalDevice(std::vector<VkDeviceQueueCreateInfo> &queues_info);
+
 	void gettingTheQueues();
 };
 

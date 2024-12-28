@@ -42,7 +42,6 @@ set(HEADERS
     inc/ComputeShader.h
     inc/DefaultConf.h
     inc/DefaultDispatcher.h
-    inc/DefaultGPU.h
     inc/DefaultRenderer.h
     inc/DepthBuffer.h
     inc/DeviceBuffer.h
@@ -114,7 +113,6 @@ set(SRC
     src/ComputeShader.cpp
     src/DefaultConf.cpp
     src/DefaultDispatcher.cpp
-    src/DefaultGPU.cpp
     src/DefaultRenderer.cpp
     src/DepthBuffer.cpp
     src/Device.cpp

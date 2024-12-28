@@ -16,8 +16,9 @@ public:
 	
 	~EngineEntity();
 
-
 	EngineEntity& operator=(const EngineEntity& e);
+
+	int32_t getNbShared();
 
 	virtual void init() = 0;
 	virtual void start() = 0;
@@ -29,7 +30,11 @@ public:
 	static void updateAll();
 	static void closeAll();
 
+protected:
+	virtual void destroy();
+	virtual void clean();
+
 private:
-	void destroy();
+	void deleteEntity(const EngineEntity& entity);
 };
 

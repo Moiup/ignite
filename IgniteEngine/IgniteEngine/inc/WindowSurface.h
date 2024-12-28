@@ -7,14 +7,12 @@
 class WindowSurface: public Window
 {
 private:
-	VkSurfaceKHR _surface;
-	Instance* _instance;
-	int32_t* _nb_shared{ nullptr };
+	VkSurfaceKHR _surface{ nullptr };
+	Instance* _instance{ nullptr };
 
 public:
 	WindowSurface();
 	WindowSurface(const std::string& name, uint32_t width, uint32_t height, uint32_t flags, Instance& instance);
-
 	WindowSurface(const WindowSurface& ws);
 
 	~WindowSurface();
@@ -32,5 +30,6 @@ public:
 private:
 	void create();
 	void destroy();
+	void clean();
 };
 

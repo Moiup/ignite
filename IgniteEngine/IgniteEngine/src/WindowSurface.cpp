@@ -22,14 +22,15 @@ WindowSurface::WindowSurface(const WindowSurface& ws) {
 }
 
 WindowSurface::~WindowSurface() {
-	close();
+	destroy();
 }
 
 WindowSurface& WindowSurface::operator=(const WindowSurface& ws) {
+	WindowSurface::destroy();
 	Window::operator=(ws);
 
 	_surface = ws._surface;
-	_instance = _instance;
+	_instance = ws._instance;
 
 	return *this;
 }
@@ -41,7 +42,6 @@ void WindowSurface::init() {
 
 void WindowSurface::close() {
 	Window::close();
-
 }
 
 void WindowSurface::setInstance(Instance* instance) {
@@ -89,7 +89,7 @@ void WindowSurface::create() {
 	//	throw std::runtime_error("WindowSurface::create: failed creating surface.");
 	//}
 
-	SDL_bool  sdl_result = SDL_Vulkan_CreateSurface(
+	SDL_bool sdl_result = SDL_Vulkan_CreateSurface(
 		getWindow(),
 		_instance->getInstance(),
 		&_surface
@@ -100,5 +100,17 @@ void WindowSurface::create() {
 }
 
 void WindowSurface::destroy() {
+	if (getNbShared() > 1) {
+		return;
+	}
+
+	if (!_surface) {
+		return;
+	}
 	vkDestroySurfaceKHR(_instance->getInstance(), _surface, nullptr);
+}
+
+void WindowSurface::clean() {
+	destroy();
+	Window::clean();
 }

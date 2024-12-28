@@ -4,29 +4,42 @@ WindowUI::WindowUI() :
 	Window::Window(),
 	_renderer{nullptr}
 {
-	setDefaultFlags();
+	;
 }
 
 WindowUI::WindowUI(std::string name) :
-	Window::Window(name),
+	Window::Window(name, DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI),
 	_renderer{ nullptr }
 {
-	setDefaultFlags();
+	create();
 }
 
 WindowUI::WindowUI(uint32_t width, uint32_t height) :
-	Window::Window(width, height),
+	Window::Window("", width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI),
 	_renderer{ nullptr }
 {
-	setDefaultFlags();
+	create();
 }
 
 WindowUI::WindowUI(std::string name, uint32_t width, uint32_t height) :
-	Window::Window(name, width, height),
+	Window::Window(name, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI),
 	_renderer{nullptr}
 {
-	setDefaultFlags();
+	create();
 }
+
+WindowUI::WindowUI(const WindowUI& w) {
+	*this = w;
+}
+
+WindowUI& WindowUI::operator=(const WindowUI& w) {
+	WindowUI::destroy();
+	Window::operator=(w);
+	_renderer = w._renderer;
+
+	return *this;
+}
+
 
 void WindowUI::init() {
 	;
@@ -37,7 +50,7 @@ void WindowUI::start() {
 
 
 void WindowUI::create() {
-	Window::create();
+	//Window::create();
 	// Initializing SDL
 	_renderer = SDL_CreateRenderer(
 		getWindow(),
@@ -54,6 +67,13 @@ void WindowUI::create() {
 }
 
 void WindowUI::destroy() {
+	if (getNbShared() > 1) {
+		return;
+	}
+
+	if (!_renderer) {
+		return;
+	}
 	ImGui_ImplSDLRenderer2_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 
@@ -62,8 +82,9 @@ void WindowUI::destroy() {
 	SDL_Quit();
 }
 
-void WindowUI::setDefaultFlags() {
-	setFlags(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+void WindowUI::clean() {
+	destroy();
+	Window::clean();
 }
 
 void WindowUI::newFrame() {

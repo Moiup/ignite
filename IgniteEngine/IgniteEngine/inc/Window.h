@@ -12,27 +12,30 @@
 
 class Window: public EngineEntity
 {
+public:
+	static const uint32_t DEFAULT_WIDTH{1280};
+	static const uint32_t DEFAULT_HEIGHT{720};
+
 private:
 	static uint32_t _last_w_id;
 	uint32_t _w_id;
 
-	const uint32_t DEFAULT_WIDTH{1280};
-	const uint32_t DEFAULT_HEIGHT{720};
-	const std::string DEFAULT_NAME{ "Ignite" };
 	uint32_t _width{1600};
 	uint32_t _height{900};
-	uint32_t _flags;  
+	uint32_t _flags{ SDL_WINDOW_SHOWN };
 
 	//GLFWwindow* _window;
-	SDL_Window* _window;
-	std::string _name;
+	SDL_Window* _window{ nullptr };
+	std::string _name = "";
 
 public:
 	Window();
 	Window(std::string name);
 	Window(uint32_t width, uint32_t height);
 	Window(std::string name, uint32_t width, uint32_t height);
+	Window(std::string name, uint32_t width, uint32_t height, uint32_t flags);
 	Window(const Window& w);
+	~Window();
 
 	Window& operator=(const Window& w);
 
@@ -59,5 +62,6 @@ public:
 protected:
 	void create();
 	void destroy();
+	void clean();
 };
 

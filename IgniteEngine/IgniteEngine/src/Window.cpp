@@ -4,21 +4,23 @@ Window::Window() :
 	EngineEntity::EngineEntity(),
 	_window{ nullptr }
 {
-	setParam(DEFAULT_NAME, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	setParam("", DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
 
 Window::Window(std::string name) :
 	EngineEntity::EngineEntity(),
 	_window{ nullptr }
 {
-	setParam(name, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	setParam("", DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	create();
 }
 
 Window::Window(uint32_t width, uint32_t height) :
 	EngineEntity::EngineEntity(),
 	_window{ nullptr }
 {
-	setParam(DEFAULT_NAME, width, height);
+	setParam("", width, height);
+	create();
 }
 
 Window::Window(std::string name, uint32_t width, uint32_t height) : 
@@ -26,13 +28,33 @@ Window::Window(std::string name, uint32_t width, uint32_t height) :
 	_window{ nullptr }
 {
 	setParam(name, width, height);
+	create();
+}
+
+Window::Window(
+	std::string name,
+	uint32_t width,
+	uint32_t height,
+	uint32_t flags
+) :
+	EngineEntity::EngineEntity(),
+	_window{ nullptr }
+{
+	setParam(name, width, height);
+	setFlags(flags);
+	create();
 }
 
 Window::Window(const Window& w) {
 	*this = w;
 }
 
+Window::~Window() {
+	destroy();
+}
+
 Window& Window::operator=(const Window& w) {
+	Window::destroy();
 	EngineEntity::operator=(w);
 
 	_w_id = w._w_id;
@@ -107,7 +129,6 @@ uint32_t Window::getId() const {
 
 void Window::init() {
 	EngineEntity::init();
-	create();
 }
 
 void Window::start() { 
@@ -133,10 +154,19 @@ void Window::create() {
 }
 
 void Window::destroy() {
+	if (getNbShared() > 1) {
+		return;
+	}
+
 	if (_window == nullptr) {
 		return;
 	}
 
 	//glfwDestroyWindow(_window);
 	SDL_DestroyWindow(_window);
+}
+
+void Window::clean() {
+	destroy();
+	EngineEntity::clean();
 }

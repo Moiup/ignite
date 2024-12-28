@@ -14,6 +14,9 @@ public:
 	WindowUI(std::string name);
 	WindowUI(uint32_t width, uint32_t height);
 	WindowUI(std::string name, uint32_t width, uint32_t height);
+	WindowUI(const WindowUI& w);
+
+	WindowUI& operator=(const WindowUI& w);
 
 	void init();
 	void start();
@@ -21,11 +24,9 @@ public:
 	void newFrame();
 	void present();
 
+private:
 	void create();
 	void destroy();
-
-private:
-	void setDefaultFlags();
-
+	void clean();
 };
 

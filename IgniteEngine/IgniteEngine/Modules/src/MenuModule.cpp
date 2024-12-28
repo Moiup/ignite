@@ -15,8 +15,7 @@ void MenuModule::init() {
 void MenuModule::start() {
 	Module::start();
 
-	_menu_window.setName("Menu");
-	_menu_window.create();
+	_menu_window = WindowUI("Menu");
 	_menu_window.newFrame();
 };
 

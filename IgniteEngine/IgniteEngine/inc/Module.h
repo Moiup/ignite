@@ -25,7 +25,7 @@ public:
 	virtual void init() = 0;
 	virtual void start() = 0;
 	virtual void update() = 0;
-	void close() = 0;
+	virtual void close() = 0;
 
 	static void initAll();
 	static void startAll();

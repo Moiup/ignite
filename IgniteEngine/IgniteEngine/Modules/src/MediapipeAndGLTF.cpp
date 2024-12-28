@@ -916,9 +916,7 @@ void MediapipeAndGLTF::createLBSShader() {
 	);
 
 	// Sampler
-	_sampler_hand.setDevice(DefaultConf::logical_device->getDevice());
-	_sampler_hand.create();
-
+	_sampler_hand = Sampler(*DefaultConf::logical_device->getDevice());
 	
 	// --------------------- //
 	// Creating the pipeline //

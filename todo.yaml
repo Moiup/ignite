@@ -1,3 +1,4 @@
+Shader count and Copy / Move constructor and assignment methods
 Done:
  - Queue
  - Pipeline
@@ -13,13 +14,22 @@ Done:
  - Device Buffer
  - Device
  - Sampler
+ - Instance
+ - Command Pool
+ - Command Buffer
 
 In progress:
 
 To Do:
- - Instance
- - Command Buffer
  - Shader
  - Compute Shader
  - Graphic Shader
- - Command Pool
+
+
+Check if files / Classes are still used:
+ - SamplerInfo
+ - ArrayBufferInfo
+ - IndexBufferInfo
+ - PushConstantInfo
+ - TextureInfo
+ - VertexBufferInfo 

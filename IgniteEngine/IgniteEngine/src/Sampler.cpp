@@ -20,6 +20,54 @@ Sampler::Sampler() :
 	_info.maxLod = 0.0f;
 	_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	_info.unnormalizedCoordinates = VK_FALSE;
+
+	_shared_count = new int32_t(1);
+}
+
+Sampler::Sampler(Device& device) :
+	Sampler::Sampler()
+{
+	_device = &device;
+	create();
+}
+
+Sampler::Sampler(const Sampler& s) {
+	*this = s;
+}
+
+Sampler::Sampler(Sampler&& s) {
+	*this = std::move(s);
+}
+
+Sampler::~Sampler() {
+	destroy();
+}
+
+Sampler& Sampler::operator=(const Sampler& s) {
+	destroy();
+
+	_info = s._info;
+	_sampler = s._sampler;
+	_device = s._device;
+	_shared_count = s._shared_count;
+	*_shared_count += 1;
+
+	return *this;
+}
+
+Sampler& Sampler::operator=(Sampler&& s) {
+	destroy();
+	
+	_info = std::move(s)._info;
+	_sampler = std::move(s)._sampler;
+	s._sampler = nullptr;
+	_device = std::move(s)._device;
+	s._device = nullptr;
+	
+	_shared_count = std::move(s)._shared_count;
+	s._shared_count = nullptr;
+
+	return *this;
 }
 
 void Sampler::create() {
@@ -36,6 +84,21 @@ void Sampler::create() {
 }
 
 void Sampler::destroy() {
+	if (!_shared_count) {
+		return;
+	}
+
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+
+	delete _shared_count;
+	_shared_count = nullptr;
+
+	if (!_sampler) {
+		return;
+	}
 	vkDestroySampler(
 		_device->getDevice(),
 		_sampler,

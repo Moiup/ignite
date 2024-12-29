@@ -22,8 +22,10 @@ public:
 	GraphicShader();
 	GraphicShader(Device& device, const std::string& vertex_shader, const std::string& fragment_shader);
 	GraphicShader(const GraphicShader& shader);
+	GraphicShader(GraphicShader&& shader);
 
 	GraphicShader& operator=(const GraphicShader& shader);
+	GraphicShader& operator=(GraphicShader&& shader);
 
 	void configureVertexBuffer(
 		const std::string& name,

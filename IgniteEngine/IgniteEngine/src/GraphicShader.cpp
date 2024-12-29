@@ -21,10 +21,22 @@ GraphicShader::GraphicShader(const GraphicShader& shader) {
 	*this = shader;
 }
 
+GraphicShader::GraphicShader(GraphicShader&& shader) {
+	*this = std::move(shader);
+}
+
 GraphicShader& GraphicShader::operator=(const GraphicShader& shader) {
 	Shader::operator=(shader);
 	_vertex_input_descs = shader._vertex_input_descs;
 	_index_buffer_info = shader._index_buffer_info;
+
+	return *this;
+}
+
+GraphicShader& GraphicShader::operator=(GraphicShader&& shader) {
+	Shader::operator=(shader);
+	_vertex_input_descs = std::move(shader)._vertex_input_descs;
+	_index_buffer_info = std::move(shader)._index_buffer_info;
 
 	return *this;
 }

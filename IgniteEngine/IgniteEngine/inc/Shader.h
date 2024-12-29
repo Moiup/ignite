@@ -36,9 +36,11 @@ public:
 	Shader();
 	Shader(Device& device);
 	Shader(const Shader& shader);
+	Shader(Shader&& shader);
 	~Shader();
 
 	Shader& operator=(const Shader& shader);
+	Shader& operator=(Shader&& shader);
 
 	void setDevice(Device* device);
 	Device* getDevice();

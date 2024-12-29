@@ -14,22 +14,35 @@ Shader::Shader(const Shader& shader) {
 	*this = shader;
 }
 
+Shader::Shader(Shader&& shader) {
+	*this = std::move(shader);
+}
+
 Shader::~Shader() {
-	*_shared_count -= 1;
-	if (*_shared_count) {
-		return;
-	}
-	delete _shared_count;
 	destroy();
 }
 
 Shader& Shader::operator=(const Shader& shader) {
+	destroy();
 	_shader_stages = shader._shader_stages;
 	_push_constant_range = shader._push_constant_range;
 	_desc_layout_bindings = shader._desc_layout_bindings;
 	_device = shader._device;
 	_shared_count = shader._shared_count;
 	*_shared_count += 1;
+
+	return *this;
+}
+
+Shader& Shader::operator=(Shader&& shader) {
+	destroy();
+	_shader_stages = std::move(shader._shader_stages);
+	_push_constant_range = std::move(shader)._push_constant_range;
+	_desc_layout_bindings = std::move(shader._desc_layout_bindings);
+	_device = std::move(shader)._device;
+	shader._device = nullptr;
+	_shared_count = std::move(shader)._shared_count;
+	shader._shared_count = nullptr;
 
 	return *this;
 }
@@ -150,6 +163,16 @@ void Shader::configureStorageTexture2D(
 
 
 void Shader::destroy() {
+	if (!_shared_count) {
+		return;
+	}
+
+	*_shared_count -= 1;
+	if (*_shared_count) {
+		return;
+	}
+	delete _shared_count;
+
 	for (auto& stage : _shader_stages) {
 		vkDestroyShaderModule(
 			_device->getDevice(),

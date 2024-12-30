@@ -3,12 +3,8 @@
 #include "PhysicalDevice.h"
 #include "Device.h"
 #include "Buffer.h"
-#include "PushConstantInfo.h"
-#include "VertexBufferInfo.h"
 #include "IndexBufferInfo.h"
-#include "ArrayBufferInfo.h"
 #include "Sampler.h"
-#include "TextureInfo.h"
 #include "Texture2D.h"
 
 #include <unordered_map>

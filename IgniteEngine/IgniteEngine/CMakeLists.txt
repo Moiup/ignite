@@ -31,7 +31,6 @@ include_directories(
 
 set(HEADERS    
     inc/App.h
-    inc/ArrayBufferInfo.h
     inc/Buffer.h
     inc/Buffer.hpp
     inc/Camera.h
@@ -78,7 +77,6 @@ set(HEADERS
     inc/Pixels.h
     inc/Pointer.h
     inc/Pointer.hpp
-    inc/PushConstantInfo.h
     inc/Queue.h
     inc/ReadWriteImageMod.h
     inc/Renderer.h
@@ -86,7 +84,6 @@ set(HEADERS
     inc/resource.h
     inc/Ressource.h
     inc/Sampler.h
-    inc/SamplerInfo.h
     # inc/SecondaryMocapHeaderNetwork.h
     inc/Shader.h
     inc/Skeleton.h
@@ -95,8 +92,6 @@ set(HEADERS
     inc/StagingBuffer.hpp
     inc/Swapchain.h
     inc/Texture2D.h
-    inc/TextureInfo.h
-    inc/VertexBufferInfo.h
     inc/Window.h
     inc/WindowSurface.h
     inc/WindowUI.h
@@ -104,7 +99,6 @@ set(HEADERS
 
 set(SRC
     src/App.cpp
-    src/ArrayBufferInfo.cpp
     src/Camera.cpp
     src/CameraScene.cpp
     src/CommandBuffer.cpp
@@ -143,22 +137,18 @@ set(SRC
     src/PhysicalDevice.cpp
     src/Pipeline.cpp
     src/Pixels.cpp
-    src/PushConstantInfo.cpp
     src/Queue.cpp
     src/ReadWriteImageMod.cpp
     src/Renderer.cpp
     src/RendererDisplayImage.cpp
     src/Ressource.cpp
     src/Sampler.cpp
-    src/SamplerInfo.cpp
     # src/SecondaryMocapHeaderNetwork.cpp
     src/Shader.cpp
     src/Skeleton.cpp
     src/SkeletonDebug.cpp
     src/Swapchain.cpp
     src/Texture2D.cpp
-    src/TextureInfo.cpp
-    src/VertexBufferInfo.cpp
     src/Window.cpp
     src/WindowSurface.cpp
     src/WindowUI.cpp

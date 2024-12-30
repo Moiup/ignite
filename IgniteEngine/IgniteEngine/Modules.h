@@ -26,8 +26,8 @@ private:
 
 	//TestModule _test_module;
 	//MediapipeModule _mediapipe_module;
-	//MediapipeAndGLTF _mediapipe_and_gltf;
-	Bistro _bistro;
+	MediapipeAndGLTF _mediapipe_and_gltf;
+	//Bistro _bistro;
 	//ComputeShaderTest _compute_shader_test;
 	//ReadWriteImageMod _read_write_image_mod;
 	//Hand2D _hand2d;

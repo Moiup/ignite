@@ -13,6 +13,3 @@
 [submodule "IgniteEngine/IgniteEngine/libs/glm/glm"]
 	path = IgniteEngine/IgniteEngine/libs/glm/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "IgniteEngine/IgniteEngine/libs/esocket/esocket"]
-	path = IgniteEngine/IgniteEngine/libs/esocket/esocket
-	url = https://github.com/Moiup/esocket.git

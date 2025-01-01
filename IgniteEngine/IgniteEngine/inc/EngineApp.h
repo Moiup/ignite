@@ -30,6 +30,8 @@ private:
 public:
 	EngineApp();
 
+	void launch();
+
 	void init();
 	void start();
 	void update();

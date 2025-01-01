@@ -6,6 +6,13 @@ EngineApp::EngineApp() :
 	;
 }
 
+void EngineApp::launch() {
+	init();
+	start();
+	update();
+	close();
+}
+
 void EngineApp::init() {
 	App::init();
 	//glfwInit();

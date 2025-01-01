@@ -4,10 +4,7 @@
 int main(int argc, char* argv[]) {
     EngineApp app{};
 
-    app.init();
-    app.start();
-    app.update();
-    app.close();
+    app.launch();
 
     return 0;
 }

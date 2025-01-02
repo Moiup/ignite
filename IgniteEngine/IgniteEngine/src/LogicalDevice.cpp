@@ -52,7 +52,6 @@ void LogicalDevice::create() {
 	std::vector<VkDeviceQueueCreateInfo> queues_info{};
 	std::unordered_map<uint32_t, std::vector<float>> priorities{};
 	createQueueCreateInfo(queues_info, priorities);
-	//_device.configure(_gpu);
 	_device = Device(
 		*_gpu,
 		queues_info

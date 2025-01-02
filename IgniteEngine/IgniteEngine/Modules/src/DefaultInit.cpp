@@ -81,7 +81,7 @@ void DefaultInit::init() {
 	DefaultConf::depth_buffer = &_depth_buffer;
 
 	// White Texture
-	Pixels pixels("../../assets/textures/white.png");
+	Pixels pixels("../assets/textures/white.png");
 	_white_texture = Texture2D(
 		DefaultConf::logical_device->getDevice(),
 		pixels.getWidth(),

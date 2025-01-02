@@ -35,8 +35,8 @@ void DefaultRenderingModule::start() {
 	//-----------//
 	_graphics_shader = GraphicShader(
 		*DefaultConf::logical_device->getDevice(),
-		"../../shaders/vert.vert",
-		"../../shaders/frag.frag"
+		"../shaders/vert.vert",
+		"../shaders/frag.frag"
 	);
 
 	// -- Vertex Shader -- //

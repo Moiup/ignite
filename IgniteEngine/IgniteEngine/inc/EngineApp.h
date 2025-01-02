@@ -25,7 +25,7 @@ private:
 	PhysicalDevice _gpu;
 	LogicalDevice _logical_device;
 
-	Modules _modules;
+	//Modules _modules;
 
 public:
 	EngineApp();

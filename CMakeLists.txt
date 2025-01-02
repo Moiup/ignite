@@ -130,7 +130,6 @@ set(SRC
 )
 
 set(IG_MAIN_FILES
-    ${IGNITE_PATH}/Modules.cpp
     ${IGNITE_PATH}/Modules.h
 )
 

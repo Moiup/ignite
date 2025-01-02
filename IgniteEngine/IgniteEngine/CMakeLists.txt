@@ -156,7 +156,6 @@ set(SRC
 
 set(IG_MAIN_FILES
     IgniteEngine.cpp
-    Modules.cpp
     Modules.h
 )
 

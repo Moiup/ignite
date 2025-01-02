@@ -9,7 +9,7 @@
 
 //#include "TestModule.h"
 #include "MediapipeModule.h"
-#include "MediapipeAndGLTF.h"
+//#include "MediapipeAndGLTF.h"
 #include "Bistro.h"
 //#include "ComputeShaderTest.h"
 //#include "ReadWriteImageMod.h"

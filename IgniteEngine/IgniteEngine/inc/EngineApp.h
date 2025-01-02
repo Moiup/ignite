@@ -51,7 +51,7 @@ private:
 	//StorageBuffer _materials_buffer;
 	//Sampler _sampler;
 
-	Modules _modules;
+	//Modules _modules;
 
 	//CameraScene _camera;
 	//glm::mat4 _cam_mvp;

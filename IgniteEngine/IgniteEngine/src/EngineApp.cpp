@@ -293,7 +293,7 @@ void EngineApp::update() {
 			ImGui_ImplSDL2_ProcessEvent(&event);
 			if (event.type == SDL_QUIT 
 				|| event.window.event == SDL_WINDOWEVENT_CLOSE
-				 && event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())) {
+				 /*&& event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())*/) {
 				break;
 			}
 		}

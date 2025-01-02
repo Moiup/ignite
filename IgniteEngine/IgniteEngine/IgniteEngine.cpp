@@ -4,7 +4,8 @@
 struct LaunchedModules {
     MenuModule menu;
     Bistro bistro;
-    DefaultModule default_module;
+    DefaultInit init_module;
+    DefaultRenderingModule default_module;
 };
 
 int main(int argc, char* argv[]) {

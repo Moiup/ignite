@@ -62,7 +62,7 @@ glm::vec3 Camera::getUp() {
 	return _up;
 }
 
-glm::mat4 Camera::getView() {
+glm::mat4 Camera::getView() const {
 	glm::mat4 view = glm::lookAt(
 		_eye,
 		_center,
@@ -72,7 +72,7 @@ glm::mat4 Camera::getView() {
 	return view;
 }
 
-glm::mat4 Camera::getClip() {
+glm::mat4 Camera::getClip() const {
 	return _clip;
 }
 

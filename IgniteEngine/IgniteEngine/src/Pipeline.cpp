@@ -184,9 +184,30 @@ void Pipeline::setSamplers(
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	uint32_t offset = _descriptor_image_infos.size();
+	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	for (const Sampler* s : samp) {
-		_descriptor_image_infos[name].push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = _descriptor_image_infos[name].back();
+		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		desc_img_info.sampler = s->getSampler();
+		desc_img_info.imageView = nullptr;
+		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	}
+
+	write.pBufferInfo = nullptr;
+	write.pImageInfo = _descriptor_image_infos[name].data();
+	write.pTexelBufferView = nullptr;
+}
+
+void Pipeline::setSamplers(
+	const std::string& name,
+	std::initializer_list<Sampler*> samp
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	uint32_t offset = _descriptor_image_infos.size();
+	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	for (const Sampler* s : samp) {
+		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
 		desc_img_info.sampler = s->getSampler();
 		desc_img_info.imageView = nullptr;
 		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -203,16 +224,37 @@ void Pipeline::setTextures2D(
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	uint32_t offset = _descriptor_image_infos.size();
+	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	for (const Texture2D* t : textures) {
-		_descriptor_image_infos[name].push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = _descriptor_image_infos[name].back();
+		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
 		desc_img_info.sampler = t->getSampler();
 		desc_img_info.imageView = t->getImageView();
 		desc_img_info.imageLayout = t->getImageLayout();
 	}
 
 	write.pBufferInfo = nullptr;
-	write.pImageInfo = _descriptor_image_infos[name].data();
+	write.pImageInfo = descriptor_image_infos.data();
+	write.pTexelBufferView = nullptr;
+}
+
+void Pipeline::setTextures2D(
+	const std::string& name,
+	std::initializer_list<Texture2D*> textures
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	uint32_t offset = _descriptor_image_infos.size();
+	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	for (const Texture2D* t : textures) {
+		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		desc_img_info.sampler = t->getSampler();
+		desc_img_info.imageView = t->getImageView();
+		desc_img_info.imageLayout = t->getImageLayout();
+	}
+
+	write.pBufferInfo = nullptr;
+	write.pImageInfo = descriptor_image_infos.data();
 	write.pTexelBufferView = nullptr;
 }
 

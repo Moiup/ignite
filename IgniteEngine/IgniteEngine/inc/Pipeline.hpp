@@ -2,6 +2,8 @@
 #include "Shader.h"
 #include "Buffer.h"
 
+#include <initializer_list>
+
 class Pipeline
 {
 protected:
@@ -50,10 +52,19 @@ public:
 		const std::string& name,
 		const std::vector<Sampler*>& samp
 	);
+	void setSamplers(
+		const std::string& name,
+		std::initializer_list<Sampler*> samp
+	);
 	void setTextures2D(
 		const std::string& name,
 		const std::vector<Texture2D*>& textures
 	);
+	void setTextures2D(
+		const std::string& name,
+		std::initializer_list<Texture2D*> textures
+	);
+
 
 	virtual void createPipeline() = 0;
 

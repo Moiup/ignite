@@ -4,11 +4,17 @@ void SkeletonDebug::setObject3D(Object3D& object) {
 	_object = &object;
 }
 
+void SkeletonDebug::setRenderer(Renderer& renderer) {
+	_renderer = &renderer;
+}
+
+void SkeletonDebug::setPipeline(GraphicsPipeline& pipeline) {
+	_pipeline = &pipeline;
+}
+
 void SkeletonDebug::setSize(float size) {
 	_size = size;
 }
-
-
 
 void SkeletonDebug::create() {
 	createCrossMesh(_cross_mesh, _size);
@@ -20,8 +26,8 @@ void SkeletonDebug::create() {
 	for (int i = 0; i < skeleton->joints().size(); ++i) {
 		_cross_objs[i].setMesh(_cross_mesh);
 		_cross_objs[i].setMaterial(_cross_material, &_cross_material_indices);
-		_cross_objs[i].addGraphicsPipeline(*DefaultConf::debug_pipeline);
-		_cross_objs[i].setRenderer(*DefaultConf::renderer);
+		_cross_objs[i].addGraphicsPipeline(*_pipeline);
+		_cross_objs[i].setRenderer(*_renderer);
 		_cross_objs[i].setPositionLocale(skeleton->joints()[i].getPositionLocale());
 		_cross_objs[i].setRotationLocale(skeleton->joints()[i].getRotationLocale());
 
@@ -32,14 +38,14 @@ void SkeletonDebug::create() {
 	}
 	//Object3D master_obj;
 	//_cross_objs.push_back(master_obj);
-	_cross_objs[_cross_objs.size() - 1].addChild(&_cross_objs[0]);
-	_cross_objs[_cross_objs.size() - 1].setMesh(_cross_mesh);
-	_cross_objs[_cross_objs.size() - 1].setMaterial(_cross_material, &_cross_material_indices);
-	_cross_objs[_cross_objs.size() - 1].addGraphicsPipeline(*DefaultConf::debug_pipeline);
-	_cross_objs[_cross_objs.size() - 1].setRenderer(*DefaultConf::renderer);
-	_cross_objs[_cross_objs.size() - 1].setPositionLocale(_object->getPositionLocale());
-	_cross_objs[_cross_objs.size() - 1].setRotationLocale(_object->getRotationLocale());
-	_cross_objs[_cross_objs.size() - 1].setScaleLocale(_object->getScaleLocale());
+	_cross_objs.back().addChild(&_cross_objs[0]);
+	_cross_objs.back().setMesh(_cross_mesh);
+	_cross_objs.back().setMaterial(_cross_material, &_cross_material_indices);
+	_cross_objs.back().addGraphicsPipeline(*DefaultConf::debug_pipeline);
+	_cross_objs.back().setRenderer(*DefaultConf::renderer);
+	_cross_objs.back().setPositionLocale(_object->getPositionLocale());
+	_cross_objs.back().setRotationLocale(_object->getRotationLocale());
+	_cross_objs.back().setScaleLocale(_object->getScaleLocale());
 }
 
 void SkeletonDebug::update() {
@@ -49,6 +55,9 @@ void SkeletonDebug::update() {
 		_cross_objs[i].setRotationLocale(skeleton->joints()[i].getRotationLocale());
 		_cross_objs[i].alignmentMatrix() = skeleton->joints()[i].alignmentMatrix();
 	}
+	_cross_objs.back().setPositionLocale(_object->getPositionLocale());
+	_cross_objs.back().setRotationLocale(_object->getRotationLocale());
+	_cross_objs.back().setScaleLocale(_object->getScaleLocale());
 }
 
 void SkeletonDebug::createCrossMesh(Mesh& cross_mesh, float size) {

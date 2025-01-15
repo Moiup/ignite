@@ -6,6 +6,8 @@
 class SkeletonDebug {
 private:
 	Object3D* _object;
+	Renderer* _renderer;
+	GraphicsPipeline* _pipeline;
 	Mesh _cross_mesh;
 	std::vector<Object3D> _cross_objs;
 	std::vector<Material> _cross_material;
@@ -16,6 +18,8 @@ public:
 	SkeletonDebug() = default;
 
 	void setObject3D(Object3D& object);
+	void setRenderer(Renderer& renderer);
+	void setPipeline(GraphicsPipeline& pipeline);
 	void setSize(float size=1.0f);
 	void create();
 	void update();

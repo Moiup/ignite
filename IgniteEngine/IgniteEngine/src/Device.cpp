@@ -177,6 +177,7 @@ VkPhysicalDeviceFeatures Device::featuresManagement() {
 
 	enabled.shaderFloat64 = VK_TRUE;
 	enabled.fragmentStoresAndAtomics = VK_TRUE;
+	enabled.wideLines = VK_TRUE;
 
 	return enabled;
 }

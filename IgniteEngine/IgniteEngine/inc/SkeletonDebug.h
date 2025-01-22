@@ -24,6 +24,8 @@ public:
 	void create();
 	void update();
 
+	std::vector<Object3D>& getCrossObjs();
+
 	static void createCrossMesh(Mesh& cross_mesh, float size = 1.0f);
 	static void createCrossMaterial(
 		std::vector<Material>& cross_material,

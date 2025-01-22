@@ -60,6 +60,10 @@ void SkeletonDebug::update() {
 	_cross_objs.back().setScaleLocale(_object->getScaleLocale());
 }
 
+std::vector<Object3D>& SkeletonDebug::getCrossObjs() {
+	return _cross_objs;
+}
+
 void SkeletonDebug::createCrossMesh(Mesh& cross_mesh, float size) {
 	std::vector<glm::vec3> coord{
 		glm::vec3(0, 0, 0),

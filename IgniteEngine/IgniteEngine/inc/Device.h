@@ -24,6 +24,7 @@ private:
 
 public:
 	Device();
+	Device(PhysicalDevice& gpu);
 	Device(
 		PhysicalDevice& gpu,
 		std::vector<VkDeviceQueueCreateInfo>& queues_info
@@ -45,7 +46,6 @@ public:
 
 private:
 	void destroy();
-	void configure(PhysicalDevice* gpu);
 	void create(std::vector<VkDeviceQueueCreateInfo>& queues_info);
 	VkPhysicalDeviceFeatures featuresManagement();
 };

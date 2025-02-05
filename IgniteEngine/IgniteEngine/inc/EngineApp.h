@@ -23,6 +23,7 @@ class EngineApp: public App
 private:
 	Instance _instance;
 	PhysicalDevice _gpu;
+	Device _device;
 	LogicalDevice _logical_device;
 
 public:

@@ -107,12 +107,26 @@ void Instance::setExtensionsAndLayers(std::vector<std::string>& layer_arr) {
 
 	_extensions.resize(_extension_count);
 	bool test = SDL_Vulkan_GetInstanceExtensions(nullptr, &_extension_count, _extensions.data());
-
+	
 	std::cout << _extension_count << " supported extensions:" << std::endl;
 	for (uint32_t i = 0; i < _extension_count; i++){
 		std::cout << "\t" << _extensions[i] << std::endl;
 	}
 
+	// Instance Layers
+	std::vector<VkLayerProperties> layer_properties = Instance::getLayers();
+
+	for (std::string layer : layer_arr) {
+		for (const auto& layer_prop: layer_properties) {
+			std::string lp = std::string(layer_prop.layerName);
+			if (layer == lp) {
+				_available_layers.push_back(strdup(layer_prop.layerName));
+			}
+		}
+	}
+}
+
+std::vector<VkLayerProperties> Instance::getLayers() {
 	// Instance Layers
 	uint32_t instance_layer_prop_count = 0;
 	std::vector<VkLayerProperties> layer_properties{};
@@ -120,15 +134,15 @@ void Instance::setExtensionsAndLayers(std::vector<std::string>& layer_arr) {
 	layer_properties.resize(instance_layer_prop_count);
 	vkEnumerateInstanceLayerProperties(&instance_layer_prop_count, layer_properties.data());
 
+	return layer_properties;
+}
+
+void Instance::displayLayers() {
+	std::vector<VkLayerProperties> layer_prop = Instance::getLayers();
+
 	std::cout << "Available layers:" << std::endl;
-	for (std::string layer : layer_arr) {
-		for (const auto& layer_prop: layer_properties) {
-			std::string lp = std::string(layer_prop.layerName);
-			if (layer == lp) {
-				_available_layers.push_back(strdup(layer_prop.layerName));
-				std::cout << "\t" << lp << std::endl;
-			}
-		}
+	for (auto& prop : layer_prop) {
+		std::cout << "    " << prop.layerName << std::endl;
 	}
 }
 
@@ -157,12 +171,13 @@ PhysicalDevice Instance::getGPU(uint32_t gpu_id) {
 
 PhysicalDevice Instance::getDefaultGPU() {
 	std::vector<PhysicalDevice> gpus = enumeratePhysicalDevices();
+	const VkPhysicalDeviceType gpu_type[2];
+	std::unordered_map<VkPhysicalDeviceType, PhysicalDevice&> type_to_gpu;
 
 	for (auto& gpu : gpus) {
-		if (gpu.getProperties().deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-			return gpu;
-		}
+		type_to_gpu[gpu.getProperties().deviceType] = gpu;
 	}
+
 	return gpus[0];
 }
 

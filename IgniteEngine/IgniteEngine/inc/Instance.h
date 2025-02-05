@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 class Instance
 {
@@ -55,6 +56,9 @@ public:
 
 	PhysicalDevice getGPU(uint32_t gpu_id = 0);
 	PhysicalDevice getDefaultGPU();
+
+	static std::vector<VkLayerProperties> getLayers();
+	static void displayLayers();
 
 private:
 	void setExtensionsAndLayers(std::vector<std::string>& layer_arr);

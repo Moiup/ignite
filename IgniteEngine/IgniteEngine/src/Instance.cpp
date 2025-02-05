@@ -12,15 +12,15 @@ Instance::Instance() {
 	_shared_count = new int32_t(1);
 }
 
-Instance::Instance(std::vector<std::string>& layer_arr) :
+Instance::Instance(std::vector<char*>& layers) :
 	Instance::Instance()
 {
-	setExtensionsAndLayers(layer_arr);
-	create();
+	std::vector<const char*> extensions = setExtensions();
+	create(layers, extensions);
 }
 
 Instance::Instance(
-	std::vector<std::string>& layer_arr,
+	std::vector<char*>& layers,
 	std::string application_name,
 	uint32_t application_version,
 	std::string engine_name,
@@ -29,7 +29,7 @@ Instance::Instance(
 ) :
 	Instance::Instance()
 {
-	setExtensionsAndLayers(layer_arr);
+	std::vector<const char*> extensions = setExtensions();
 	setApplicationInfo(
 		application_name,
 		application_version,
@@ -37,7 +37,7 @@ Instance::Instance(
 		engine_version,
 		api_version
 	);
-	create();
+	create(layers, extensions);
 }
 
 Instance::Instance(const Instance& instance) {
@@ -52,9 +52,6 @@ Instance& Instance::operator=(const Instance& instance) {
 	destroy();
 	_instance = instance._instance;
 	_application_info = instance._application_info;
-	_available_layers = instance._available_layers;
-	_extension_count = instance._extension_count;
-	_extensions = instance._extensions;
 
 	_shared_count = instance._shared_count;
 	*_shared_count += 1;
@@ -67,9 +64,6 @@ Instance& Instance::operator=(Instance&& instance) {
 	_instance = std::move(instance)._instance;
 	instance._instance = nullptr;
 	_application_info = std::move(instance)._application_info;
-	_available_layers = std::move(instance._available_layers);
-	_extension_count = std::move(instance)._extension_count;
-	_extensions = std::move(instance._extensions);
 
 	_shared_count = std::move(instance)._shared_count;
 	instance._shared_count = nullptr;
@@ -97,33 +91,24 @@ void Instance::setApplicationInfo(
 	_application_info.apiVersion = api_version;
 }
 
-void Instance::setExtensionsAndLayers(std::vector<std::string>& layer_arr) {
+std::vector<const char*> Instance::setExtensions() {
 	// Instance Extensions
 	/*_extensions = glfwGetRequiredInstanceExtensions(&_extension_count);*/
 
-	if (SDL_Vulkan_GetInstanceExtensions(nullptr, &_extension_count, nullptr) != SDL_TRUE) {
+	uint32_t extension_count{ 0 };
+	if (SDL_Vulkan_GetInstanceExtensions(nullptr, &extension_count, nullptr) != SDL_TRUE) {
 		throw std::runtime_error("No extension found!");
 	}
 
-	_extensions.resize(_extension_count);
-	bool test = SDL_Vulkan_GetInstanceExtensions(nullptr, &_extension_count, _extensions.data());
+	std::vector<const char*> extensions(extension_count);
+	bool test = SDL_Vulkan_GetInstanceExtensions(nullptr, &extension_count, extensions.data());
 	
-	std::cout << _extension_count << " supported extensions:" << std::endl;
-	for (uint32_t i = 0; i < _extension_count; i++){
-		std::cout << "\t" << _extensions[i] << std::endl;
+	std::cout << extension_count << " supported extensions:" << std::endl;
+	for (uint32_t i = 0; i < extension_count; i++){
+		std::cout << "\t" << extensions[i] << std::endl;
 	}
 
-	// Instance Layers
-	std::vector<VkLayerProperties> layer_properties = Instance::getLayers();
-
-	for (std::string layer : layer_arr) {
-		for (const auto& layer_prop: layer_properties) {
-			std::string lp = std::string(layer_prop.layerName);
-			if (layer == lp) {
-				_available_layers.push_back(strdup(layer_prop.layerName));
-			}
-		}
-	}
+	return extensions;
 }
 
 std::vector<VkLayerProperties> Instance::getLayers() {
@@ -226,16 +211,16 @@ std::vector<PhysicalDevice> Instance::enumeratePhysicalDevices() {
 	return gpus;
 }
 
-void Instance::create() {
+void Instance::create(std::vector<char*>& layers, std::vector<const char*>& extensions) {
 	VkInstanceCreateInfo vk_instance_create_info{};
 	vk_instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	vk_instance_create_info.pNext = nullptr;
 	vk_instance_create_info.flags = 0;
 	vk_instance_create_info.pApplicationInfo = &_application_info;
-	vk_instance_create_info.enabledLayerCount = _available_layers.size();
-	vk_instance_create_info.ppEnabledLayerNames = _available_layers.data();
-	vk_instance_create_info.enabledExtensionCount = _extension_count;
-	vk_instance_create_info.ppEnabledExtensionNames = _extensions.data();
+	vk_instance_create_info.enabledLayerCount = layers.size();
+	vk_instance_create_info.ppEnabledLayerNames = layers.data();
+	vk_instance_create_info.enabledExtensionCount = extensions.size();
+	vk_instance_create_info.ppEnabledExtensionNames = extensions.data();
 
 	VkResult vk_result = vkCreateInstance(&vk_instance_create_info, nullptr, &_instance);
 	if (vk_result != VK_SUCCESS) {
@@ -259,7 +244,6 @@ void Instance::destroy() {
 	_shared_count = nullptr;
 
 	destroyInstance();
-	freeLayers();
 }
 
 void Instance::destroyInstance() {
@@ -269,10 +253,3 @@ void Instance::destroyInstance() {
 	vkDestroyInstance(_instance, nullptr);
 	_instance = nullptr;
 }
-
-void Instance::freeLayers() {
-	for (auto layer : _available_layers) {
-		free(layer);
-	}
-}
-

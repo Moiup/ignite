@@ -15,18 +15,14 @@ class Instance
 private:
 	VkInstance _instance{ nullptr };
 	VkApplicationInfo _application_info;
-	std::vector<char*> _available_layers;
-	uint32_t _extension_count{};
-	//const char** _extensions;
-	std::vector<const char*> _extensions;
 
 	int32_t* _shared_count{ nullptr };
 
 public:
 	Instance();
-	Instance(std::vector<std::string>& layer_arr);
+	Instance(std::vector<char*>& layers);
 	Instance(
-		std::vector<std::string>& layer_arr,
+		std::vector<char*>& layers,
 		std::string application_name,
 		uint32_t application_version,
 		std::string engine_name,
@@ -53,6 +49,7 @@ public:
 	const VkInstance& getInstance() const;
 
 	void displayAvailableGPUs();
+	std::vector<PhysicalDevice> enumeratePhysicalDevices();
 
 	PhysicalDevice getGPU(uint32_t gpu_id = 0);
 	PhysicalDevice getDefaultGPU();
@@ -61,11 +58,9 @@ public:
 	static void displayLayers();
 
 private:
-	void setExtensionsAndLayers(std::vector<std::string>& layer_arr);
-	void create();
+	std::vector<const char*> setExtensions();
+	void create(std::vector<char*>& layers, std::vector<const char*>& extensions);
 	void destroy();
 	void destroyInstance();
-	void freeLayers();
-	std::vector<PhysicalDevice> enumeratePhysicalDevices();
 };
 

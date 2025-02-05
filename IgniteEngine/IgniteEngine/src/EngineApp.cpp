@@ -34,7 +34,7 @@ void EngineApp::init() {
 
 	// Instance
 	Instance::displayLayers();
-	std::vector<std::string> instance_layer = {
+	std::vector<char *> instance_layer = {
 		"VK_LAYER_KHRONOS_validation",
 		"VK_LAYER_KHRONOS_synchronization2"
 	};

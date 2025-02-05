@@ -44,6 +44,7 @@ void EngineApp::init() {
 	_gpu = _instance.getDefaultGPU();
 	std::cout << "Selected GPU:" << std::endl;
 	_gpu.displayProperties();
+	_gpu.displayQueueFamilyProperties();
 	
 	// Initialising logical device and queues
 	_logical_device.setGPU(_gpu);

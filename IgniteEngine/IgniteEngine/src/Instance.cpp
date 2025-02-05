@@ -171,11 +171,25 @@ PhysicalDevice Instance::getGPU(uint32_t gpu_id) {
 
 PhysicalDevice Instance::getDefaultGPU() {
 	std::vector<PhysicalDevice> gpus = enumeratePhysicalDevices();
-	const VkPhysicalDeviceType gpu_type[2];
-	std::unordered_map<VkPhysicalDeviceType, PhysicalDevice&> type_to_gpu;
+	const VkPhysicalDeviceType gpu_type[] = {
+		VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU,
+		VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU,
+		VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU,
+		VK_PHYSICAL_DEVICE_TYPE_CPU,
+		VK_PHYSICAL_DEVICE_TYPE_OTHER
+	};
+	int32_t nb_gpu_type = sizeof(gpu_type) / sizeof(VkPhysicalDeviceType);
+
+	std::unordered_map<VkPhysicalDeviceType, PhysicalDevice*> type_to_gpu;
 
 	for (auto& gpu : gpus) {
-		type_to_gpu[gpu.getProperties().deviceType] = gpu;
+		type_to_gpu[gpu.getProperties().deviceType] = &gpu;
+	}
+	
+	for (int32_t i = 0; i < nb_gpu_type; ++i) {
+		if (type_to_gpu.count(gpu_type[i])) {
+			return *type_to_gpu[gpu_type[i]];
+		}
 	}
 
 	return gpus[0];

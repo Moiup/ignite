@@ -22,6 +22,7 @@ public:
 	const VkPhysicalDevice& getGPU() const;
 	VkPhysicalDeviceMemoryProperties getMemoryProperties();
 	std::vector<VkQueueFamilyProperties2> getQueueFamilyProperties();
+	void displayQueueFamilyProperties();
 
 private:
 	PhysicalDevice(VkPhysicalDevice gpu);

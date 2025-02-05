@@ -70,6 +70,27 @@ std::vector<VkQueueFamilyProperties2> PhysicalDevice::getQueueFamilyProperties()
 	return family_properties;
 }
 
+void PhysicalDevice::displayQueueFamilyProperties() {
+	std::vector<VkQueueFamilyProperties2> family_properties = std::move(getQueueFamilyProperties());
+
+	std::cout << "Nb families: " << family_properties.size() << std::endl;
+	for (int32_t i = 0; i < family_properties.size(); ++i) {
+		VkQueueFamilyProperties p = family_properties[i].queueFamilyProperties;
+		std::cout << "-------------------" << std::endl;
+		std::cout << "family #" << i << std::endl;
+		std::cout << "    Queue count: " <<  p.queueCount << std::endl;
+		std::cout << "    Flags" << std::endl;
+		std::cout << "        Graphics       : " << ((p.queueFlags & VK_QUEUE_GRAPHICS_BIT)? "true" : "false") << std::endl;
+		std::cout << "        Compute        : " << ((p.queueFlags & VK_QUEUE_COMPUTE_BIT) ? "true" : "false") << std::endl;
+		std::cout << "        Transfer       : " << ((p.queueFlags & VK_QUEUE_TRANSFER_BIT) ? "true" : "false") << std::endl;
+		std::cout << "        Sparse binding : " << ((p.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) ? "true" : "false") << std::endl;
+		std::cout << "        Video decode   : " << ((p.queueFlags & VK_QUEUE_VIDEO_DECODE_BIT_KHR) ? "true" : "false") << std::endl;
+		std::cout << "        Video encode   : " << ((p.queueFlags & VK_QUEUE_VIDEO_ENCODE_BIT_KHR) ? "true" : "false") << std::endl;
+		std::cout << "        Optical flow nv: " << ((p.queueFlags & VK_QUEUE_OPTICAL_FLOW_BIT_NV) ? "true" : "false") << std::endl;
+	}
+	
+}
+
 std::string PhysicalDevice::makeString(VkPhysicalDeviceType type) {
 	switch (type) {
 	case VK_PHYSICAL_DEVICE_TYPE_OTHER:

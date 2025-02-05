@@ -9,16 +9,7 @@ Device::Device(
 ) :
 	Device::Device()
 {
-	//create();
-}
-
-Device::Device(
-	PhysicalDevice& gpu,
-	std::vector<VkDeviceQueueCreateInfo>& queues_info
-) :
-	Device::Device()
-{
-	create(queues_info);
+	create();
 }
 
 Device::Device(const Device& device) {
@@ -33,7 +24,7 @@ Device& Device::operator=(const Device& device) {
 	destroy();
 	_gpu = device._gpu;
 	_device = device._device;
-	_family_properties = device._family_properties;
+	_queue_family_infos = device._queue_family_infos;
 
 	_shared_count = device._shared_count;
 	*_shared_count += 1;
@@ -47,7 +38,7 @@ Device& Device::operator=(Device&& device) {
 	device._gpu = nullptr;
 	_device = std::move(device)._device;
 	device._device = nullptr;
-	_family_properties = std::move(device._family_properties);
+	_queue_family_infos = std::move(device._queue_family_infos);
 
 	_shared_count = std::move(device)._shared_count;
 	device._shared_count = nullptr;
@@ -71,11 +62,8 @@ void Device::waitIdle() {
 	vkDeviceWaitIdle(_device);
 }
 
-std::vector<VkQueueFamilyProperties2>& Device::getFamilyProperties() {
-	return _family_properties;
-}
 
-void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
+void Device::create() {
 	VkPhysicalDeviceFeatures features = featuresManagement();
 
 	VkPhysicalDeviceShaderAtomicFloatFeaturesEXT shader_atomic_float_feats{};
@@ -111,12 +99,14 @@ void Device::create(std::vector<VkDeviceQueueCreateInfo>& queues_info) {
 	physical_device_features2.pNext = &physical_device_v12_features;
 	physical_device_features2.features = features;
 
+	QueueCreationInfo queues_info = queueCreateInfos();
+
 	VkDeviceCreateInfo device_info{};
 	device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	device_info.pNext = &physical_device_features2;
 	device_info.flags = 0;
-	device_info.queueCreateInfoCount = queues_info.size();
-	device_info.pQueueCreateInfos = queues_info.data();
+	device_info.queueCreateInfoCount = queues_info.queue_create_infos.size();
+	device_info.pQueueCreateInfos = queues_info.queue_create_infos.data();
 	device_info.enabledExtensionCount = _EXTENSIONS.size();
 	device_info.ppEnabledExtensionNames = _EXTENSIONS.data();
 	device_info.pEnabledFeatures = nullptr;
@@ -167,4 +157,39 @@ VkPhysicalDeviceFeatures Device::featuresManagement() {
 	enabled.wideLines = VK_TRUE;
 
 	return enabled;
+}
+
+QueueCreationInfo Device::queueCreateInfos() {
+	std::vector<VkQueueFamilyProperties2>  queue_family_properties = _gpu->getQueueFamilyProperties();
+
+	uint32_t max_queue_count = 0;
+	for (auto& qfp : queue_family_properties) {
+		QueueFamilyInfo queue_family_info{};
+		queue_family_info.properties = qfp;
+		_queue_family_infos.push_back(queue_family_info);
+
+		max_queue_count = std::max(
+			max_queue_count,
+			qfp.queueFamilyProperties.queueCount
+		);
+	}
+
+	std::vector<VkDeviceQueueCreateInfo> queue_create_infos{};
+	std::vector<float> priorities(max_queue_count, 0.0f);
+
+	int32_t family_index = 0;
+	for (auto& qfp : queue_family_properties) {
+		VkDeviceQueueCreateInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		info.pNext = nullptr;
+		//info.flags = 0;
+		info.queueFamilyIndex = family_index++;
+		info.queueCount = qfp.queueFamilyProperties.queueCount;
+		info.pQueuePriorities = priorities.data();
+	}
+
+	return {
+		std::move(queue_create_infos),
+		std::move(priorities)
+	};
 }

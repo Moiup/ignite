@@ -5,6 +5,16 @@
 #include <vector>
 #include <string>
 
+struct QueueCreationInfo {
+	std::vector<VkDeviceQueueCreateInfo> queue_create_infos{};
+	std::vector<float> priorities{};
+};
+
+struct QueueFamilyInfo {
+	VkQueueFamilyProperties2 properties{};
+	int32_t nb_queue_retreived{0};
+};
+
 class Device
 {
 private:
@@ -18,17 +28,13 @@ private:
 	PhysicalDevice* _gpu{ nullptr };
 	VkDevice _device{};
 
-	std::vector<VkQueueFamilyProperties2> _family_properties;
+	std::vector<QueueFamilyInfo> _queue_family_infos;
 
 	int32_t* _shared_count{nullptr};
 
 public:
 	Device();
 	Device(PhysicalDevice& gpu);
-	Device(
-		PhysicalDevice& gpu,
-		std::vector<VkDeviceQueueCreateInfo>& queues_info
-	);
 
 	Device(const Device& device);
 	Device(Device&& device);
@@ -40,13 +46,13 @@ public:
 
 	VkDevice getDevice();
 	PhysicalDevice* getGPU();
-	std::vector<VkQueueFamilyProperties2>& getFamilyProperties();
 
 	void waitIdle();
 
 private:
 	void destroy();
-	void create(std::vector<VkDeviceQueueCreateInfo>& queues_info);
+	void create();
 	VkPhysicalDeviceFeatures featuresManagement();
+	QueueCreationInfo Device::queueCreateInfos();
 };
 

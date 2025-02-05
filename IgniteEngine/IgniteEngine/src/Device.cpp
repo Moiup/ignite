@@ -5,12 +5,19 @@ Device::Device() {
 }
 
 Device::Device(
+	PhysicalDevice& gpu
+) :
+	Device::Device()
+{
+	//create();
+}
+
+Device::Device(
 	PhysicalDevice& gpu,
 	std::vector<VkDeviceQueueCreateInfo>& queues_info
 ) :
 	Device::Device()
 {
-	configure(&gpu);
 	create(queues_info);
 }
 
@@ -62,26 +69,6 @@ PhysicalDevice* Device::getGPU() {
 
 void Device::waitIdle() {
 	vkDeviceWaitIdle(_device);
-}
-
-void Device::configure(PhysicalDevice* gpu) {
-	_gpu = gpu;
-
-	uint32_t family_count;
-	vkGetPhysicalDeviceQueueFamilyProperties2(
-		_gpu->getGPU(),
-		&family_count,
-		nullptr
-	);
-	_family_properties.resize(family_count);
-	for (auto& prop : _family_properties) {
-		prop.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
-	}
-	vkGetPhysicalDeviceQueueFamilyProperties2(
-		_gpu->getGPU(),
-		&family_count,
-		_family_properties.data()
-	);
 }
 
 std::vector<VkQueueFamilyProperties2>& Device::getFamilyProperties() {

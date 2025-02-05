@@ -33,8 +33,10 @@ void EngineApp::init() {
 	ImGui::StyleColorsDark();
 
 	// Instance
+	Instance::displayLayers();
 	std::vector<std::string> instance_layer = {
-		"VK_LAYER_KHRONOS_validation"
+		"VK_LAYER_KHRONOS_validation",
+		"VK_LAYER_KHRONOS_synchronization2"
 	};
 	_instance = Instance(instance_layer);
 

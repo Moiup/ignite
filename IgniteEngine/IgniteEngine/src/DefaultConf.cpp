@@ -18,8 +18,6 @@ Instance* DefaultConf::instance;
 Renderer* DefaultConf::renderer;
 CameraScene* DefaultConf::camera;
 Queue* DefaultConf::graphics_queue;
-Queue* DefaultConf::present_queue;
-Queue* DefaultConf::compute_queue;
 Swapchain* DefaultConf::swapchain;
 Texture2D* DefaultConf::white_texture;
 DepthBuffer* DefaultConf::depth_buffer;

@@ -30,8 +30,6 @@ public:
 	static Renderer* renderer;
 	static CameraScene* camera;
 	static Queue* graphics_queue;
-	static Queue* present_queue;
-	static Queue* compute_queue;
 	static Swapchain* swapchain;
 	static Texture2D* white_texture;
 	static DepthBuffer* depth_buffer;

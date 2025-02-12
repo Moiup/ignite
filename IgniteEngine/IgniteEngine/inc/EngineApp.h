@@ -25,8 +25,6 @@ private:
 	Device _device;
 
 	Queue _g_queue;
-	Queue _c_queue;
-	Queue _p_queue;
 
 public:
 	EngineApp();

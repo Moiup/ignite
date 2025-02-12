@@ -33,54 +33,75 @@ void EngineApp::init() {
 	ImGui::StyleColorsDark();
 
 	// Instance
-	Instance::displayLayers();
+	//Instance::displayExtensionProperties();
+	//Instance::displayLayers();
 	std::vector<char *> instance_layer = {
 		"VK_LAYER_KHRONOS_validation",
 		"VK_LAYER_KHRONOS_synchronization2"
 	};
 	_instance = Instance(instance_layer);
 
-	_instance.displayAvailableGPUs();
+	//_instance.displayAvailableGPUs();
 	
 	// Initialising
 	_gpu = _instance.getDefaultGPU();
 	std::cout << "Selected GPU:" << std::endl;
-	_gpu.displayProperties();
-	_gpu.displayQueueFamilyProperties();
+	//_gpu.displayProperties();
+	//_gpu.displayDeviceExtensionProperties();
+	//_gpu.displayQueueFamilyProperties();
 
-	_device = Device();
-	
+	_device = Device(_gpu);
+
+	{
+		std::optional<Queue> q = _device.getQueue(VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
+		if (!q.has_value()) {
+			std::cerr << "Failed retreiving graphics queue" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		_g_queue = std::move(q.value());
+	}
+	{
+		std::optional<Queue> q = _device.getQueue(VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT);
+		if (!q.has_value()) {
+			std::cerr << "Failed retreiving graphics queue" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		_c_queue = std::move(q.value());
+	}
+	{
+		std::optional<Queue> q = _device.getQueue(VK_QUEUE_GRAPHICS_BIT);
+		if (!q.has_value()) {
+			std::cerr << "Failed retreiving graphics queue" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		_p_queue = std::move(q.value());
+	}
+
 	// Initialising logical device and queues
-	_logical_device.setGPU(_gpu);
-	_logical_device.defineQueue(
-		"graphics_queues",
-		{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
-		1
-	);
-	_logical_device.defineQueue(
-		"present_queues",
-		{ VK_QUEUE_GRAPHICS_BIT },
-		1
-	);
-	_logical_device.defineQueue(
-		"compute_queues",
-		{ VK_QUEUE_COMPUTE_BIT },
-		1
-	);
+	//_logical_device.setGPU(_gpu);
 	//_logical_device.defineQueue(
-	//	"video_decode_queues",
-	//	{ VK_QUEUE_VIDEO_DECODE_BIT_KHR },
+	//	"graphics_queues",
+	//	{VK_QUEUE_GRAPHICS_BIT, VK_QUEUE_COMPUTE_BIT},
 	//	1
 	//);
-	//_logical_device.setGPU(&_gpu);
-	_logical_device.create();
+	//_logical_device.defineQueue(
+	//	"present_queues",
+	//	{ VK_QUEUE_GRAPHICS_BIT },
+	//	1
+	//);
+	//_logical_device.defineQueue(
+	//	"compute_queues",
+	//	{ VK_QUEUE_COMPUTE_BIT },
+	//	1
+	//);
 
 	DefaultConf::gpu = &_gpu;
-	DefaultConf::logical_device = &_logical_device;
+	DefaultConf::device = &_device;
+	DefaultConf::graphics_queue = &_g_queue;
+	DefaultConf::compute_queue = &_c_queue;
+	DefaultConf::present_queue = &_p_queue;
 	//DefaultConf::render_window = &_render_window;
-	DefaultConf::graphics_queue = &_logical_device.getQueues("graphics_queues")[0];
-	DefaultConf::present_queue = &_logical_device.getQueues("present_queues")[0];
-	DefaultConf::compute_queue = &_logical_device.getQueues("compute_queues")[0];
+
 	//DefaultConf::graphic_shader = &_graphic_shader;
 
 	DefaultConf::instance = &_instance;
@@ -335,7 +356,7 @@ void EngineApp::update() {
 		//std::cout << delta_time << "\t" << static_cast<uint32_t>(1000 / delta_time) << std::endl;
 	}
 
-	DefaultConf::logical_device->getDevice()->waitIdle();
+	DefaultConf::device->waitIdle();
 }
 
 void EngineApp::close() {

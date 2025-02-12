@@ -28,6 +28,7 @@ private:
 	VkFence _fence{ nullptr };
 
 	uint32_t _family_index{};
+	uint32_t _queue_index{};
 
 	CommandPool _command_pool;
 	CommandPoolSubmitBuffersIndices _command_pool_indices;
@@ -39,6 +40,11 @@ private:
 
 public:
 	Queue();
+	Queue::Queue(
+		Device& device,
+		uint32_t family_index,
+		uint32_t queue_index
+	);
 	Queue(const Queue& q);
 	Queue(Queue&& q);
 
@@ -113,6 +119,13 @@ public:
 		VkAccessFlags2 dst_access_mask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT
 	);
 
+	void barrier(
+		VkPipelineStageFlags2 src_stage_mask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags2 dst_stage_mask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+		VkAccessFlags2 src_access_mask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT,
+		VkAccessFlags2 dst_access_mask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT
+	);
+
 	void beginRendering(
 		glm::vec4& clear_color_value,
 		Swapchain& swapchain,
@@ -121,6 +134,7 @@ public:
 		VkExtent2D& extent
 	);
 	void bindPipeline(GraphicsPipeline& gp);
+
 	void drawIndexed(
 		uint32_t index_count,
 		uint32_t instance_count,
@@ -128,6 +142,7 @@ public:
 		uint32_t vertex_offset,
 		uint32_t first_instance
 	);
+	
 	void endRendering(Swapchain& swapchain);
 
 	void flush();

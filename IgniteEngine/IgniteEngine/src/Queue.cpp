@@ -7,6 +7,19 @@ Queue::Queue()
 	_shared_count = new int32_t(1);
 }
 
+Queue::Queue(
+	Device& device,
+	uint32_t family_index,
+	uint32_t queue_index
+) :
+	Queue::Queue()
+{
+	_device = &device;
+	_family_index = family_index;
+	_queue_index = queue_index;
+	create();
+}
+
 Queue::Queue(const Queue& q)
 {
 	*this = q;
@@ -27,6 +40,7 @@ Queue& Queue::operator=(const Queue& q) {
 	_device = q._device;
 	_fence = q._fence;
 	_family_index = q._family_index;
+	_queue_index = q._queue_index;
 	_command_pool_indices = q._command_pool_indices;
 
 	_command_pools = q._command_pools;
@@ -48,6 +62,7 @@ Queue& Queue::operator=(Queue&& q) {
 	_fence = std::move(q)._fence;
 	q._fence = nullptr;
 	_family_index = std::move(q)._family_index;
+	_queue_index = std::move(q)._queue_index;
 	_command_pool_indices = std::move(q)._command_pool_indices;
 
 	_command_pools = std::move(q)._command_pools;
@@ -74,7 +89,7 @@ void Queue::create() {
 	vkGetDeviceQueue(
 		_device->getDevice(),
 		_family_index,
-		0,
+		_queue_index,
 		&_queue
 	);
 
@@ -192,6 +207,60 @@ void Queue::changeLayout(
 	cmd.end();
 }
 
+void Queue::dispatch(
+	ComputePipeline& cp,
+	uint32_t group_count_x,
+	uint32_t group_count_y,
+	uint32_t group_count_z
+) {
+	CommandBuffer& cmd_buf = newCommandBuffer();
+
+	cmd_buf.begin();
+	dispatch(
+		cmd_buf,
+		cp,
+		group_count_x,
+		group_count_y,
+		group_count_z
+	);
+	cmd_buf.end();
+}
+
+void Queue::dispatch(
+	CommandBuffer& cmd_buf,
+	ComputePipeline& cp,
+	uint32_t group_count_x,
+	uint32_t group_count_y,
+	uint32_t group_count_z
+) {
+
+	cmd_buf.bindPipeline(
+		VK_PIPELINE_BIND_POINT_COMPUTE,
+		cp.getPipeline()
+	);
+	cmd_buf.bindDescriptorSets(
+		VK_PIPELINE_BIND_POINT_COMPUTE,
+		cp.getPipelineLayout(),
+		0,
+		cp.getDescriptorSets().size(),
+		cp.getDescriptorSets().data(),
+		0,
+		nullptr
+	);
+	cmd_buf.pushConstants(
+		cp.getPipelineLayout(),
+		cp.getShader()->getPushConstantRange().stageFlags,
+		cp.getShader()->getPushConstantRange().offset,
+		cp.getShader()->getPushConstantRange().size,
+		cp.getPushConstants()
+	);
+	cmd_buf.dispatch(
+		group_count_x,
+		group_count_y,
+		group_count_z
+	);
+}
+
 void Queue::dispatchBarrier(
 	ComputePipeline& cp,
 	uint32_t group_count_x,
@@ -237,58 +306,36 @@ void Queue::dispatchBarrier(
 	cmd_buf.end();
 }
 
-void Queue::dispatch(
-	ComputePipeline& cp,
-	uint32_t group_count_x,
-	uint32_t group_count_y,
-	uint32_t group_count_z
+void Queue::barrier(
+	VkPipelineStageFlags2 src_stage_mask,
+	VkPipelineStageFlags2 dst_stage_mask,
+	VkAccessFlags2 src_access_mask,
+	VkAccessFlags2 dst_access_mask
 ) {
 	CommandBuffer& cmd_buf = newCommandBuffer();
 
+	VkMemoryBarrier2 mem_bar{};
+	mem_bar.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
+	mem_bar.pNext = nullptr;
+	mem_bar.srcStageMask = src_stage_mask;
+	mem_bar.dstStageMask = dst_stage_mask;
+	mem_bar.srcAccessMask = src_access_mask;
+	mem_bar.dstAccessMask = dst_access_mask;
+
+	VkDependencyInfo dependency_info{};
+	dependency_info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+	dependency_info.pNext = nullptr;
+	dependency_info.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	dependency_info.memoryBarrierCount = 1;
+	dependency_info.pMemoryBarriers = &mem_bar;
+	dependency_info.bufferMemoryBarrierCount = 0;
+	dependency_info.pBufferMemoryBarriers = nullptr;
+	dependency_info.imageMemoryBarrierCount = 0;
+	dependency_info.pImageMemoryBarriers = nullptr;
+
 	cmd_buf.begin();
-	dispatch(
-		cmd_buf,
-		cp,
-		group_count_x,
-		group_count_y,
-		group_count_z
-	);
+	cmd_buf.pipelineBarrier(&dependency_info);
 	cmd_buf.end();
-}
-
-void Queue::dispatch(
-	CommandBuffer& cmd_buf,
-	ComputePipeline& cp,
-	uint32_t group_count_x,
-	uint32_t group_count_y,
-	uint32_t group_count_z
-) {	
-
-	cmd_buf.bindPipeline(
-		VK_PIPELINE_BIND_POINT_COMPUTE,
-		cp.getPipeline()
-	);
-	cmd_buf.bindDescriptorSets(
-		VK_PIPELINE_BIND_POINT_COMPUTE,
-		cp.getPipelineLayout(),
-		0,
-		cp.getDescriptorSets().size(),
-		cp.getDescriptorSets().data(),
-		0,
-		nullptr
-	);
-	cmd_buf.pushConstants(
-		cp.getPipelineLayout(),
-		cp.getShader()->getPushConstantRange().stageFlags,
-		cp.getShader()->getPushConstantRange().offset,
-		cp.getShader()->getPushConstantRange().size,
-		cp.getPushConstants()
-	);
-	cmd_buf.dispatch(
-		group_count_x,
-		group_count_y,
-		group_count_z
-	);
 }
 
 void Queue::beginRendering(

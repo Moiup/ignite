@@ -12,8 +12,6 @@
 //
 //void ComputeShaderTest::start() {
 //	Module::start();
-//
-//	_compute_shader.setLogicalDevice(DefaultConf::logical_device);
 //	_compute_shader.read("../shaders/compute_sum.comp");
 //
 //	_compute_shader.addStorageBufferInfo(

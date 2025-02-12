@@ -6,7 +6,6 @@
 #include "PhysicalDevice.h"
 #include "Window.h"
 #include "WindowSurface.h"
-#include "LogicalDevice.h"
 
 #include "DefaultRenderer.h"
 #include "Modules.h"

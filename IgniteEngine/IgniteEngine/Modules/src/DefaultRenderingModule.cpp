@@ -160,7 +160,6 @@ void DefaultRenderingModule::start() {
 	_graphics_pipeline.setPushConstants(&_cam_mvp[0][0]);
 
 	// Uniform buffer
-	//_camera_buffer.setLogicalDevice(DefaultConf::logical_device);
 	//_camera_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
 	//_camera_buffer.setSize(sizeof(_camera.getMVP()));
 	//_camera_buffer.create();

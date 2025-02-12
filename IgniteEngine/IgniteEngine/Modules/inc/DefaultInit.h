@@ -12,7 +12,6 @@ class DefaultInit: public Module
 {
 private:
 	//DefaultGPU _gpu{};
-	//LogicalDevice _logical_device{};
 	WindowSurface _render_window{};
 	Swapchain _swapchain;
 	DefaultRenderer _renderer{};

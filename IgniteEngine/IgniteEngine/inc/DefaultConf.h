@@ -1,6 +1,5 @@
 #pragma once
 
-#include "LogicalDevice.h"
 #include "Buffer.h"
 //#include "CameraScene.h"
 #include "GraphicShader.h"

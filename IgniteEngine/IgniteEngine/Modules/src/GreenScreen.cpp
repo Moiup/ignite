@@ -99,7 +99,6 @@
 //}
 //
 //void GreenScreen::createShader() {
-//	_green_screen_comp.setLogicalDevice(DefaultConf::logical_device);
 //	_green_screen_comp.read("../../shaders/green_screen/green_screen.comp");
 //
 //	_green_screen_comp.addStorageTextureInfo(

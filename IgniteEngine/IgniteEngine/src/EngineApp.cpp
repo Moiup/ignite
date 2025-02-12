@@ -138,7 +138,6 @@ void EngineApp::start() {
 	//// Shader    //
 	////-----------//
 	//DefaultConf::graphic_shader->setNbFrame(NB_FRAME);
-	//DefaultConf::graphic_shader->setLogicalDevice(DefaultConf::logical_device);
 	//DefaultConf::graphic_shader->read(
 	//	"../shaders/vert.vert",
 	//	"../shaders/frag.frag"
@@ -260,7 +259,6 @@ void EngineApp::start() {
 	//DefaultConf::graphic_shader->addPushConstant("pc", &_cam_mvp[0][0]);
 
 	//// Uniform buffer
-	////_camera_buffer.setLogicalDevice(DefaultConf::logical_device);
 	////_camera_buffer.setMemoryProperties(DefaultConf::gpu->getMemoryProperties());
 	////_camera_buffer.setSize(sizeof(_camera.getMVP()));
 	////_camera_buffer.create();

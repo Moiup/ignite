@@ -46,7 +46,6 @@ set(HEADERS
     ${IGNITE_PATH}/inc/Instance.h
     ${IGNITE_PATH}/inc/Joint.h
     ${IGNITE_PATH}/inc/LoadedObjectInfo.h
-    ${IGNITE_PATH}/inc/LogicalDevice.h
     ${IGNITE_PATH}/inc/Material.h
     ${IGNITE_PATH}/inc/Mesh.h
     ${IGNITE_PATH}/inc/Module.h
@@ -104,7 +103,6 @@ set(SRC
     ${IGNITE_PATH}/src/Instance.cpp
     ${IGNITE_PATH}/src/Joint.cpp
     ${IGNITE_PATH}/src/LoadedObjectInfo.cpp
-    ${IGNITE_PATH}/src/LogicalDevice.cpp
     ${IGNITE_PATH}/src/Material.cpp
     ${IGNITE_PATH}/src/Mesh.cpp
     ${IGNITE_PATH}/src/Module.cpp

@@ -14,6 +14,7 @@ DepthBuffer::DepthBuffer(
 ) :
 	Image(device, width, height, 1, IGEImgFormat::d32_sfloat_s8_uint)
 {
+	setImageQueueFamilyIndices(indices);
 	setImageInfo();
 	setImageViewInfo();
 	create();

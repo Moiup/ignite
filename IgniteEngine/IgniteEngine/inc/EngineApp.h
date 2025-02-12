@@ -24,7 +24,10 @@ private:
 	Instance _instance;
 	PhysicalDevice _gpu;
 	Device _device;
-	LogicalDevice _logical_device;
+
+	Queue _g_queue;
+	Queue _c_queue;
+	Queue _p_queue;
 
 public:
 	EngineApp();

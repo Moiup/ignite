@@ -34,6 +34,7 @@ Ray::Ray(int32_t x, int32_t y, glm::mat4 inv_mvpv) {
 
 	_o = glm::vec3(o);
 	_d = glm::vec3(e) - _o;
+	_d = glm::normalize(_d);
 }
 
 const glm::vec3& Ray::o() const {

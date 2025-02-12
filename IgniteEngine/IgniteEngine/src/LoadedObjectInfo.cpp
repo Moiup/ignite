@@ -32,7 +32,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 			Pixels pixels(texture_path);
 			_textures[0].push_back(
 				Texture2D(
-					DefaultConf::logical_device->getDevice(),
+					DefaultConf::device,
 					pixels.getWidth(),
 					pixels.getHeight()
 				)
@@ -41,7 +41,7 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 			DefaultConf::graphics_queue->changeLayout(_textures[0][t_id], VK_IMAGE_LAYOUT_GENERAL);
 
 			StagingBuffer<IGEBufferUsage::transfer> sb = StagingBuffer<IGEBufferUsage::transfer>(
-				DefaultConf::logical_device->getDevice(),
+				DefaultConf::device,
 				pixels.getSize(),
 				pixels.getPixels().data()
 			);

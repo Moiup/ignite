@@ -19,7 +19,7 @@ public:
 	static GraphicsPipelineConfiguration configuration;
 	static uint32_t NB_FRAME;
 	static PhysicalDevice* gpu;
-	static LogicalDevice* logical_device;
+	static Device* device;
 	static GraphicsPipeline* graphics_pipeline;
 	static GraphicsPipeline* debug_pipeline;
 	static CommandBuffer* copy_cmd_buf;

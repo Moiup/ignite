@@ -63,7 +63,6 @@ set(HEADERS
     inc/Instance.h
     inc/Joint.h
     inc/LoadedObjectInfo.h
-    inc/LogicalDevice.h
     inc/Material.h
     inc/Mesh.h
     # inc/MessageProtocoleNetwork.h
@@ -126,7 +125,6 @@ set(SRC
     src/Instance.cpp
     src/Joint.cpp
     src/LoadedObjectInfo.cpp
-    src/LogicalDevice.cpp
     src/Material.cpp
     src/Mesh.cpp
     # src/MessageProtocoleNetwork.cpp

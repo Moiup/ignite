@@ -211,6 +211,35 @@ std::vector<PhysicalDevice> Instance::enumeratePhysicalDevices() {
 	return gpus;
 }
 
+std::vector<VkExtensionProperties> Instance::enumerateExtensionProperties() {
+	std::vector<VkExtensionProperties> extensions{};
+	uint32_t nb_ext{ 0 };
+	
+	vkEnumerateInstanceExtensionProperties(
+		nullptr,
+		&nb_ext,
+		nullptr
+	);
+
+	extensions.resize(nb_ext);
+	vkEnumerateInstanceExtensionProperties(
+		nullptr,
+		&nb_ext,
+		extensions.data()
+	);
+
+	return extensions;
+}
+
+void Instance::displayExtensionProperties() {
+	std::vector<VkExtensionProperties> extensions = Instance::enumerateExtensionProperties();
+
+	std::cout << "Instance extension properties (" << extensions.size() << "): " << std::endl;
+	for (auto& ext : extensions) {
+		std::cout << "    " << ext.extensionName << ": " << ext.specVersion << std::endl;
+	}
+}
+
 void Instance::create(std::vector<char*>& layers, std::vector<const char*>& extensions) {
 	VkInstanceCreateInfo vk_instance_create_info{};
 	vk_instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

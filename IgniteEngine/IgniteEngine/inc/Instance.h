@@ -57,6 +57,9 @@ public:
 	static std::vector<VkLayerProperties> getLayers();
 	static void displayLayers();
 
+	static std::vector<VkExtensionProperties> enumerateExtensionProperties();
+	static void displayExtensionProperties();
+
 private:
 	std::vector<const char*> setExtensions();
 	void create(std::vector<char*>& layers, std::vector<const char*>& extensions);

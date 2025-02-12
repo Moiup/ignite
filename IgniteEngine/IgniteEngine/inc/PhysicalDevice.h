@@ -19,6 +19,9 @@ public:
 	VkPhysicalDeviceProperties getProperties();
 	void displayProperties();
 
+	std::vector<VkExtensionProperties> enumerateDeviceExtensionProperties();
+	void displayDeviceExtensionProperties();
+
 	const VkPhysicalDevice& getGPU() const;
 	VkPhysicalDeviceMemoryProperties getMemoryProperties();
 	std::vector<VkQueueFamilyProperties2> getQueueFamilyProperties();

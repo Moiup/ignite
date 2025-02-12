@@ -30,6 +30,36 @@ void PhysicalDevice::displayProperties() {
 	std::cout << "    " << makeString(prop.deviceType) << std::endl;
 }
 
+std::vector<VkExtensionProperties> PhysicalDevice::enumerateDeviceExtensionProperties() {
+	std::vector<VkExtensionProperties> extensions;
+	uint32_t nb_ext;
+	
+	vkEnumerateDeviceExtensionProperties(
+		_gpu,
+		nullptr,
+		&nb_ext,
+		nullptr
+	);
+	extensions.resize(nb_ext);
+	vkEnumerateDeviceExtensionProperties(
+		_gpu,
+		nullptr,
+		&nb_ext,
+		extensions.data()
+	);
+
+	return extensions;
+}
+
+void PhysicalDevice::displayDeviceExtensionProperties() {
+	std::vector<VkExtensionProperties> extensions = enumerateDeviceExtensionProperties();
+
+	std::cout << "Physical device extension properties (" << extensions.size() << ")" << std::endl;
+	for (auto& ext : extensions) {
+		std::cout << "    " << ext.extensionName << std::endl;
+	}
+}
+
 const VkPhysicalDevice& PhysicalDevice::getGPU() const {
 	return _gpu;
 }

@@ -34,7 +34,7 @@ void DefaultRenderingModule::start() {
 	// Shader    //
 	//-----------//
 	_graphics_shader = GraphicShader(
-		*DefaultConf::logical_device->getDevice(),
+		*DefaultConf::device,
 		"../shaders/vert.vert",
 		"../shaders/frag.frag"
 	);
@@ -120,28 +120,28 @@ void DefaultRenderingModule::start() {
 	// Coord
 	// Mesh offsets
 	_coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-		DefaultConf::logical_device->getDevice(),
+		DefaultConf::device,
 		Object3D::getCoordsSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
 		Object3D::getCoords(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
 	_graphics_pipeline.setVertexBuffer("coord", _coord_buffer);
 
 	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-		DefaultConf::logical_device->getDevice(),
+		DefaultConf::device,
 		Object3D::getObjectIdSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
 		Object3D::getObjectId(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
 	_graphics_pipeline.setVertexBuffer("object_id", _object_id_buffer);
 
 	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-		DefaultConf::logical_device->getDevice(),
+		DefaultConf::device,
 		Object3D::getMaterialIndicesSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
 		Object3D::getMaterialIndices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
 	_graphics_pipeline.setVertexBuffer("material_id", _material_indices_buffer);
 
 	_uv_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-		DefaultConf::logical_device->getDevice(),
+		DefaultConf::device,
 		Object3D::getUVSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
 		Object3D::getUV(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
@@ -150,7 +150,7 @@ void DefaultRenderingModule::start() {
 	// Index buffersetDevice(DefaultConf::logical_device->getDevice());
 	// 
 	_index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
-		DefaultConf::logical_device->getDevice(),
+		DefaultConf::device,
 		Object3D::getIndicesSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
 		Object3D::getIndices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
@@ -170,7 +170,7 @@ void DefaultRenderingModule::start() {
 	// Storage Buffers
 	// transform
 	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
-		DefaultConf::logical_device->getDevice(),
+		DefaultConf::device,
 		Object3D::getTransformMatricesSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
 		Object3D::getTransformMatrices(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
@@ -178,14 +178,14 @@ void DefaultRenderingModule::start() {
 
 	// materials
 	_materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
-		DefaultConf::logical_device->getDevice(),
+		DefaultConf::device,
 		Object3D::getMaterialsSize(*DefaultConf::renderer, *DefaultConf::graphics_pipeline),
 		Object3D::getMaterials(*DefaultConf::renderer, *DefaultConf::graphics_pipeline).data()
 	);
 	_graphics_pipeline.setStorageBuffer("MaterialsBuffer", _materials_buffer);
 
 	// Sampler
-	_sampler = Sampler(*DefaultConf::logical_device->getDevice());
+	_sampler = Sampler(*DefaultConf::device);
 	_graphics_pipeline.setSamplers("samp", { &_sampler });
 
 	// Textures
@@ -197,18 +197,18 @@ void DefaultRenderingModule::start() {
 	_graphics_pipeline.update();
 
 	// Renderer
-	DefaultConf::renderer->setGraphicsQueues(&DefaultConf::logical_device->getQueues("graphics_queues"));
-	DefaultConf::renderer->setPresentQueues(&DefaultConf::logical_device->getQueues("present_queues"));
-	DefaultConf::renderer->setNbFrame(DefaultConf::NB_FRAME);
-	DefaultConf::renderer->setDevice(DefaultConf::logical_device->getDevice());
-	DefaultConf::renderer->setWindow(DefaultConf::render_window);
-	DefaultConf::renderer->setOffset(0, 0);
-	DefaultConf::renderer->setExtent(
-		DefaultConf::render_window->getWidth(),
-		DefaultConf::render_window->getHeight()
-	);
+	//DefaultConf::renderer->setGraphicsQueues(&);
+	//DefaultConf::renderer->setPresentQueues(&DefaultConf::logical_device->getQueues("present_queues"));
+	//DefaultConf::renderer->setNbFrame(DefaultConf::NB_FRAME);
+	//DefaultConf::renderer->setDevice(DefaultConf::logical_device->getDevice());
+	//DefaultConf::renderer->setWindow(DefaultConf::render_window);
+	//DefaultConf::renderer->setOffset(0, 0);
+	//DefaultConf::renderer->setExtent(
+	//	DefaultConf::render_window->getWidth(),
+	//	DefaultConf::render_window->getHeight()
+	//);
 
-	DefaultConf::renderer->create();
+	//DefaultConf::renderer->create();
 }
 
 void DefaultRenderingModule::update() {

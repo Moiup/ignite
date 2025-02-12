@@ -1,9 +1,12 @@
 #pragma once
 
 #include "PhysicalDevice.h"
+//#include "Queue.h"
 
 #include <vector>
 #include <string>
+#include <optional>
+
 
 struct QueueCreationInfo {
 	std::vector<VkDeviceQueueCreateInfo> queue_create_infos{};
@@ -15,6 +18,8 @@ struct QueueFamilyInfo {
 	int32_t nb_queue_retreived{0};
 };
 
+class Queue;
+
 class Device
 {
 private:
@@ -22,7 +27,8 @@ private:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
 		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-		VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME
+		VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
+		//VK_KHR_MAINTENANCE_5_EXTENSION_NAME
 	};
 
 	PhysicalDevice* _gpu{ nullptr };
@@ -46,6 +52,8 @@ public:
 
 	VkDevice getDevice();
 	PhysicalDevice* getGPU();
+	std::optional<Queue> getQueue(VkQueueFlags flags);
+	std::optional<Queue> getQueueFromFamily(int32_t family_index);
 
 	void waitIdle();
 

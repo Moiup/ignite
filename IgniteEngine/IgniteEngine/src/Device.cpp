@@ -1,4 +1,5 @@
 #include "Device.h"
+#include "Queue.h"
 
 Device::Device() {
 	_shared_count = new int32_t(1);
@@ -9,6 +10,7 @@ Device::Device(
 ) :
 	Device::Device()
 {
+	_gpu = &gpu;
 	create();
 }
 
@@ -58,6 +60,41 @@ PhysicalDevice* Device::getGPU() {
 	return _gpu;
 }
 
+std::optional<Queue> Device::getQueue(VkQueueFlags flags) {
+	for (int32_t fi = 0; fi < _queue_family_infos.size(); ++fi) {
+		QueueFamilyInfo& qfi = _queue_family_infos[fi];
+		VkQueueFamilyProperties& qfp = qfi.properties.queueFamilyProperties;
+		if (qfi.nb_queue_retreived == qfp.queueCount) {
+			continue;
+		}
+		if (!(qfp.queueFlags & flags)) {
+			continue;
+		}
+
+		return Queue(
+			*this,
+			fi,
+			qfi.nb_queue_retreived++
+		);
+	}
+
+	return {};
+}
+
+std::optional<Queue> Device::getQueueFromFamily(int32_t family_index) {
+	QueueFamilyInfo& qfi = _queue_family_infos[family_index];
+
+	if (qfi.nb_queue_retreived == qfi.properties.queueFamilyProperties.queueCount) {
+		return {};
+	}
+
+	return Queue(
+		*this,
+		family_index,
+		qfi.nb_queue_retreived++
+	);
+}
+
 void Device::waitIdle() {
 	vkDeviceWaitIdle(_device);
 }
@@ -65,6 +102,11 @@ void Device::waitIdle() {
 
 void Device::create() {
 	VkPhysicalDeviceFeatures features = featuresManagement();
+
+	//VkPhysicalDeviceMaintenance5FeaturesKHR maintenance5{};
+	//maintenance5.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_FEATURES_KHR;
+	//maintenance5.pNext = nullptr;
+	//maintenance5.maintenance5 = VK_TRUE;
 
 	VkPhysicalDeviceShaderAtomicFloatFeaturesEXT shader_atomic_float_feats{};
 	shader_atomic_float_feats.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
@@ -118,7 +160,7 @@ void Device::create() {
 		&_device
 	);
 	if (vk_result != VK_SUCCESS) {
-		std::cerr << "Error: failed creating logical device." << std::endl;
+		std::cerr << "Error: failed creating logical device. " << string_VkResult(vk_result) << std::endl;
 		throw std::runtime_error("Error: failed creating logical device.");
 	}
 }
@@ -186,6 +228,7 @@ QueueCreationInfo Device::queueCreateInfos() {
 		info.queueFamilyIndex = family_index++;
 		info.queueCount = qfp.queueFamilyProperties.queueCount;
 		info.pQueuePriorities = priorities.data();
+		queue_create_infos.push_back(info);
 	}
 
 	return {

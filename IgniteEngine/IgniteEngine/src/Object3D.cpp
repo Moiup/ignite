@@ -500,7 +500,7 @@ void Object3D::buildObjectId(Renderer& renderer, GraphicsPipeline& gp) {
 	if (Object3D::_arrays[&renderer][&gp].object_id.size()) {
 		return;
 	}
-
+	
 	uint32_t obj_i{ 0 };
 	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
 		Mesh* mesh = m_o.first;
@@ -509,6 +509,7 @@ void Object3D::buildObjectId(Renderer& renderer, GraphicsPipeline& gp) {
 		for (uint32_t i = 0; i < nb_coords; i++) {
 			Object3D::_arrays[&renderer][&gp].object_id.push_back(obj_i);
 		}
+		
 		obj_i += objects.size();
 	}
 }

@@ -37,6 +37,8 @@ protected:
 	std::vector<Entity3D*> _children;
 
 public:
+	glm::mat4 _first_mat;
+
 	Entity3D();
 	~Entity3D();
 

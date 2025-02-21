@@ -40,13 +40,12 @@ void EngineApp::init() {
 		"VK_LAYER_KHRONOS_synchronization2"
 	};
 	_instance = Instance(instance_layer);
-
-	//_instance.displayAvailableGPUs();
+	_instance.displayAvailableGPUs();
 	
 	// Initialising
 	_gpu = _instance.getDefaultGPU();
 	std::cout << "Selected GPU:" << std::endl;
-	//_gpu.displayProperties();
+	_gpu.displayProperties();
 	//_gpu.displayDeviceExtensionProperties();
 	//_gpu.displayQueueFamilyProperties();
 

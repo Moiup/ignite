@@ -81,17 +81,19 @@ void DefaultInit::init() {
 	DefaultConf::depth_buffer = &_depth_buffer;
 
 	// White Texture
-	Pixels pixels("../assets/textures/white.png");
+	Pixels white_pixels;
+	white_pixels.setPixels(1, 1);
+	white_pixels.setPixel(0, 0, 255, 255, 255, 255);
 	_white_texture = Texture2D(
 		DefaultConf::device,
-		pixels.getWidth(),
-		pixels.getHeight()
+		white_pixels.getWidth(),
+		white_pixels.getHeight()
 	);
 
 	StagingBuffer<IGEBufferUsage::transfer> sb = StagingBuffer<IGEBufferUsage::transfer>(
 		DefaultConf::device,
-		pixels.getSize(),
-		pixels.getPixels().data()
+		white_pixels.getSize(),
+		white_pixels.getPixels().data()
 	);
 
 	DefaultConf::graphics_queue->changeLayout(_white_texture, VK_IMAGE_LAYOUT_GENERAL);

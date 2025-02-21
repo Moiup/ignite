@@ -9,10 +9,10 @@ StagingBuffer<U>::StagingBuffer(
 ) :
 	Buffer<U>(device, size)
 {
-	setMemoryPropertyFlags(
+	this->setMemoryPropertyFlags(
 		IGEMemoryType::staging
 	);
-	create();
+	this->create();
 }
 
 template<IGEBufferUsage U>
@@ -28,16 +28,16 @@ StagingBuffer<U>::StagingBuffer(
 
 template<IGEBufferUsage U>
 void* StagingBuffer<U>::map() {
-	if (_size == 0) {
+	if (this->_size == 0) {
 		return nullptr;
 	}
 
 	void* ptr{ nullptr };
 	vkMapMemory(
-		_device->getDevice(),
-		_memory,
+		this->_device->getDevice(),
+		this->_memory,
 		0,
-		_size,
+		this->_size,
 		0,
 		&ptr
 	);
@@ -48,33 +48,33 @@ void* StagingBuffer<U>::map() {
 template<IGEBufferUsage U>
 void StagingBuffer<U>::unmap() {
 	vkUnmapMemory(
-		_device->getDevice(),
-		_memory
+		this->_device->getDevice(),
+		this->_memory
 	);
 }
 
 template<IGEBufferUsage U>
 void StagingBuffer<U>::setValues(const void* values) {
-	if (_buffer_info.size == 0) {
+	if (this->_buffer_info.size == 0) {
 		return;
 	}
 
 	void* copy;
 	copy = map();
-	memcpy(copy, values, _size);
+	memcpy(copy, values, this->_size);
 	unmap();
 }
 
 template<IGEBufferUsage U>
 Pointer<uint8_t> StagingBuffer<U>::getValues() {
-	if (_size == 0) {
+	if (this->_size == 0) {
 		return nullptr;
 	}
 
 	void* copy{};
-	uint8_t* v = new uint8_t[_size];
+	uint8_t* v = new uint8_t[this->_size];
 	copy = map();
-	memcpy(v, copy, _size);
+	memcpy(v, copy, this->_size);
 	unmap();
 
 	return Pointer<uint8_t>(v);
@@ -82,12 +82,12 @@ Pointer<uint8_t> StagingBuffer<U>::getValues() {
 
 template<IGEBufferUsage U>
 void StagingBuffer<U>::getValues(Pointer<uint8_t> data) {
-	if (_size == 0) {
+	if (this->_size == 0) {
 		return;
 	}
 
 	void* copy{};
 	copy = map();
-	memcpy(data.data(), copy, _size);
+	memcpy(data.data(), copy, this->_size);
 	unmap();
 }

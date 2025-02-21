@@ -370,7 +370,8 @@ glm::mat4& Entity3D::alignmentMatrix() {
 }
 
 void Entity3D::buildTransformWorld() {
-	buildTransformWorld(glm::mat4(1.0));
+	glm::mat4 identity = glm::mat4(1.0);
+	buildTransformWorld(identity);
 }
 
 void Entity3D::buildTransformWorld(glm::mat4& father_mat) {

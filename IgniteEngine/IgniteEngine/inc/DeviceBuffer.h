@@ -6,8 +6,8 @@ template<IGEBufferUsage U>
 DeviceBuffer<U>::DeviceBuffer(Device* device, VkDeviceSize size) :
 	Buffer<U>(device, size)
 {
-	setMemoryPropertyFlags(
+	this->setMemoryPropertyFlags(
 		IGEMemoryType::device
 	);
-	create();
+	this->create();
 }

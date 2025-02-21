@@ -172,7 +172,6 @@ void Pipeline::setStorageBuffer(
 	desc_buf_info.buffer = buff.getBuffer();
 	desc_buf_info.offset = 0;
 	desc_buf_info.range = buff.getCapacity();
-
 	write.pBufferInfo = _descriptor_buffer_infos[name].data();
 	write.pImageInfo = nullptr;
 	write.pTexelBufferView = nullptr;

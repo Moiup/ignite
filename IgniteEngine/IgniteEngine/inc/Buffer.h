@@ -163,12 +163,12 @@ const VkBuffer& Buffer<U>::getBuffer() const {
 }
 
 template<IGEBufferUsage U>
-const uint32_t& Buffer<U>::getSize() const {
+const uint32_t Buffer<U>::getSize() const {
 	return _size;
 }
 
 template<IGEBufferUsage U>
-const uint32_t& Buffer<U>::getCapacity() const {
+const uint32_t Buffer<U>::getCapacity() const {
 	return _capacity;
 }
 

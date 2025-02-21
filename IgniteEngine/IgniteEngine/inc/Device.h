@@ -61,6 +61,6 @@ private:
 	void destroy();
 	void create();
 	VkPhysicalDeviceFeatures featuresManagement();
-	QueueCreationInfo Device::queueCreateInfos();
+	QueueCreationInfo queueCreateInfos();
 };
 

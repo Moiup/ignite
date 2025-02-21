@@ -34,8 +34,8 @@ public:
 	Pointer<uint8_t> getValues();
 	void setValues(Pointer<uint8_t> data);
 
-	const uint32_t& getSize() const;
-	const uint32_t& getCapacity() const;
+	const uint32_t getSize() const;
+	const uint32_t getCapacity() const;
 
 	void* map();
 	void unmap();

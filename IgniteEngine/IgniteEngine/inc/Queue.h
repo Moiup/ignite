@@ -40,7 +40,7 @@ private:
 
 public:
 	Queue();
-	Queue::Queue(
+	Queue(
 		Device& device,
 		uint32_t family_index,
 		uint32_t queue_index
@@ -229,11 +229,11 @@ private:
 
 
 	// Command buffers managing methods
-	VkCommandBuffer* Queue::getPendingCommandBufferStartPointer();
-	const uint32_t Queue::getStartIndexPendingCommandBuffers() const;
-	uint32_t& Queue::getStartIndexPendingCommandBuffers();
-	const uint32_t Queue::getNbPendingCommandBuffers() const;
-	uint32_t& Queue::getNbPendingCommandBuffers();
+	VkCommandBuffer* getPendingCommandBufferStartPointer();
+	const uint32_t getStartIndexPendingCommandBuffers() const;
+	uint32_t& getStartIndexPendingCommandBuffers();
+	const uint32_t getNbPendingCommandBuffers() const;
+	uint32_t& getNbPendingCommandBuffers();
 
 };
 

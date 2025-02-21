@@ -28,9 +28,9 @@ CommandBuffer::CommandBuffer(const CommandBuffer& cmd_buf) :
 //	*this = cmd_buf;
 //}
 
-CommandBuffer& CommandBuffer::operator=(const CommandBuffer& cmd_buf) {
-	return CommandBuffer(cmd_buf);
-}
+// CommandBuffer& CommandBuffer::operator=(const CommandBuffer& cmd_buf) {
+// 	return CommandBuffer(cmd_buf);
+// }
 
 void CommandBuffer::setLevel(VkCommandBufferLevel level) {
 	_level = level;

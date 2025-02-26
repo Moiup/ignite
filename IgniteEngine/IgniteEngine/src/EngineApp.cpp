@@ -119,7 +119,7 @@ void EngineApp::update() {
 		std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
 		float delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;
 		DefaultConf::delta_time = delta_time;
-		//std::cout << delta_time << "\t" << static_cast<uint32_t>(1000 / delta_time) << std::endl;
+		std::cout << "total: " << delta_time << " ms" << "\t" << static_cast<uint32_t>(1000 / delta_time) << " fps" << std::endl;
 	}
 
 	DefaultConf::device->waitIdle();

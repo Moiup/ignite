@@ -5,12 +5,12 @@ project(ESocket)
 if(MSVC)
     file(GLOB HEADERS
         esocket/inc/*.h
-        esocket/inc/window/*.h
+        esocket/inc/windows/*.h
     )
 
     file(GLOB SRC
         esocket/src/*.cpp
-        esocket/src/window/*.cpp
+        esocket/src/windows/*.cpp
     )
 
 else()

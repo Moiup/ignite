@@ -12,6 +12,7 @@
 
 std::string makeString(const glm::uvec2 v);
 std::string makeString(const glm::vec2 v);
+std::string makeString(const glm::ivec2 v);
 std::string makeString(const glm::vec3 v);
 std::string makeString(const glm::vec4 v);
 std::string makeString(const glm::mat4 m);

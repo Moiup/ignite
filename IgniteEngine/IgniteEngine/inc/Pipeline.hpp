@@ -40,10 +40,6 @@ public:
 	void setPushConstants(void* push_constant);
 	const void* getPushConstants() const;
 
-	void setUniformBuffer(
-		const std::string& name,
-		const Buffer<IGEBufferUsage::uniform_buffer>& buff
-	);
 	template<IGEBufferUsage T>
 	void setStorageBuffer(
 		const std::string& name,

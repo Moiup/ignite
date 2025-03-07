@@ -146,37 +146,6 @@ VkWriteDescriptorSet& Pipeline::setWriteDescriptorSet(
 	return _write_descriptor_sets.back();
 }
 
-void Pipeline::setUniformBuffer(
-	const std::string& name,
-	const Buffer<IGEBufferUsage::uniform_buffer>& buff
-) {
-	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	_descriptor_buffer_infos[name].push_back(VkDescriptorBufferInfo{});
-	VkDescriptorBufferInfo& desc_buf_info = _descriptor_buffer_infos[name].back();
-	desc_buf_info.buffer = buff.getBuffer();
-	desc_buf_info.offset = 0;
-	desc_buf_info.range = buff.getCapacity();
-
-	write.pBufferInfo = _descriptor_buffer_infos[name].data();
-	write.pImageInfo = nullptr;
-	write.pTexelBufferView = nullptr;
-}
-
-void Pipeline::setStorageBuffer(
-	const std::string& name,
-	const Buffer<IGEBufferUsage::storage_buffer>& buff
-) {
-	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	_descriptor_buffer_infos[name].push_back(VkDescriptorBufferInfo{});
-	VkDescriptorBufferInfo& desc_buf_info = _descriptor_buffer_infos[name].back();
-	desc_buf_info.buffer = buff.getBuffer();
-	desc_buf_info.offset = 0;
-	desc_buf_info.range = buff.getCapacity();
-	write.pBufferInfo = _descriptor_buffer_infos[name].data();
-	write.pImageInfo = nullptr;
-	write.pTexelBufferView = nullptr;
-}
-
 void Pipeline::setSamplers(
 	const std::string& name,
 	const std::vector<Sampler*>& samp
@@ -403,7 +372,7 @@ void Pipeline::createPipelineLayout() {
 	pipeline_layout_info.flags = 0;
 	pipeline_layout_info.setLayoutCount = _descriptor_set_layout.size();
 	pipeline_layout_info.pSetLayouts = _descriptor_set_layout.data();
-	pipeline_layout_info.pushConstantRangeCount = 1;
+	pipeline_layout_info.pushConstantRangeCount = (_shader->getPushConstantRange().size > 0);
 	pipeline_layout_info.pPushConstantRanges = &_shader->getPushConstantRange();
 
 	VkResult vk_result = vkCreatePipelineLayout(

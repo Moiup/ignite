@@ -50,11 +50,22 @@ void GraphicsPipeline::setVertexBuffer(
 	const std::string& name,
 	const Buffer<IGEBufferUsage::vertex_buffer>& buff
 ) {
-	_vertex_buffers[name] = buff.getBuffer();
+	setVertexBufferBis(name, buff);
+}
+
+void GraphicsPipeline::setVertexBuffer(
+	const std::string& name,
+	const Buffer<IGEBufferUsage::vertex_storage_buffer>& buff
+) {
+	setVertexBufferBis(name, buff);
 }
 
 void GraphicsPipeline::setIndexBuffer(const Buffer<IGEBufferUsage::index_buffer>& buff) {
-	_index_buffer = buff.getBuffer();
+	setIndexBufferBis(buff);
+}
+
+void GraphicsPipeline::setIndexBuffer(const Buffer<IGEBufferUsage::index_storage_buffer>& buff) {
+	setIndexBufferBis(buff);
 }
 
 const std::unordered_map<std::string, VkBuffer>& GraphicsPipeline::getVertexBuffers() const {

@@ -247,13 +247,15 @@ void Queue::dispatch(
 		0,
 		nullptr
 	);
-	cmd_buf.pushConstants(
-		cp.getPipelineLayout(),
-		cp.getShader()->getPushConstantRange().stageFlags,
-		cp.getShader()->getPushConstantRange().offset,
-		cp.getShader()->getPushConstantRange().size,
-		cp.getPushConstants()
-	);
+	if (cp.getShader()->getPushConstantRange().size) {
+		cmd_buf.pushConstants(
+			cp.getPipelineLayout(),
+			cp.getShader()->getPushConstantRange().stageFlags,
+			cp.getShader()->getPushConstantRange().offset,
+			cp.getShader()->getPushConstantRange().size,
+			cp.getPushConstants()
+		);
+	}
 	cmd_buf.dispatch(
 		group_count_x,
 		group_count_y,

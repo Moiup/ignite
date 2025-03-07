@@ -213,7 +213,7 @@ std::vector<uint32_t> Shader::compile(const std::string& glsl, const std::string
 	if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
 		std::cerr << "Error compiling shader \"" << path << "\"" << std::endl;
 		std::cerr << result.GetErrorMessage() << std::endl;
-		throw std::runtime_error("Error compiling shader");
+ 		throw std::runtime_error("Error compiling shader");
 	}
 
 	return {result.cbegin(), result.cend()};

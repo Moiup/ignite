@@ -44,9 +44,10 @@ public:
 		const std::string& name,
 		const Buffer<IGEBufferUsage::uniform_buffer>& buff
 	);
+	template<IGEBufferUsage T>
 	void setStorageBuffer(
 		const std::string& name,
-		const Buffer<IGEBufferUsage::storage_buffer>& buff
+		const Buffer<T>& buff
 	);
 	void setSamplers(
 		const std::string& name,

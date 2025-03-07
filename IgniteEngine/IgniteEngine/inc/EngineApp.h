@@ -4,7 +4,6 @@
 
 #include "Instance.h"
 #include "PhysicalDevice.h"
-#include "Window.h"
 #include "WindowSurface.h"
 
 #include "DefaultRenderer.h"

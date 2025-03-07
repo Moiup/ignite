@@ -20,7 +20,7 @@ class Shader
 protected:
 	std::vector<VkPipelineShaderStageCreateInfo> _shader_stages;
 
-	VkPushConstantRange _push_constant_range;
+	VkPushConstantRange _push_constant_range{};
 
 	std::unordered_map<std::string, VkDescriptorSetLayoutBinding> _desc_layout_bindings;
 

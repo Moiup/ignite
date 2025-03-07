@@ -47,8 +47,13 @@ public:
 		const std::string& name,
 		const Buffer<IGEBufferUsage::vertex_buffer>& buff
 	);
+	void setVertexBuffer(
+		const std::string& name,
+		const Buffer<IGEBufferUsage::vertex_storage_buffer>& buff
+	);
 
 	void setIndexBuffer(const Buffer<IGEBufferUsage::index_buffer>& buff);
+	void setIndexBuffer(const Buffer<IGEBufferUsage::index_storage_buffer>& buff);
 
 	const std::unordered_map<std::string, VkBuffer>& getVertexBuffers() const;
 	const VkBuffer getIndexBuffer() const;
@@ -62,6 +67,27 @@ public:
 	const GraphicShader& getShader() const;
 
 private:
+	template<IGEBufferUsage U>
+	void setVertexBufferBis(
+		const std::string& name,
+		const Buffer<U>& buff
+	);
+
+	template<IGEBufferUsage U>
+	void setIndexBufferBis(const Buffer<U>& buff);
+
 	void createPipeline();
 };
 
+template<IGEBufferUsage U>
+void GraphicsPipeline::setVertexBufferBis(
+	const std::string& name,
+	const Buffer<U>& buff
+) {
+	_vertex_buffers[name] = buff.getBuffer();
+}
+
+template<IGEBufferUsage U>
+void GraphicsPipeline::setIndexBufferBis(const Buffer<U>& buff) {
+	_index_buffer = buff.getBuffer();
+}

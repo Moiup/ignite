@@ -25,6 +25,7 @@ struct Object3DArrays {
 	std::vector<uint32_t> indices;
 	std::vector<Texture2D*> _textures2D;
 	std::vector<glm::vec2> uv;
+	std::vector<glm::vec3> normals;
 	std::vector<uint32_t> transform_indices;
 	std::vector<glm::mat4> transform_matrices;
 	std::vector<uint32_t> material_indices;
@@ -95,10 +96,14 @@ public:
 	static const std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& getArrays();
 	static const std::unordered_map<GraphicsPipeline*, Object3DArrays>& getArrays(Renderer& renderer);
 
-	static const std::vector<glm::vec3>& getCoords(Renderer& renderer, GraphicsPipeline& graphics_pipeline);
+	static const std::vector<glm::vec3>& getCoords(Renderer& renderer, GraphicsPipeline& gp);
 	static std::vector<glm::vec3>& updateCoords(Renderer& renderer, GraphicsPipeline& gp);
 	static uint32_t getCoordsStride(Renderer& renderer, GraphicsPipeline& gp);
 	static uint32_t getCoordsSize(Renderer& renderer, GraphicsPipeline& gp);
+
+	static std::vector<glm::vec3>& getNormals(Renderer& renderer, GraphicsPipeline& gp);
+	static uint32_t getNormalsStride(Renderer& renderer, GraphicsPipeline& gp);
+	static uint32_t getNormalsSize(Renderer& renderer, GraphicsPipeline& gp);
 
 	static std::vector<uint32_t>& getObjectId(Renderer& renderer, GraphicsPipeline& gp);
 	static uint32_t getObjectIdStride(Renderer& renderer, GraphicsPipeline& gp);
@@ -154,6 +159,7 @@ public:
 
 private:
 	static void buildCoords(Renderer& renderer, GraphicsPipeline& gp);
+	static void buildNormals(Renderer& renderer, GraphicsPipeline& gp);
 	static void buildObjectId(Renderer& renderer, GraphicsPipeline& gp);
 	static void buildMeshOffsets(Renderer& renderer, GraphicsPipeline& gp);
 	static void buildIndices(Renderer& renderer, GraphicsPipeline& gp);

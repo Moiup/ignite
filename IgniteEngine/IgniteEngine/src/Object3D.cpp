@@ -252,6 +252,21 @@ uint32_t Object3D::getCoordsSize(Renderer& renderer, GraphicsPipeline& gp) {
 	return getCoords(renderer, gp).size() * stride;
 }
 
+std::vector<glm::vec3>& Object3D::getNormals(Renderer& renderer, GraphicsPipeline& gp) {
+	buildNormals(renderer, gp);
+	return Object3D::_arrays[&renderer][&gp].normals;
+}
+
+uint32_t Object3D::getNormalsStride(Renderer& renderer, GraphicsPipeline& gp) {
+	return sizeof(*getNormals(renderer, gp).data());
+}
+
+uint32_t Object3D::getNormalsSize(Renderer& renderer, GraphicsPipeline& gp) {
+	uint32_t stride = getNormalsStride(renderer, gp);
+	return getNormals(renderer, gp).size() * stride;
+}
+
+
 std::vector<uint32_t>& Object3D::getObjectId(Renderer& renderer, GraphicsPipeline& gp) {
 	buildObjectId(renderer, gp);
 	return Object3D::_arrays[&renderer][&gp].object_id;
@@ -476,6 +491,22 @@ void Object3D::buildCoords(Renderer& renderer, GraphicsPipeline& gp) {
 			Object3D::_arrays[&renderer][&gp].coords.end(),
 			mesh->getCoords().begin(),
 			mesh->getCoords().end()
+		);
+	}
+}
+
+void Object3D::buildNormals(Renderer& renderer, GraphicsPipeline& gp) {
+	// if not empty
+	if (Object3D::_arrays[&renderer][&gp].normals.size()) {
+		return;
+	}
+
+	for (auto& m_o : Object3D::_arrays[&renderer][&gp].mesh_objects) {
+		const Mesh* mesh = m_o.first;
+		Object3D::_arrays[&renderer][&gp].normals.insert(
+			Object3D::_arrays[&renderer][&gp].normals.end(),
+			mesh->getNormals().begin(),
+			mesh->getNormals().end()
 		);
 	}
 }

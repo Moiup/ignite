@@ -265,7 +265,7 @@ void Queue::copy(Image& src, Buffer<U>& dst,
 	region_info.bufferOffset = 0;
 	region_info.bufferRowLength = 0;
 	region_info.bufferImageHeight = 0;
-	region_info.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	region_info.imageSubresource.aspectMask = src.aspectMask();
 	region_info.imageSubresource.mipLevel = 0;
 	region_info.imageSubresource.baseArrayLayer = 0;
 	region_info.imageSubresource.layerCount = 1;
@@ -326,7 +326,7 @@ void Queue::copy(Buffer<U>& src, Image& dst,
 	// (To start, we consider only the original level -> 0)
 	VkBufferImageCopy image_copy{};
 	image_copy.bufferOffset = 0;
-	image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.imageSubresource.aspectMask = dst.aspectMask();
 	image_copy.imageSubresource.mipLevel = 0;
 	image_copy.imageSubresource.baseArrayLayer = 0;
 	image_copy.imageSubresource.layerCount = 1;

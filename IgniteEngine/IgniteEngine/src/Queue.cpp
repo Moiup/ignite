@@ -768,7 +768,7 @@ void Queue::changeLayout(
 ) {
 	// Preparing the transfer with the image memory barrier
 	VkImageSubresourceRange subresource_range{};
-	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range.aspectMask = img.aspectMask();
 	subresource_range.baseMipLevel = 0;
 	subresource_range.levelCount = 1;
 	subresource_range.layerCount = 1;

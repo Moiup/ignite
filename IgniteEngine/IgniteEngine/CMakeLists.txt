@@ -62,6 +62,7 @@ set(HEADERS
     # inc/InitNetworkProtocole.h
     inc/Instance.h
     inc/Joint.h
+    inc/LightObject.h
     inc/LoadedObjectInfo.h
     inc/Material.h
     inc/Mesh.h
@@ -124,6 +125,7 @@ set(SRC
     # src/InitNetworkProtocole.cpp
     src/Instance.cpp
     src/Joint.cpp
+    src/LoadObject.cpp
     src/LoadedObjectInfo.cpp
     src/Material.cpp
     src/Mesh.cpp

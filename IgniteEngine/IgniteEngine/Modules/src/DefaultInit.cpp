@@ -22,6 +22,10 @@ void DefaultInit::init() {
 		_render_window.getHeight(),
 		{ DefaultConf::graphics_queue->getFamilyIndex() }
 	);
+	DefaultConf::graphics_queue->changeLayout(
+		_depth_buffer,
+		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+	);
 
 	_swapchain = Swapchain(
 		*DefaultConf::device,

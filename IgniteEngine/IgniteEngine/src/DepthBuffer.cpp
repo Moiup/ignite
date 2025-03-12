@@ -26,6 +26,7 @@ void DepthBuffer::setImageQueueFamilyIndices(const std::vector<uint32_t>& indice
 }
 
 void DepthBuffer::setImageInfo() {
+	setAspectMask(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
 	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	setImagePNext(nullptr);

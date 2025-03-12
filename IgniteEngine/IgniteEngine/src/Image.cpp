@@ -76,6 +76,7 @@ Image& Image::operator=(const Image& img) {
 	_image_view = img._image_view;
 	_image_info = img._image_info;
 	_image_view_info = img._image_view_info;
+	_aspect_mask = img._aspect_mask;
 	
 	return *this;
 }
@@ -89,6 +90,7 @@ Image& Image::operator=(Image&& img) {
 	img._image_view = nullptr;
 	_image_info = std::move(img)._image_info;
 	_image_view_info = std::move(img)._image_view_info;
+	_aspect_mask = std::move(img)._aspect_mask;
 
 	return *this;
 }
@@ -96,7 +98,6 @@ Image& Image::operator=(Image&& img) {
 Image::~Image() {
 	destroy();
 }
-
 
 void Image::createImage() {
 	VkResult vk_result = vkCreateImage(
@@ -110,7 +111,6 @@ void Image::createImage() {
 	}
 }
 
-
 void Image::bind(){
 	vkBindImageMemory(
 		_device->getDevice(),
@@ -119,7 +119,6 @@ void Image::bind(){
 		0
 	);
 }
-
 
 void Image::createImageView() {
 	_image_view_info.image = _image;
@@ -308,6 +307,10 @@ void Image::setImageViewInfo(VkImageViewCreateInfo info) {
 	_image_view_info = info;
 }
 
+void Image::setAspectMask(VkImageAspectFlags aspect_flag){
+	_aspect_mask = aspect_flag;
+}
+
 
 VkFormat Image::getImageFormat() {
 	return _image_info.format;
@@ -333,4 +336,8 @@ const uint32_t Image::getWidth() const {
 
 const uint64_t Image::getHeight() const {
 	return _image_info.extent.height;
+}
+
+const VkImageAspectFlags Image::aspectMask() const {
+	return _aspect_mask;
 }

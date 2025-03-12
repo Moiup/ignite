@@ -18,6 +18,7 @@ protected:
 
 	VkImageCreateInfo _image_info{};
 	VkImageViewCreateInfo _image_view_info{};
+	VkImageAspectFlags _aspect_mask{ VK_IMAGE_ASPECT_COLOR_BIT };
 
 protected:
 	Image(
@@ -81,6 +82,8 @@ protected:
 	void setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count);
 	void setImageViewInfo(VkImageViewCreateInfo info);
 
+	void setAspectMask(VkImageAspectFlags aspect_flag);
+
 public:
 	VkFormat getImageFormat();
 	VkImageLayout getImageLayout() const;
@@ -91,6 +94,7 @@ public:
 	const uint32_t getWidth() const;
 	const uint64_t getHeight() const;
 
+	const VkImageAspectFlags aspectMask() const;
 
 protected:
 	void getMemoryRequirements();

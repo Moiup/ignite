@@ -57,7 +57,8 @@ void DefaultInit::init() {
 	conf.scissor.offset = {0, 0};
 	conf.scissor.extent = {_render_window.getWidth(), _render_window.getHeight()};
 	conf.polygon_mode = VK_POLYGON_MODE_FILL;
-	conf.cull_mode = VK_CULL_MODE_BACK_BIT;
+	//conf.cull_mode = VK_CULL_MODE_BACK_BIT;
+	conf.cull_mode = VK_CULL_MODE_NONE;
 	conf.front_face = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	conf.line_width = 1.0;
 	conf.blend_constants = { 1.0, 1.0, 1.0, 1.0 };
@@ -76,7 +77,8 @@ void DefaultInit::init() {
 	_perspective_camera.setNear(0.1f);
 	_perspective_camera.setFar(100.0f);
 	_perspective_camera.setEye(0, 0, 0);
-	_perspective_camera.setCenter(0, 0, 1);
+	_perspective_camera.setCenter(0, 0, -1);
+	_perspective_camera.setUp(0, 1, 0);
 	_camera.setCamera(&_perspective_camera);
 
 	DefaultConf::camera = &_camera;

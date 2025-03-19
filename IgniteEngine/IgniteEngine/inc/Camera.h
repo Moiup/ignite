@@ -27,9 +27,9 @@ public:
 	void setUp(glm::vec3 up);
 	void setUp(float x, float y, float z);
 
-	glm::vec3 getEye();
-	glm::vec3 getCenter();
-	glm::vec3 getUp();
+	const glm::vec3& getEye() const;
+	const glm::vec3& getCenter() const;
+	const glm::vec3& getUp() const;
 
 	glm::mat4 getView() const;
 	virtual glm::mat4 getProjection() = 0;

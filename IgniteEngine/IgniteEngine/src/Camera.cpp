@@ -50,15 +50,15 @@ void Camera::setUp(float x, float y, float z) {
 	setUp(glm::vec3(x, y, z));
 }
 
-glm::vec3 Camera::getEye(){
+const glm::vec3& Camera::getEye() const{
 	return _eye;
 }
 
-glm::vec3 Camera::getCenter() {
+const glm::vec3& Camera::getCenter() const {
 	return _center;
 }
 
-glm::vec3 Camera::getUp() {
+const glm::vec3& Camera::getUp() const {
 	return _up;
 }
 

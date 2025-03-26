@@ -10,14 +10,31 @@ DepthBuffer::DepthBuffer(
 	Device* device,
 	uint32_t width,
 	uint32_t height,
-	const std::vector<uint32_t>& indices
-) :
-	Image(device, width, height, 1, IGEImgFormat::d32_sfloat_s8_uint)
+	std::vector<uint32_t>& indices
+):
+	Image::Image(
+		device,
+		width,
+		height,
+		1,
+		IGEImgFormat::d32_sfloat_s8_uint,
+		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+		VK_IMAGE_TYPE_2D,
+		indices.data(),
+		indices.size(),
+		{ VK_COMPONENT_SWIZZLE_IDENTITY,
+		VK_COMPONENT_SWIZZLE_IDENTITY,
+		VK_COMPONENT_SWIZZLE_IDENTITY,
+		VK_COMPONENT_SWIZZLE_IDENTITY },
+		VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT,
+		0, 1, 0, 1
+	)
 {
-	setImageQueueFamilyIndices(indices);
-	setImageInfo();
-	setImageViewInfo();
-	create();
+	;
+	//setImageQueueFamilyIndices(indices);
+	//setImageInfo();
+	//setImageViewInfo();
+	//create();
 }
 
 void DepthBuffer::setImageQueueFamilyIndices(const std::vector<uint32_t>& indices) {

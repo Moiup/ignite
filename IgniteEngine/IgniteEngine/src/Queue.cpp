@@ -342,7 +342,7 @@ void Queue::barrier(
 
 void Queue::beginRendering(
 	glm::vec4& clear_color_value,
-	Swapchain& swapchain,
+	Image& image,
 	DepthBuffer& depth_buffer,
 	VkOffset2D& offset,
 	VkExtent2D& extent
@@ -353,7 +353,7 @@ void Queue::beginRendering(
 	cmd_buf.begin();
 
 	cmd_buf.dynamicRenderingPipelineBarrier(
-		swapchain,
+		image,
 		depth_buffer
 	);
 
@@ -364,7 +364,7 @@ void Queue::beginRendering(
 	};
 	cmd_buf.beginRendering(
 		ccv,
-		swapchain,
+		image,
 		depth_buffer,
 		offset,
 		extent
@@ -443,11 +443,11 @@ void Queue::drawIndexed(
 	);
 }
 
-void Queue::endRendering(Swapchain& swapchain) {
+void Queue::endRendering(Image &image) {
 	CommandBuffer& cmd_buf = _command_pool.commandBuffers().back();
 
 	cmd_buf.endRendering();
-	cmd_buf.dynamicRenderingPipelineBarrierBack(swapchain);
+	cmd_buf.dynamicRenderingPipelineBarrierBack(image);
 	cmd_buf.end();
 }
 

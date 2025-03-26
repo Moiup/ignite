@@ -128,7 +128,7 @@ public:
 
 	void beginRendering(
 		glm::vec4& clear_color_value,
-		Swapchain& swapchain,
+		Image& image,
 		DepthBuffer& depth_buffer,
 		VkOffset2D& offset,
 		VkExtent2D& extent
@@ -143,7 +143,7 @@ public:
 		uint32_t first_instance
 	);
 	
-	void endRendering(Swapchain& swapchain);
+	void endRendering(Image& swapchain);
 
 	void flush();
 

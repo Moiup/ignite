@@ -15,12 +15,12 @@ void DefaultInit::init() {
 	);
 
 	DefaultConf::render_window = &_render_window;
-
+	std::vector<uint32_t> db_queue_family_indices{ DefaultConf::graphics_queue->getFamilyIndex() };
 	_depth_buffer = DepthBuffer(
 		DefaultConf::device,
 		_render_window.getWidth(),
 		_render_window.getHeight(),
-		{ DefaultConf::graphics_queue->getFamilyIndex() }
+		db_queue_family_indices
 	);
 	DefaultConf::graphics_queue->changeLayout(
 		_depth_buffer,

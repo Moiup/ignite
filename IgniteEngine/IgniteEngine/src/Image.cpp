@@ -12,7 +12,17 @@ Image::Image(
 	uint32_t width,
 	uint32_t height,
 	uint32_t depth,
-	IGEImgFormat format
+	IGEImgFormat format,
+	VkImageUsageFlags usage,
+	VkImageType image_type,
+	uint32_t* queue_family_indices,
+	uint32_t queue_family_indices_count,
+	ComponentSwizzle swizzle,
+	VkImageAspectFlags aspect_mask,
+	uint32_t base_mip_level,
+	uint32_t level_count,
+	uint32_t base_array_layer,
+	uint32_t layer_count
 ) :
 	Image()
 {
@@ -24,23 +34,75 @@ Image::Image(
 	setImageTiling(VK_IMAGE_TILING_OPTIMAL);
 	setImageSharingMode(VK_SHARING_MODE_EXCLUSIVE);
 	setImageInitialLayout(VK_IMAGE_LAYOUT_UNDEFINED);
-	setImageUsage(
-		VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-		VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-		VK_IMAGE_USAGE_SAMPLED_BIT |
-		VK_IMAGE_USAGE_STORAGE_BIT
-	);
+	setImageUsage(usage);
 	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	setImageExtent(width, height, depth);
 
 	setImageViewFormat(static_cast<VkFormat>(format));
-	setImageViewSurbresourceRange(
-		VK_IMAGE_ASPECT_COLOR_BIT,
-		0, // base mip level
-		1, // level count
-		0, // base array layer
-		1  // layer count
+	setImageViewComponents(
+		swizzle.r,
+		swizzle.g,
+		swizzle.b,
+		swizzle.a
 	);
+	setImageViewSurbresourceRange(
+		aspect_mask,
+		base_mip_level, // base mip level
+		level_count, // level count
+		base_array_layer, // base array layer
+		layer_count  // layer count
+	);
+
+	VkImageViewType view_type{};
+	switch (image_type) {
+	case VK_IMAGE_TYPE_1D:
+		view_type = VK_IMAGE_VIEW_TYPE_1D;
+		break;
+	case VK_IMAGE_TYPE_3D:
+		view_type = VK_IMAGE_VIEW_TYPE_3D;
+		break;
+	default:
+		view_type = VK_IMAGE_VIEW_TYPE_2D;
+		break;
+	}
+
+	setImageImageType(VK_IMAGE_TYPE_2D);
+	setImageViewViewType(view_type);
+
+	create();
+}
+
+Image::Image(
+	Device* device,
+	uint32_t width,
+	uint32_t height,
+	uint32_t depth,
+	IGEImgFormat format,
+	VkImageUsageFlags usage,
+	VkImageType image_type
+):
+	Image(
+		device,
+		width,
+		height,
+		depth,
+		format,
+		usage,
+		image_type,
+		nullptr,
+		0,
+		{ VK_COMPONENT_SWIZZLE_IDENTITY,
+		VK_COMPONENT_SWIZZLE_IDENTITY,
+		VK_COMPONENT_SWIZZLE_IDENTITY,
+		VK_COMPONENT_SWIZZLE_IDENTITY },
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0,
+		1,
+		0,
+		1
+	)
+{
+	;
 }
 
 Image::Image(
@@ -76,7 +138,6 @@ Image& Image::operator=(const Image& img) {
 	_image_view = img._image_view;
 	_image_info = img._image_info;
 	_image_view_info = img._image_view_info;
-	_aspect_mask = img._aspect_mask;
 	
 	return *this;
 }
@@ -90,7 +151,6 @@ Image& Image::operator=(Image&& img) {
 	img._image_view = nullptr;
 	_image_info = std::move(img)._image_info;
 	_image_view_info = std::move(img)._image_view_info;
-	_aspect_mask = std::move(img)._aspect_mask;
 
 	return *this;
 }
@@ -308,7 +368,7 @@ void Image::setImageViewInfo(VkImageViewCreateInfo info) {
 }
 
 void Image::setAspectMask(VkImageAspectFlags aspect_flag){
-	_aspect_mask = aspect_flag;
+	_image_view_info.subresourceRange.aspectMask = aspect_flag;
 }
 
 
@@ -339,5 +399,5 @@ const uint64_t Image::getHeight() const {
 }
 
 const VkImageAspectFlags Image::aspectMask() const {
-	return _aspect_mask;
+	return _image_view_info.subresourceRange.aspectMask;
 }

@@ -6,6 +6,10 @@
 class Queue;
 class Swapchain;
 
+struct ComponentSwizzle {
+	VkComponentSwizzle r, g, b, a;
+};
+
 class Image: public Ressource
 {
 	friend Queue;
@@ -18,19 +22,39 @@ protected:
 
 	VkImageCreateInfo _image_info{};
 	VkImageViewCreateInfo _image_view_info{};
-	VkImageAspectFlags _aspect_mask{ VK_IMAGE_ASPECT_COLOR_BIT };
 
-protected:
+
+public:
+	Image();
+
 	Image(
 		Device* device,
 		uint32_t width,
 		uint32_t height,
 		uint32_t depth,
-		IGEImgFormat format
+		IGEImgFormat format,
+		VkImageUsageFlags usage,
+		VkImageType image_type,
+		uint32_t* queue_family_indices,
+		uint32_t queue_family_indices_count,
+		ComponentSwizzle swizzle,
+		VkImageAspectFlags aspect_mask,
+		uint32_t base_mip_level,
+		uint32_t level_count,
+		uint32_t base_array_layer,
+		uint32_t layer_count
 	);
 
-public:
-	Image();
+	Image(
+		Device* device,
+		uint32_t width,
+		uint32_t height,
+		uint32_t depth,
+		IGEImgFormat format,
+		VkImageUsageFlags usage,
+		VkImageType image_type
+	);
+
 	Image(
 		Device* device,
 		VkImage vk_img,

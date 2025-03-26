@@ -197,14 +197,14 @@ void CommandBuffer::endRendering() {
 
 void CommandBuffer::beginRendering(
 	VkClearColorValue& clear_color,
-	Swapchain& swapchain,
+	Image& image,
 	DepthBuffer& depth_buffer,
 	VkOffset2D& offset,
 	VkExtent2D& extent
 ) {
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	color_attachment.imageView = swapchain.getCurrentImage().getImageView();
+	color_attachment.imageView = image.getImageView();
 	color_attachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
 	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -243,7 +243,7 @@ void CommandBuffer::beginRendering(
 }
 
 void CommandBuffer::dynamicRenderingPipelineBarrier(
-	Swapchain& swapchain,
+	Image& image,
 	DepthBuffer& depth_buffer
 ) {
 	VkImageSubresourceRange subresource_range_frame{};
@@ -269,7 +269,7 @@ void CommandBuffer::dynamicRenderingPipelineBarrier(
 	image_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	image_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame.image = swapchain.getCurrentImage().getImage();
+	image_memory_barrier_frame.image = image.getImage();
 	image_memory_barrier_frame.subresourceRange = subresource_range_frame;
 
 	VkImageMemoryBarrier depth_memory_barrier_frame{};
@@ -303,7 +303,7 @@ void CommandBuffer::dynamicRenderingPipelineBarrier(
 	);
 }
 
-void CommandBuffer::dynamicRenderingPipelineBarrierBack(Swapchain& swapchain) {
+void CommandBuffer::dynamicRenderingPipelineBarrierBack(Image& image) {
 	VkImageSubresourceRange subresource_range_frame_bk{};
 	subresource_range_frame_bk.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subresource_range_frame_bk.baseMipLevel = 0;
@@ -320,7 +320,7 @@ void CommandBuffer::dynamicRenderingPipelineBarrierBack(Swapchain& swapchain) {
 	image_memory_barrier_frame_bk.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	image_memory_barrier_frame_bk.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame_bk.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.image = swapchain.getCurrentImage().getImage();
+	image_memory_barrier_frame_bk.image = image.getImage();
 	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
 
 	pipelineBarrier(

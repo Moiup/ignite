@@ -53,17 +53,17 @@ public:
 
 	void beginRendering(
 		VkClearColorValue& clear_color,
-		Swapchain& swapchain,
+		Image& image,
 		DepthBuffer& depth_buffer,
 		VkOffset2D& offset,
 		VkExtent2D& extent
 	);
 
 	void dynamicRenderingPipelineBarrier(
-		Swapchain& swapchain,
+		Image& image,
 		DepthBuffer& depth_buffer
 	);
-	void dynamicRenderingPipelineBarrierBack(Swapchain& swapchain);
+	void dynamicRenderingPipelineBarrierBack(Image& image);
 
 	void pipelineBarrier(
 		VkPipelineStageFlags srcStageMask,

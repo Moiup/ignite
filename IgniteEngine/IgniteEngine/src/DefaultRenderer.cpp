@@ -65,12 +65,12 @@ void DefaultRenderer::render() {
 	cmd_buf.begin();
 	
 	cmd_buf.dynamicRenderingPipelineBarrier(
-		*_swapchain,
+		_swapchain->getCurrentImage(),
 		*_depth_buffer
 	);
 	cmd_buf.beginRendering(
 		_clear_color_value,
-		*_swapchain,
+		_swapchain->getCurrentImage(),
 		*_depth_buffer,
 		_offset,
 		_extent
@@ -164,7 +164,7 @@ void DefaultRenderer::render() {
 	}
 	
 	cmd_buf.endRendering();
-	cmd_buf.dynamicRenderingPipelineBarrierBack(*_swapchain);
+	cmd_buf.dynamicRenderingPipelineBarrierBack(_swapchain->getCurrentImage());
 	cmd_buf.end();
 
 	// Submit

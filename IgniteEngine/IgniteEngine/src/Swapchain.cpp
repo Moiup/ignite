@@ -72,8 +72,8 @@ Swapchain::Swapchain(
 	VkFormat found_format = { VK_FORMAT_UNDEFINED };
 	VkColorSpaceKHR color_space{};
 
-	for (const VkSurfaceFormatKHR& sf : surface_formats) {
-		for (const VkFormat& af : accepted_format) {
+	for (const VkFormat& af : accepted_format) {
+		for (const VkSurfaceFormatKHR& sf : surface_formats) {
 			if (sf.format == af) {
 				found_format = sf.format;
 				color_space = sf.colorSpace;

@@ -9,7 +9,7 @@ public:
 		Device* device,
 		uint32_t width,
 		uint32_t height,
-		const std::vector<uint32_t>& indices
+		std::vector<uint32_t>& indices
 	);
 
 

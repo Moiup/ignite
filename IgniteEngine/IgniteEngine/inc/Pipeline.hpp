@@ -61,7 +61,14 @@ public:
 		const std::string& name,
 		std::initializer_list<Texture2D*> textures
 	);
-
+	void setImages2D(
+		const std::string& name,
+		const std::vector<Image2D*>& images
+	);
+	void setImages2D(
+		const std::string& name,
+		std::initializer_list<Image2D*> images
+	);
 
 	virtual void createPipeline() = 0;
 

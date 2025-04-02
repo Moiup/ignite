@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Device.h"
-#include "Image.h"
+#include "Image2D.h"
 #include "PhysicalDevice.h"
 #include "Pixels.h"
 #include "Sampler.h"
@@ -13,10 +13,10 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-class Texture2D : public Image
+class Texture2D : public Image2D
 {
 private:
-	VkSampler _sampler;
+	VkSampler _sampler{ nullptr };
 
 public:
 	Texture2D() = default;

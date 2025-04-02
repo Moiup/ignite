@@ -13,18 +13,16 @@ Texture2D::Texture2D(
 	uint32_t height,
 	IGEImgFormat format
 ) :
-	Image(
+	Image2D(
 		device,
 		width,
 		height,
-		1,
 		format,
 		(VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 		VK_IMAGE_USAGE_SAMPLED_BIT |
 		VK_IMAGE_USAGE_STORAGE_BIT
-		),
-		VK_IMAGE_TYPE_2D
+		)
 	)
 {
 	//setImageImageType(VK_IMAGE_TYPE_2D);

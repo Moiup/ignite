@@ -331,6 +331,8 @@ void CommandBuffer::dynamicRenderingPipelineBarrierBack(Image& image) {
 		0, nullptr,
 		1, &image_memory_barrier_frame_bk
 	);
+
+	image.setImageInitialLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 }
 
 void CommandBuffer::pipelineBarrier(

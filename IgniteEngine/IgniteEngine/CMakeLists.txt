@@ -56,6 +56,7 @@ set(HEADERS
     # inc/HeaderMessageProtocoleNetwork.h
     inc/IGETypes.h
     inc/Image.h
+    inc/Image2D.h
     inc/IndexBufferInfo.h
     inc/InitChildPoint.h
     inc/InitHeader.h
@@ -119,6 +120,7 @@ set(SRC
     src/Hand2D.cpp
     # src/HeaderMessageProtocoleNetwork.cpp
     src/Image.cpp
+    src/Image2D.cpp
     src/IndexBufferInfo.cpp
     src/InitChildPoint.cpp
     src/InitHeader.cpp

@@ -40,6 +40,7 @@ set(HEADERS
     ${IGNITE_PATH}/inc/Hand2D.h
     ${IGNITE_PATH}/inc/IGETypes.h
     ${IGNITE_PATH}/inc/Image.h
+    ${IGNITE_PATH}/inc/Image2D.h
     ${IGNITE_PATH}/inc/IndexBufferInfo.h
     ${IGNITE_PATH}/inc/InitChildPoint.h
     ${IGNITE_PATH}/inc/InitHeader.h
@@ -97,6 +98,7 @@ set(SRC
     ${IGNITE_PATH}/src/GraphicsPipeline.cpp
     ${IGNITE_PATH}/src/Hand2D.cpp
     ${IGNITE_PATH}/src/Image.cpp
+    ${IGNITE_PATH}/src/Image2D.cpp
     ${IGNITE_PATH}/src/IndexBufferInfo.cpp
     ${IGNITE_PATH}/src/InitChildPoint.cpp
     ${IGNITE_PATH}/src/InitHeader.cpp

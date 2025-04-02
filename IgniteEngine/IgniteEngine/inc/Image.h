@@ -4,6 +4,7 @@
 #include <vector>
 
 class Queue;
+class CommandBuffer;
 class Swapchain;
 
 struct ComponentSwizzle {
@@ -14,6 +15,8 @@ class Image: public Ressource
 {
 	friend Queue;
 	friend Swapchain;
+	friend CommandBuffer;
+
 protected:
 	static const uint8_t _n{ 4 };
 
@@ -35,6 +38,7 @@ public:
 		IGEImgFormat format,
 		VkImageUsageFlags usage,
 		VkImageType image_type,
+		VkImageViewType image_view_type,
 		uint32_t* queue_family_indices,
 		uint32_t queue_family_indices_count,
 		ComponentSwizzle swizzle,
@@ -52,7 +56,8 @@ public:
 		uint32_t depth,
 		IGEImgFormat format,
 		VkImageUsageFlags usage,
-		VkImageType image_type
+		VkImageType image_type,
+		VkImageViewType image_view_type
 	);
 
 	Image(
@@ -115,8 +120,9 @@ public:
 	const VkImage& getImage() const;
 	const VkImageView& getImageView() const;
 
-	const uint32_t getWidth() const;
+	const uint64_t getWidth() const;
 	const uint64_t getHeight() const;
+	const uint64_t getDepth() const;
 
 	const VkImageAspectFlags aspectMask() const;
 

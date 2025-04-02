@@ -15,6 +15,7 @@ Image::Image(
 	IGEImgFormat format,
 	VkImageUsageFlags usage,
 	VkImageType image_type,
+	VkImageViewType image_view_type,
 	uint32_t* queue_family_indices,
 	uint32_t queue_family_indices_count,
 	ComponentSwizzle swizzle,
@@ -53,21 +54,8 @@ Image::Image(
 		layer_count  // layer count
 	);
 
-	VkImageViewType view_type{};
-	switch (image_type) {
-	case VK_IMAGE_TYPE_1D:
-		view_type = VK_IMAGE_VIEW_TYPE_1D;
-		break;
-	case VK_IMAGE_TYPE_3D:
-		view_type = VK_IMAGE_VIEW_TYPE_3D;
-		break;
-	default:
-		view_type = VK_IMAGE_VIEW_TYPE_2D;
-		break;
-	}
-
-	setImageImageType(VK_IMAGE_TYPE_2D);
-	setImageViewViewType(view_type);
+	setImageImageType(image_type);
+	setImageViewViewType(image_view_type);
 
 	create();
 }
@@ -79,7 +67,8 @@ Image::Image(
 	uint32_t depth,
 	IGEImgFormat format,
 	VkImageUsageFlags usage,
-	VkImageType image_type
+	VkImageType image_type,
+	VkImageViewType image_view_type
 ):
 	Image(
 		device,
@@ -89,6 +78,7 @@ Image::Image(
 		format,
 		usage,
 		image_type,
+		image_view_type,
 		nullptr,
 		0,
 		{ VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -389,13 +379,17 @@ const VkImageView& Image::getImageView() const {
 	return _image_view;
 }
 
-const uint32_t Image::getWidth() const {
+const uint64_t Image::getWidth() const {
 	return _image_info.extent.width;
 }
 
 
 const uint64_t Image::getHeight() const {
 	return _image_info.extent.height;
+}
+
+const uint64_t Image::getDepth() const {
+	return _image_info.extent.depth;
 }
 
 const VkImageAspectFlags Image::aspectMask() const {

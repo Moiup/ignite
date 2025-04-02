@@ -226,6 +226,46 @@ void Pipeline::setTextures2D(
 	write.pTexelBufferView = nullptr;
 }
 
+void Pipeline::setImages2D(
+	const std::string& name,
+	const std::vector<Image2D*>& images
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	uint32_t offset = _descriptor_image_infos.size();
+	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	for (const Image2D* img : images) {
+		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		desc_img_info.sampler = nullptr;
+		desc_img_info.imageView = img->getImageView();
+		desc_img_info.imageLayout = img->getImageLayout();
+	}
+
+	write.pBufferInfo = nullptr;
+	write.pImageInfo = descriptor_image_infos.data();
+	write.pTexelBufferView = nullptr;
+}
+
+void Pipeline::setImages2D(
+	const std::string& name,
+	std::initializer_list<Image2D*> images
+) {
+	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	uint32_t offset = _descriptor_image_infos.size();
+	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	for (const Image2D* img : images) {
+		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		desc_img_info.sampler = nullptr;
+		desc_img_info.imageView = img->getImageView();
+		desc_img_info.imageLayout = img->getImageLayout();
+	}
+
+	write.pBufferInfo = nullptr;
+	write.pImageInfo = descriptor_image_infos.data();
+	write.pTexelBufferView = nullptr;
+}
+
 void Pipeline::setDescriptorSetLayoutBinding(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_binding_arr, const std::unordered_map<std::string, VkDescriptorSetLayoutBinding>& buffer_arr) {
 	for (auto& name_buff : buffer_arr) {
 		const VkDescriptorSetLayoutBinding& buff_info = name_buff.second;

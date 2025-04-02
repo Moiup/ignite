@@ -445,9 +445,11 @@ void Queue::drawIndexed(
 
 void Queue::endRendering(Image &image) {
 	CommandBuffer& cmd_buf = _command_pool.commandBuffers().back();
-
+	VkImageLayout image_layout = image.getImageLayout();
 	cmd_buf.endRendering();
 	cmd_buf.dynamicRenderingPipelineBarrierBack(image);
+	//changeLayout(cmd_buf, image, VK_IMAGE_LAYOUT_UNDEFINED);
+	changeLayout(cmd_buf, image, image_layout);
 	cmd_buf.end();
 }
 
@@ -676,7 +678,27 @@ void Queue::createFence(VkFenceCreateFlags flags) {
 	}
 }
 
+//void Queue::copy(Image& src, Image& dst,
+//	VkAccessFlags src_access_mask,
+//	VkAccessFlags dst_access_mask,
+//	VkPipelineStageFlags src_stage_mask,
+//	VkPipelineStageFlags dst_stage_mask
+//) {
+//	copy(
+//		src,
+//		dst,
+//		{ 0, 0, 0 },
+//		{ 0, 0, 0 },
+//		src_access_mask,
+//		dst_access_mask,
+//		src_stage_mask,
+//		dst_stage_mask
+//	);
+//}
+
 void Queue::copy(Image& src, Image& dst,
+	VkOffset3D src_offset,
+	VkOffset3D dst_offset,
 	VkAccessFlags src_access_mask,
 	VkAccessFlags dst_access_mask,
 	VkPipelineStageFlags src_stage_mask,
@@ -715,15 +737,15 @@ void Queue::copy(Image& src, Image& dst,
 	image_copy.srcSubresource.mipLevel = 0;
 	image_copy.srcSubresource.baseArrayLayer = 0;
 	image_copy.srcSubresource.layerCount = 1;
-	image_copy.srcOffset = { 0 , 0 , 0 };
+	image_copy.srcOffset = src_offset;
 	image_copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	image_copy.dstSubresource.mipLevel = 0;
 	image_copy.dstSubresource.baseArrayLayer = 0;
 	image_copy.dstSubresource.layerCount = 1;
-	image_copy.dstOffset = { 0, 0, 0 };
-	image_copy.extent.width = dst.getWidth();
-	image_copy.extent.height = dst.getHeight();
-	image_copy.extent.depth = 1;
+	image_copy.dstOffset = dst_offset;
+	image_copy.extent.width = src.getWidth();
+	image_copy.extent.height = src.getHeight();
+	image_copy.extent.depth = src.getDepth();
 
 	cmd_buf.copyImageToImage(
 		src.getImage(),

@@ -2,6 +2,7 @@
 
 #include "WindowSurface.h"
 #include "Image.h"
+#include "Image2D.h"
 #include "Device.h"
 
 class Swapchain
@@ -14,7 +15,7 @@ private:
 	uint32_t _image_count;
 	//std::vector<VkImage> _images;
 	//std::vector<VkImageView> _image_views;
-	std::vector<Image> _images;
+	std::vector<Image2D> _images;
 	VkImageViewCreateInfo _image_view_info;
 	uint32_t _current_image_i{0};
 
@@ -62,8 +63,8 @@ public:
 	void setImageViewComponents(VkComponentSwizzle r, VkComponentSwizzle g, VkComponentSwizzle b, VkComponentSwizzle a);
 	void setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count);
 
-	std::vector<Image>& getImages();
-	Image& getCurrentImage();
+	std::vector<Image2D>& getImages();
+	Image2D& getCurrentImage();
 	const uint32_t getCurrentImageIndex() const;
 
 	const uint32_t& acquireNextImage(

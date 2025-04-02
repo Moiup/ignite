@@ -233,11 +233,11 @@ void Swapchain::setImageViewSurbresourceRange(VkImageAspectFlags aspect_mask, ui
 	_image_view_info.subresourceRange.layerCount = layer_count;
 }
 
-std::vector<Image>& Swapchain::getImages() {
+std::vector<Image2D>& Swapchain::getImages() {
 	return _images;
 }
 
-Image& Swapchain::getCurrentImage() {
+Image2D& Swapchain::getCurrentImage() {
 	return _images[_current_image_i];
 }
 
@@ -336,12 +336,11 @@ void Swapchain::gettingImages(){
 
 	_image_view_info.format = _info.imageFormat;
 	for (uint32_t i = 0; i < _image_count; i++) {
-		_images[i] = Image(
+		_images[i] = Image2D(
 			_device,
 			imgs[i],
 			_info.imageExtent.width,
 			_info.imageExtent.height,
-			1,
 			_image_view_info
 		);
 	}

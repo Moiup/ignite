@@ -1,7 +1,7 @@
 #include "DepthBuffer.h"
 
 DepthBuffer::DepthBuffer() :
-	Image::Image()
+	Image2D::Image2D()
 {
 	setMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 }
@@ -12,14 +12,12 @@ DepthBuffer::DepthBuffer(
 	uint32_t height,
 	std::vector<uint32_t>& indices
 ):
-	Image::Image(
+	Image2D::Image2D(
 		device,
 		width,
 		height,
-		1,
 		IGEImgFormat::d32_sfloat_s8_uint,
 		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-		VK_IMAGE_TYPE_2D,
 		indices.data(),
 		indices.size(),
 		{ VK_COMPONENT_SWIZZLE_IDENTITY,

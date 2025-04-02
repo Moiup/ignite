@@ -1,7 +1,7 @@
 #pragma once
-#include "Image.h"
+#include "Image2D.h"
 
-class DepthBuffer : public Image
+class DepthBuffer : public Image2D
 {
 public:
 	DepthBuffer();

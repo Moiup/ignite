@@ -8,8 +8,8 @@ void Pipeline::setStorageBuffer(
 	const Buffer<T>& buff
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	_descriptor_buffer_infos[name].push_back(VkDescriptorBufferInfo{});
-	VkDescriptorBufferInfo& desc_buf_info = _descriptor_buffer_infos[name].back();
+	_descriptor_buffer_infos[name].resize(1);
+	VkDescriptorBufferInfo& desc_buf_info = _descriptor_buffer_infos[name][0];
 	desc_buf_info.buffer = buff.getBuffer();
 	desc_buf_info.offset = 0;
 	desc_buf_info.range = buff.getCapacity();

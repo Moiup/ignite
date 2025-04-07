@@ -9,7 +9,8 @@ ComputePipeline::ComputePipeline() :
 ComputePipeline::ComputePipeline(ComputeShader& shader) :
 	Pipeline::Pipeline(shader)
 {
-	createPipeline();
+	//createPipeline();
+	create();
 }
 
 ComputeShader* ComputePipeline::getShader() {

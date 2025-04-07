@@ -15,8 +15,28 @@ Pipeline::Pipeline(Shader& shader) :
 	Pipeline::Pipeline()
 {
 	_shader = &shader;
-	createDescriptorSet();
-	createPipelineLayout();
+
+	int32_t i = 0;
+	for (const auto& dlb_pair : _shader->getDescLayoutBindings()) {
+		const std::string& name = dlb_pair.first;
+		const VkDescriptorSetLayoutBinding& dslb = dlb_pair.second;
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.pNext = nullptr;
+		//write.dstSet = _descriptor_sets[0];
+		write.dstBinding = dslb.binding;
+		write.dstArrayElement = 0;
+		write.descriptorCount = dslb.descriptorCount;
+		write.descriptorType = dslb.descriptorType;
+		_write_descriptor_sets.push_back(write);
+		
+		_name_to_write_desc[name] = i++;
+	}
+
+	//createDescriptorSet();
+	//createPipelineLayout();
+	//create();
 }
 
 Pipeline::Pipeline(const Pipeline& pipeline) {
@@ -46,6 +66,7 @@ Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
 	_descriptor_buffer_infos = pipeline._descriptor_buffer_infos;
 	_descriptor_image_infos = pipeline._descriptor_image_infos;
 	_write_descriptor_sets = pipeline._write_descriptor_sets;
+	_name_to_write_desc = pipeline._name_to_write_desc;
 
 	_push_constants = pipeline._push_constants;
 
@@ -71,6 +92,7 @@ Pipeline& Pipeline::operator=(Pipeline&& pipeline) {
 	_descriptor_buffer_infos = std::move(pipeline._descriptor_buffer_infos);
 	_descriptor_image_infos = std::move(pipeline._descriptor_image_infos);
 	_write_descriptor_sets = std::move(pipeline._write_descriptor_sets);
+	_name_to_write_desc = std::move(pipeline._name_to_write_desc);
 
 	_push_constants = std::move(pipeline)._push_constants;
 	pipeline._push_constants = nullptr;
@@ -98,9 +120,12 @@ const Shader& Pipeline::getShader() const {
 }
 
 void Pipeline::create() {
-	createDescriptorSet();
+	createDescriptorSetLayout();
 	createPipelineLayout();
 	createPipeline();
+	createDescriptorPool();
+
+	//createDescriptorSet();
 }
 
 void Pipeline::destroy() {
@@ -130,20 +155,22 @@ const void* Pipeline::getPushConstants() const {
 VkWriteDescriptorSet& Pipeline::setWriteDescriptorSet(
 	const std::string& name
 ) {
-	VkDescriptorSetLayoutBinding infos = _shader->getDescLayoutBindings().at(name);
-	VkWriteDescriptorSet write{};
-	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	write.pNext = nullptr;
-	write.dstSet = _descriptor_sets[0];
-	write.dstBinding = infos.binding;
-	write.dstArrayElement = 0;
-	write.descriptorCount = infos.descriptorCount;
-	write.descriptorType = infos.descriptorType;
-	_write_descriptor_sets.push_back(write);
+	//VkDescriptorSetLayoutBinding infos = _shader->getDescLayoutBindings().at(name);
+	//VkWriteDescriptorSet write{};
+	//write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	//write.pNext = nullptr;
+	////write.dstSet = _descriptor_sets[0];
+	//write.dstBinding = infos.binding;
+	//write.dstArrayElement = 0;
+	//write.descriptorCount = infos.descriptorCount;
+	//write.descriptorType = infos.descriptorType;
+	//_write_descriptor_sets.push_back(write);
 
-	_is_changed = true;
+	//_is_changed = true;
 
-	return _write_descriptor_sets.back();
+	//return _write_descriptor_sets.back();
+	int32_t index = _name_to_write_desc[name];
+	return _write_descriptor_sets[index];
 }
 
 void Pipeline::setSamplers(
@@ -151,11 +178,13 @@ void Pipeline::setSamplers(
 	const std::vector<Sampler*>& samp
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
+	//VkWriteDescriptorSet& write = _write_descriptor_sets[_name_to_write_desc[name]];
 	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	int32_t i = 0;
+	descriptor_image_infos.resize(samp.size());
 	for (const Sampler* s : samp) {
-		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
 		desc_img_info.sampler = s->getSampler();
 		desc_img_info.imageView = nullptr;
 		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -173,9 +202,10 @@ void Pipeline::setSamplers(
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	int32_t i = 0;
+	descriptor_image_infos.resize(samp.size());
 	for (const Sampler* s : samp) {
-		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
 		desc_img_info.sampler = s->getSampler();
 		desc_img_info.imageView = nullptr;
 		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -193,9 +223,10 @@ void Pipeline::setTextures2D(
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	int32_t i = 0;
+	descriptor_image_infos.resize(textures.size());
 	for (const Texture2D* t : textures) {
-		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
 		desc_img_info.sampler = t->getSampler();
 		desc_img_info.imageView = t->getImageView();
 		desc_img_info.imageLayout = t->getImageLayout();
@@ -213,9 +244,10 @@ void Pipeline::setTextures2D(
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	int32_t i = 0;
+	descriptor_image_infos.resize(textures.size());
 	for (const Texture2D* t : textures) {
-		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
 		desc_img_info.sampler = t->getSampler();
 		desc_img_info.imageView = t->getImageView();
 		desc_img_info.imageLayout = t->getImageLayout();
@@ -233,9 +265,10 @@ void Pipeline::setImages2D(
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	int32_t i = 0;
+	descriptor_image_infos.resize(images.size());
 	for (const Image2D* img : images) {
-		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
 		desc_img_info.sampler = nullptr;
 		desc_img_info.imageView = img->getImageView();
 		desc_img_info.imageLayout = img->getImageLayout();
@@ -253,9 +286,10 @@ void Pipeline::setImages2D(
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
+	int32_t i = 0;
+	descriptor_image_infos.resize(images.size());
 	for (const Image2D* img : images) {
-		descriptor_image_infos.push_back(VkDescriptorImageInfo{});
-		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos.back();
+		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
 		desc_img_info.sampler = nullptr;
 		desc_img_info.imageView = img->getImageView();
 		desc_img_info.imageLayout = img->getImageLayout();
@@ -294,10 +328,10 @@ void Pipeline::createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBindin
 	}
 }
 
-void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr) {
+void Pipeline::createDescriptorPool() {
 	std::vector<VkDescriptorPoolSize> descriptor_pool_size_arr;
 
-	for (VkDescriptorSetLayoutBinding& dslb : descriptor_set_layout_binding_arr) {
+	for (VkDescriptorSetLayoutBinding& dslb : _descriptor_set_layout_bindings) {
 		VkDescriptorPoolSize descriptor_pool_size{};
 		descriptor_pool_size.type = dslb.descriptorType;
 		descriptor_pool_size.descriptorCount = dslb.descriptorCount;
@@ -308,7 +342,7 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	descriptor_pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	descriptor_pool_info.pNext = nullptr;
 	descriptor_pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-	descriptor_pool_info.maxSets = descriptor_pool_size_arr.size();
+	descriptor_pool_info.maxSets = 1000;
 	descriptor_pool_info.poolSizeCount = descriptor_pool_size_arr.size();
 	descriptor_pool_info.pPoolSizes = descriptor_pool_size_arr.data();
 
@@ -321,8 +355,10 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed creating the descriptor pool!");
 	}
+}
 
-	_descriptor_sets.resize(_descriptor_set_layout.size());
+void Pipeline::allocateDescriptorSet() {
+	//_descriptor_sets.resize(_descriptor_set_layout.size());
 
 	VkDescriptorSetAllocateInfo descriptor_sets_info{};
 	descriptor_sets_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -331,20 +367,31 @@ void Pipeline::createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& de
 	descriptor_sets_info.descriptorSetCount = _descriptor_set_layout.size();
 	descriptor_sets_info.pSetLayouts = _descriptor_set_layout.data();
 
-	vk_result = vkAllocateDescriptorSets(
+	VkDescriptorSet dst_set{ nullptr };
+
+	VkResult vk_result = vkAllocateDescriptorSets(
 		_shader->getDevice()->getDevice(),
 		&descriptor_sets_info,
-		_descriptor_sets.data()
+		&dst_set
 	);
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed allocating descriptor sets!");
 	}
+
+	_descriptor_sets.push_back(dst_set);
 }
 
 void Pipeline::update() {
 	//if (!_is_changed) {
 	//	return;
 	//}
+
+	allocateDescriptorSet();
+	VkDescriptorSet desc_set = _descriptor_sets.back();
+
+	for (VkWriteDescriptorSet& write_desc_set : _write_descriptor_sets) {
+		write_desc_set.dstSet = desc_set;
+	}
 
 	vkUpdateDescriptorSets(
 		_shader->getDevice()->getDevice(),
@@ -355,23 +402,21 @@ void Pipeline::update() {
 	);
 
 	_is_changed = false;
-	_write_descriptor_sets.clear();
-	_descriptor_buffer_infos.clear();
-	_descriptor_image_infos.clear();
+	//_write_descriptor_sets.clear();
+	//_descriptor_buffer_infos.clear();
+	//_descriptor_image_infos.clear();
 }
 
-void Pipeline::createDescriptorSet() {
-	std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_binding_arr;
+void Pipeline::createDescriptorSetLayout() {
 	setDescriptorSetLayoutBinding(
-		descriptor_set_layout_binding_arr,
+		_descriptor_set_layout_bindings,
 		_shader->getDescLayoutBindings()
 	);
 
-	if (!descriptor_set_layout_binding_arr.size()) {
+	if (!_descriptor_set_layout_bindings.size()) {
 		return;
 	}
-	createDescriptorSetLayout(descriptor_set_layout_binding_arr);
-	createDescriptorSet(descriptor_set_layout_binding_arr);
+	createDescriptorSetLayout(_descriptor_set_layout_bindings);
 	//updateDescriptorSets();
 }
 

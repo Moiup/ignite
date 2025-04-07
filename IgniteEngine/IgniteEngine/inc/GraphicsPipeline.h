@@ -27,8 +27,8 @@ private:
 	std::unordered_map<std::string, VkBuffer> _vertex_buffers;
 	VkBuffer _index_buffer;
 
-protected:
-	GraphicsPipeline(GraphicShader& shader);
+//protected:
+	GraphicsPipeline(GraphicShader& shader) = delete;
 
 public:
 	GraphicsPipeline();
@@ -66,6 +66,9 @@ public:
 	const GraphicsPipelineConfiguration& configuration() const;
 	const GraphicShader& getShader() const;
 
+protected:
+	void createPipeline();
+
 private:
 	template<IGEBufferUsage U>
 	void setVertexBufferBis(
@@ -76,7 +79,6 @@ private:
 	template<IGEBufferUsage U>
 	void setIndexBufferBis(const Buffer<U>& buff);
 
-	void createPipeline();
 };
 
 template<IGEBufferUsage U>

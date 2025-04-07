@@ -2,19 +2,22 @@
 
 GraphicsPipeline::GraphicsPipeline() : Pipeline() { ; }
 
-GraphicsPipeline::GraphicsPipeline(GraphicShader& shader) :
-	Pipeline(shader)
-{
-	;
-}
+//GraphicsPipeline::GraphicsPipeline(GraphicShader& shader) :
+//	Pipeline(shader)
+//{
+//	;
+//}
 
 GraphicsPipeline::GraphicsPipeline(
 	GraphicShader& shader,
 	const GraphicsPipelineConfiguration& config
-) :  GraphicsPipeline(shader)
+) : 
+	_pipeline_conf{ config },
+	Pipeline(shader)
 {
-	_pipeline_conf = config;
-	createPipeline();
+	//_pipeline_conf = config;
+	//createPipeline();
+	create();
 }
 
 GraphicsPipeline::GraphicsPipeline(const GraphicsPipeline& gp) {

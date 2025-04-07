@@ -11,6 +11,7 @@ protected:
 
 	std::vector<VkDescriptorSetLayout> _descriptor_set_layout;
 	VkDescriptorPool _descriptor_pool;
+	std::vector<VkDescriptorSetLayoutBinding> _descriptor_set_layout_bindings;
 	std::vector<VkDescriptorSet> _descriptor_sets;
 	VkPipelineLayout _pipeline_layout;
 	VkPipeline _pipeline{ nullptr };
@@ -18,7 +19,8 @@ protected:
 	bool _is_changed = false;
 	std::unordered_map<std::string, std::vector<VkDescriptorBufferInfo>> _descriptor_buffer_infos;
 	std::unordered_map<std::string, std::vector<VkDescriptorImageInfo>> _descriptor_image_infos;
-	std::vector<VkWriteDescriptorSet> _write_descriptor_sets;
+	std::vector<VkWriteDescriptorSet> _write_descriptor_sets{};
+	std::unordered_map<std::string, int32_t> _name_to_write_desc{};
 
 	void* _push_constants;
 
@@ -70,7 +72,6 @@ public:
 		std::initializer_list<Image2D*> images
 	);
 
-	virtual void createPipeline() = 0;
 
 	const VkPipeline getPipeline() const;
 	const VkPipelineLayout& getPipelineLayout() const;
@@ -89,12 +90,13 @@ private:
 	);
 
 	void createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
-	void createDescriptorSet(std::vector<VkDescriptorSetLayoutBinding>& descriptor_set_layout_binding_arr);
 	
 
 	void destroyDescriptorSetLayout();
 
-	void createDescriptorSet();
+	void createDescriptorPool();
+	void createDescriptorSetLayout();
+	void allocateDescriptorSet();
 	void destroyDescriptorSet();
 
 	void createPipelineLayout();
@@ -102,4 +104,5 @@ private:
 	void destroyPipeline();
 
 protected:
+	virtual void createPipeline() = 0;
 };

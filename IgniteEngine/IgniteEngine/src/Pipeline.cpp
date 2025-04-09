@@ -34,6 +34,8 @@ Pipeline::Pipeline(Shader& shader) :
 		_name_to_write_desc[name] = i++;
 	}
 
+	_descriptor_sets.resize(1);
+
 	//createDescriptorSet();
 	//createPipelineLayout();
 	//create();
@@ -179,7 +181,6 @@ void Pipeline::setSamplers(
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
 	//VkWriteDescriptorSet& write = _write_descriptor_sets[_name_to_write_desc[name]];
-	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	int32_t i = 0;
 	descriptor_image_infos.resize(samp.size());
@@ -200,7 +201,6 @@ void Pipeline::setSamplers(
 	std::initializer_list<Sampler*> samp
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	int32_t i = 0;
 	descriptor_image_infos.resize(samp.size());
@@ -221,7 +221,6 @@ void Pipeline::setTextures2D(
 	const std::vector<Texture2D*>& textures
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	int32_t i = 0;
 	descriptor_image_infos.resize(textures.size());
@@ -242,7 +241,6 @@ void Pipeline::setTextures2D(
 	std::initializer_list<Texture2D*> textures
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	int32_t i = 0;
 	descriptor_image_infos.resize(textures.size());
@@ -263,7 +261,6 @@ void Pipeline::setImages2D(
 	const std::vector<Image2D*>& images
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	int32_t i = 0;
 	descriptor_image_infos.resize(images.size());
@@ -284,7 +281,6 @@ void Pipeline::setImages2D(
 	std::initializer_list<Image2D*> images
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	uint32_t offset = _descriptor_image_infos.size();
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	int32_t i = 0;
 	descriptor_image_infos.resize(images.size());
@@ -378,7 +374,7 @@ void Pipeline::allocateDescriptorSet() {
 		throw std::runtime_error("Error: failed allocating descriptor sets!");
 	}
 
-	_descriptor_sets.push_back(dst_set);
+	_descriptor_sets[0] = dst_set;
 }
 
 void Pipeline::update() {

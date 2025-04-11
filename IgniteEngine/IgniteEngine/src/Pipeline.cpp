@@ -374,7 +374,8 @@ void Pipeline::allocateDescriptorSet() {
 		throw std::runtime_error("Error: failed allocating descriptor sets!");
 	}
 
-	_descriptor_sets[0] = dst_set;
+	_descriptor_sets_pool.push_back(dst_set);
+	_descriptor_sets[0] = _descriptor_sets_pool.back();
 }
 
 void Pipeline::update() {
@@ -403,6 +404,16 @@ void Pipeline::update() {
 	//_descriptor_image_infos.clear();
 }
 
+void Pipeline::reset() {
+	vkFreeDescriptorSets(
+		_shader->getDevice()->getDevice(),
+		_descriptor_pool,
+		_descriptor_sets_pool.size(),
+		_descriptor_sets_pool.data()
+	);
+	_descriptor_sets_pool.clear();
+}
+
 void Pipeline::createDescriptorSetLayout() {
 	setDescriptorSetLayoutBinding(
 		_descriptor_set_layout_bindings,
@@ -421,12 +432,8 @@ void Pipeline::destroyDescriptorSet() {
 		return;
 	}
 
-	vkFreeDescriptorSets(
-		_shader->getDevice()->getDevice(),
-		_descriptor_pool,
-		_descriptor_sets.size(),
-		_descriptor_sets.data()
-	);
+	reset();
+	
 
 	vkDestroyDescriptorPool(
 		_shader->getDevice()->getDevice(),

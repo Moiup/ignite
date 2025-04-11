@@ -13,6 +13,7 @@ protected:
 	VkDescriptorPool _descriptor_pool;
 	std::vector<VkDescriptorSetLayoutBinding> _descriptor_set_layout_bindings;
 	std::vector<VkDescriptorSet> _descriptor_sets;
+	std::vector<VkDescriptorSet> _descriptor_sets_pool;
 	VkPipelineLayout _pipeline_layout;
 	VkPipeline _pipeline{ nullptr };
 
@@ -79,6 +80,7 @@ public:
 	const Shader& getShader() const;
 
 	void update();
+	void reset();
 private:
 	VkWriteDescriptorSet& setWriteDescriptorSet(
 		const std::string& name

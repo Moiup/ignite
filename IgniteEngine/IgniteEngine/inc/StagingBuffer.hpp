@@ -12,6 +12,7 @@ public:
 	void unmap();
 
 	void setValues(const void* values);
+	void setValues(const void* values, const int32_t size);
 	Pointer<uint8_t> getValues();
 	void getValues(Pointer<uint8_t> data);
 };

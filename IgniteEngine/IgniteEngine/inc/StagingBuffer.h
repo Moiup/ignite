@@ -66,6 +66,18 @@ void StagingBuffer<U>::setValues(const void* values) {
 }
 
 template<IGEBufferUsage U>
+void StagingBuffer<U>::setValues(const void* values, const int32_t size) {
+	if (this->_buffer_info.size == 0) {
+		return;
+	}
+
+	void* copy;
+	copy = map();
+	memcpy(copy, values, size);
+	unmap();
+}
+
+template<IGEBufferUsage U>
 Pointer<uint8_t> StagingBuffer<U>::getValues() {
 	if (this->_size == 0) {
 		return nullptr;

@@ -364,6 +364,26 @@ void CommandBuffer::pipelineBarrier(const VkDependencyInfo* p_dependency_info){
 	vkCmdPipelineBarrier2(_command_buffer, p_dependency_info);
 }
 
+void CommandBuffer::copyBufferToBuffer(
+	VkBuffer srcBuffer,
+	VkBuffer dstBuffer,
+	uint32_t regionCount,
+	const VkBufferCopy2* pRegions
+) {
+	VkCopyBufferInfo2 info{};
+	info.sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
+	info.pNext = nullptr;
+	info.srcBuffer = srcBuffer;
+	info.dstBuffer = dstBuffer;
+	info.regionCount = regionCount;
+	info.pRegions = pRegions;
+
+	vkCmdCopyBuffer2(
+		_command_buffer,
+		&info
+	);
+}
+
 void CommandBuffer::copyBufferToImage(
 	VkBuffer srcBuffer,
 	VkImage dstImage,

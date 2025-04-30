@@ -82,6 +82,13 @@ public:
 	*/
 	void pipelineBarrier(const VkDependencyInfo* p_dependency_info);
 
+	void copyBufferToBuffer(
+		VkBuffer srcBuffer,
+		VkBuffer dstBuffer,
+		uint32_t regionCount,
+		const VkBufferCopy2* pRegions
+	);
+
 	void copyBufferToImage(
 		VkBuffer srcBuffer,
 		VkImage dstImage,

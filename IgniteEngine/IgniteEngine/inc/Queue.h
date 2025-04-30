@@ -65,12 +65,9 @@ public:
 	std::vector<VkCommandBuffer>& getPendingCommandBuffers();
 	CommandBuffer& newCommandBuffer();
 
-	//void copy(Buffer& src, Buffer& dst,
-	//	VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-	//	VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-	//	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-	//	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
-	//);
+	template<IGEBufferUsage U1, IGEBufferUsage U2>
+	void copy(Buffer<U1>& src, Buffer<U2>& dst);
+
 	template<IGEBufferUsage U>
 	void copy(Buffer<U>& src, Image& dst,
 		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
@@ -78,6 +75,7 @@ public:
 		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 	);
+
 	template<IGEBufferUsage U>
 	void copy(Image& src, Buffer<U>& dst,
 		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
@@ -244,6 +242,29 @@ private:
 	uint32_t& getNbPendingCommandBuffers();
 
 };
+
+template<IGEBufferUsage U1, IGEBufferUsage U2>
+void Queue::copy(Buffer<U1>& src, Buffer<U2>& dst) {
+	
+	CommandBuffer cmd_buf = newCommandBuffer();
+	cmd_buf.begin();
+	
+	VkBufferCopy2 copy_info{};
+	copy_info.sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
+	copy_info.pNext = nullptr;
+	copy_info.srcOffset = 0;
+	copy_info.dstOffset = 0;
+	copy_info.size = src.getSize();
+
+	cmd_buf.copyBufferToBuffer(
+		src.getBuffer(),
+		dst.getBuffer(),
+		1,
+		&copy_info
+	);
+
+	cmd_buf.end();
+}
 
 template<IGEBufferUsage U>
 void Queue::copy(Image& src, Buffer<U>& dst,

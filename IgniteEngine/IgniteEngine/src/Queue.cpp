@@ -453,102 +453,13 @@ void Queue::endRendering(Image &image) {
 	cmd_buf.end();
 }
 
-void Queue::flush() {
-	VkSubmitInfo info{};
-	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	info.pNext = nullptr;
-	info.waitSemaphoreCount = 0;
-	info.pWaitSemaphores = nullptr;
-	info.pWaitDstStageMask = nullptr;
-	info.commandBufferCount = getNbPendingCommandBuffers();
-	info.pCommandBuffers = getPendingCommandBufferStartPointer();
-	info.signalSemaphoreCount = 0;
-	info.pSignalSemaphores = nullptr;
-
-	VkResult vk_result = vkQueueSubmit(
-		_queue,
-		1,
-		&info,
-		nullptr
-	);
-	if (vk_result != VK_SUCCESS) {
-		std::cerr << "Error flushing!" << std::endl;
-		throw "Error flushing!";
-	}
-
-	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
-	getNbPendingCommandBuffers() = 0;
-}
-
-const void Queue::submit(
-	uint32_t waitSemaphorecount,
-	const VkSemaphore* pWaitSemaphores,
-	const VkPipelineStageFlags* pWaitDstStageMask,
-	uint32_t signalSemaphoreCount,
-	const VkSemaphore* pSignalSemaphores
-) {
-	submit(
-		waitSemaphorecount,
-		pWaitSemaphores,
-		pWaitDstStageMask,
-		signalSemaphoreCount,
-		pSignalSemaphores,
-		nullptr
-	);
-}
-
-const void Queue::submit(
+void Queue::flush(
 	uint32_t waitSemaphorecount,
 	const VkSemaphore* pWaitSemaphores,
 	const VkPipelineStageFlags* pWaitDstStageMask,
 	uint32_t signalSemaphoreCount,
 	const VkSemaphore* pSignalSemaphores,
-	const uint64_t* pSignalSemaphoreValues
-) {
-	VkResult vk_result = vkResetFences(
-		_device->getDevice(),
-		1,
-		&_fence
-	);
-
-	if (vk_result != VK_SUCCESS) {
-		throw std::runtime_error("Error: resetting fence failed!");
-	}
-
-	if (!getNbPendingCommandBuffers()) {
-		return;
-	}
-
-	VkTimelineSemaphoreSubmitInfo timeline_sem_submit_info{};
-	timeline_sem_submit_info.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-	timeline_sem_submit_info.pNext = nullptr;
-	timeline_sem_submit_info.waitSemaphoreValueCount = 0;
-	timeline_sem_submit_info.pWaitSemaphoreValues = nullptr;
-	timeline_sem_submit_info.signalSemaphoreValueCount = signalSemaphoreCount;
-	timeline_sem_submit_info.pSignalSemaphoreValues = pSignalSemaphoreValues;
-
-	submit(
-		waitSemaphorecount,
-		pWaitSemaphores,
-		pWaitDstStageMask,
-		getNbPendingCommandBuffers(),
-		getPendingCommandBufferStartPointer(),
-		signalSemaphoreCount,
-		pSignalSemaphores,
-		_fence,
-		&timeline_sem_submit_info
-	);
-
-	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
-	getNbPendingCommandBuffers() = 0;
-}
-
-const void Queue::submitNoFence(
-	uint32_t waitSemaphorecount,
-	const VkSemaphore* pWaitSemaphores,
-	const VkPipelineStageFlags* pWaitDstStageMask,
-	uint32_t signalSemaphoreCount,
-	const VkSemaphore* pSignalSemaphores
+	const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
 ) {
 	submit(
 		waitSemaphorecount,
@@ -559,11 +470,29 @@ const void Queue::submitNoFence(
 		signalSemaphoreCount,
 		pSignalSemaphores,
 		nullptr,
-		nullptr
+		timelineSemaphoreSubmitInfo
 	);
+}
 
-	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
-	getNbPendingCommandBuffers() = 0;
+const void Queue::submit(
+	uint32_t waitSemaphorecount,
+	const VkSemaphore* pWaitSemaphores,
+	const VkPipelineStageFlags* pWaitDstStageMask,
+	uint32_t signalSemaphoreCount,
+	const VkSemaphore* pSignalSemaphores,
+	const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
+) {
+	submit(
+		waitSemaphorecount,
+		pWaitSemaphores,
+		pWaitDstStageMask,
+		getNbPendingCommandBuffers(),
+		getPendingCommandBufferStartPointer(),
+		signalSemaphoreCount,
+		pSignalSemaphores,
+		_fence,
+		timelineSemaphoreSubmitInfo
+	);
 }
 
 const void Queue::submit(
@@ -575,8 +504,8 @@ const void Queue::submit(
 	uint32_t signalSemaphoreCount,
 	const VkSemaphore* pSignalSemaphores,
 	VkFence fence,
-	VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSumbintInfo
-) const {
+	const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSumbintInfo
+) {
 	VkSubmitInfo submit_info{};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.pNext = timelineSemaphoreSumbintInfo;
@@ -594,13 +523,12 @@ const void Queue::submit(
 		std::cerr << "Queue submit failed: " << vk_result << std::endl;
 		throw std::runtime_error("Error: failed submitting queue!");
 	}
+
+	getStartIndexPendingCommandBuffers() += getNbPendingCommandBuffers();
+	getNbPendingCommandBuffers() = 0;
 }
 
 const void Queue::wait() {
-	if (getPendingCommandBuffers().empty()) {
-		return;
-	}
-
 	VkResult result = vkWaitForFences(
 		_device->getDevice(),
 		1, &_fence,
@@ -676,6 +604,12 @@ void Queue::createFence(VkFenceCreateFlags flags) {
 	if (vk_result != VK_SUCCESS) {
 		throw std::runtime_error("Error: failed creating fence!");
 	}
+
+	vkResetFences(
+		_device->getDevice(),
+		1,
+		&_fence
+	);
 }
 
 //void Queue::copy(Image& src, Image& dst,
@@ -821,6 +755,9 @@ void Queue::changeLayout(
 }
 
 VkCommandBuffer* Queue::getPendingCommandBufferStartPointer() {
+	if(!getNbPendingCommandBuffers()){
+		return nullptr;
+	}
 	return &((*_pending_command_buffers)[getStartIndexPendingCommandBuffers()]);
 }
 
@@ -839,4 +776,3 @@ const uint32_t Queue::getNbPendingCommandBuffers() const {
 uint32_t& Queue::getNbPendingCommandBuffers() {
 	return _command_pool_indices.nb_cmd_buf;
 }
-

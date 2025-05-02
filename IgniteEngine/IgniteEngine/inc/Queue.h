@@ -151,34 +151,22 @@ public:
 	
 	void endRendering(Image& swapchain);
 
-	void flush();
+	void flush(
+		uint32_t waitSemaphorecount = 0,
+		const VkSemaphore* pWaitSemaphores = nullptr,
+		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
+		uint32_t signalSemaphoreCount = 0,
+		const VkSemaphore* pSignalSemaphores = nullptr,
+		const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo = nullptr
+	);
 
 	const void submit(
 		uint32_t waitSemaphorecount = 0,
 		const VkSemaphore* pWaitSemaphores = nullptr,
 		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
 		uint32_t signalSemaphoreCount = 0,
-		const VkSemaphore* pSignalSemaphores = nullptr
-	);
-
-	const void submit(
-		uint32_t waitSemaphorecount,
-		const VkSemaphore* pWaitSemaphores,
-		const VkPipelineStageFlags* pWaitDstStageMask,
-		uint32_t signalSemaphoreCount,
-		const VkSemaphore* pSignalSemaphores,
-		const uint64_t* pSignalSemaphoreValues
-	);
-
-	/**
-	* Flush but with parameters
-	*/
-	const void submitNoFence(
-		uint32_t waitSemaphorecount = 0,
-		const VkSemaphore* pWaitSemaphores = nullptr,
-		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
-		uint32_t signalSemaphoreCount = 0,
-		const VkSemaphore* pSignalSemaphores = nullptr
+		const VkSemaphore* pSignalSemaphores = nullptr,
+		const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo = nullptr
 	);
 
 	const void submit(
@@ -190,9 +178,8 @@ public:
 		uint32_t signalSemaphoreCount,
 		const VkSemaphore* pSignalSemaphores,
 		VkFence fence,
-		VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
-	) const;
-
+		const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
+	);
 
 	const void wait();
 

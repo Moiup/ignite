@@ -45,6 +45,6 @@ const glm::vec3& Ray::d() const {
 	return _d;
 }
 
-glm::vec3 Ray::p(float t) const{
+glm::vec3 Ray::p(float t) const {
 	return _o + t * _d;
 }

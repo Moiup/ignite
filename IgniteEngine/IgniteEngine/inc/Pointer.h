@@ -30,10 +30,8 @@ Pointer<T>::Pointer(const Pointer<T>& p) {
 }
 
 template<class T>
-Pointer<T>::Pointer(const Pointer<T>&& ptr) {
-	Pointer<T>&& ptr_bis = const_cast<Pointer<T>&&>(ptr);
-	_p = ptr_bis.data();
-	_offset = ptr_bis.offset();
+Pointer<T>::Pointer(Pointer<T>&& ptr) {
+	*this = std::move(ptr);
 }
 
 template<class T>
@@ -50,14 +48,15 @@ Pointer<T>& Pointer<T>::operator=(T* p) {
 template<class T>
 Pointer<T>& Pointer<T>::operator=(Pointer<T> ptr) {
 	add(ptr.data(), ptr.offset());
-
+	std::cout << "operator=" << std::endl;
 	return *this;
 }
 
 template<class T>
 Pointer<T>& Pointer<T>::operator=(Pointer<T>&& ptr) {
-	_p = ptr.data();
-	_offset = ptr.offset();
+	_p = std::move(ptr).data();
+	_offset = std::move(ptr).offset();
+	std::move(ptr)._p = nullptr;
 
 	return *this;
 }
@@ -150,7 +149,7 @@ int32_t& Pointer<T>::offset() {
 
 template<class T>
 void Pointer<T>::add(T* p, uint32_t offset) {
-	remove();
+	// remove();
 
 	_p = p - offset;
 	_offset = offset;

@@ -32,7 +32,7 @@ public:
 	Pointer();
 	Pointer(T* p);
 	Pointer(const Pointer<T>& p);
-	Pointer(const Pointer<T>&& p);
+	Pointer(Pointer<T>&& p);
 	~Pointer();
 
 

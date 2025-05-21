@@ -36,6 +36,7 @@ void DefaultInit::init() {
 		_render_window.getWidth(),
 		_render_window.getHeight()
 	);
+
 	for (Image& img : _swapchain.getImages()) {
 		DefaultConf::graphics_queue->changeLayout(
 			img,

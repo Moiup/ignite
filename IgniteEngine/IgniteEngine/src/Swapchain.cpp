@@ -66,11 +66,15 @@ Swapchain::Swapchain(
 	std::vector<VkSurfaceFormatKHR> surface_formats = window.getSurfaceFormats(gpu);
 	std::vector<VkFormat> accepted_format = {
 		VK_FORMAT_R8G8B8A8_SRGB,
-		VK_FORMAT_B8G8R8A8_SRGB
+		VK_FORMAT_B8G8R8A8_SRGB,
 	};
 
 	VkFormat found_format = { VK_FORMAT_UNDEFINED };
 	VkColorSpaceKHR color_space{};
+
+	for (const VkSurfaceFormatKHR& sf : surface_formats) {
+		std::cout << "\t" << string_VkFormat(sf.format) << std::endl;
+	}
 
 	for (const VkFormat& af : accepted_format) {
 		for (const VkSurfaceFormatKHR& sf : surface_formats) {
@@ -344,6 +348,7 @@ void Swapchain::gettingImages(){
 			_image_view_info
 		);
 	}
+
 }
 
 void Swapchain::createImagesViews(){	

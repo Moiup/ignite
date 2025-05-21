@@ -107,6 +107,7 @@ Image::Image(
 {
 	_device = device;
 	_image = vk_img;
+	setImageFormat(view_info.format);
 	setImageExtent(width, height, depth);
 	_image_view_info = view_info;
 	_image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

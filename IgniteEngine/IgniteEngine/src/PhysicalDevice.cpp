@@ -30,6 +30,18 @@ void PhysicalDevice::displayProperties() {
 	std::cout << "    " << makeString(prop.deviceType) << std::endl;
 }
 
+VkFormatProperties2 PhysicalDevice::getFormatProperties(VkFormat format){
+	VkFormatProperties2 f_prop;
+
+	vkGetPhysicalDeviceFormatProperties2(
+		_gpu,
+		format,
+		&f_prop
+	);
+
+	return f_prop;
+}
+
 std::vector<VkExtensionProperties> PhysicalDevice::enumerateDeviceExtensionProperties() {
 	std::vector<VkExtensionProperties> extensions;
 	uint32_t nb_ext;

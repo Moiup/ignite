@@ -19,6 +19,8 @@ public:
 	VkPhysicalDeviceProperties getProperties();
 	void displayProperties();
 
+	VkFormatProperties2 getFormatProperties(VkFormat format);
+
 	std::vector<VkExtensionProperties> enumerateDeviceExtensionProperties();
 	void displayDeviceExtensionProperties();
 

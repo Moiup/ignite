@@ -569,7 +569,7 @@ const void Queue::present(
 	present_info.pNext = nullptr;
 	present_info.waitSemaphoreCount = waitSemaphoreCount;
 	present_info.pWaitSemaphores = pWaitSemaphores;
-	present_info.swapchainCount = 1;
+	present_info.swapchainCount = swapchainCount;
 	present_info.pSwapchains = pSwapchains;
 	present_info.pImageIndices = pImageIndices;
 	present_info.pResults = nullptr;

@@ -32,25 +32,32 @@ void* StagingBuffer<U>::map() {
 		return nullptr;
 	}
 
-	void* ptr{ nullptr };
+	if(_map_ptr){
+		return _map_ptr;
+	}
+
 	vkMapMemory(
 		this->_device->getDevice(),
 		this->_memory,
 		0,
 		this->_size,
 		0,
-		&ptr
+		&_map_ptr
 	);
 
-	return ptr;
+	return _map_ptr;
 }
 
 template<IGEBufferUsage U>
 void StagingBuffer<U>::unmap() {
+	if(!_map_ptr){
+		return;
+	}
 	vkUnmapMemory(
 		this->_device->getDevice(),
 		this->_memory
 	);
+	_map_ptr = nullptr;
 }
 
 template<IGEBufferUsage U>

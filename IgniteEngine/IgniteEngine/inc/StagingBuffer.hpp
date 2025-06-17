@@ -3,6 +3,9 @@
 template<IGEBufferUsage U>
 class StagingBuffer : public Buffer<U>
 {
+private:
+	void* _map_ptr { nullptr };
+
 public:
 	StagingBuffer() = default;
 	StagingBuffer(Device* device, VkDeviceSize size);

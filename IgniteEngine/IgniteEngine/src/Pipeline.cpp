@@ -180,7 +180,6 @@ void Pipeline::setSamplers(
 	const std::vector<Sampler*>& samp
 ) {
 	VkWriteDescriptorSet& write = setWriteDescriptorSet(name);
-	//VkWriteDescriptorSet& write = _write_descriptor_sets[_name_to_write_desc[name]];
 	std::vector<VkDescriptorImageInfo>& descriptor_image_infos = _descriptor_image_infos[name];
 	int32_t i = 0;
 	descriptor_image_infos.resize(samp.size());
@@ -405,6 +404,10 @@ void Pipeline::update() {
 }
 
 void Pipeline::reset() {
+	if(!_descriptor_sets_pool.size()){
+		return;
+	}
+
 	vkFreeDescriptorSets(
 		_shader->getDevice()->getDevice(),
 		_descriptor_pool,

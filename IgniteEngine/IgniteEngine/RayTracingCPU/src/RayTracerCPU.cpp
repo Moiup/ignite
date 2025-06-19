@@ -34,14 +34,14 @@ void RayTracerCPU::render() {
 }
 
 void RayTracerCPU::buildAssets() {
-	Camera* camera = (Camera*)DefaultConf::camera->camera();
+	Camera& camera = DefaultConf::camera->camera();
 
 	_scene.clear();	
 	Triangle::buildTriangles(_scene);
 }
 
 void RayTracerCPU::buildImage() {
-	Camera* camera = const_cast<Camera*>(DefaultConf::camera->camera());
+	Camera& camera = DefaultConf::camera->camera();
 	uint64_t width = DefaultConf::render_window->getWidthInPixel();
 	uint64_t height = DefaultConf::render_window->getHeightInPixel();
 
@@ -51,12 +51,12 @@ void RayTracerCPU::buildImage() {
 	);
 
 
-	glm::mat4 model = camera->getTranslate() * camera->getRotate() * camera->getScale();
-	glm::mat4 view = camera->getView();
+	glm::mat4 model = camera.getTranslate() * camera.getRotate() * camera.getScale();
+	glm::mat4 view = camera.getView();
 
-	glm::mat4 projection = camera->getProjection();
-	glm::mat4 viewport = camera->getViewport(width, height);
-	glm::mat4 clip = camera->getClip();
+	glm::mat4 projection = camera.getProjection();
+	glm::mat4 viewport = camera.getViewport(width, height);
+	glm::mat4 clip = camera.getClip();
 
 	glm::mat4 mvpv = viewport * clip * projection * view * model;
 	//glm::mat4 mvpv = viewport * clip;

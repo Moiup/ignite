@@ -25,7 +25,7 @@ void CameraScene::update() {
 	EngineEntity::update();
 
 	SDL_Event* event = DefaultConf::event;
-	glm::vec3 cam_pos = _camera->getPositionAbsolute();
+	glm::vec3 cam_pos = _camera->getPositionLocale();
 	
 	if (event->type == SDL_MOUSEBUTTONDOWN || event->type == SDL_MOUSEBUTTONUP) {
 		_is_middle_clicked = (event->button.button == SDL_BUTTON_MIDDLE) && (event->button.state == SDL_PRESSED);
@@ -42,7 +42,7 @@ void CameraScene::update() {
 		if (event->button.x != 0 && event->button.y != 0) {
 			glm::vec3 dir = glm::vec3(
 				event->button.x - _middle_prev_mouse.x,
-				event->button.y - _middle_prev_mouse.y,
+				_middle_prev_mouse.y - event->button.y,
 				0
 			);
 
@@ -50,8 +50,8 @@ void CameraScene::update() {
 				dir = glm::normalize(dir);
 				//dir = _perspective_camera.getRotate() * glm::vec4(dir, 1);
 
-				_camera->setPositionAbsoluteUpdateChildren(
-					cam_pos - dir * 0.1f
+				_camera->setPositionLocaleUpdateChildren(
+					cam_pos - dir * 0.001f
 				);
 			}
 		}
@@ -75,11 +75,13 @@ void CameraScene::update() {
 				0
 			);
 
-			glm::vec3 cam_rot = _camera->getRotationAbsolute();
+			glm::vec3 cam_rot = _camera->getRotationLocale();
 
+			const float speed = 0.001f;
+			
 			if (dir.x != 0 && dir.y != 0) {
 				dir = glm::normalize(dir);
-				_camera->setRotationAbsoluteUpdateChildren(cam_rot.x + dir.y * 0.05, cam_rot.y - dir.x * 0.05, 0);
+				_camera->setRotationLocaleUpdateChildren(cam_rot.x + dir.y * speed, cam_rot.y - dir.x * speed, 0);
 			}
 		}
 	}
@@ -92,12 +94,13 @@ void CameraScene::update() {
 		glm::vec3 eye = _camera->getEye();
 		glm::vec3 center = _camera->getCenter();
 		glm::vec3 dir = glm::normalize(center - eye);
+		const float wheel_speed = 0.5f;
 
 		if (event->wheel.y > 0) {
-			_camera->setPositionAbsoluteUpdateChildren(cam_pos - dir);
+			_camera->setPositionLocaleUpdateChildren(cam_pos - dir * wheel_speed);
 		}
 		else if (event->wheel.y < 0) {
-			_camera->setPositionAbsoluteUpdateChildren(cam_pos + dir);
+			_camera->setPositionLocaleUpdateChildren(cam_pos + dir * wheel_speed);
 		}
 	}
 }
@@ -110,8 +113,12 @@ void CameraScene::setCamera(Camera* camera) {
 	_camera = camera;
 }
 
-const Camera* CameraScene::camera() const {
-	return _camera;
+const Camera& CameraScene::camera() const {
+	return *_camera;
+}
+
+Camera& CameraScene::camera() {
+	return *_camera;
 }
 
 glm::mat4 CameraScene::getProjection() {

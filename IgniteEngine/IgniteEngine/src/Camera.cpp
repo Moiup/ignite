@@ -77,7 +77,7 @@ glm::mat4 Camera::getClip() const {
 }
 
 glm::mat4 Camera::getMVP() {
-	glm::mat4 mvp = getProjection() * getView() * getTranslate() * getRotate() * getScale();
+	glm::mat4 mvp = getProjection() * getView() * getTranslateLocale() * getRotateLocale() * getScale();
 	return mvp;
 }
 

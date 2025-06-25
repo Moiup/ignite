@@ -27,7 +27,8 @@ public:
 	void close();
 
 	void setCamera(Camera* camera);
-	const Camera* camera() const;
+	const Camera& camera() const;
+	Camera& camera();
 	glm::mat4 getProjection();
 	glm::mat4 getMVPC();
 	glm::mat4 getMVP();

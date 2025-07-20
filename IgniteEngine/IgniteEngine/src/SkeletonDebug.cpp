@@ -41,8 +41,8 @@ void SkeletonDebug::create() {
 	_cross_objs.back().addChild(&_cross_objs[0]);
 	_cross_objs.back().setMesh(_cross_mesh);
 	_cross_objs.back().setMaterial(_cross_material, &_cross_material_indices);
-	_cross_objs.back().addGraphicsPipeline(*DefaultConf::debug_pipeline);
-	_cross_objs.back().setRenderer(*DefaultConf::renderer);
+	// _cross_objs.back().addGraphicsPipeline(*_pipeline);
+	// _cross_objs.back().setRenderer(*_renderer);
 	_cross_objs.back().setPositionLocale(_object->getPositionLocale());
 	_cross_objs.back().setRotationLocale(_object->getRotationLocale());
 	_cross_objs.back().setScaleLocale(_object->getScaleLocale());

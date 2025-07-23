@@ -65,7 +65,6 @@ Entity3D::Entity3D() :
 	_ls{ 1.0f, 1.0f, 1.0f },
 	_as{ 1.0f, 1.0f, 1.0f },
 	_alignment_matrix{ glm::mat4(1.0) },
-	_first_mat{glm::mat4(1.0)},
 	_parent{ nullptr },
 	_children{}
 { 
@@ -342,7 +341,7 @@ glm::mat4 Entity3D::getScale() const {
 }
 
 glm::mat4 Entity3D::getTransformLocale() const {
-	return _first_mat * getTranslateLocale() * getRotateLocale() * alignmentMatrix() * getScale();
+	return getTranslateLocale() * getRotateLocale() * alignmentMatrix() * getScale();
 }
 
 glm::mat4 Entity3D::getTransformParent() const {

@@ -631,6 +631,7 @@ void Queue::createFence(VkFenceCreateFlags flags) {
 //}
 
 void Queue::copy(Image& src, Image& dst,
+	VkExtent3D extent,
 	VkOffset3D src_offset,
 	VkOffset3D dst_offset,
 	VkAccessFlags src_access_mask,
@@ -677,9 +678,7 @@ void Queue::copy(Image& src, Image& dst,
 	image_copy.dstSubresource.baseArrayLayer = 0;
 	image_copy.dstSubresource.layerCount = 1;
 	image_copy.dstOffset = dst_offset;
-	image_copy.extent.width = src.getWidth();
-	image_copy.extent.height = src.getHeight();
-	image_copy.extent.depth = src.getDepth();
+	image_copy.extent = extent;
 
 	cmd_buf.copyImageToImage(
 		src.getImage(),
@@ -711,6 +710,32 @@ void Queue::copy(Image& src, Image& dst,
 	);
 
 	cmd_buf.end();
+}
+
+void Queue::copy(Image& src, Image& dst,
+	VkOffset3D src_offset,
+	VkOffset3D dst_offset,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+){
+	VkExtent3D extent = {
+		std::min(src.getWidth(), dst.getWidth()),
+		std::min(src.getHeight(), dst.getHeight()),
+		1
+	};
+	copy(
+		src,
+		dst,
+		extent,
+		src_offset,
+		dst_offset,
+		src_access_mask,
+		dst_access_mask,
+		src_stage_mask,
+		dst_stage_mask
+	);
 }
 
 void Queue::changeLayout(

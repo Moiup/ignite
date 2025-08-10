@@ -107,10 +107,14 @@ void Device::create() {
 	//maintenance5.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_FEATURES_KHR;
 	//maintenance5.pNext = nullptr;
 	//maintenance5.maintenance5 = VK_TRUE;
+	VkPhysicalDevice16BitStorageFeatures storage16bits{};
+	storage16bits.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES;
+	storage16bits.storageBuffer16BitAccess = VK_TRUE;
+	storage16bits.storagePushConstant16 = VK_TRUE;
 
 	VkPhysicalDeviceShaderAtomicFloatFeaturesEXT shader_atomic_float_feats{};
 	shader_atomic_float_feats.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
-	shader_atomic_float_feats.pNext = nullptr;
+	shader_atomic_float_feats.pNext = &storage16bits;
 	shader_atomic_float_feats.shaderBufferFloat32Atomics = VK_TRUE;
 	shader_atomic_float_feats.shaderBufferFloat32AtomicAdd = VK_TRUE;
 	shader_atomic_float_feats.shaderBufferFloat64Atomics = VK_TRUE;
@@ -135,6 +139,8 @@ void Device::create() {
 	physical_device_v12_features.pNext = &physical_device_v13_features;
 	physical_device_v12_features.runtimeDescriptorArray = VK_TRUE;
 	physical_device_v12_features.timelineSemaphore = VK_TRUE;
+	physical_device_v12_features.shaderFloat16 = VK_TRUE;
+	physical_device_v12_features.shaderInt8 = VK_TRUE;
 
 	VkPhysicalDeviceFeatures2 physical_device_features2{};
 	physical_device_features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -187,8 +193,10 @@ void Device::destroy() {
 VkPhysicalDeviceFeatures Device::featuresManagement() {
 	VkPhysicalDeviceFeatures2 available{};
 	available.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+	available.pNext = nullptr;
+
 	vkGetPhysicalDeviceFeatures2(getGPU()->getGPU(), &available);
-	
+
 	VkPhysicalDeviceFeatures enabled{};
 	if (available.features.fillModeNonSolid) {
 		enabled.fillModeNonSolid = VK_TRUE;

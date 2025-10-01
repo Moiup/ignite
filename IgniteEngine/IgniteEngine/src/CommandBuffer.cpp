@@ -127,6 +127,20 @@ void CommandBuffer::setScissor(VkRect2D* p_scissor, uint32_t count) {
 	);
 }
 
+void CommandBuffer::setCullMode(VkCullModeFlags cull_mode){
+	vkCmdSetCullMode(
+		_command_buffer,
+		cull_mode
+	);
+}
+
+void CommandBuffer::setFrontFace(VkFrontFace front_face){
+	vkCmdSetFrontFace(
+		_command_buffer,
+		front_face
+	);
+}
+
 void CommandBuffer::bindDescriptorSets(VkPipelineBindPoint bind_point, VkPipelineLayout pipeline_layout, uint32_t first_set, uint32_t descriptor_count, const VkDescriptorSet* p_descriptor_sets,
 	uint32_t dynamic_offset_count, const uint32_t* p_dynamic_offsets) {
 	vkCmdBindDescriptorSets(

@@ -41,6 +41,8 @@ public:
 	void setViewport(VkViewport* p_viewport, uint32_t count);
 	void setScissor(std::vector<VkRect2D>& scissor_arr);
 	void setScissor(VkRect2D* p_scissor, uint32_t count);
+	void setCullMode(VkCullModeFlags cull_mode);
+	void setFrontFace(VkFrontFace front_face);
 	void bindDescriptorSets(VkPipelineBindPoint bind_point, VkPipelineLayout pipeline_layout, uint32_t first_set, uint32_t descriptor_count, const VkDescriptorSet* p_descriptor_sets,
 		uint32_t dynamic_offset_count, const uint32_t* p_dynamic_offsets);
 	void pushConstants(const VkPipelineLayout layout, VkShaderStageFlags stage_flags, uint32_t offset, uint32_t size, const void* p_values);

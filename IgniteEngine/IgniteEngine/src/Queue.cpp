@@ -344,6 +344,26 @@ void Queue::beginRendering(
 	glm::vec4& clear_color_value,
 	Image& image,
 	DepthBuffer& depth_buffer,
+	VkOffset2D offset
+){
+	VkExtent2D extent = {
+		image.getWidth(),
+		image.getHeight()
+	};
+
+	beginRendering(
+		clear_color_value,
+		image,
+		depth_buffer,
+		offset,
+		extent
+	);
+}
+
+void Queue::beginRendering(
+	glm::vec4& clear_color_value,
+	Image& image,
+	DepthBuffer& depth_buffer,
 	VkOffset2D& offset,
 	VkExtent2D& extent
 ) {
@@ -386,6 +406,8 @@ void Queue::bindPipeline(GraphicsPipeline& gp) {
 		&gp.getScissors(),
 		1
 	);
+	cmd_buf.setCullMode(gp.getCullMode());
+	cmd_buf.setFrontFace(gp.getFrontFace());
 
 	cmd_buf.bindDescriptorSets(
 		VK_PIPELINE_BIND_POINT_GRAPHICS,

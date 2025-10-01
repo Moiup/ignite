@@ -95,6 +95,22 @@ VkRect2D& GraphicsPipeline::getScissors() {
 	return _pipeline_conf.scissor;
 }
 
+const VkCullModeFlags GraphicsPipeline::getCullMode() const {
+	return _pipeline_conf.cull_mode;
+}
+
+VkCullModeFlags& GraphicsPipeline::getCullMode() {
+	return _pipeline_conf.cull_mode;
+}
+
+const VkFrontFace GraphicsPipeline::getFrontFace() const {
+	return _pipeline_conf.front_face;
+}
+
+VkFrontFace& GraphicsPipeline::getFrontFace() {
+	return _pipeline_conf.front_face;
+}
+
 const GraphicsPipelineConfiguration& GraphicsPipeline::configuration() const {
 	return _pipeline_conf;
 }
@@ -222,7 +238,9 @@ void GraphicsPipeline::createPipeline() {
 	//---- Dynamic State (10.11.)----//
 	std::vector<VkDynamicState> dynamic_state_arr = {
 		VK_DYNAMIC_STATE_VIEWPORT,
-		VK_DYNAMIC_STATE_SCISSOR
+		VK_DYNAMIC_STATE_SCISSOR,
+		VK_DYNAMIC_STATE_FRONT_FACE,
+		VK_DYNAMIC_STATE_CULL_MODE,
 	};
 	VkPipelineDynamicStateCreateInfo dynamic_state_info{};
 	dynamic_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

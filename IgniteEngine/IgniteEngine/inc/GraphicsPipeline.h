@@ -62,6 +62,10 @@ public:
 	VkViewport& getViewport();
 	const VkRect2D& getScissors() const;
 	VkRect2D& getScissors();
+	const VkCullModeFlags getCullMode() const;
+	VkCullModeFlags& getCullMode();
+	const VkFrontFace getFrontFace() const;
+	VkFrontFace& getFrontFace();
 
 	const GraphicsPipelineConfiguration& configuration() const;
 	const GraphicShader& getShader() const;

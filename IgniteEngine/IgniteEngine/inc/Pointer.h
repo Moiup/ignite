@@ -48,7 +48,6 @@ Pointer<T>& Pointer<T>::operator=(T* p) {
 template<class T>
 Pointer<T>& Pointer<T>::operator=(Pointer<T> ptr) {
 	add(ptr.data(), ptr.offset());
-	std::cout << "operator=" << std::endl;
 	return *this;
 }
 

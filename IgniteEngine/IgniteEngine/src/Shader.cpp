@@ -207,8 +207,9 @@ std::vector<uint32_t> Shader::compile(const std::string& glsl, const std::string
 	shaderc::CompileOptions options;
 
 	//options.AddMacroDefinition("MY_DEFINE", "1");
+	options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_4);
 
-	shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(glsl, shader_kind, path.c_str());
+	shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(glsl, shader_kind, path.c_str(), options);
 
 	if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
 		std::cerr << "Error compiling shader \"" << path << "\"" << std::endl;

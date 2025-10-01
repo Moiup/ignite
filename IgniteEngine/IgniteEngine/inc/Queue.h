@@ -146,6 +146,12 @@ public:
 		glm::vec4& clear_color_value,
 		Image& image,
 		DepthBuffer& depth_buffer,
+		VkOffset2D offset = {0, 0}
+	);
+	void beginRendering(
+		glm::vec4& clear_color_value,
+		Image& image,
+		DepthBuffer& depth_buffer,
 		VkOffset2D& offset,
 		VkExtent2D& extent
 	);

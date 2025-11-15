@@ -37,8 +37,10 @@ public:
 	const uint32_t getSize() const;
 	const uint32_t getCapacity() const;
 
-	void* map();
-	void unmap();
+	// void* map();
+	// void unmap();
+
+	const VkBuffer buffer() const;
 
 protected:
 	void create();

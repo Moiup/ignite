@@ -173,6 +173,11 @@ const uint32_t Buffer<U>::getCapacity() const {
 }
 
 template<IGEBufferUsage U>
+const VkBuffer Buffer<U>::buffer() const {
+	return _buffer;
+}
+
+template<IGEBufferUsage U>
 void Buffer<U>::createBuffer() {
 	VkResult vk_result = vkCreateBuffer(
 		_device->getDevice(),

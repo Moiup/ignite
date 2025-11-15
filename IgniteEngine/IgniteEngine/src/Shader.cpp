@@ -190,6 +190,11 @@ std::string Shader::readShaderFile(const std::string& path) {
 	std::ifstream file(path);
 	std::string content;
 
+	if(!file.is_open()){
+		// std::cerr << "Error opening " << path << std::endl;
+		throw std::runtime_error("Error opening " + path);
+	}
+
 	file.seekg(0, std::ios::end);
 	content.reserve(file.tellg());
 	file.seekg(0, std::ios::beg);

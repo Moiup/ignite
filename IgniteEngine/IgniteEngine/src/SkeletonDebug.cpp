@@ -58,6 +58,7 @@ void SkeletonDebug::update() {
 	_cross_objs.back().setPositionLocale(_object->getPositionLocale());
 	_cross_objs.back().setRotationLocale(_object->getRotationLocale());
 	_cross_objs.back().setScaleLocale(_object->getScaleLocale());
+	_cross_objs.back().alignmentMatrix() = _object->alignmentMatrix();
 }
 
 std::vector<Object3D>& SkeletonDebug::getCrossObjs() {

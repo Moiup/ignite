@@ -61,7 +61,6 @@ set(HEADERS
     ${IGNITE_PATH}/inc/Ressource.h
     ${IGNITE_PATH}/inc/Sampler.h
     ${IGNITE_PATH}/inc/Shader.h
-    ${IGNITE_PATH}/inc/SharedCounter.h
     ${IGNITE_PATH}/inc/Skeleton.h
     ${IGNITE_PATH}/inc/SkeletonDebug.h
     ${IGNITE_PATH}/inc/StagingBuffer.h
@@ -111,7 +110,6 @@ set(SRC
     ${IGNITE_PATH}/src/Ressource.cpp
     ${IGNITE_PATH}/src/Sampler.cpp
     ${IGNITE_PATH}/src/Shader.cpp
-    ${IGNITE_PATH}/src/SharedCounter.cpp
     ${IGNITE_PATH}/src/Skeleton.cpp
     ${IGNITE_PATH}/src/SkeletonDebug.cpp
     ${IGNITE_PATH}/src/Swapchain.cpp

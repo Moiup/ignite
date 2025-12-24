@@ -38,7 +38,10 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 				)
 			);
 
-			DefaultConf::graphics_queue->changeLayout(_textures[0][t_id], VK_IMAGE_LAYOUT_GENERAL);
+			CommandBuffer cmd_buff = DefaultConf::command_pool->newCommandBuffer();
+
+			cmd_buff.begin();
+			cmd_buff.changeLayout(_textures[0][t_id], VK_IMAGE_LAYOUT_GENERAL);
 
 			StagingBuffer<IGEBufferUsage::transfer> sb = StagingBuffer<IGEBufferUsage::transfer>(
 				DefaultConf::device,
@@ -46,11 +49,13 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 				pixels.getPixels().data()
 			);
 
-			DefaultConf::graphics_queue->copy(sb, _textures[0][t_id]);
-			DefaultConf::graphics_queue->changeLayout(_textures[0][t_id], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			cmd_buff.copy(sb, _textures[0][t_id]);
+			cmd_buff.changeLayout(_textures[0][t_id], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			cmd_buff.end();
 
-			DefaultConf::graphics_queue->submit();
+			DefaultConf::graphics_queue->submit(*DefaultConf::command_pool);
 			DefaultConf::graphics_queue->wait();
+			DefaultConf::command_pool->reset();
 
 			t_id++;
 		}

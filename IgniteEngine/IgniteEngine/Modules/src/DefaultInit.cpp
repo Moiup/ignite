@@ -22,7 +22,14 @@ void DefaultInit::init() {
 		_render_window.getHeight(),
 		db_queue_family_indices
 	);
-	DefaultConf::graphics_queue->changeLayout(
+
+	_command_pool = std::move(DefaultConf::graphics_queue->newCommandPool());
+	DefaultConf::command_pool = &_command_pool;
+
+	CommandBuffer cmd_buff = _command_pool.newCommandBuffer();
+	cmd_buff.begin();
+
+	cmd_buff.changeLayout(
 		_depth_buffer,
 		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 	);
@@ -38,13 +45,16 @@ void DefaultInit::init() {
 	);
 
 	for (Image& img : _swapchain.getImages()) {
-		DefaultConf::graphics_queue->changeLayout(
+		cmd_buff.changeLayout(
 			img,
 			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 		);
 	}
-	DefaultConf::graphics_queue->submit();
+	cmd_buff.end();
+
+	DefaultConf::graphics_queue->submit(_command_pool);
 	DefaultConf::graphics_queue->wait();
+	_command_pool.reset();
 
 	GraphicsPipelineConfiguration conf;
 	conf.nb_frame = DefaultConf::NB_FRAME;
@@ -103,12 +113,18 @@ void DefaultInit::init() {
 		white_pixels.getPixels().data()
 	);
 
-	DefaultConf::graphics_queue->changeLayout(_white_texture, VK_IMAGE_LAYOUT_GENERAL);
-	DefaultConf::graphics_queue->copy(sb, _white_texture);
-	DefaultConf::graphics_queue->changeLayout(_white_texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	cmd_buff = _command_pool.newCommandBuffer();
+	cmd_buff.begin();
 
-	DefaultConf::graphics_queue->submit();
+	cmd_buff.changeLayout(_white_texture, VK_IMAGE_LAYOUT_GENERAL);
+	cmd_buff.copy(sb, _white_texture);
+	cmd_buff.changeLayout(_white_texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	cmd_buff.end();
+
+	DefaultConf::graphics_queue->submit(_command_pool);
 	DefaultConf::graphics_queue->wait();
+	_command_pool.reset();
 }
 
 void DefaultInit::start() {

@@ -115,7 +115,7 @@ const uint32_t Triangle::mat_id() const {
 void Triangle::buildTriangles(RTScene& scene) {
 	//materials.push_back(Material());
 
-	const std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& arrays = Object3D::getArrays();
+	const std::unordered_map<RenderFamily*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& arrays = Object3D::getArrays();
 
 
 
@@ -123,10 +123,10 @@ void Triangle::buildTriangles(RTScene& scene) {
 
 	uint32_t nb_mat{ 0 };
 
-	// For each renderer
+	// For each rf
 	for (auto& r_gp : arrays) {
-		Renderer* renderer = r_gp.first;
-		if (!renderer) {
+		RenderFamily* rf = r_gp.first;
+		if (!rf) {
 			continue;
 		}
 

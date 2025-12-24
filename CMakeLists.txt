@@ -25,13 +25,10 @@ set(HEADERS
     ${IGNITE_PATH}/inc/ComputePipeline.h
     ${IGNITE_PATH}/inc/ComputeShader.h
     ${IGNITE_PATH}/inc/DefaultConf.h
-    ${IGNITE_PATH}/inc/DefaultDispatcher.h
-    ${IGNITE_PATH}/inc/DefaultRenderer.h
     ${IGNITE_PATH}/inc/DepthBuffer.h
     ${IGNITE_PATH}/inc/DeviceBuffer.h
     ${IGNITE_PATH}/inc/DeviceBuffer.hpp
     ${IGNITE_PATH}/inc/Device.h
-    ${IGNITE_PATH}/inc/Dispatcher.h
     ${IGNITE_PATH}/inc/EngineApp.h
     ${IGNITE_PATH}/inc/EngineEntity.h
     ${IGNITE_PATH}/inc/Entity3D.h
@@ -59,13 +56,12 @@ set(HEADERS
     ${IGNITE_PATH}/inc/Pointer.h
     ${IGNITE_PATH}/inc/Pointer.hpp
     ${IGNITE_PATH}/inc/Queue.h
-    ${IGNITE_PATH}/inc/ReadWriteImageMod.h
-    ${IGNITE_PATH}/inc/Renderer.h
-    ${IGNITE_PATH}/inc/RendererDisplayImage.h
+    ${IGNITE_PATH}/inc/RenderFamily.h
     ${IGNITE_PATH}/inc/resource.h
     ${IGNITE_PATH}/inc/Ressource.h
     ${IGNITE_PATH}/inc/Sampler.h
     ${IGNITE_PATH}/inc/Shader.h
+    ${IGNITE_PATH}/inc/SharedCounter.h
     ${IGNITE_PATH}/inc/Skeleton.h
     ${IGNITE_PATH}/inc/SkeletonDebug.h
     ${IGNITE_PATH}/inc/StagingBuffer.h
@@ -86,11 +82,8 @@ set(SRC
     ${IGNITE_PATH}/src/ComputePipeline.cpp
     ${IGNITE_PATH}/src/ComputeShader.cpp
     ${IGNITE_PATH}/src/DefaultConf.cpp
-    ${IGNITE_PATH}/src/DefaultDispatcher.cpp
-    ${IGNITE_PATH}/src/DefaultRenderer.cpp
     ${IGNITE_PATH}/src/DepthBuffer.cpp
     ${IGNITE_PATH}/src/Device.cpp
-    ${IGNITE_PATH}/src/Dispatcher.cpp
     ${IGNITE_PATH}/src/EngineApp.cpp
     ${IGNITE_PATH}/src/EngineEntity.cpp
     ${IGNITE_PATH}/src/Entity3D.cpp
@@ -114,12 +107,11 @@ set(SRC
     ${IGNITE_PATH}/src/Pipeline.cpp
     ${IGNITE_PATH}/src/Pixels.cpp
     ${IGNITE_PATH}/src/Queue.cpp
-    ${IGNITE_PATH}/src/ReadWriteImageMod.cpp
-    ${IGNITE_PATH}/src/Renderer.cpp
-    ${IGNITE_PATH}/src/RendererDisplayImage.cpp
+    ${IGNITE_PATH}/src/RenderFamily.cpp
     ${IGNITE_PATH}/src/Ressource.cpp
     ${IGNITE_PATH}/src/Sampler.cpp
     ${IGNITE_PATH}/src/Shader.cpp
+    ${IGNITE_PATH}/src/SharedCounter.cpp
     ${IGNITE_PATH}/src/Skeleton.cpp
     ${IGNITE_PATH}/src/SkeletonDebug.cpp
     ${IGNITE_PATH}/src/Swapchain.cpp

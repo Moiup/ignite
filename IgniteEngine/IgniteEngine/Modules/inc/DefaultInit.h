@@ -6,16 +6,14 @@
 
 #include "Module.h"
 
-#include "DefaultRenderer.h"
-
 class DefaultInit: public Module
 {
 private:
 	//DefaultGPU _gpu{};
 	WindowSurface _render_window{};
 	Swapchain _swapchain;
-	DefaultRenderer _renderer{};
 	DepthBuffer _depth_buffer;
+	CommandPool _command_pool;
 
 	Texture2D _white_texture{};
 

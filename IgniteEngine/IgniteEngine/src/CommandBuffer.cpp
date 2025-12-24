@@ -23,14 +23,6 @@ CommandBuffer::CommandBuffer(const CommandBuffer& cmd_buf) :
 {
 	;
 }
-//
-//CommandBuffer::CommandBuffer(CommandBuffer&& cmd_buf) {
-//	*this = cmd_buf;
-//}
-
-// CommandBuffer& CommandBuffer::operator=(const CommandBuffer& cmd_buf) {
-// 	return CommandBuffer(cmd_buf);
-// }
 
 void CommandBuffer::setLevel(VkCommandBufferLevel level) {
 	_level = level;
@@ -89,6 +81,68 @@ void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, VkPipeline pipe
 		bind_point,
 		pipeline
 	);
+}
+
+void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, Pipeline& pp) {
+	bindPipeline(bind_point, pp.getPipeline());
+
+	bindDescriptorSets(
+		bind_point,
+		pp.getPipelineLayout(),
+		0,
+		pp.getDescriptorSets().size(),
+		pp.getDescriptorSets().data(),
+		0,
+		nullptr
+	);
+
+	if (pp.getShader().getPushConstantRange().size) {
+		pushConstants(
+			pp.getPipelineLayout(),
+			pp.getShader().getPushConstantRange().stageFlags,
+			pp.getShader().getPushConstantRange().offset,
+			pp.getShader().getPushConstantRange().size,
+			pp.getPushConstants()
+		);
+	}
+}
+
+void CommandBuffer::bindPipeline(GraphicsPipeline& gp) {
+	bindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, gp);
+
+	setViewport(
+		&gp.getViewport(),
+		1
+	);
+	setScissor(
+		&gp.getScissors(),
+		1
+	);
+	setCullMode(gp.getCullMode());
+	setFrontFace(gp.getFrontFace());
+
+	bindIndexBuffer(
+		gp.getIndexBuffer(),
+		0,
+		gp.getShader().getIndexBufferInfo().getIndexType()
+	);
+
+	VkDeviceSize v_offsets = { 0 };
+	for (const auto& vb : gp.getVertexBuffers()) {
+		const std::string& buf_name = vb.first;
+		const VkBuffer vertex_buffer = vb.second;
+
+		bindVertexBuffer(
+			gp.getShader().getVertexBufferDescription(buf_name).binding_desc.binding,
+			1,
+			&vertex_buffer,
+			&v_offsets
+		);
+	}
+}
+
+void CommandBuffer::bindPipeline(ComputePipeline& cp) {
+	bindPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, cp);
 }
 
 void CommandBuffer::setViewport(std::vector<VkViewport>& viewport_arr) {
@@ -185,7 +239,13 @@ void CommandBuffer::bindVertexBuffer(uint32_t first_binding, uint32_t binding_co
 	);
 }
 
-void CommandBuffer::drawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance) {
+void CommandBuffer::drawIndexed(
+	const uint32_t index_count,
+	const uint32_t instance_count,
+	const uint32_t first_index,
+	const uint32_t vertex_offset,
+	const uint32_t first_instance
+) {
 	vkCmdDrawIndexed(
 		_command_buffer,
 		index_count,
@@ -205,17 +265,44 @@ void CommandBuffer::dispatch(uint32_t group_count_x, uint32_t group_count_y, uin
 	);
 }
 
+void CommandBuffer::dispatch(
+	ComputePipeline& cp,
+	uint32_t group_count_x,
+	uint32_t group_count_y,
+	uint32_t group_count_z
+) {
+	bindPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, cp);
+
+	dispatch(
+		group_count_x,
+		group_count_y,
+		group_count_z
+	);
+}
+
 void CommandBuffer::endRendering() {
 	vkCmdEndRendering(_command_buffer);
 }
 
+void CommandBuffer::endRendering(Image &image) {
+	VkImageLayout image_layout = image.getImageLayout();
+	endRendering();
+	dynamicRenderingPipelineBarrierBack(image);
+	changeLayout(image, image_layout);
+}
+
 void CommandBuffer::beginRendering(
-	VkClearColorValue& clear_color,
+	VkClearColorValue clear_color,
 	Image& image,
 	DepthBuffer& depth_buffer,
-	VkOffset2D& offset,
-	VkExtent2D& extent
+	VkOffset2D offset,
+	VkExtent2D extent
 ) {
+	dynamicRenderingPipelineBarrier(
+		image,
+		depth_buffer
+	);
+
 	VkRenderingAttachmentInfoKHR color_attachment{};
 	color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
 	color_attachment.imageView = image.getImageView();
@@ -253,6 +340,26 @@ void CommandBuffer::beginRendering(
 
 	beginRendering(
 		rendering_info_khr
+	);
+}
+
+void CommandBuffer::beginRendering(
+	VkClearColorValue clear_color,
+	Image& image,
+	DepthBuffer& depth_buffer,
+	VkOffset2D offset
+) {
+	VkExtent2D extent = {
+		image.getWidth(),
+		image.getHeight()
+	};
+
+	beginRendering(
+		clear_color,
+		image,
+		depth_buffer,
+		offset,
+		extent
 	);
 }
 
@@ -378,6 +485,34 @@ void CommandBuffer::pipelineBarrier(const VkDependencyInfo* p_dependency_info){
 	vkCmdPipelineBarrier2(_command_buffer, p_dependency_info);
 }
 
+void CommandBuffer::barrier(
+	VkPipelineStageFlags2 src_stage_mask,
+	VkPipelineStageFlags2 dst_stage_mask,
+	VkAccessFlags2 src_access_mask,
+	VkAccessFlags2 dst_access_mask
+){
+	VkMemoryBarrier2 mem_bar{};
+	mem_bar.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
+	mem_bar.pNext = nullptr;
+	mem_bar.srcStageMask = src_stage_mask;
+	mem_bar.dstStageMask = dst_stage_mask;
+	mem_bar.srcAccessMask = src_access_mask;
+	mem_bar.dstAccessMask = dst_access_mask;
+
+	VkDependencyInfo dependency_info{};
+	dependency_info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+	dependency_info.pNext = nullptr;
+	dependency_info.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	dependency_info.memoryBarrierCount = 1;
+	dependency_info.pMemoryBarriers = &mem_bar;
+	dependency_info.bufferMemoryBarrierCount = 0;
+	dependency_info.pBufferMemoryBarriers = nullptr;
+	dependency_info.imageMemoryBarrierCount = 0;
+	dependency_info.pImageMemoryBarriers = nullptr;
+
+	pipelineBarrier(&dependency_info);
+}
+
 void CommandBuffer::copyBufferToBuffer(
 	VkBuffer srcBuffer,
 	VkBuffer dstBuffer,
@@ -458,4 +593,143 @@ void CommandBuffer::copyImageToImage(
 		region_count,
 		p_regions
 	);
+}
+
+void CommandBuffer::copy(Image& src, Image& dst,
+	VkExtent3D extent,
+	VkOffset3D src_offset,
+	VkOffset3D dst_offset,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	VkImageLayout image_layout = dst.getImageLayout();
+
+	VkImageLayout src_image_layout_initial = src.getImageLayout();
+	changeLayout(
+		src,
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		src_access_mask,
+		VK_ACCESS_TRANSFER_READ_BIT,
+		src_stage_mask,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	changeLayout(
+		dst,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		src_access_mask,
+		VK_ACCESS_TRANSFER_WRITE_BIT,
+		src_stage_mask,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	// To do for each mip level
+	// (To start, we consider only the original level -> 0)
+	VkImageCopy image_copy{};
+	image_copy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.srcSubresource.mipLevel = 0;
+	image_copy.srcSubresource.baseArrayLayer = 0;
+	image_copy.srcSubresource.layerCount = 1;
+	image_copy.srcOffset = src_offset;
+	image_copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_copy.dstSubresource.mipLevel = 0;
+	image_copy.dstSubresource.baseArrayLayer = 0;
+	image_copy.dstSubresource.layerCount = 1;
+	image_copy.dstOffset = dst_offset;
+	image_copy.extent = extent;
+
+	copyImageToImage(
+		src.getImage(),
+		src.getImageLayout(),
+		dst.getImage(),
+		dst.getImageLayout(),
+		1,
+		&image_copy
+	);
+
+	changeLayout(
+		src,
+		src_image_layout_initial,
+		src.getStageAccessInfo().access_mask,
+		dst_access_mask,
+		src.getStageAccessInfo().stage_mask,
+		dst_stage_mask
+	);
+
+	changeLayout(
+		dst,
+		image_layout,
+		dst.getStageAccessInfo().access_mask,
+		dst_access_mask,
+		dst.getStageAccessInfo().stage_mask,
+		dst_stage_mask
+	);
+}
+
+void CommandBuffer::copy(Image& src, Image& dst,
+	VkOffset3D src_offset,
+	VkOffset3D dst_offset,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+){
+	VkExtent3D extent = {
+		std::min(src.getWidth(), dst.getWidth()),
+		std::min(src.getHeight(), dst.getHeight()),
+		1
+	};
+	copy(
+		src,
+		dst,
+		extent,
+		src_offset,
+		dst_offset,
+		src_access_mask,
+		dst_access_mask,
+		src_stage_mask,
+		dst_stage_mask
+	);
+}
+
+void CommandBuffer::changeLayout(
+	Image& img,
+	VkImageLayout new_layout,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	// Preparing the transfer with the image memory barrier
+	VkImageSubresourceRange subresource_range{};
+	subresource_range.aspectMask = img.aspectMask();
+	subresource_range.baseMipLevel = 0;
+	subresource_range.levelCount = 1;
+	subresource_range.layerCount = 1;
+
+	VkImageMemoryBarrier image_memory_barrier{};
+	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	image_memory_barrier.pNext = nullptr;
+	image_memory_barrier.image = img.getImage();
+	image_memory_barrier.subresourceRange = subresource_range;
+	image_memory_barrier.srcAccessMask = src_access_mask;
+	image_memory_barrier.dstAccessMask = dst_access_mask;
+	image_memory_barrier.oldLayout = img.getImageLayout();
+	image_memory_barrier.newLayout = new_layout;
+
+	pipelineBarrier(
+		src_stage_mask,
+		dst_stage_mask,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &image_memory_barrier
+	);
+
+	img.getStageAccessInfo().access_mask = dst_access_mask;
+	img.getStageAccessInfo().stage_mask = dst_stage_mask;
+
+	img.setImageInitialLayout(new_layout);
 }

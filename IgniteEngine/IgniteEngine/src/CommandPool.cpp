@@ -4,40 +4,66 @@ CommandPool::CommandPool() :
 	_pool{nullptr},
 	_device{nullptr},
 	_flags{},
-	_family_index{},
-	_shared_count{nullptr}
+	_family_index{}
 {
-	_vk_cmd_buffs = new std::vector<VkCommandBuffer>;
-	_cmd_buffs = new std::vector<CommandBuffer>;
-	_shared_count = new int(1);
+	_shared_count = new int32_t(1);
 }
 
-CommandPool::CommandPool(const CommandPool& cp)
+CommandPool::CommandPool(
+	Device& device,
+	VkCommandPoolCreateFlagBits flags,
+	uint32_t family_index
+) : 
+	CommandPool::CommandPool()
 {
+	_device = &device;
+	_flags = flags;
+	_family_index = family_index;
+	create();
+}
+
+CommandPool::CommandPool(const CommandPool& cp) {
+	destroy();
 	*this = cp;
 }
 
-CommandPool& CommandPool::operator=(const CommandPool& cp) {
+CommandPool::CommandPool(CommandPool&& cp) {
+	destroy();
+	*this = std::move(cp);
+}
+
+CommandPool::~CommandPool() {
+	destroy();
+}
+
+CommandPool& CommandPool::operator=(const CommandPool& cp){
 	destroy();
 
-	_pool = { cp._pool };
-	_device = { cp._device };
-	_flags = { cp._flags };
-	_family_index = { cp._family_index };
-	_vk_cmd_buffs = { cp._vk_cmd_buffs };
-	_cmd_buffs = { cp._cmd_buffs };
-	_shared_count = { cp._shared_count };
+	_pool = cp._pool;
+	_device = cp._device;
+	_flags = cp._flags;
+	_family_index = cp._family_index;
+	_shared_count = cp._shared_count;
 	*_shared_count += 1;
+
+	return *this;
+}
+
+CommandPool& CommandPool::operator=(CommandPool&& cp) {
+	destroy();
+
+	_pool = std::move(cp._pool);
+	_device = std::move(cp._device);
+	_flags = std::move(cp._flags);
+	_family_index = std::move(cp._family_index);
+	_shared_count = std::move(cp._shared_count);
+	cp._shared_count = nullptr;
 
 	return *this;
 }
 
 bool CommandPool::operator==(const CommandPool& cp) {
 	return _pool == cp._pool;
-}
-
-CommandPool::~CommandPool() {
-	destroy();
 }
 
 void CommandPool::setDevice(Device* device) {
@@ -71,7 +97,7 @@ void CommandPool::create() {
 }
 
 void CommandPool::reset() {
-	if (_vk_cmd_buffs->empty()) {
+	if (_vk_cmd_buffs.empty()) {
 		return;
 	}
 
@@ -111,26 +137,29 @@ CommandBuffer& CommandPool::newCommandBuffer() {
 		info.level
 	);
 	
-	_vk_cmd_buffs->push_back(vk_cmd_buf);
-	_cmd_buffs->push_back(cmd_buf);
+	_vk_cmd_buffs.push_back(vk_cmd_buf);
+	_cmd_buffs.push_back(cmd_buf);
 
-	return _cmd_buffs->back();
+	return _cmd_buffs.back();
 }
 
-std::vector<CommandBuffer>& CommandPool::commandBuffers() {
-	return *_cmd_buffs;
+const std::vector<CommandBuffer>& CommandPool::commandBuffers() const {
+	return _cmd_buffs;
+}
+
+const std::vector<VkCommandBuffer>& CommandPool::vkCommandBuffers() const {
+	return _vk_cmd_buffs;
 }
 
 void CommandPool::destroy() {
-	if (!_shared_count) {
+	if(!_shared_count){
 		return;
 	}
-
 	*_shared_count -= 1;
-	if (*_shared_count) {
+
+	if(*_shared_count){
 		return;
-	}
-	delete _shared_count;
+	}	
 
 	if (!_pool) {
 		return;
@@ -138,9 +167,6 @@ void CommandPool::destroy() {
 
 	reset();
 	
-	delete _vk_cmd_buffs;
-	delete _cmd_buffs;
-
 	vkDestroyCommandPool(
 		_device->getDevice(),
 		_pool,
@@ -152,9 +178,9 @@ void CommandPool::resetCommandBuffers() {
 	vkFreeCommandBuffers(
 		_device->getDevice(),
 		_pool,
-		_vk_cmd_buffs->size(),
-		_vk_cmd_buffs->data()
+		_vk_cmd_buffs.size(),
+		_vk_cmd_buffs.data()
 	);
-	_vk_cmd_buffs->clear();
-	_cmd_buffs->clear();
+	_vk_cmd_buffs.clear();
+	_cmd_buffs.clear();
 }

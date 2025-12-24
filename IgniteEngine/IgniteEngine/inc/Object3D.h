@@ -5,7 +5,7 @@
 #include "DefaultConf.h"
 #include "Sampler.h"
 #include "Texture2D.h"
-#include "Renderer.h"
+#include "RenderFamily.h"
 #include "LoadedObjectInfo.h"
 
 #include <map>
@@ -42,13 +42,13 @@ public:
 	static const uint32_t DEFAULT_MATERIAL_INDICES = 0;
 
 private:
-	static std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>> _arrays;
+	static std::unordered_map<RenderFamily*, std::unordered_map<GraphicsPipeline*, Object3DArrays>> _arrays;
 
 	static std::vector<Object3D*> allocated_objects;
 
 	Mesh* _mesh;
 	Skeleton* _skeleton;
-	Renderer* _renderer;
+	RenderFamily* _rf;
 	std::vector<uint32_t>* _material_indices;
 	std::vector<Material*> _materials;
 	std::vector<Texture2D*> _Texture2D;
@@ -68,8 +68,8 @@ public:
 	Skeleton* getSkeleton();
 	const Skeleton* getSkeleton() const;
 	
-	void setRenderer(Renderer& renderer);
-	const Renderer* getRenderer() const;
+	void setRenderFamily(RenderFamily& rf);
+	const RenderFamily& getRenderFamily() const;
 
 	void setMaterial(Material& material);
 	const std::vector<Material*>& getMaterial() const;
@@ -93,86 +93,86 @@ private:
 	void setTextures2D(const std::vector<Texture2D>& Texture2D);
 
 public:
-	static const std::unordered_map<Renderer*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& getArrays();
-	static const std::unordered_map<GraphicsPipeline*, Object3DArrays>& getArrays(Renderer& renderer);
+	static const std::unordered_map<RenderFamily*, std::unordered_map<GraphicsPipeline*, Object3DArrays>>& getArrays();
+	static const std::unordered_map<GraphicsPipeline*, Object3DArrays>& getArrays(RenderFamily& rf);
 
-	static const std::vector<glm::vec3>& getCoords(Renderer& renderer, GraphicsPipeline& gp);
-	static std::vector<glm::vec3>& updateCoords(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getCoordsStride(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getCoordsSize(Renderer& renderer, GraphicsPipeline& gp);
+	static const std::vector<glm::vec3>& getCoords(RenderFamily& rf, GraphicsPipeline& gp);
+	static std::vector<glm::vec3>& updateCoords(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getCoordsStride(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getCoordsSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<glm::vec3>& getNormals(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getNormalsStride(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getNormalsSize(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<glm::vec3>& getNormals(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getNormalsStride(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getNormalsSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<uint32_t>& getObjectId(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getObjectIdStride(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getObjectIdSize(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<uint32_t>& getObjectId(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getObjectIdStride(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getObjectIdSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<uint32_t>& getMeshOffsets(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getMeshOffsetsStride(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getMeshOffsetsSize(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<uint32_t>& getMeshOffsets(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getMeshOffsetsStride(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getMeshOffsetsSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<uint32_t>& getIndices(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getIndicesSize(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getIndicesNbElem(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<uint32_t>& getIndices(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getIndicesSize(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getIndicesNbElem(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<glm::vec2>& getUV(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getUVSize(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getUVStride(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<glm::vec2>& getUV(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getUVSize(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getUVStride(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<glm::uvec4>& getJoints(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getJointsSize(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getJointsStride(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<glm::uvec4>& getJoints(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getJointsSize(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getJointsStride(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<glm::vec4>& getWeights(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getWeightsSize(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getWeightsStride(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<glm::vec4>& getWeights(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getWeightsSize(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getWeightsStride(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<Texture2D*>& getTextures2D(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getTextures2DSize(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getTextures2DStride(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<Texture2D*>& getTextures2D(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getTextures2DSize(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getTextures2DStride(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<uint32_t>& getTransformIndices(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getTransformIndicesSize(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getTransformIndicesStride(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<uint32_t>& getTransformIndices(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getTransformIndicesSize(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getTransformIndicesStride(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<glm::mat4>& getTransformMatrices(Renderer& renderer, GraphicsPipeline& gp);
-	static std::vector<glm::mat4>& updateTransformMatrices(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getTransformMatricesSize(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<glm::mat4>& getTransformMatrices(RenderFamily& rf, GraphicsPipeline& gp);
+	static std::vector<glm::mat4>& updateTransformMatrices(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getTransformMatricesSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<uint32_t>& getMaterialIndices(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getMaterialIndicesStride(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getMaterialIndicesSize(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<uint32_t>& getMaterialIndices(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getMaterialIndicesStride(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getMaterialIndicesSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<glsl::Mat>& getMaterials(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getMaterialsStride(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getMaterialsSize(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<glsl::Mat>& getMaterials(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getMaterialsStride(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getMaterialsSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	static std::vector<glm::mat4>& getJointsTransform(Renderer& renderer, GraphicsPipeline& gp);
-	static std::vector<glm::mat4>& updateJointsTransform(Renderer& renderer, GraphicsPipeline& gp);
-	static uint32_t getJointsTransformSize(Renderer& renderer, GraphicsPipeline& gp);
+	static std::vector<glm::mat4>& getJointsTransform(RenderFamily& rf, GraphicsPipeline& gp);
+	static std::vector<glm::mat4>& updateJointsTransform(RenderFamily& rf, GraphicsPipeline& gp);
+	static uint32_t getJointsTransformSize(RenderFamily& rf, GraphicsPipeline& gp);
 
-	//static std::vector<uint32_t>& getTexture2DIndices(Renderer& renderer, GraphicsPipeline& gp);
-	//static uint32_t getTexture2DIndicesStride(Renderer& renderer, GraphicsPipeline& gp);
-	//static uint32_t getTexture2DIndicesSize(Renderer& renderer, GraphicsPipeline& gp);
+	//static std::vector<uint32_t>& getTexture2DIndices(RenderFamily& rf, GraphicsPipeline& gp);
+	//static uint32_t getTexture2DIndicesStride(RenderFamily& rf, GraphicsPipeline& gp);
+	//static uint32_t getTexture2DIndicesSize(RenderFamily& rf, GraphicsPipeline& gp);
 
 private:
-	static void buildCoords(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildNormals(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildObjectId(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildMeshOffsets(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildIndices(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildUV(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildJoints(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildWeights(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildTextures2D(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildTransformIndices(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildTransformMatrices(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildMaterialIndices(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildMaterials(Renderer& renderer, GraphicsPipeline& gp);
-	static void buildJointsTransform(Renderer& renderer, GraphicsPipeline& gp);
-	//static void buildTexture2DIndices(Renderer& renderer, GraphicsPipeline& gp);
+	static void buildCoords(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildNormals(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildObjectId(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildMeshOffsets(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildIndices(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildUV(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildJoints(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildWeights(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildTextures2D(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildTransformIndices(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildTransformMatrices(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildMaterialIndices(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildMaterials(RenderFamily& rf, GraphicsPipeline& gp);
+	static void buildJointsTransform(RenderFamily& rf, GraphicsPipeline& gp);
+	//static void buildTexture2DIndices(RenderFamily& rf, GraphicsPipeline& gp);
 
 	static void freeAllocatedObjects();
 };

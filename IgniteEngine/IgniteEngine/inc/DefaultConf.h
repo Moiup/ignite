@@ -5,7 +5,7 @@
 #include "GraphicShader.h"
 #include "WindowSurface.h"
 #include "GraphicsPipeline.h"
-#include "Renderer.h"
+#include "RenderFamily.h"
 #include "WindowUI.h"
 
 #include <chrono>
@@ -21,13 +21,13 @@ public:
 	static Device* device;
 	static GraphicsPipeline* graphics_pipeline;
 	static GraphicsPipeline* debug_pipeline;
-	static CommandBuffer* copy_cmd_buf;
+	static CommandPool* command_pool;
 	static WindowSurface* render_window;
 	static uint32_t render_window_width;
 	static uint32_t render_window_height;
 	static WindowUI* menu_window;
 	static Instance* instance;
-	static Renderer* renderer;
+	static RenderFamily* renderer;
 	static CameraScene* camera;
 	static Queue* graphics_queue;
 	static Swapchain* swapchain;

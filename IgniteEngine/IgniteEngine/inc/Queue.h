@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PhysicalDevice.h"
-#include "SharedCounter.h"
 #include "CommandPool.h"
 #include "CommandBuffer.h"
 #include "Buffer.h"

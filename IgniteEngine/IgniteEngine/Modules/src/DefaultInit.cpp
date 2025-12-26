@@ -110,7 +110,8 @@ void DefaultInit::init() {
 	StagingBuffer<IGEBufferUsage::transfer> sb = StagingBuffer<IGEBufferUsage::transfer>(
 		DefaultConf::device,
 		white_pixels.getSize(),
-		white_pixels.getPixels().data()
+		white_pixels.getPixels().data(),
+		white_pixels.getSize()
 	);
 
 	cmd_buff = _command_pool.newCommandBuffer();

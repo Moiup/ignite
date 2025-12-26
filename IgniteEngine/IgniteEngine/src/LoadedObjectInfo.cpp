@@ -46,7 +46,8 @@ void LoadedObjectInfo::loadWavefont(const std::string& file_name) {
 			StagingBuffer<IGEBufferUsage::transfer> sb = StagingBuffer<IGEBufferUsage::transfer>(
 				DefaultConf::device,
 				pixels.getSize(),
-				pixels.getPixels().data()
+				pixels.getPixels().data(),
+				pixels.getSize()
 			);
 
 			cmd_buff.copy(sb, _textures[0][t_id]);

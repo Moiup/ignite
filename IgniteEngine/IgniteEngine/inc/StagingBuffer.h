@@ -16,14 +16,27 @@ StagingBuffer<U>::StagingBuffer(
 }
 
 template<IGEBufferUsage U>
+template<class T>
 StagingBuffer<U>::StagingBuffer(
 	Device* device,
 	VkDeviceSize size,
-	const void* values
+	const std::vector<T>& v
 ) :
 	StagingBuffer<U>(device, size)
 {
-	setValues(values);
+	setValues(v.data(), v.size() * sizeof(T));
+}
+
+template<IGEBufferUsage U>
+StagingBuffer<U>::StagingBuffer(
+	Device* device,
+	VkDeviceSize size,
+	const void* values,
+	const int32_t values_size
+) :
+	StagingBuffer<U>(device, size)
+{
+	setValues(values, values_size);
 }
 
 template<IGEBufferUsage U>
@@ -61,15 +74,9 @@ void StagingBuffer<U>::unmap() {
 }
 
 template<IGEBufferUsage U>
-void StagingBuffer<U>::setValues(const void* values) {
-	if (this->_buffer_info.size == 0) {
-		return;
-	}
-
-	void* copy;
-	copy = map();
-	memcpy(copy, values, this->_size);
-	unmap();
+template<class T>
+void StagingBuffer<U>::setValues(const std::vector<T>& v) {
+	setValues(v.data(), v.size() * sizeof(T));
 }
 
 template<IGEBufferUsage U>
@@ -80,7 +87,7 @@ void StagingBuffer<U>::setValues(const void* values, const int32_t size) {
 
 	void* copy;
 	copy = map();
-	memcpy(copy, values, size);
+	memcpy(copy, values, std::min(static_cast<int32_t>(this->_size), size));
 	unmap();
 }
 

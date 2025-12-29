@@ -7,25 +7,25 @@
 class Pipeline
 {
 protected:
-	Shader* _shader;
+	Shader* _shader{nullptr};
 
-	std::vector<VkDescriptorSetLayout> _descriptor_set_layout;
-	VkDescriptorPool _descriptor_pool;
-	std::vector<VkDescriptorSetLayoutBinding> _descriptor_set_layout_bindings;
-	std::vector<VkDescriptorSet> _descriptor_sets;
-	std::vector<VkDescriptorSet> _descriptor_sets_pool;
-	VkPipelineLayout _pipeline_layout;
+	std::vector<VkDescriptorSetLayout> _descriptor_set_layout{};
+	VkDescriptorPool _descriptor_pool{};
+	std::vector<VkDescriptorSetLayoutBinding> _descriptor_set_layout_bindings{};
+	std::vector<VkDescriptorSet> _descriptor_sets{};
+	std::vector<VkDescriptorSet> _descriptor_sets_pool{};
+	VkPipelineLayout _pipeline_layout{};
 	VkPipeline _pipeline{ nullptr };
 
 	bool _is_changed = false;
-	std::unordered_map<std::string, std::vector<VkDescriptorBufferInfo>> _descriptor_buffer_infos;
-	std::unordered_map<std::string, std::vector<VkDescriptorImageInfo>> _descriptor_image_infos;
+	std::unordered_map<std::string, std::vector<VkDescriptorBufferInfo>> _descriptor_buffer_infos{};
+	std::unordered_map<std::string, std::vector<VkDescriptorImageInfo>> _descriptor_image_infos{};
 	std::vector<VkWriteDescriptorSet> _write_descriptor_sets{};
 	std::unordered_map<std::string, int32_t> _name_to_write_desc{};
 
-	void* _push_constants;
+	void* _push_constants{nullptr};
 
-	int32_t* _shared_count;
+	int32_t* _shared_count{nullptr};
 
 protected:
 	Pipeline();

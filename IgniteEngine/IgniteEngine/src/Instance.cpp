@@ -181,8 +181,8 @@ PhysicalDevice Instance::getDefaultGPU() {
 }
 
 std::vector<PhysicalDevice> Instance::enumeratePhysicalDevices() {
-	std::vector<VkPhysicalDevice> vk_gpus;
-	std::vector<PhysicalDevice> gpus;
+	std::vector<VkPhysicalDevice> vk_gpus{};
+	std::vector<PhysicalDevice> gpus{};
 	uint32_t gpus_count{ 0 };
 	VkResult vk_result{};
 

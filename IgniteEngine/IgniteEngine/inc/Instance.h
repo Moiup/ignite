@@ -14,7 +14,15 @@ class Instance
 {
 private:
 	VkInstance _instance{ nullptr };
-	VkApplicationInfo _application_info;
+	VkApplicationInfo _application_info{
+		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+		.pNext = nullptr,
+		.pApplicationName = "Ignite",
+		.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+		.pEngineName = "IgniteEngine",
+		.engineVersion = VK_MAKE_VERSION(1, 0, 0),
+		.apiVersion = VK_API_VERSION_1_4
+	};
 
 	int32_t* _shared_count{ nullptr };
 

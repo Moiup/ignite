@@ -18,11 +18,11 @@
 class EngineApp: public App
 {
 private:
-	Instance _instance;
-	PhysicalDevice _gpu;
-	Device _device;
+	Instance _instance{};
+	PhysicalDevice _gpu{};
+	Device _device{};
 
-	Queue _g_queue;
+	Queue _g_queue{};
 
 public:
 	EngineApp();

@@ -11,15 +11,15 @@
 class MenuModule : public Module
 {
 private:
-	WindowUI _menu_window;
-	SDL_Renderer* _renderer;
+	WindowUI _menu_window{};
+	SDL_Renderer* _renderer{nullptr};
 
 	float _update_fps{ 0 };
-	uint32_t _fps;
+	uint32_t _fps{0};
 	std::string _fps_str{};
 
-	bool _is_ray_tracer;
-	RayTracerCPU _rt_cpu;
+	bool _is_ray_tracer{false};
+	RayTracerCPU _rt_cpu{};
 
 public:
 	MenuModule();

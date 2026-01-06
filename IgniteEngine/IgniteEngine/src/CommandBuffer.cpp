@@ -513,6 +513,76 @@ void CommandBuffer::barrier(
 	pipelineBarrier(&dependency_info);
 }
 
+void CommandBuffer::blitImage2(const VkBlitImageInfo2* pBlitImageInfo2){
+	vkCmdBlitImage2(_command_buffer, pBlitImageInfo2);
+}
+
+void CommandBuffer::blitImage(
+	Image src,
+	Image dst,
+	uint32_t regionCount,
+	const VkImageBlit2* pRegions,
+	VkFilter filter
+){
+	VkImageLayout src_layout = src.getImageLayout();
+	VkImageLayout dst_layout = dst.getImageLayout();
+
+	changeLayout(src, VK_IMAGE_LAYOUT_GENERAL);
+	changeLayout(dst, VK_IMAGE_LAYOUT_GENERAL);
+
+	VkBlitImageInfo2 blit_info {
+		.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
+		.pNext = nullptr,
+		.srcImage = src.getImage(),
+		.srcImageLayout = src.getImageLayout(),
+		.dstImage = dst.getImage(),
+		.dstImageLayout = dst.getImageLayout(),
+		.regionCount = regionCount,
+		.pRegions = pRegions,
+		.filter = filter
+	};
+
+	blitImage2(&blit_info);
+
+	changeLayout(src, src_layout);
+	changeLayout(dst, dst_layout);
+}
+
+void CommandBuffer::blitImage(
+	Image src,
+	Image dst,
+	VkOffset3D srcOffsets[2],
+	VkOffset3D dstOffsets[2],
+	VkFilter filter
+) {
+	VkImageBlit2 region {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2,
+		.pNext = nullptr,
+		.srcSubresource{
+			.aspectMask = src.aspectMask(),
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+		.srcOffsets = {{0, 0, 0}, {src.getWidth(), src.getHeight(), 1}},
+		.dstSubresource{
+			.aspectMask = dst.aspectMask(),
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+		.dstOffsets = {{0, 0, 0}, {dst.getWidth(), dst.getHeight(), 1}}
+	};
+
+	blitImage(
+		src,
+		dst,
+		1,
+		&region,
+		filter
+	);
+}
+
 void CommandBuffer::copyBufferToBuffer(
 	VkBuffer srcBuffer,
 	VkBuffer dstBuffer,

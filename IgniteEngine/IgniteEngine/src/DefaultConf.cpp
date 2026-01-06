@@ -4,7 +4,7 @@
 //#include "PerspectiveCamera.h"
 
 GraphicsPipelineConfiguration DefaultConf::configuration;
-uint32_t DefaultConf::NB_FRAME = 2;
+uint32_t DefaultConf::NB_FRAME = 3;
 PhysicalDevice* DefaultConf::gpu;
 Device* DefaultConf::device;
 GraphicsPipeline* DefaultConf::graphics_pipeline;

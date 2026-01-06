@@ -116,6 +116,22 @@ public:
 		VkAccessFlags2 dst_access_mask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT
 	);
 
+	void blitImage2(const VkBlitImageInfo2*);
+	void blitImage(
+		Image src,
+		Image dst,
+		uint32_t regionCount,
+		const VkImageBlit2* pRegions,
+		VkFilter filter
+	);
+	void blitImage(
+		Image src,
+		Image dst,
+		VkOffset3D srcOffsets[2],
+		VkOffset3D dstOffsets[2],
+		VkFilter filter
+	);
+
 	void copyBufferToBuffer(
 		VkBuffer srcBuffer,
 		VkBuffer dstBuffer,

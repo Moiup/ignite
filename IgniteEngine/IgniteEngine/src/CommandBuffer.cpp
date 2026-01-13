@@ -426,7 +426,7 @@ void CommandBuffer::dynamicRenderingPipelineBarrier(
 
 void CommandBuffer::dynamicRenderingPipelineBarrierBack(Image& image) {
 	VkImageSubresourceRange subresource_range_frame_bk{};
-	subresource_range_frame_bk.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range_frame_bk.aspectMask = image.aspectMask();
 	subresource_range_frame_bk.baseMipLevel = 0;
 	subresource_range_frame_bk.levelCount = 1;
 	subresource_range_frame_bk.baseArrayLayer = 0;
@@ -666,9 +666,8 @@ void CommandBuffer::copyImageToImage(
 }
 
 void CommandBuffer::copy(Image& src, Image& dst,
-	VkExtent3D extent,
-	VkOffset3D src_offset,
-	VkOffset3D dst_offset,
+	uint32_t region_count,
+	const VkImageCopy* p_regions,
 	VkAccessFlags src_access_mask,
 	VkAccessFlags dst_access_mask,
 	VkPipelineStageFlags src_stage_mask,
@@ -695,28 +694,13 @@ void CommandBuffer::copy(Image& src, Image& dst,
 		VK_PIPELINE_STAGE_TRANSFER_BIT
 	);
 
-	// To do for each mip level
-	// (To start, we consider only the original level -> 0)
-	VkImageCopy image_copy{};
-	image_copy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_copy.srcSubresource.mipLevel = 0;
-	image_copy.srcSubresource.baseArrayLayer = 0;
-	image_copy.srcSubresource.layerCount = 1;
-	image_copy.srcOffset = src_offset;
-	image_copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_copy.dstSubresource.mipLevel = 0;
-	image_copy.dstSubresource.baseArrayLayer = 0;
-	image_copy.dstSubresource.layerCount = 1;
-	image_copy.dstOffset = dst_offset;
-	image_copy.extent = extent;
-
 	copyImageToImage(
 		src.getImage(),
 		src.getImageLayout(),
 		dst.getImage(),
 		dst.getImageLayout(),
-		1,
-		&image_copy
+		region_count,
+		p_regions
 	);
 
 	changeLayout(
@@ -738,7 +722,42 @@ void CommandBuffer::copy(Image& src, Image& dst,
 	);
 }
 
-void CommandBuffer::copy(Image& src, Image& dst,
+void CommandBuffer::copy(Image& src, VkImageAspectFlags src_aspect_mask,
+	Image& dst, VkImageAspectFlags dst_aspect_mask,
+	VkExtent3D extent,
+	VkOffset3D src_offset,
+	VkOffset3D dst_offset,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {
+	VkImageCopy image_copy{};
+	image_copy.srcSubresource.aspectMask = src_aspect_mask;
+	image_copy.srcSubresource.mipLevel = 0;
+	image_copy.srcSubresource.baseArrayLayer = 0;
+	image_copy.srcSubresource.layerCount = 1;
+	image_copy.srcOffset = src_offset;
+	image_copy.dstSubresource.aspectMask = dst_aspect_mask;
+	image_copy.dstSubresource.mipLevel = 0;
+	image_copy.dstSubresource.baseArrayLayer = 0;
+	image_copy.dstSubresource.layerCount = 1;
+	image_copy.dstOffset = dst_offset;
+	image_copy.extent = extent;
+
+	copy(
+		src, dst,
+		1,
+		&image_copy,
+		src_access_mask,
+		dst_access_mask,
+		src_stage_mask,
+		dst_stage_mask
+	);
+}
+
+void CommandBuffer::copy(Image& src, VkImageAspectFlags src_aspect_mask,
+	Image& dst, VkImageAspectFlags dst_aspect_mask,
 	VkOffset3D src_offset,
 	VkOffset3D dst_offset,
 	VkAccessFlags src_access_mask,
@@ -751,10 +770,55 @@ void CommandBuffer::copy(Image& src, Image& dst,
 		std::min(src.getHeight(), dst.getHeight()),
 		1
 	};
+	
 	copy(
 		src,
+		src_aspect_mask,
 		dst,
+		dst_aspect_mask,
 		extent,
+		src_offset,
+		dst_offset,
+		src_access_mask,
+		dst_access_mask,
+		src_stage_mask,
+		dst_stage_mask
+	);
+}
+
+void CommandBuffer::copy(Image& src, Image& dst,
+	VkExtent3D extent,
+	VkOffset3D src_offset,
+	VkOffset3D dst_offset,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+){
+	copy(
+		src, src.aspectMask(),
+		dst, dst.aspectMask(),
+		extent,
+		src_offset,
+		dst_offset,
+		src_access_mask,
+		dst_access_mask,
+		src_stage_mask,
+		dst_stage_mask
+	);
+}
+
+void CommandBuffer::copy(Image& src, Image& dst,
+	VkOffset3D src_offset,
+	VkOffset3D dst_offset,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+){
+	copy(
+		src, src.aspectMask(),
+		dst, dst.aspectMask(),
 		src_offset,
 		dst_offset,
 		src_access_mask,
@@ -772,6 +836,10 @@ void CommandBuffer::changeLayout(
 	VkPipelineStageFlags src_stage_mask,
 	VkPipelineStageFlags dst_stage_mask
 ) {
+	// if(new_layout == img.getImageLayout()){
+	// 	return;
+	// }
+
 	// Preparing the transfer with the image memory barrier
 	VkImageSubresourceRange subresource_range{};
 	subresource_range.aspectMask = img.aspectMask();

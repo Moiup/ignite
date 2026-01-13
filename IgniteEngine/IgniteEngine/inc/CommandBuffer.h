@@ -181,6 +181,56 @@ public:
 
 	template<IGEBufferUsage U>
 	void copy(Image& src, Buffer<U>& dst,
+		uint32_t region_count,
+		const VkBufferImageCopy2* p_regions,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	template<IGEBufferUsage U>
+	void copy(Image& src,
+		VkImageAspectFlags src_aspect_mask,
+		Buffer<U>& dst,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	template<IGEBufferUsage U>
+	void copy(Image& src, Buffer<U>& dst,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	void copy(Image& src, Image& dst,
+		uint32_t region_count,
+		const VkImageCopy* p_regions,
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	void copy(Image& src, VkImageAspectFlags src_aspect_mask,
+		Image& dst, VkImageAspectFlags dst_aspect_mask,
+		VkExtent3D extent,
+		VkOffset3D src_offset = { 0, 0, 0 },
+		VkOffset3D dst_offset = { 0, 0, 0 },
+		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
+	);
+
+	void copy(Image& src, VkImageAspectFlags src_aspect_mask,
+		Image& dst, VkImageAspectFlags dst_aspect_mask,
+		VkOffset3D src_offset = { 0, 0, 0 },
+		VkOffset3D dst_offset = { 0, 0, 0 },
 		VkAccessFlags src_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 		VkAccessFlags dst_access_mask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
@@ -196,7 +246,7 @@ public:
 		VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 		VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 	);
-	
+
 	void copy(Image& src, Image& dst,
 		VkOffset3D src_offset = { 0, 0, 0 },
 		VkOffset3D dst_offset = { 0, 0, 0 },
@@ -238,6 +288,8 @@ void CommandBuffer::copy(Buffer<U1>& src, Buffer<U2>& dst) {
 
 template<IGEBufferUsage U>
 void CommandBuffer::copy(Image& src, Buffer<U>& dst,
+	uint32_t region_count,
+	const VkBufferImageCopy2* p_regions,
 	VkAccessFlags src_access_mask,
 	VkAccessFlags dst_access_mask,
 	VkPipelineStageFlags src_stage_mask,
@@ -254,13 +306,43 @@ void CommandBuffer::copy(Image& src, Buffer<U>& dst,
 		VK_PIPELINE_STAGE_TRANSFER_BIT
 	);
 
+	VkCopyImageToBufferInfo2 copy_info{};
+	copy_info.sType = VK_STRUCTURE_TYPE_COPY_IMAGE_TO_BUFFER_INFO_2;
+	copy_info.pNext = nullptr;
+	copy_info.srcImage = src.getImage();
+	copy_info.srcImageLayout = src.getImageLayout();
+	copy_info.dstBuffer = dst.getBuffer();
+	copy_info.regionCount = region_count;
+	copy_info.pRegions = p_regions;
+
+	copyImageToBuffer(&copy_info);
+
+	changeLayout(
+		src,
+		image_layout,
+		src.getStageAccessInfo().access_mask,
+		dst_access_mask,
+		src.getStageAccessInfo().stage_mask,
+		dst_stage_mask
+	);
+}
+
+template<IGEBufferUsage U>
+void CommandBuffer::copy(Image& src,
+	VkImageAspectFlags src_aspect_mask,
+	Buffer<U>& dst,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {	
 	VkBufferImageCopy2 region_info{};
 	region_info.sType = VK_STRUCTURE_TYPE_BUFFER_IMAGE_COPY_2;
 	region_info.pNext = nullptr;
 	region_info.bufferOffset = 0;
 	region_info.bufferRowLength = 0;
 	region_info.bufferImageHeight = 0;
-	region_info.imageSubresource.aspectMask = src.aspectMask();
+	region_info.imageSubresource.aspectMask = src_aspect_mask;
 	region_info.imageSubresource.mipLevel = 0;
 	region_info.imageSubresource.baseArrayLayer = 0;
 	region_info.imageSubresource.layerCount = 1;
@@ -271,23 +353,28 @@ void CommandBuffer::copy(Image& src, Buffer<U>& dst,
 	region_info.imageExtent.height = static_cast<uint32_t>(src.getHeight());
 	region_info.imageExtent.depth = 1;
 
-	VkCopyImageToBufferInfo2 copy_info{};
-	copy_info.sType = VK_STRUCTURE_TYPE_COPY_IMAGE_TO_BUFFER_INFO_2;
-	copy_info.pNext = nullptr;
-	copy_info.srcImage = src.getImage();
-	copy_info.srcImageLayout = src.getImageLayout();
-	copy_info.dstBuffer = dst.getBuffer();
-	copy_info.regionCount = 1;
-	copy_info.pRegions = &region_info;
-
-	copyImageToBuffer(&copy_info);
-
-	changeLayout(
-		src,
-		image_layout,
-		src.getStageAccessInfo().access_mask,
+	copy(src, dst,
+		1,
+		&region_info,
+		src_access_mask,
 		dst_access_mask,
-		src.getStageAccessInfo().stage_mask,
+		src_stage_mask,
+		dst_stage_mask
+	);
+}
+
+template<IGEBufferUsage U>
+void CommandBuffer::copy(Image& src, Buffer<U>& dst,
+	VkAccessFlags src_access_mask,
+	VkAccessFlags dst_access_mask,
+	VkPipelineStageFlags src_stage_mask,
+	VkPipelineStageFlags dst_stage_mask
+) {	
+	copy(src, src.aspectMask(),
+		dst,
+		src_access_mask,
+		dst_access_mask,
+		src_stage_mask,
 		dst_stage_mask
 	);
 }

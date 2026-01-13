@@ -62,6 +62,10 @@ const glm::vec3& Camera::getUp() const {
 	return _up;
 }
 
+glm::mat4 Camera::getModel() const {
+	return  getTranslateLocale() * getRotateLocale() * getScale();
+}
+
 glm::mat4 Camera::getView() const {
 	glm::mat4 view = glm::lookAt(
 		_eye,

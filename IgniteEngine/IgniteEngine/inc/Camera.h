@@ -31,6 +31,7 @@ public:
 	const glm::vec3& getCenter() const;
 	const glm::vec3& getUp() const;
 
+	glm::mat4 getModel() const;
 	glm::mat4 getView() const;
 	virtual glm::mat4 getProjection() = 0;
 	glm::mat4 getClip() const;

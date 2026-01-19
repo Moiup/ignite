@@ -1,12 +1,13 @@
 #pragma once
 #include "vulkan/vulkan.h"
+#include "VulkanObject.h"
 #include <vector>
 #include <iostream>
 #include <string>
 
 class Instance;
 
-class PhysicalDevice
+class PhysicalDevice : public VulkanObject<VkPhysicalDevice>
 {
 	friend Instance;
 
@@ -24,7 +25,7 @@ public:
 	std::vector<VkExtensionProperties> enumerateDeviceExtensionProperties();
 	void displayDeviceExtensionProperties();
 
-	const VkPhysicalDevice& getGPU() const;
+	const VkPhysicalDevice& vkObj() const;
 	VkPhysicalDeviceMemoryProperties getMemoryProperties();
 	std::vector<VkQueueFamilyProperties2> getQueueFamilyProperties();
 	void displayQueueFamilyProperties();

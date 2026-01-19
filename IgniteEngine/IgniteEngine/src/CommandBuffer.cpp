@@ -28,10 +28,9 @@ void CommandBuffer::setLevel(VkCommandBufferLevel level) {
 	_level = level;
 }
 
-VkCommandBuffer CommandBuffer::getCommandBuffer() {
+const VkCommandBuffer& CommandBuffer::vkObj() const {
 	return _command_buffer;
 }
-
 
 VkCommandBufferLevel CommandBuffer::getLevel() {
 	return _level;
@@ -84,7 +83,7 @@ void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, VkPipeline pipe
 }
 
 void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, Pipeline& pp) {
-	bindPipeline(bind_point, pp.getPipeline());
+	bindPipeline(bind_point, pp.vkObj());
 
 	bindDescriptorSets(
 		bind_point,
@@ -390,7 +389,7 @@ void CommandBuffer::dynamicRenderingPipelineBarrier(
 	image_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	image_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame.image = image.getImage();
+	image_memory_barrier_frame.image = image.vkObj();
 	image_memory_barrier_frame.subresourceRange = subresource_range_frame;
 
 	VkImageMemoryBarrier depth_memory_barrier_frame{};
@@ -402,7 +401,7 @@ void CommandBuffer::dynamicRenderingPipelineBarrier(
 	depth_memory_barrier_frame.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	depth_memory_barrier_frame.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	depth_memory_barrier_frame.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	depth_memory_barrier_frame.image = depth_buffer.getImage();
+	depth_memory_barrier_frame.image = depth_buffer.vkObj();
 	depth_memory_barrier_frame.subresourceRange = depth_subresource_range_frame;
 
 	pipelineBarrier(
@@ -441,7 +440,7 @@ void CommandBuffer::dynamicRenderingPipelineBarrierBack(Image& image) {
 	image_memory_barrier_frame_bk.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	image_memory_barrier_frame_bk.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier_frame_bk.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier_frame_bk.image = image.getImage();
+	image_memory_barrier_frame_bk.image = image.vkObj();
 	image_memory_barrier_frame_bk.subresourceRange = subresource_range_frame_bk;
 
 	pipelineBarrier(
@@ -533,9 +532,9 @@ void CommandBuffer::blitImage(
 	VkBlitImageInfo2 blit_info {
 		.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
 		.pNext = nullptr,
-		.srcImage = src.getImage(),
+		.srcImage = src.vkObj(),
 		.srcImageLayout = src.getImageLayout(),
-		.dstImage = dst.getImage(),
+		.dstImage = dst.vkObj(),
 		.dstImageLayout = dst.getImageLayout(),
 		.regionCount = regionCount,
 		.pRegions = pRegions,
@@ -695,9 +694,9 @@ void CommandBuffer::copy(Image& src, Image& dst,
 	);
 
 	copyImageToImage(
-		src.getImage(),
+		src.vkObj(),
 		src.getImageLayout(),
-		dst.getImage(),
+		dst.vkObj(),
 		dst.getImageLayout(),
 		region_count,
 		p_regions
@@ -850,7 +849,7 @@ void CommandBuffer::changeLayout(
 	VkImageMemoryBarrier image_memory_barrier{};
 	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	image_memory_barrier.pNext = nullptr;
-	image_memory_barrier.image = img.getImage();
+	image_memory_barrier.image = img.vkObj();
 	image_memory_barrier.subresourceRange = subresource_range;
 	image_memory_barrier.srcAccessMask = src_access_mask;
 	image_memory_barrier.dstAccessMask = dst_access_mask;

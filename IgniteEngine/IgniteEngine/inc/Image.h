@@ -11,7 +11,7 @@ struct ComponentSwizzle {
 	VkComponentSwizzle r, g, b, a;
 };
 
-class Image: public Ressource
+class Image: public Ressource, VulkanObject<VkImage>
 {
 	friend Queue;
 	friend Swapchain;
@@ -117,7 +117,7 @@ public:
 	VkFormat getImageFormat();
 	VkImageLayout getImageLayout() const;
 
-	const VkImage& getImage() const;
+	const VkImage& vkObj() const;
 	const VkImageView& getImageView() const;
 
 	const uint64_t getWidth() const;

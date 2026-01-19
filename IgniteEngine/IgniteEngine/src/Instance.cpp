@@ -131,7 +131,7 @@ void Instance::displayLayers() {
 	}
 }
 
-const VkInstance& Instance::getInstance() const {
+const VkInstance& Instance::vkObj() const {
 	return _instance;
 }
 

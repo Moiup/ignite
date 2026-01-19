@@ -82,7 +82,7 @@ void Ressource::allocateMemory() {
 	}
 
 	VkResult vk_result = vkAllocateMemory(
-		_device->getDevice(),
+		_device->vkObj(),
 		&allocate_info,
 		nullptr,
 		&_memory
@@ -120,7 +120,7 @@ void Ressource::freeMemory() {
 	if (!_memory) {
 		return;
 	}
-	vkFreeMemory(_device->getDevice(), _memory, nullptr);
+	vkFreeMemory(_device->vkObj(), _memory, nullptr);
 }
 
 void Ressource::destroy() {

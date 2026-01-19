@@ -50,7 +50,7 @@ void* StagingBuffer<U>::map() {
 	}
 
 	vkMapMemory(
-		this->_device->getDevice(),
+		this->_device->vkObj(),
 		this->_memory,
 		0,
 		this->_size,
@@ -67,7 +67,7 @@ void StagingBuffer<U>::unmap() {
 		return;
 	}
 	vkUnmapMemory(
-		this->_device->getDevice(),
+		this->_device->vkObj(),
 		this->_memory
 	);
 	_map_ptr = nullptr;

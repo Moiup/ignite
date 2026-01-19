@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 template <IGEBufferUsage U>
-class Buffer : public Ressource
+class Buffer : public Ressource, VulkanObject<VkBuffer>
 {
 protected:
 	VkBuffer _buffer{ nullptr };
@@ -29,8 +29,8 @@ public:
 	void bind();
 	void destroy();
 
-	const VkBuffer& getBuffer() const;
-	//const VkBuffer& getBuffer() const;
+	const VkBuffer& vkObj() const;
+	//const VkBuffer& vkObj() const;
 	Pointer<uint8_t> getValues();
 	void setValues(Pointer<uint8_t> data);
 
@@ -39,8 +39,6 @@ public:
 
 	// void* map();
 	// void unmap();
-
-	const VkBuffer buffer() const;
 
 protected:
 	void create();

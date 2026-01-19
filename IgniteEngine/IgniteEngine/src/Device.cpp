@@ -52,7 +52,7 @@ Device::~Device() {
 	destroy();
 }
 
-VkDevice Device::getDevice() {
+const VkDevice& Device::vkObj() const {
 	return _device;
 }
 
@@ -160,7 +160,7 @@ void Device::create() {
 	device_info.pEnabledFeatures = nullptr;
 
 	VkResult vk_result = vkCreateDevice(
-		_gpu->getGPU(),
+		_gpu->vkObj(),
 		&device_info,
 		nullptr,
 		&_device
@@ -195,7 +195,7 @@ VkPhysicalDeviceFeatures Device::featuresManagement() {
 	available.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 	available.pNext = nullptr;
 
-	vkGetPhysicalDeviceFeatures2(getGPU()->getGPU(), &available);
+	vkGetPhysicalDeviceFeatures2(_gpu->vkObj(), &available);
 
 	VkPhysicalDeviceFeatures enabled{};
 	if (available.features.fillModeNonSolid) {

@@ -90,10 +90,10 @@ void GraphicsPipeline::setVertexBufferBis(
 	const std::string& name,
 	const Buffer<U>& buff
 ) {
-	_vertex_buffers[name] = buff.getBuffer();
+	_vertex_buffers[name] = buff.vkObj();
 }
 
 template<IGEBufferUsage U>
 void GraphicsPipeline::setIndexBufferBis(const Buffer<U>& buff) {
-	_index_buffer = buff.getBuffer();
+	_index_buffer = buff.vkObj();
 }

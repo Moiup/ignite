@@ -68,7 +68,7 @@ void Queue::setFamilyIndex(uint32_t family_index) {
 
 void Queue::create() {
 	vkGetDeviceQueue(
-		_device->getDevice(),
+		_device->vkObj(),
 		_family_index,
 		_queue_index,
 		&_queue
@@ -77,7 +77,7 @@ void Queue::create() {
 	createFence();
 }
 
-VkQueue Queue::getQueue() {
+const VkQueue& Queue::vkObj() const {
 	return _queue;
 }
 
@@ -110,7 +110,7 @@ void Queue::destroy() {
 
 	if (_fence) {
 		vkDestroyFence(
-			_device->getDevice(),
+			_device->vkObj(),
 			_fence,
 			nullptr
 		);
@@ -238,7 +238,7 @@ const void Queue::submit(
 
 const void Queue::wait() {
 	VkResult result = vkWaitForFences(
-		_device->getDevice(),
+		_device->vkObj(),
 		1, &_fence,
 		VK_TRUE,
 		UINT64_MAX
@@ -249,7 +249,7 @@ const void Queue::wait() {
 	}
 
 	vkResetFences(
-		_device->getDevice(),
+		_device->vkObj(),
 		1,
 		&_fence
 	);
@@ -295,7 +295,7 @@ void Queue::createFence(VkFenceCreateFlags flags) {
 	fence_info.flags = flags;
 
 	VkResult vk_result = vkCreateFence(
-		_device->getDevice(),
+		_device->vkObj(),
 		&fence_info,
 		nullptr,
 		&_fence
@@ -305,7 +305,7 @@ void Queue::createFence(VkFenceCreateFlags flags) {
 	}
 
 	vkResetFences(
-		_device->getDevice(),
+		_device->vkObj(),
 		1,
 		&_fence
 	);

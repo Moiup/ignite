@@ -96,7 +96,7 @@ void Buffer<U>::destroy() {
 template<IGEBufferUsage U>
 void Buffer<U>::bind() {
 	VkResult vk_result = vkBindBufferMemory(
-		_device->getDevice(),
+		_device->vkObj(),
 		_buffer,
 		_memory,
 		0
@@ -158,7 +158,7 @@ void Buffer<U>::setPQueueFamilyIndices(const uint32_t* p_queue_family_indices) {
 }
 
 template<IGEBufferUsage U>
-const VkBuffer& Buffer<U>::getBuffer() const {
+const VkBuffer& Buffer<U>::vkObj() const {
 	return _buffer;
 }
 
@@ -173,14 +173,9 @@ const uint32_t Buffer<U>::getCapacity() const {
 }
 
 template<IGEBufferUsage U>
-const VkBuffer Buffer<U>::buffer() const {
-	return _buffer;
-}
-
-template<IGEBufferUsage U>
 void Buffer<U>::createBuffer() {
 	VkResult vk_result = vkCreateBuffer(
-		_device->getDevice(),
+		_device->vkObj(),
 		&_buffer_info,
 		nullptr,
 		&_buffer
@@ -193,7 +188,7 @@ void Buffer<U>::createBuffer() {
 template<IGEBufferUsage U>
 void Buffer<U>::destroyBuffer() {
 	vkDestroyBuffer(
-		_device->getDevice(),
+		_device->vkObj(),
 		_buffer,
 		nullptr
 	);
@@ -203,7 +198,7 @@ void Buffer<U>::destroyBuffer() {
 template<IGEBufferUsage U>
 void Buffer<U>::getMemoryRequirements() {
 	vkGetBufferMemoryRequirements(
-		_device->getDevice(),
+		_device->vkObj(),
 		_buffer,
 		&_memory_req
 	);

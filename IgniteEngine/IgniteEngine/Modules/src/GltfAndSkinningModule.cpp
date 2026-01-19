@@ -100,7 +100,7 @@
 //	// Shader    //
 //	//-----------//
 //	_lbs_shader.setNbFrame(DefaultConf::NB_FRAME);
-//	_lbs_shader.setDevice(DefaultConf::logical_device->getDevice());
+//	_lbs_shader.setDevice(DefaultConf::logical_device->vkObj());
 //	_lbs_shader.read(
 //		"../../shaders/lbs.vert",
 //		"../../shaders/lbs.frag"
@@ -198,42 +198,42 @@
 //	// Creating the buffers //
 //	//----------------------//
 //	_coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getCoordsSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getCoords(DefaultConf::renderer, &_lbs_shader).data()
 //	);
 //	_lbs_shader.addVertexBuffer("coord", &_coord_buffer);
 //
 //	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getObjectIdSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getObjectId(DefaultConf::renderer, &_lbs_shader).data()
 //	);
 //	_lbs_shader.addVertexBuffer("object_id", &_object_id_buffer);
 //
 //	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getMaterialIndices(DefaultConf::renderer, &_lbs_shader).data()
 //	);
 //	_lbs_shader.addVertexBuffer("material_id", &_material_indices_buffer);
 //
 //	_uv_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getUVSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getUV(DefaultConf::renderer, &_lbs_shader).data()
 //	);
 //	_lbs_shader.addVertexBuffer("uv", &_uv_buffer);
 //
 //	_joints_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getJointsSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getJoints(DefaultConf::renderer, &_lbs_shader).data()
 //	);
 //	_lbs_shader.addVertexBuffer("joints", &_joints_buffer);
 //
 //	_weights_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getWeightsSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getWeights(DefaultConf::renderer, &_lbs_shader).data()
 //	);
@@ -241,7 +241,7 @@
 //
 //	// Index buffer
 //	_index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getIndicesSize(*DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getIndices(*DefaultConf::renderer, &_lbs_shader).data()
 //	);
@@ -253,7 +253,7 @@
 //	// Storage Buffers
 //	// transform
 //	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getTransformMatricesSize(DefaultConf::renderer, &_lbs_shader),
 //		&Object3D::getTransformMatrices(DefaultConf::renderer, &_lbs_shader)[0][0]
 //	);
@@ -261,7 +261,7 @@
 //
 //	// Joint transform
 //	_joint_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getJointsTransformSize(DefaultConf::renderer, &_lbs_shader),
 //		&Object3D::getJointsTransform(DefaultConf::renderer, &_lbs_shader)[0][0]
 //	);
@@ -269,14 +269,14 @@
 //
 //	// materials
 //	_materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getMaterialsSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getMaterials(DefaultConf::renderer, &_lbs_shader).data()
 //	);
 //	_lbs_shader.addStorageBuffer("MaterialsBuffer", &_materials_buffer);
 //
 //	// Sampler
-//	_sampler.setDevice(DefaultConf::logical_device->getDevice());
+//	_sampler.setDevice(DefaultConf::logical_device->vkObj());
 //	_sampler.create();
 //	_lbs_shader.addSampler("samp", &_sampler);
 //

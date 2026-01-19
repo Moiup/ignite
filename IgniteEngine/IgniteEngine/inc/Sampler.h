@@ -24,7 +24,7 @@ public:
 	Sampler& operator=(const Sampler& s);
 	Sampler& operator=(Sampler&& s);
 
-	const VkSampler getSampler() const;
+	const VkSampler& vkObj() const;
 
 private:
 	void setDevice(Device* device);

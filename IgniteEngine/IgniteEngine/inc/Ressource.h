@@ -4,6 +4,7 @@
 #include "IGETypes.h"
 
 #include <vulkan/vulkan.h>
+#include "VulkanObject.h"
 #include <iostream>
 
 struct PipelineStageAndAccessMaskInfo {

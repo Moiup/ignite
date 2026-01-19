@@ -16,7 +16,7 @@ struct CommandPoolSubmitBuffersIndices {
 	uint32_t nb_cmd_buf{0};
 };
 
-class Queue
+class Queue : VulkanObject<VkQueue>
 {
 private:
 	//static std::unordered_map<VkQueue, std::vector<CommandPool>> _cmd_pools;
@@ -51,7 +51,7 @@ public:
 	void setFamilyIndex(uint32_t family_index);
 	void create();
 
-	VkQueue getQueue();
+	const VkQueue& vkObj() const;
 	Device* getDevice();
 	uint32_t getFamilyIndex();
 

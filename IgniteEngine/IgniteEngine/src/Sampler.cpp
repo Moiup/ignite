@@ -72,7 +72,7 @@ Sampler& Sampler::operator=(Sampler&& s) {
 
 void Sampler::create() {
 	VkResult result = vkCreateSampler(
-		_device->getDevice(),
+		_device->vkObj(),
 		&_info,
 		nullptr,
 		&_sampler
@@ -100,13 +100,13 @@ void Sampler::destroy() {
 		return;
 	}
 	vkDestroySampler(
-		_device->getDevice(),
+		_device->vkObj(),
 		_sampler,
 		nullptr
 	);
 }
 
-const VkSampler Sampler::getSampler() const {
+const VkSampler& Sampler::vkObj() const {
 	return _sampler;
 }
 

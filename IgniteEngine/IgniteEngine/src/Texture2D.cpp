@@ -71,7 +71,7 @@ Texture2D& Texture2D::operator=(Texture2D&& tex) {
 }
 
 void Texture2D::setSampler(Sampler& sampler) {
-	_sampler = sampler.getSampler();
+	_sampler = sampler.vkObj();
 }
 
 const VkSampler Texture2D::getSampler() const {

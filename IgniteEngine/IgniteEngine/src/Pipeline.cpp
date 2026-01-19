@@ -105,7 +105,7 @@ Pipeline& Pipeline::operator=(Pipeline&& pipeline) {
 	return *this;
 }
 
-const VkPipeline Pipeline::getPipeline() const {
+const VkPipeline& Pipeline::vkObj() const {
 	return _pipeline;
 }
 
@@ -185,7 +185,7 @@ void Pipeline::setSamplers(
 	descriptor_image_infos.resize(samp.size());
 	for (const Sampler* s : samp) {
 		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
-		desc_img_info.sampler = s->getSampler();
+		desc_img_info.sampler = s->vkObj();
 		desc_img_info.imageView = nullptr;
 		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	}
@@ -205,7 +205,7 @@ void Pipeline::setSamplers(
 	descriptor_image_infos.resize(samp.size());
 	for (const Sampler* s : samp) {
 		VkDescriptorImageInfo& desc_img_info = descriptor_image_infos[i++];
-		desc_img_info.sampler = s->getSampler();
+		desc_img_info.sampler = s->vkObj();
 		desc_img_info.imageView = nullptr;
 		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	}
@@ -313,7 +313,7 @@ void Pipeline::createDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBindin
 	VkDescriptorSetLayout descriptor_set_layout{};
 	_descriptor_set_layout.push_back(descriptor_set_layout);
 	VkResult vk_result = vkCreateDescriptorSetLayout(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		&descriptor_set_layout_info,
 		nullptr,
 		_descriptor_set_layout.data()
@@ -342,7 +342,7 @@ void Pipeline::createDescriptorPool() {
 	descriptor_pool_info.pPoolSizes = descriptor_pool_size_arr.data();
 
 	VkResult vk_result = vkCreateDescriptorPool(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		&descriptor_pool_info,
 		nullptr,
 		&_descriptor_pool
@@ -365,7 +365,7 @@ void Pipeline::allocateDescriptorSet() {
 	VkDescriptorSet dst_set{ nullptr };
 
 	VkResult vk_result = vkAllocateDescriptorSets(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		&descriptor_sets_info,
 		&dst_set
 	);
@@ -390,7 +390,7 @@ void Pipeline::update() {
 	}
 
 	vkUpdateDescriptorSets(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		_write_descriptor_sets.size(),
 		_write_descriptor_sets.data(),
 		0,
@@ -409,7 +409,7 @@ void Pipeline::reset() {
 	}
 
 	vkFreeDescriptorSets(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		_descriptor_pool,
 		_descriptor_sets_pool.size(),
 		_descriptor_sets_pool.data()
@@ -439,7 +439,7 @@ void Pipeline::destroyDescriptorSet() {
 	
 
 	vkDestroyDescriptorPool(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		_descriptor_pool,
 		nullptr
 	);
@@ -449,7 +449,7 @@ void Pipeline::destroyDescriptorSet() {
 void Pipeline::destroyDescriptorSetLayout() {
 	for (auto _dsl : _descriptor_set_layout) {
 		vkDestroyDescriptorSetLayout(
-			_shader->getDevice()->getDevice(),
+			_shader->getDevice()->vkObj(),
 			_dsl,
 			nullptr
 		);
@@ -467,7 +467,7 @@ void Pipeline::createPipelineLayout() {
 	pipeline_layout_info.pPushConstantRanges = &_shader->getPushConstantRange();
 
 	VkResult vk_result = vkCreatePipelineLayout(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		&pipeline_layout_info,
 		nullptr,
 		&_pipeline_layout
@@ -482,7 +482,7 @@ void Pipeline::destroyPipelineLayout() {
 		return;
 	}
 	vkDestroyPipelineLayout(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		_pipeline_layout,
 		nullptr
 	);
@@ -493,7 +493,7 @@ void Pipeline::destroyPipeline() {
 		return;
 	}
 	vkDestroyPipeline(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		_pipeline,
 		nullptr
 	);

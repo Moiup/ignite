@@ -55,7 +55,7 @@ const VkSurfaceKHR& WindowSurface::getSurface() const {
 std::vector<VkSurfaceFormatKHR> WindowSurface::getSurfaceFormats(const PhysicalDevice& gpu){
 	uint32_t surface_format_count{};
 	VkResult vk_result = vkGetPhysicalDeviceSurfaceFormatsKHR(
-		gpu.getGPU(),
+		gpu.vkObj(),
 		getSurface(),
 		&surface_format_count,
 		nullptr
@@ -65,7 +65,7 @@ std::vector<VkSurfaceFormatKHR> WindowSurface::getSurfaceFormats(const PhysicalD
 	}
 	std::vector<VkSurfaceFormatKHR> surface_formats(surface_format_count);
 	vk_result = vkGetPhysicalDeviceSurfaceFormatsKHR(
-		gpu.getGPU(),
+		gpu.vkObj(),
 		getSurface(),
 		&surface_format_count,
 		surface_formats.data()
@@ -91,7 +91,7 @@ void WindowSurface::create() {
 
 	SDL_bool sdl_result = SDL_Vulkan_CreateSurface(
 		getWindow(),
-		_instance->getInstance(),
+		_instance->vkObj(),
 		&_surface
 	);
 	if (!sdl_result) {
@@ -107,7 +107,7 @@ void WindowSurface::destroy() {
 	if (!_surface) {
 		return;
 	}
-	vkDestroySurfaceKHR(_instance->getInstance(), _surface, nullptr);
+	vkDestroySurfaceKHR(_instance->vkObj(), _surface, nullptr);
 }
 
 void WindowSurface::clean() {

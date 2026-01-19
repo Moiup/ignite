@@ -256,7 +256,7 @@ const uint32_t& Swapchain::acquireNextImage(
 ) {
 	uint32_t p_image_index{0};
 	VkResult vk_result = vkAcquireNextImageKHR(
-		_device->getDevice(),
+		_device->vkObj(),
 		_swapchain,
 		timeout,
 		semaphore,
@@ -277,7 +277,7 @@ const VkSwapchainCreateInfoKHR& Swapchain::getSwapchainInfo() const {
 	return _info;
 }
 
-const VkSwapchainKHR& Swapchain::getSwapchain() const {
+const VkSwapchainKHR& Swapchain::vkObj() const {
 	return _swapchain;
 }
 
@@ -303,7 +303,7 @@ void Swapchain::createSwapchain() {
 	}
 
 	VkResult vk_result = vkCreateSwapchainKHR(
-		_device->getDevice(),
+		_device->vkObj(),
 		&_info,
 		nullptr,
 		&_swapchain
@@ -317,7 +317,7 @@ void Swapchain::createSwapchain() {
 
 void Swapchain::gettingImages(){
 	VkResult vk_result = vkGetSwapchainImagesKHR(
-		_device->getDevice(),
+		_device->vkObj(),
 		_swapchain,
 		&_image_count,
 		nullptr
@@ -329,7 +329,7 @@ void Swapchain::gettingImages(){
 	_images.resize(_image_count);
 	std::vector<VkImage> imgs(_image_count);
 	vk_result = vkGetSwapchainImagesKHR(
-		_device->getDevice(),
+		_device->vkObj(),
 		_swapchain,
 		&_image_count,
 		imgs.data()
@@ -355,7 +355,7 @@ void Swapchain::createImagesViews(){
 	//_image_view_info.format = _info.imageFormat;
 
 	//for (uint32_t i = 0; i < _image_count; i++) {
-	//	//_image_view_info.image = _images[i].getImage();
+	//	//_image_view_info.image = _images[i].vkObj();
 
 	//	_images[i].setImageViewInfo(_image_view_info);
 	//	_images[i].createImageView();
@@ -368,7 +368,7 @@ void Swapchain::destroySwapchain() {
 	}
 
 	vkDestroySwapchainKHR(
-		_device->getDevice(),
+		_device->vkObj(),
 		_swapchain,
 		nullptr
 	);

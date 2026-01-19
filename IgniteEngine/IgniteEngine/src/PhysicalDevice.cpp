@@ -72,7 +72,7 @@ void PhysicalDevice::displayDeviceExtensionProperties() {
 	}
 }
 
-const VkPhysicalDevice& PhysicalDevice::getGPU() const {
+const VkPhysicalDevice& PhysicalDevice::vkObj() const {
 	return _gpu;
 }
 

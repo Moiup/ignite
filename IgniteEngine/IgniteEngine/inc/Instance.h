@@ -4,13 +4,14 @@
 #include <SDL_vulkan.h>
 
 #include <PhysicalDevice.h>
+#include "VulkanObject.h"
 
 #include <iostream>
 #include <vector>
 #include <string>
 #include <unordered_map>
 
-class Instance
+class Instance : public VulkanObject<VkInstance>
 {
 private:
 	VkInstance _instance{ nullptr };
@@ -54,7 +55,7 @@ public:
 		uint32_t api_version
 	);
 
-	const VkInstance& getInstance() const;
+	const VkInstance& vkObj() const;
 
 	void displayAvailableGPUs();
 	std::vector<PhysicalDevice> enumeratePhysicalDevices();

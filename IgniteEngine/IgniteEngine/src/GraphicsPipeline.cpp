@@ -279,7 +279,7 @@ void GraphicsPipeline::createPipeline() {
 	pipeline_info.basePipelineIndex = 0;
 
 	VkResult vk_result = vkCreateGraphicsPipelines(
-		_shader->getDevice()->getDevice(),
+		_shader->getDevice()->vkObj(),
 		VK_NULL_HANDLE,
 		1,
 		&pipeline_info,

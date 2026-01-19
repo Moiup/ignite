@@ -6,7 +6,7 @@
 #include "ComputePipeline.h"
 #include "GraphicsPipeline.h"
 
-class CommandBuffer
+class CommandBuffer : public VulkanObject<VkCommandBuffer>
 {
 	friend class CommandPool;
 
@@ -27,7 +27,7 @@ public:
 
 	void setLevel(VkCommandBufferLevel level);
 
-	VkCommandBuffer getCommandBuffer();
+	const VkCommandBuffer& vkObj() const;
 	VkCommandBufferLevel getLevel();
 
 	void begin();
@@ -279,8 +279,8 @@ void CommandBuffer::copy(Buffer<U1>& src, Buffer<U2>& dst) {
 	copy_info.size = src.getSize();
 
 	copyBufferToBuffer(
-		src.getBuffer(),
-		dst.getBuffer(),
+		src.vkObj(),
+		dst.vkObj(),
 		1,
 		&copy_info
 	);
@@ -309,9 +309,9 @@ void CommandBuffer::copy(Image& src, Buffer<U>& dst,
 	VkCopyImageToBufferInfo2 copy_info{};
 	copy_info.sType = VK_STRUCTURE_TYPE_COPY_IMAGE_TO_BUFFER_INFO_2;
 	copy_info.pNext = nullptr;
-	copy_info.srcImage = src.getImage();
+	copy_info.srcImage = src.vkObj();
 	copy_info.srcImageLayout = src.getImageLayout();
-	copy_info.dstBuffer = dst.getBuffer();
+	copy_info.dstBuffer = dst.vkObj();
 	copy_info.regionCount = region_count;
 	copy_info.pRegions = p_regions;
 
@@ -410,8 +410,8 @@ void CommandBuffer::copy(Buffer<U>& src, Image& dst,
 	image_copy.imageExtent.depth = 1;
 
 	copyBufferToImage(
-		src.getBuffer(),
-		dst.getImage(),
+		src.vkObj(),
+		dst.vkObj(),
 		dst.getImageLayout(),
 		1,
 		&image_copy

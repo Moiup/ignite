@@ -85,7 +85,7 @@ void CommandPool::create() {
 	pool_info.queueFamilyIndex = _family_index;
 
 	VkResult vk_result = vkCreateCommandPool(
-		_device->getDevice(),
+		_device->vkObj(),
 		&pool_info,
 		nullptr,
 		&_pool
@@ -103,13 +103,13 @@ void CommandPool::reset() {
 
 	resetCommandBuffers();
 	VkResult vk_result = vkResetCommandPool(
-		_device->getDevice(),
+		_device->vkObj(),
 		_pool,
 		VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT
 	);
 }
 
-const VkCommandPool& CommandPool::getPool() const {
+const VkCommandPool& CommandPool::vkObj() const {
 	return _pool;
 }
 
@@ -123,7 +123,7 @@ CommandBuffer& CommandPool::newCommandBuffer() {
 	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
 	VkResult vk_result = vkAllocateCommandBuffers(
-		_device->getDevice(),
+		_device->vkObj(),
 		&info,
 		&vk_cmd_buf
 	);
@@ -168,7 +168,7 @@ void CommandPool::destroy() {
 	reset();
 	
 	vkDestroyCommandPool(
-		_device->getDevice(),
+		_device->vkObj(),
 		_pool,
 		nullptr
 	);
@@ -176,7 +176,7 @@ void CommandPool::destroy() {
 
 void CommandPool::resetCommandBuffers() {
 	vkFreeCommandBuffers(
-		_device->getDevice(),
+		_device->vkObj(),
 		_pool,
 		_vk_cmd_buffs.size(),
 		_vk_cmd_buffs.data()

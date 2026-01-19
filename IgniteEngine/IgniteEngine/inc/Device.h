@@ -20,7 +20,7 @@ struct QueueFamilyInfo {
 
 class Queue;
 
-class Device
+class Device : public VulkanObject<VkDevice>
 {
 private:
 	const std::vector<const char*> _EXTENSIONS{
@@ -50,7 +50,7 @@ public:
 
 	~Device();
 
-	VkDevice getDevice();
+	const VkDevice& vkObj() const;
 	PhysicalDevice* getGPU();
 	std::optional<Queue> getQueue(VkQueueFlags flags);
 	std::optional<Queue> getQueueFromFamily(int32_t family_index);

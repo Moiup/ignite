@@ -175,7 +175,7 @@ void Shader::destroy() {
 
 	for (auto& stage : _shader_stages) {
 		vkDestroyShaderModule(
-			_device->getDevice(),
+			_device->vkObj(),
 			stage.module,
 			nullptr
 		);
@@ -256,7 +256,7 @@ void Shader::createShaderModuleAndStage(const std::string& path, VkShaderStageFl
 	shader_module_info.pCode = shader_text.data();
 
 	VkResult vk_result = vkCreateShaderModule(
-		_device->getDevice(),
+		_device->vkObj(),
 		&shader_module_info,
 		nullptr,
 		&shader_module

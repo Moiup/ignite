@@ -5,7 +5,7 @@
 #include "Image2D.h"
 #include "Device.h"
 
-class Swapchain
+class Swapchain : public VulkanObject<VkSwapchainKHR>
 {
 private:
 	Device* _device;
@@ -74,7 +74,7 @@ public:
 		);
 
 	const VkSwapchainCreateInfoKHR& getSwapchainInfo() const;
-	const VkSwapchainKHR& getSwapchain() const;
+	const VkSwapchainKHR& vkObj() const;
 
 	void destroy();
 

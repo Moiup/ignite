@@ -7,7 +7,7 @@
 
 #include "Device.h"
 
-class CommandPool
+class CommandPool : VulkanObject<VkCommandPool>
 {
 private:
 	VkCommandPool _pool{nullptr};
@@ -44,7 +44,7 @@ public:
 	void create();
 	void reset();
 
-	const VkCommandPool& getPool() const;
+	const VkCommandPool& vkObj() const;
 
 	CommandBuffer& newCommandBuffer();
 	const std::vector<CommandBuffer>& commandBuffers() const;

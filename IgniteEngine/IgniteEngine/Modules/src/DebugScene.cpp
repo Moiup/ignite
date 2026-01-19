@@ -51,7 +51,7 @@
 //
 //void DebugScene::createShader() {
 //	_debug_shader.setNbFrame(DefaultConf::NB_FRAME);
-//	_debug_shader.setDevice(DefaultConf::logical_device->getDevice());
+//	_debug_shader.setDevice(DefaultConf::logical_device->vkObj());
 //	_debug_shader.read(
 //		"../../shaders/debug/debug.vert",
 //		"../../shaders/debug/debug.frag"
@@ -113,21 +113,21 @@
 //	// Coord
 //	// Mesh offsets
 //	_coord_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getCoordsSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getCoords(DefaultConf::renderer, &_debug_shader).data()
 //	);
 //	_debug_shader.addVertexBuffer("coord", &_coord_buffer);
 //
 //	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getObjectIdSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getObjectId(DefaultConf::renderer, &_debug_shader).data()
 //	);
 //	_debug_shader.addVertexBuffer("object_id", &_object_id_buffer);
 //
 //	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getMaterialIndices(DefaultConf::renderer, &_debug_shader).data()
 //	);
@@ -136,7 +136,7 @@
 //
 //	// Index buffer
 //	_index_buffer = StagingBuffer<IGEBufferUsage::index_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getIndicesSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getIndices(DefaultConf::renderer, &_debug_shader).data()
 //	);
@@ -150,7 +150,7 @@
 //	// Storage Buffers
 //	// transform
 //	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getTransformMatricesSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
 //	);
@@ -158,7 +158,7 @@
 //
 //	// materials
 //	_materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
-//		DefaultConf::logical_device->getDevice(),
+//		DefaultConf::logical_device->vkObj(),
 //		Object3D::getMaterialsSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getMaterials(DefaultConf::renderer, &_debug_shader).data()
 //	);

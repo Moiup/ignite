@@ -4,7 +4,7 @@
 
 #include <initializer_list>
 
-class Pipeline
+class Pipeline : public VulkanObject<VkPipeline>
 {
 protected:
 	Shader* _shader{nullptr};
@@ -74,7 +74,7 @@ public:
 	);
 
 
-	const VkPipeline getPipeline() const;
+	const VkPipeline& vkObj() const;
 	const VkPipelineLayout& getPipelineLayout() const;
 	const std::vector<VkDescriptorSet>& getDescriptorSets() const;
 	const Shader& getShader() const;

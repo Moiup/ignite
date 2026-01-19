@@ -21,6 +21,15 @@ std::string makeString(const glm::ivec2 v) {
 	return s;
 }
 
+std::string makeString(const glm::ivec4 v) {
+	std::string s = "";
+	s += std::to_string(v.x)
+		+ " " + std::to_string(v.y);
+		+ " " + std::to_string(v.z);
+		+ " " + std::to_string(v.w);
+	return s;
+}
+
 std::string makeString(const glm::vec3 v) {
 	std::string s = "";
 	s += std::to_string(v.x)

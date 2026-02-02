@@ -10,7 +10,7 @@
 
 #include "DefaultConf.h"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "imgui.h"
 #include "imgui/backends/imgui_impl_sdl2.h"
 #include "imgui/backends/imgui_impl_sdlrenderer2.h"

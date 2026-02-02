@@ -116,6 +116,32 @@ public:
 		VkAccessFlags2 dst_access_mask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT
 	);
 
+	template<IGEBufferUsage U>
+	void fillBuffer(
+		Buffer<U>& dst,
+		VkDeviceSize offset,
+		VkDeviceSize size,
+		uint32_t value
+	);
+
+	template<IGEBufferUsage U>
+	void fillBuffer(
+		Buffer<U>& dst,
+		uint32_t value = 0
+	);
+
+	void clearColorImage(
+		Image& img,
+		VkClearColorValue* p_color,
+		uint32_t range_count,
+		const VkImageSubresourceRange* p_ranges
+	);
+
+	void clearColorImage(
+		Image& img,
+		VkClearColorValue color
+	);
+
 	void blitImage2(const VkBlitImageInfo2*);
 	void blitImage(
 		Image src,
@@ -268,6 +294,30 @@ public:
 private:
 	void bindPipeline(VkPipelineBindPoint bind_point, Pipeline& pp);
 };
+
+template<IGEBufferUsage U>
+void CommandBuffer::fillBuffer(
+	Buffer<U>& dst,
+	VkDeviceSize offset,
+	VkDeviceSize size,
+	uint32_t value
+){
+	vkCmdFillBuffer(
+		_command_buffer,
+		dst.vkObj(),
+		offset,
+		size,
+		value
+	);
+}
+
+template<IGEBufferUsage U>
+void CommandBuffer::fillBuffer(
+	Buffer<U>& dst,
+	uint32_t value
+){
+	fillBuffer(dst, 0, dst.getSize(), value);
+}
 
 template<IGEBufferUsage U1, IGEBufferUsage U2>
 void CommandBuffer::copy(Buffer<U1>& src, Buffer<U2>& dst) {

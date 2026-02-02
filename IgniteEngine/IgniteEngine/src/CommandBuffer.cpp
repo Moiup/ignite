@@ -84,7 +84,7 @@ void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, VkPipeline pipe
 
 void CommandBuffer::bindPipeline(VkPipelineBindPoint bind_point, Pipeline& pp) {
 	bindPipeline(bind_point, pp.vkObj());
-
+	
 	bindDescriptorSets(
 		bind_point,
 		pp.getPipelineLayout(),
@@ -510,6 +510,42 @@ void CommandBuffer::barrier(
 	dependency_info.pImageMemoryBarriers = nullptr;
 
 	pipelineBarrier(&dependency_info);
+}
+
+void CommandBuffer::clearColorImage(
+	Image& img,
+	VkClearColorValue* p_color,
+	uint32_t range_count,
+	const VkImageSubresourceRange* p_ranges
+){
+	vkCmdClearColorImage(
+		_command_buffer,
+		img.vkObj(),
+		img.getImageLayout(),
+		p_color,
+		range_count,
+		p_ranges
+	);
+}
+
+void CommandBuffer::clearColorImage(
+	Image& img,
+	VkClearColorValue color
+){
+	VkImageSubresourceRange range {
+		.aspectMask = img.aspectMask(),
+		.baseMipLevel = 0,
+		.levelCount = 1,
+		.baseArrayLayer = 0,
+		.layerCount = 1
+	};
+
+	clearColorImage(
+		img,
+		&color,
+		1,
+		&range
+	);
 }
 
 void CommandBuffer::blitImage2(const VkBlitImageInfo2* pBlitImageInfo2){

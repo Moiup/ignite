@@ -3,7 +3,6 @@
 #include "Device.h"
 #include "IGETypes.h"
 
-#include <vulkan/vulkan.h>
 #include "VulkanObject.h"
 #include <iostream>
 

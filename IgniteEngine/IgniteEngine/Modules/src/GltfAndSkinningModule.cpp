@@ -63,7 +63,7 @@
 //	Joint* j = reinterpret_cast<Joint*>(joint);
 //	j->getChildren()[0]->getChildren()[0]->getChildren()[0]->setRotationLocale(
 //		-_angle,
-//		0.0f, 
+//		0.0f,
 //		0.0
 //	);
 //
@@ -85,7 +85,7 @@
 //	const int32_t limit = 300;
 //	if (_step > limit) {
 //		_step = -limit;
-//	} 
+//	}
 //
 //	_hand_skeleton_debug.update();
 //	_joint_tr_buffer.setValues(Object3D::updateJointsTransform(DefaultConf::renderer, &_lbs_shader).data());
@@ -204,26 +204,26 @@
 //	);
 //	_lbs_shader.addVertexBuffer("coord", &_coord_buffer);
 //
-//	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+//	 = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 //		DefaultConf::logical_device->vkObj(),
 //		Object3D::getObjectIdSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getObjectId(DefaultConf::renderer, &_lbs_shader).data()
 //	);
-//	_lbs_shader.addVertexBuffer("object_id", &_object_id_buffer);
+//	_lbs_shader.addVertexBuffer("object_id", &);
 //
-//	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+//	_debug_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 //		DefaultConf::logical_device->vkObj(),
 //		Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getMaterialIndices(DefaultConf::renderer, &_lbs_shader).data()
 //	);
-//	_lbs_shader.addVertexBuffer("material_id", &_material_indices_buffer);
+//	_lbs_shader.addVertexBuffer("material_id", &_debug_material_indices_buffer);
 //
-//	_uv_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+//	_debug_uv_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 //		DefaultConf::logical_device->vkObj(),
 //		Object3D::getUVSize(DefaultConf::renderer, &_lbs_shader),
 //		Object3D::getUV(DefaultConf::renderer, &_lbs_shader).data()
 //	);
-//	_lbs_shader.addVertexBuffer("uv", &_uv_buffer);
+//	_lbs_shader.addVertexBuffer("uv", &_debug_uv_buffer);
 //
 //	_joints_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 //		DefaultConf::logical_device->vkObj(),
@@ -252,12 +252,12 @@
 //
 //	// Storage Buffers
 //	// transform
-//	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+//	_debug_obg_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
 //		DefaultConf::logical_device->vkObj(),
 //		Object3D::getTransformMatricesSize(DefaultConf::renderer, &_lbs_shader),
 //		&Object3D::getTransformMatrices(DefaultConf::renderer, &_lbs_shader)[0][0]
 //	);
-//	_lbs_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
+//	_lbs_shader.addStorageBuffer("obj_tr", &_debug_obg_tr_buffer);
 //
 //	// Joint transform
 //	_joint_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(

@@ -7,11 +7,11 @@
 //private:
 //
 //	StagingBuffer<IGEBufferUsage::vertex_buffer> _coord_buffer;
-//	StagingBuffer<IGEBufferUsage::vertex_buffer> _object_id_buffer;
-//	StagingBuffer<IGEBufferUsage::vertex_buffer> _material_indices_buffer;
-//	StagingBuffer<IGEBufferUsage::vertex_buffer> _uv_buffer;
+//	StagingBuffer<IGEBufferUsage::vertex_buffer> ;
+//	StagingBuffer<IGEBufferUsage::vertex_buffer> _debug_material_indices_buffer;
+//	StagingBuffer<IGEBufferUsage::vertex_buffer> _debug_uv_buffer;
 //	StagingBuffer<IGEBufferUsage::index_buffer> _index_buffer;
-//	StagingBuffer<IGEBufferUsage::storage_buffer> _obj_tr_buffer;
+//	StagingBuffer<IGEBufferUsage::storage_buffer> _debug_obg_tr_buffer;
 //	StagingBuffer<IGEBufferUsage::storage_buffer> _materials_buffer;
 //
 //	glm::mat4 _camera;
@@ -34,6 +34,6 @@
 //
 //private:
 //	void createShader();
-//	
+//
 //};
 //

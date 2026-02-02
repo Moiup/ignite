@@ -38,7 +38,7 @@
 //	_camera = DefaultConf::camera->getMVPC();
 //
 //
-//	_obj_tr_buffer.setValues(
+//	_debug_obg_tr_buffer.setValues(
 //		Object3D::updateTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
 //	);
 //}
@@ -119,19 +119,19 @@
 //	);
 //	_debug_shader.addVertexBuffer("coord", &_coord_buffer);
 //
-//	_object_id_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+//	 = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 //		DefaultConf::logical_device->vkObj(),
 //		Object3D::getObjectIdSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getObjectId(DefaultConf::renderer, &_debug_shader).data()
 //	);
-//	_debug_shader.addVertexBuffer("object_id", &_object_id_buffer);
+//	_debug_shader.addVertexBuffer("object_id", &);
 //
-//	_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
+//	_debug_material_indices_buffer = StagingBuffer<IGEBufferUsage::vertex_buffer>(
 //		DefaultConf::logical_device->vkObj(),
 //		Object3D::getMaterialIndicesSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getMaterialIndices(DefaultConf::renderer, &_debug_shader).data()
 //	);
-//	_debug_shader.addVertexBuffer("material_id", &_material_indices_buffer);
+//	_debug_shader.addVertexBuffer("material_id", &_debug_material_indices_buffer);
 //
 //
 //	// Index buffer
@@ -149,12 +149,12 @@
 //
 //	// Storage Buffers
 //	// transform
-//	_obj_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
+//	_debug_obg_tr_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(
 //		DefaultConf::logical_device->vkObj(),
 //		Object3D::getTransformMatricesSize(DefaultConf::renderer, &_debug_shader),
 //		Object3D::getTransformMatrices(DefaultConf::renderer, &_debug_shader).data()
 //	);
-//	_debug_shader.addStorageBuffer("obj_tr", &_obj_tr_buffer);
+//	_debug_shader.addStorageBuffer("obj_tr", &_debug_obg_tr_buffer);
 //
 //	// materials
 //	_materials_buffer = StagingBuffer<IGEBufferUsage::storage_buffer>(

@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
-#include <SDL_vulkan.h>
+#include <SDL2/SDL_vulkan.h>
 
 #include <PhysicalDevice.h>
 #include "VulkanObject.h"
@@ -27,7 +27,11 @@ private:
 
 	int32_t* _shared_count{ nullptr };
 
+	static bool _are_extensions_loaded;
+
 public:
+	static PFN_vkGetDeviceFaultInfoEXT _vkGetDeviceFaultInfoEXT;
+	
 	Instance();
 	Instance(std::vector<char*>& layers);
 	Instance(
@@ -68,6 +72,13 @@ public:
 
 	static std::vector<VkExtensionProperties> enumerateExtensionProperties();
 	static void displayExtensionProperties();
+
+	static void loadVulkanExtensionFunctions(VkInstance instance);
+	static VkResult getDeviceFaultInfoEXT(
+		VkDevice device,
+		VkDeviceFaultCountsEXT* pFaultCounts,
+		VkDeviceFaultInfoEXT* pFaultInfo
+	);
 
 private:
 	std::vector<const char*> setExtensions();

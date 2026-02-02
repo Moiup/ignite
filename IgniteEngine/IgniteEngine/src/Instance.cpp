@@ -1,5 +1,8 @@
 #include "Instance.h"
 
+PFN_vkGetDeviceFaultInfoEXT Instance::_vkGetDeviceFaultInfoEXT{0};
+bool Instance::_are_extensions_loaded{false};
+
 Instance::Instance() {
 	setApplicationInfo(
 		"Ignite",
@@ -205,7 +208,7 @@ std::vector<PhysicalDevice> Instance::enumeratePhysicalDevices() {
 	}
 
 	for (auto& vk_gpu : vk_gpus) {
-		gpus.push_back(PhysicalDevice(vk_gpu));
+		gpus.push_back(PhysicalDevice(vk_gpu, *this));
 	}
 
 	return gpus;
@@ -241,6 +244,20 @@ void Instance::displayExtensionProperties() {
 }
 
 void Instance::create(std::vector<char*>& layers, std::vector<const char*>& extensions) {
+	VkValidationFeatureEnableEXT vfee[1] = {
+		VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
+    	// VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
+    	// VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
+    	// VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT,
+    	// VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+	};
+	VkValidationFeaturesEXT validation_features_ext {
+		.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+		.pNext = nullptr,
+		.enabledValidationFeatureCount = 1,
+		.pEnabledValidationFeatures = vfee,
+	};
+
 	VkInstanceCreateInfo vk_instance_create_info{};
 	vk_instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	vk_instance_create_info.pNext = nullptr;
@@ -258,7 +275,36 @@ void Instance::create(std::vector<char*>& layers, std::vector<const char*>& exte
 	}
 
 	std::cout << "Instance created." << std::endl;
+
+	loadVulkanExtensionFunctions(_instance);
 }
+
+void Instance::loadVulkanExtensionFunctions(VkInstance instance){
+	if(_are_extensions_loaded){
+		return;
+	}
+	_are_extensions_loaded = true;
+
+	PFN_vkVoidFunction tmp_func = vkGetInstanceProcAddr(instance, "vkGetDeviceFaultInfoEXT");
+	if(!tmp_func){
+		throw std::runtime_error("Instance::loadVulkanExtensionsFunctions: No function found!");
+	}
+
+	_vkGetDeviceFaultInfoEXT = reinterpret_cast<PFN_vkGetDeviceFaultInfoEXT>(tmp_func);
+}
+
+VkResult Instance::getDeviceFaultInfoEXT(
+	VkDevice device,
+	VkDeviceFaultCountsEXT* pFaultCounts,
+	VkDeviceFaultInfoEXT* pFaultInfo
+){
+	return _vkGetDeviceFaultInfoEXT(
+		device,
+		pFaultCounts,
+		pFaultInfo
+	);
+}
+
 
 void Instance::destroy() {
 	if (!_shared_count) {

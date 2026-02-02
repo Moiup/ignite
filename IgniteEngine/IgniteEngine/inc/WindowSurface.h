@@ -2,7 +2,7 @@
 #include "Window.h"
 #include "Instance.h"
 #include "PhysicalDevice.h"
-#include <SDL_vulkan.h>
+#include <SDL2/SDL_vulkan.h>
 
 class WindowSurface: public Window
 {

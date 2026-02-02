@@ -2,7 +2,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include "EngineEntity.h"
 

@@ -172,6 +172,49 @@ const void Queue::submit(
 	const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
 ) {
 	submit(
+		command_pool,
+		_fence,
+		waitSemaphorecount,
+		pWaitSemaphores,
+		pWaitDstStageMask,
+		signalSemaphoreCount,
+		pSignalSemaphores,
+		timelineSemaphoreSubmitInfo
+	);
+}
+
+const void Queue::submit(
+	std::vector<VkCommandBuffer> command_buffers,
+	const uint32_t waitSemaphorecount,
+	const VkSemaphore* pWaitSemaphores,
+	const VkPipelineStageFlags* pWaitDstStageMask,
+	const uint32_t signalSemaphoreCount,
+	const VkSemaphore* pSignalSemaphores,
+	const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
+) {
+	submit(
+		command_buffers,
+		_fence,
+		waitSemaphorecount,
+		pWaitSemaphores,
+		pWaitDstStageMask,
+		signalSemaphoreCount,
+		pSignalSemaphores,
+		timelineSemaphoreSubmitInfo
+	);
+}
+
+const void Queue::submit(
+	const CommandPool& command_pool,
+	const VkFence fence,
+	const uint32_t waitSemaphorecount,
+	const VkSemaphore* pWaitSemaphores,
+	const VkPipelineStageFlags* pWaitDstStageMask,
+	uint32_t signalSemaphoreCount,
+	const VkSemaphore* pSignalSemaphores,
+	const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo
+) {
+	submit(
 		waitSemaphorecount,
 		pWaitSemaphores,
 		pWaitDstStageMask,
@@ -179,13 +222,14 @@ const void Queue::submit(
 		command_pool.vkCommandBuffers().data(),
 		signalSemaphoreCount,
 		pSignalSemaphores,
-		_fence,
+		fence,
 		timelineSemaphoreSubmitInfo
 	);
 }
 
 const void Queue::submit(
 	std::vector<VkCommandBuffer> command_buffers,
+	const VkFence fence,
 	const uint32_t waitSemaphorecount,
 	const VkSemaphore* pWaitSemaphores,
 	const VkPipelineStageFlags* pWaitDstStageMask,
@@ -201,7 +245,7 @@ const void Queue::submit(
 		command_buffers.data(),
 		signalSemaphoreCount,
 		pSignalSemaphores,
-		_fence,
+		fence,
 		timelineSemaphoreSubmitInfo
 	);
 }
@@ -236,22 +280,61 @@ const void Queue::submit(
 	}
 }
 
+
 const void Queue::wait() {
-	VkResult result = vkWaitForFences(
+	VkResult vk_result = vkWaitForFences(
 		_device->vkObj(),
 		1, &_fence,
 		VK_TRUE,
 		UINT64_MAX
 	);
 
-	if (result != VK_SUCCESS) {
-		throw std::runtime_error("Queue::submitSync: Error while waiting for the fence to finish.");
+	
+	if (vk_result != VK_SUCCESS) {
+		std::string res = string_VkResult(vk_result);
+		throw std::runtime_error("Queue::submitSync: Error while waiting for the fence to finish. vkWaitForFences error: " + res + " (" + std::to_string(vk_result) + ").");
 	}
 
 	vkResetFences(
 		_device->vkObj(),
 		1,
 		&_fence
+	);
+}
+
+const void Queue::wait(VkFence fence) {
+	VkResult vk_result = vkWaitForFences(
+		_device->vkObj(),
+		1, &fence,
+		VK_TRUE,
+		UINT64_MAX
+	);
+
+	
+	if (vk_result != VK_SUCCESS) {
+		VkDeviceFaultCountsEXT info{
+			.sType = VK_STRUCTURE_TYPE_DEVICE_FAULT_COUNTS_EXT,
+			.pNext = nullptr,
+		};
+		
+		Instance::getDeviceFaultInfoEXT(
+			_device->vkObj(),
+			&info,
+			nullptr
+		);
+
+		std::cout << info.vendorBinarySize << std::endl;
+		std::cout << info.addressInfoCount << std::endl;
+		std::cout << info.vendorInfoCount << std::endl;
+
+		std::string res = string_VkResult(vk_result);
+		throw std::runtime_error("Queue::submitSync: Error while waiting for the fence to finish. vkWaitForFences error: " + res + " (" + std::to_string(vk_result) + ").");
+	}
+
+	vkResetFences(
+		_device->vkObj(),
+		1,
+		&fence
 	);
 }
 

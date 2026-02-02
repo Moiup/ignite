@@ -98,6 +98,28 @@ public:
 	);
 
 	const void submit(
+		const CommandPool& command_pool,
+		const VkFence fence,
+		const uint32_t waitSemaphorecount = 0,
+		const VkSemaphore* pWaitSemaphores = nullptr,
+		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
+		const uint32_t signalSemaphoreCount = 0,
+		const VkSemaphore* pSignalSemaphores = nullptr,
+		const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo = nullptr
+	);
+
+	const void submit(
+		std::vector<VkCommandBuffer> command_buffers,
+		const VkFence fence,
+		const uint32_t waitSemaphorecount = 0,
+		const VkSemaphore* pWaitSemaphores = nullptr,
+		const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
+		const uint32_t signalSemaphoreCount = 0,
+		const VkSemaphore* pSignalSemaphores = nullptr,
+		const VkTimelineSemaphoreSubmitInfo* timelineSemaphoreSubmitInfo = nullptr
+	);
+
+	const void submit(
 		const uint32_t waitSemaphorecount,
 		const VkSemaphore* pWaitSemaphores,
 		const VkPipelineStageFlags* pWaitDstStageMask,
@@ -110,6 +132,8 @@ public:
 	);
 
 	const void wait();
+
+	const void wait(VkFence fence);
 
 	const void present(
 		uint32_t waitSemaphoreCount,

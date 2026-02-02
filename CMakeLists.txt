@@ -173,9 +173,11 @@ if(MSVC)
 
 else()
     find_package(SDL2 REQUIRED)
+    find_library(LIBS NAMES shaderc_combined)
     target_link_libraries(ignite PRIVATE
         Vulkan::Vulkan
-        shaderc_combined
+        #shaderc_combined
+        ${LIBS}
         SDL2::SDL2
         fastObj
         imgui

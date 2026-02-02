@@ -12,6 +12,7 @@ class PhysicalDevice : public VulkanObject<VkPhysicalDevice>
 	friend Instance;
 
 private:
+	Instance* _instance;
 	VkPhysicalDevice _gpu{nullptr};
 
 public:
@@ -31,7 +32,7 @@ public:
 	void displayQueueFamilyProperties();
 
 private:
-	PhysicalDevice(VkPhysicalDevice gpu);
+	PhysicalDevice(VkPhysicalDevice gpu, Instance& instance);
 	std::string makeString(VkPhysicalDeviceType type);
 };
 

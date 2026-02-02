@@ -4,8 +4,9 @@ PhysicalDevice::PhysicalDevice() {
 	;
 }
 
-PhysicalDevice::PhysicalDevice(VkPhysicalDevice gpu) :
-	_gpu{gpu}
+PhysicalDevice::PhysicalDevice(VkPhysicalDevice gpu, Instance& instance) :
+	_gpu{gpu},
+	_instance{&instance}
 {
 	;
 }

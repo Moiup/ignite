@@ -28,6 +28,8 @@ private:
 		VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
 		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 		VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
+		VK_EXT_DEVICE_FAULT_EXTENSION_NAME,
+		VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME
 		//VK_KHR_MAINTENANCE_5_EXTENSION_NAME
 	};
 
@@ -37,6 +39,9 @@ private:
 	std::vector<QueueFamilyInfo> _queue_family_infos;
 
 	int32_t* _shared_count{nullptr};
+
+	static PFN_vkCmdSetCheckpointNV _vkCmdSetCheckpointNV;
+	static PFN_vkGetQueueCheckpointData2NV _vkGetQueueCheckpointData2NV;
 
 public:
 	Device();
@@ -57,9 +62,21 @@ public:
 
 	void waitIdle();
 
+	static void getQueueCheckpointData2NV(
+		VkQueue queue,
+		uint32_t* pCheckpointDataCount,
+		VkCheckpointData2NV* pCheckpointData
+	);
+
+	static void cmdSetCheckpointNV(
+    	VkCommandBuffer commandBuffer,
+    	const void* pCheckpointMarker
+	);
+
 private:
 	void destroy();
 	void create();
+	void loadVulkanExtensionFunctions();
 	VkPhysicalDeviceFeatures featuresManagement();
 	QueueCreationInfo queueCreateInfos();
 };

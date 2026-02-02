@@ -1,6 +1,9 @@
 #include "Device.h"
 #include "Queue.h"
 
+PFN_vkCmdSetCheckpointNV Device::_vkCmdSetCheckpointNV{0};
+PFN_vkGetQueueCheckpointData2NV Device::_vkGetQueueCheckpointData2NV{0};
+
 Device::Device() {
 	_shared_count = new int32_t(1);
 }
@@ -99,6 +102,20 @@ void Device::waitIdle() {
 	vkDeviceWaitIdle(_device);
 }
 
+void Device::getQueueCheckpointData2NV(
+		VkQueue queue,
+		uint32_t* pCheckpointDataCount,
+		VkCheckpointData2NV* pCheckpointData
+){
+	_vkGetQueueCheckpointData2NV(queue, pCheckpointDataCount, pCheckpointData);
+}
+
+void Device::cmdSetCheckpointNV(
+	VkCommandBuffer commandBuffer,
+	const void* pCheckpointMarker
+){
+	_vkCmdSetCheckpointNV(commandBuffer, pCheckpointMarker);
+}
 
 void Device::create() {
 	VkPhysicalDeviceFeatures features = featuresManagement();
@@ -107,11 +124,12 @@ void Device::create() {
 	//maintenance5.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_FEATURES_KHR;
 	//maintenance5.pNext = nullptr;
 	//maintenance5.maintenance5 = VK_TRUE;
+	
 	VkPhysicalDevice16BitStorageFeatures storage16bits{};
 	storage16bits.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES;
 	storage16bits.storageBuffer16BitAccess = VK_TRUE;
 	storage16bits.storagePushConstant16 = VK_TRUE;
-
+	
 	VkPhysicalDeviceShaderAtomicFloatFeaturesEXT shader_atomic_float_feats{};
 	shader_atomic_float_feats.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
 	shader_atomic_float_feats.pNext = &storage16bits;
@@ -128,9 +146,22 @@ void Device::create() {
 	shader_atomic_float_feats.sparseImageFloat32Atomics = VK_TRUE;
 	shader_atomic_float_feats.sparseImageFloat32AtomicAdd = VK_TRUE;
 	
+	VkPhysicalDeviceFaultFeaturesEXT fault_features_ext{
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_EXT,
+		.pNext = &shader_atomic_float_feats,
+		.deviceFault = VK_TRUE,
+		// .deviceFaultVendorBinary = VK_TRUE
+	};
+
+	VkPhysicalDeviceDiagnosticsConfigFeaturesNV diagnostics_config_features_nv {
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DIAGNOSTICS_CONFIG_FEATURES_NV,
+		.pNext = &fault_features_ext,
+		.diagnosticsConfig = VK_TRUE
+	};
+	
 	VkPhysicalDeviceVulkan13Features physical_device_v13_features{};
 	physical_device_v13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-	physical_device_v13_features.pNext = &shader_atomic_float_feats;
+	physical_device_v13_features.pNext = &diagnostics_config_features_nv;
 	physical_device_v13_features.synchronization2 = VK_TRUE;
 	physical_device_v13_features.dynamicRendering = VK_TRUE;
 
@@ -169,6 +200,17 @@ void Device::create() {
 		std::cerr << "Error: failed creating logical device. " << string_VkResult(vk_result) << std::endl;
 		throw std::runtime_error("Error: failed creating logical device.");
 	}
+
+	loadVulkanExtensionFunctions();
+}
+
+void Device::loadVulkanExtensionFunctions(){
+	if(_vkCmdSetCheckpointNV){
+		return;
+	}
+
+	_vkCmdSetCheckpointNV = reinterpret_cast<PFN_vkCmdSetCheckpointNV>(vkGetDeviceProcAddr(_device, "vkCmdSetCheckpointNV" ));
+	_vkGetQueueCheckpointData2NV = reinterpret_cast<PFN_vkGetQueueCheckpointData2NV>(vkGetDeviceProcAddr( _device, "vkGetQueueCheckpointData2NV" ));
 }
 
 void Device::destroy() {

@@ -38,10 +38,11 @@ void EngineApp::init() {
 	std::vector<char *> instance_layer = {
 		"VK_LAYER_KHRONOS_validation",
 		"VK_LAYER_KHRONOS_synchronization2"
+		// "VK_LAYER_LUNARG_crash_diagnostic"
 	};
 	_instance = Instance(instance_layer);
 	_instance.displayAvailableGPUs();
-	
+
 	// Initialising
 	_gpu = _instance.getDefaultGPU();
 	std::cout << "Selected GPU:" << std::endl;
@@ -83,7 +84,7 @@ void EngineApp::update() {
 		SDL_Event event{};
 		if (SDL_PollEvent(&event)) {
 			ImGui_ImplSDL2_ProcessEvent(&event);
-			if (event.type == SDL_QUIT 
+			if (event.type == SDL_QUIT
 				|| event.window.event == SDL_WINDOWEVENT_CLOSE
 				 /*&& event.window.windowID == SDL_GetWindowID(DefaultConf::render_window->getWindow())*/) {
 				break;
@@ -92,7 +93,7 @@ void EngineApp::update() {
 
 		DefaultConf::event = &event;
 		EngineEntity::updateAll();
-		//_obj_tr_buffer.setValues(
+		//_debug_obg_tr_buffer.setValues(
 		//	&Object3D::updateTransformMatrices(
 		//		DefaultConf::renderer, DefaultConf::graphic_shader
 		//	)[0][0]
@@ -114,7 +115,7 @@ void EngineApp::update() {
 
 		//DefaultConf::renderer->render();
 	//	glfwPollEvents();
-	//	
+	//
 
 		std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
 		float delta_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() * 0.001;

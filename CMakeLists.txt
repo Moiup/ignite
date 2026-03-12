@@ -67,6 +67,7 @@ set(HEADERS
     ${IGNITE_PATH}/inc/StagingBuffer.hpp
     ${IGNITE_PATH}/inc/Swapchain.h
     ${IGNITE_PATH}/inc/Texture2D.h
+    ${IGNITE_PATH}/inc/Vek.h
     ${IGNITE_PATH}/inc/VulkanObject.h
     ${IGNITE_PATH}/inc/Window.h
     ${IGNITE_PATH}/inc/WindowSurface.h

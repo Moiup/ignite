@@ -32,6 +32,7 @@ set(HEADERS
     ${IGNITE_PATH}/inc/EngineApp.h
     ${IGNITE_PATH}/inc/EngineEntity.h
     ${IGNITE_PATH}/inc/Entity3D.h
+    ${IGNITE_PATH}/inc/Fence.h
     ${IGNITE_PATH}/inc/GraphicShader.h
     ${IGNITE_PATH}/inc/GraphicsPipeline.h
     ${IGNITE_PATH}/inc/Hand2D.h
@@ -88,6 +89,7 @@ set(SRC
     ${IGNITE_PATH}/src/EngineApp.cpp
     ${IGNITE_PATH}/src/EngineEntity.cpp
     ${IGNITE_PATH}/src/Entity3D.cpp
+    ${IGNITE_PATH}/src/Fence.cpp
     ${IGNITE_PATH}/src/GraphicShader.cpp
     ${IGNITE_PATH}/src/GraphicsPipeline.cpp
     ${IGNITE_PATH}/src/Hand2D.cpp

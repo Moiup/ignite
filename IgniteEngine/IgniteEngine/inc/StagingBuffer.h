@@ -117,3 +117,9 @@ void StagingBuffer<U>::getValues(Pointer<uint8_t> data) {
 	memcpy(data.data(), copy, this->_size);
 	unmap();
 }
+
+template<IGEBufferUsage U>
+void StagingBuffer<U>::destroyBuffer(){
+	unmap();
+	Buffer<U>::destroyBuffer();
+}

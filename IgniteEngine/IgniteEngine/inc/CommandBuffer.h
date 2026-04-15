@@ -195,6 +195,9 @@ public:
 	);
 
 	template<IGEBufferUsage U1, IGEBufferUsage U2>
+	void copy(Buffer<U1>& src, Buffer<U2>& dst, int32_t src_offset, int32_t dst_offset, int32_t size);
+
+	template<IGEBufferUsage U1, IGEBufferUsage U2>
 	void copy(Buffer<U1>& src, Buffer<U2>& dst);
 
 	template<IGEBufferUsage U>
@@ -320,13 +323,13 @@ void CommandBuffer::fillBuffer(
 }
 
 template<IGEBufferUsage U1, IGEBufferUsage U2>
-void CommandBuffer::copy(Buffer<U1>& src, Buffer<U2>& dst) {
+void CommandBuffer::copy(Buffer<U1>& src, Buffer<U2>& dst, int32_t src_offset, int32_t dst_offset, int32_t size) {
 	VkBufferCopy2 copy_info{};
 	copy_info.sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
 	copy_info.pNext = nullptr;
-	copy_info.srcOffset = 0;
-	copy_info.dstOffset = 0;
-	copy_info.size = src.getSize();
+	copy_info.srcOffset = src_offset;
+	copy_info.dstOffset = dst_offset;
+	copy_info.size = size;
 
 	copyBufferToBuffer(
 		src.vkObj(),
@@ -334,6 +337,11 @@ void CommandBuffer::copy(Buffer<U1>& src, Buffer<U2>& dst) {
 		1,
 		&copy_info
 	);
+}
+
+template<IGEBufferUsage U1, IGEBufferUsage U2>
+void CommandBuffer::copy(Buffer<U1>& src, Buffer<U2>& dst) {
+	copy(src, dst, 0, 0, src.getSize());
 }
 
 template<IGEBufferUsage U>

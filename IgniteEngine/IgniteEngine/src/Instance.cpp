@@ -271,8 +271,11 @@ void Instance::create(std::vector<char*>& layers, std::vector<const char*>& exte
 	VkResult vk_result = vkCreateInstance(&vk_instance_create_info, nullptr, &_instance);
 	if (vk_result != VK_SUCCESS) {
 		std::cout << "Failed!" << std::endl;
+		std::cout << string_VkResult(vk_result) << std::endl;
+		
 		throw std::runtime_error("Error: Instance creation failed!");
 	}
+
 
 	std::cout << "Instance created." << std::endl;
 

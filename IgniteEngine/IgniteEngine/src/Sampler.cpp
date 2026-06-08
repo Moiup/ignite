@@ -1,5 +1,7 @@
 #include "Sampler.h"
 
+int32_t Sampler::_nb_samplers = 0;
+
 Sampler::Sampler() :
 	_info{},
 	_sampler{nullptr}
@@ -20,6 +22,8 @@ Sampler::Sampler() :
 	_info.maxLod = 0.0f;
 	_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	_info.unnormalizedCoordinates = VK_FALSE;
+
+	_id = Sampler::_nb_samplers++;
 
 	_shared_count = new int32_t(1);
 }
@@ -49,6 +53,7 @@ Sampler& Sampler::operator=(const Sampler& s) {
 	_info = s._info;
 	_sampler = s._sampler;
 	_device = s._device;
+	_id = s._id;
 	_shared_count = s._shared_count;
 	*_shared_count += 1;
 
@@ -63,6 +68,7 @@ Sampler& Sampler::operator=(Sampler&& s) {
 	s._sampler = nullptr;
 	_device = std::move(s)._device;
 	s._device = nullptr;
+	_id = std::move(s)._id;
 	
 	_shared_count = std::move(s)._shared_count;
 	s._shared_count = nullptr;
@@ -180,4 +186,8 @@ void Sampler::setBorderColor(VkBorderColor border_color) {
 
 void Sampler::setUnnormalizedCoordinates(VkBool32 unnormalized_coordinates) {
 	_info.unnormalizedCoordinates = unnormalized_coordinates;
+}
+
+const int32_t Sampler::getId() const {
+	return _id;
 }

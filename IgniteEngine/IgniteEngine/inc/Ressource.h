@@ -23,6 +23,10 @@ protected:
 
 	int32_t* _shared_count{nullptr};
 
+	static int32_t _ressource_tracking;
+private:
+	int32_t _ressource_id = 0;
+
 public:
 	Ressource();
 	Ressource(const Ressource& r);
@@ -42,6 +46,7 @@ public:
 	PipelineStageAndAccessMaskInfo& getStageAccessInfo();
 
 	int32_t getNbShared();
+	const int32_t getRessourceId() const;
 
 private:
 	void freeMemory();

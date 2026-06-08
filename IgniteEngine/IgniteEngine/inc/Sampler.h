@@ -7,6 +7,10 @@
 class Sampler
 {
 private:
+	static int32_t _nb_samplers; 
+
+	int32_t _id;
+
 	VkSamplerCreateInfo _info;
 	VkSampler _sampler{ nullptr };
 
@@ -25,6 +29,8 @@ public:
 	Sampler& operator=(Sampler&& s);
 
 	const VkSampler& vkObj() const;
+	
+	const int32_t getId() const;
 
 private:
 	void setDevice(Device* device);
@@ -46,6 +52,7 @@ private:
 	void setMaxLod(float max_lod);
 	void setBorderColor(VkBorderColor border_color);
 	void setUnnormalizedCoordinates(VkBool32 unnormalized_coordinates);
+
 
 	void create();
 	void destroy();

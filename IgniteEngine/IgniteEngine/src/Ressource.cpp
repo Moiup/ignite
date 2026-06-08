@@ -1,8 +1,12 @@
 #include "Ressource.h"
 
+int32_t Ressource::_ressource_tracking = 0;
+
 Ressource::Ressource()
 {
 	_shared_count = new int32_t(1);
+	_ressource_id = _ressource_tracking;
+	_ressource_tracking++;
 }
 
 Ressource::Ressource(const Ressource& r)
@@ -24,6 +28,7 @@ Ressource& Ressource::operator=(const Ressource& r) {
 	_memory_req = r._memory_req;
 	_memory = r._memory;
 	_memory_property_flags = r._memory_property_flags;
+	_ressource_id = r._ressource_id;
 
 	_shared_count = r._shared_count;
 	*_shared_count += 1;
@@ -40,6 +45,7 @@ Ressource& Ressource::operator=(Ressource&& r) {
 	_memory = std::move(r)._memory;
 	r._memory = nullptr;
 	_memory_property_flags = std::move(r)._memory_property_flags;
+	_ressource_id = std::move(r)._ressource_id;
 
 	_shared_count = std::move(r)._shared_count;
 	r._shared_count = nullptr;
@@ -114,6 +120,10 @@ int32_t Ressource::getNbShared() {
 	}
 	return 0;
 	//return *_shared_count;
+}
+
+const int32_t Ressource::getRessourceId() const {
+	return _ressource_id;
 }
 
 void Ressource::freeMemory() {

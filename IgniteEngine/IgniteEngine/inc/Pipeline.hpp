@@ -4,6 +4,8 @@
 
 #include <initializer_list>
 
+#include <chrono>
+
 class Pipeline : public VulkanObject<VkPipeline>
 {
 protected:
@@ -22,6 +24,10 @@ protected:
 	std::unordered_map<std::string, std::vector<VkDescriptorImageInfo>> _descriptor_image_infos{};
 	std::vector<VkWriteDescriptorSet> _write_descriptor_sets{};
 	std::unordered_map<std::string, int32_t> _name_to_write_desc{};
+
+	std::string _current_buffer_keys;
+	int32_t _cbk_cur_i = 0;
+	std::unordered_map<std::string, int32_t> _cbk_to_descriptor_set;
 
 	void* _push_constants{nullptr};
 
@@ -82,6 +88,8 @@ public:
 	void update();
 	void reset();
 private:
+	void updateBuffersKey(int32_t id);
+
 	VkWriteDescriptorSet& setWriteDescriptorSet(
 		const std::string& name
 	);

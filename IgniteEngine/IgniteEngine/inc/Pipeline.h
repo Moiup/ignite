@@ -16,4 +16,6 @@ void Pipeline::setStorageBuffer(
 	write.pBufferInfo = _descriptor_buffer_infos[name].data();
 	write.pImageInfo = nullptr;
 	write.pTexelBufferView = nullptr;
+
+	updateBuffersKey(buff.getRessourceId());
 }

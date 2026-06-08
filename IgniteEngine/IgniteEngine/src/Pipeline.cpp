@@ -9,6 +9,7 @@ Pipeline::Pipeline() :
 	_pipeline{nullptr}
 {
 	_shared_count = new int32_t(1);
+	_current_buffer_keys = std::string(512, '\0');
 }
 
 Pipeline::Pipeline(Shader& shader) :
@@ -70,6 +71,10 @@ Pipeline& Pipeline::operator=(const Pipeline& pipeline) {
 	_write_descriptor_sets = pipeline._write_descriptor_sets;
 	_name_to_write_desc = pipeline._name_to_write_desc;
 
+	_current_buffer_keys = pipeline._current_buffer_keys;
+	_cbk_cur_i = pipeline._cbk_cur_i;
+	_cbk_to_descriptor_set = pipeline._cbk_to_descriptor_set;
+
 	_push_constants = pipeline._push_constants;
 
 	_shared_count = pipeline._shared_count;
@@ -95,6 +100,10 @@ Pipeline& Pipeline::operator=(Pipeline&& pipeline) {
 	_descriptor_image_infos = std::move(pipeline._descriptor_image_infos);
 	_write_descriptor_sets = std::move(pipeline._write_descriptor_sets);
 	_name_to_write_desc = std::move(pipeline._name_to_write_desc);
+
+	_current_buffer_keys = std::move(pipeline)._current_buffer_keys;
+	_cbk_cur_i = std::move(pipeline)._cbk_cur_i;
+	_cbk_to_descriptor_set = std::move(pipeline)._cbk_to_descriptor_set;
 
 	_push_constants = std::move(pipeline)._push_constants;
 	pipeline._push_constants = nullptr;
@@ -154,6 +163,15 @@ const void* Pipeline::getPushConstants() const {
 	return _push_constants;
 }
 
+void Pipeline::updateBuffersKey(int32_t id) {
+	do {
+		int32_t r = '0' + (id % 10);
+		id = id / 10;
+
+		_current_buffer_keys[_cbk_cur_i++] = r;
+	} while(id > 0);
+}
+
 VkWriteDescriptorSet& Pipeline::setWriteDescriptorSet(
 	const std::string& name
 ) {
@@ -188,6 +206,8 @@ void Pipeline::setSamplers(
 		desc_img_info.sampler = s->vkObj();
 		desc_img_info.imageView = nullptr;
 		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		updateBuffersKey(s->getId());
 	}
 
 	write.pBufferInfo = nullptr;
@@ -208,6 +228,8 @@ void Pipeline::setSamplers(
 		desc_img_info.sampler = s->vkObj();
 		desc_img_info.imageView = nullptr;
 		desc_img_info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		updateBuffersKey(s->getId());
 	}
 
 	write.pBufferInfo = nullptr;
@@ -228,6 +250,8 @@ void Pipeline::setTextures2D(
 		desc_img_info.sampler = t->getSampler();
 		desc_img_info.imageView = t->getImageView();
 		desc_img_info.imageLayout = t->getImageLayout();
+
+		updateBuffersKey(t->getRessourceId());
 	}
 
 	write.pBufferInfo = nullptr;
@@ -248,6 +272,8 @@ void Pipeline::setTextures2D(
 		desc_img_info.sampler = t->getSampler();
 		desc_img_info.imageView = t->getImageView();
 		desc_img_info.imageLayout = t->getImageLayout();
+
+		updateBuffersKey(t->getRessourceId());
 	}
 
 	write.pBufferInfo = nullptr;
@@ -268,6 +294,8 @@ void Pipeline::setImages2D(
 		desc_img_info.sampler = nullptr;
 		desc_img_info.imageView = img->getImageView();
 		desc_img_info.imageLayout = img->getImageLayout();
+
+		updateBuffersKey(img->getRessourceId());
 	}
 
 	write.pBufferInfo = nullptr;
@@ -288,6 +316,8 @@ void Pipeline::setImages2D(
 		desc_img_info.sampler = nullptr;
 		desc_img_info.imageView = img->getImageView();
 		desc_img_info.imageLayout = img->getImageLayout();
+
+		updateBuffersKey(img->getRessourceId());
 	}
 
 	write.pBufferInfo = nullptr;
@@ -374,7 +404,7 @@ void Pipeline::allocateDescriptorSet() {
 	}
 
 	_descriptor_sets_pool.push_back(dst_set);
-	_descriptor_sets[0] = _descriptor_sets_pool.back();
+	// _descriptor_sets[0] = _descriptor_sets_pool.back();
 }
 
 void Pipeline::update() {
@@ -382,25 +412,31 @@ void Pipeline::update() {
 	//	return;
 	//}
 
-	allocateDescriptorSet();
-	VkDescriptorSet desc_set = _descriptor_sets.back();
+	if (!_cbk_to_descriptor_set.count(_current_buffer_keys)){
+		allocateDescriptorSet();
+		VkDescriptorSet desc_set = _descriptor_sets_pool.back();
 
-	for (VkWriteDescriptorSet& write_desc_set : _write_descriptor_sets) {
-		write_desc_set.dstSet = desc_set;
+		for (VkWriteDescriptorSet& write_desc_set : _write_descriptor_sets) {
+			write_desc_set.dstSet = desc_set;
+		}
+		
+		vkUpdateDescriptorSets(
+			_shader->getDevice()->vkObj(),
+			_write_descriptor_sets.size(),
+			_write_descriptor_sets.data(),
+			0,
+			nullptr
+		);
+
+		_cbk_to_descriptor_set[_current_buffer_keys] = _descriptor_sets_pool.size() - 1;
 	}
 
-	vkUpdateDescriptorSets(
-		_shader->getDevice()->vkObj(),
-		_write_descriptor_sets.size(),
-		_write_descriptor_sets.data(),
-		0,
-		nullptr
-	);
+	_descriptor_sets[0] = _descriptor_sets_pool[_cbk_to_descriptor_set[_current_buffer_keys]];
 
 	_is_changed = false;
-	//_write_descriptor_sets.clear();
-	//_descriptor_buffer_infos.clear();
-	//_descriptor_image_infos.clear();
+
+	std::memset(_current_buffer_keys.data(), 0, 512 * sizeof(char));
+	_cbk_cur_i = 0;
 }
 
 void Pipeline::reset() {
@@ -415,6 +451,8 @@ void Pipeline::reset() {
 		_descriptor_sets_pool.data()
 	);
 	_descriptor_sets_pool.clear();
+
+	_cbk_to_descriptor_set.clear();
 }
 
 void Pipeline::createDescriptorSetLayout() {
